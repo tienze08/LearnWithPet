@@ -8,6 +8,8 @@ import com.vocabpet.backend.service.AuthService;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,9 +21,15 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<Map<String, String>> register(
+            @RequestBody RegisterRequest request) {
+
         authService.register(request);
-        return ResponseEntity.ok("Register success");
+
+        return ResponseEntity.ok(
+                Map.of(
+                        "message",
+                        "User registered successfully"));
     }
 
     @PostMapping("/login")

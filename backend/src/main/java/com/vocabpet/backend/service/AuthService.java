@@ -8,6 +8,8 @@ import com.vocabpet.backend.dto.LoginRequest;
 import com.vocabpet.backend.dto.RegisterRequest;
 import com.vocabpet.backend.entity.User;
 import com.vocabpet.backend.entity.enums.Role;
+import com.vocabpet.backend.exception.EmailAlreadyExistsException;
+import com.vocabpet.backend.exception.InvalidCredentialsException;
 import com.vocabpet.backend.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -22,8 +24,9 @@ public class AuthService {
 
     public void register(RegisterRequest request) {
 
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new RuntimeException("Email already exists");
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new EmailAlreadyExistsException(
+                    "Email already exists");
         }
 
         User user = User.builder()
@@ -40,15 +43,25 @@ public class AuthService {
 
     public AuthResponse login(LoginRequest request) {
 
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository
+                .findByEmail(request.getEmail())
+                .orElseThrow(() -> new InvalidCredentialsException(
+                        "Invalid email or password"));
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid password");
+        if (!passwordEncoder.matches(
+                request.getPassword(),
+                user.getPassword())) {
+
+            throw new InvalidCredentialsException(
+                    "Invalid email or password");
         }
 
         String token = jwtService.generateToken(user);
 
-        return new AuthResponse(token);
+        return new AuthResponse(
+                token,
+                user.getId(),
+                user.getName(),
+                user.getEmail());
     }
 }

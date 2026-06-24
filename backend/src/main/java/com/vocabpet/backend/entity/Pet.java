@@ -5,6 +5,10 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+import com.vocabpet.backend.entity.enums.PetColor;
+import com.vocabpet.backend.entity.enums.PetSpecies;
+import com.vocabpet.backend.entity.enums.PetStage;
+
 @Entity
 @Table(name = "pets")
 @Getter
@@ -23,6 +27,15 @@ public class Pet {
     private User user;
 
     private String name;
+
+    @Enumerated(EnumType.STRING)
+    private PetSpecies species;
+
+    @Enumerated(EnumType.STRING)
+    private PetColor color;
+
+    @Enumerated(EnumType.STRING)
+    private PetStage stage;
 
     @Builder.Default
     private int level = 1;

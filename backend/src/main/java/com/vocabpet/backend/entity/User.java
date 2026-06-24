@@ -37,6 +37,14 @@ public class User {
     @Builder.Default
     private int xp = 0;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean onboarded = false;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private String avatarType = "FOX";
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -49,4 +57,7 @@ public class User {
     public void preUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Pet pet;
 }
