@@ -13,15 +13,9 @@ public class PetResponse {
 
     private String species;
 
-    private String color;
+    private String mood;
 
-    private String stage;
+    private int level;
 
-    private Integer level;
-
-    private Integer exp;
-
-    private Integer happiness;
-
-    private Integer energy;
+    private int xp;
 }

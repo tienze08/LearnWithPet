@@ -5,46 +5,33 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-import com.vocabpet.backend.entity.enums.PetMood;
 import com.vocabpet.backend.entity.enums.PetSpecies;
 
 @Entity
-@Table(name = "pets")
+@Table(name = "pet_unlocks")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Pet {
+public class PetUnlock {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
-    @JoinColumn(name = "user_id", unique = true)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
     private User user;
-
-    private String name;
 
     @Enumerated(EnumType.STRING)
     private PetSpecies species;
 
-    @Enumerated(EnumType.STRING)
-    @Builder.Default
-    private PetMood mood = PetMood.HAPPY;
-
-    @Builder.Default
-    private int level = 1;
-
-    @Builder.Default
-    private int xp = 0;
-
-    private LocalDateTime createdAt;
+    private LocalDateTime unlockedAt;
 
     @PrePersist
     public void prePersist() {
-        createdAt = LocalDateTime.now();
+        unlockedAt = LocalDateTime.now();
     }
 
 }

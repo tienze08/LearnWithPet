@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+import com.vocabpet.backend.entity.enums.AvatarType;
 import com.vocabpet.backend.entity.enums.Role;
 
 @Entity
@@ -31,33 +32,50 @@ public class User {
 
     private String name;
 
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private AvatarType avatar = AvatarType.FOX;
+
     @Builder.Default
     private int level = 1;
 
     @Builder.Default
     private int xp = 0;
 
+    @Builder.Default
+    private int totalXp = 0;
+
+    /**
+     * Chuỗi học liên tiếp
+     */
+    @Builder.Default
+    private int streak = 0;
+
+    /**
+     * Ngày học gần nhất
+     */
+    private LocalDateTime lastStudyAt;
+
     @Column(nullable = false)
     @Builder.Default
     private Boolean onboarded = false;
 
-    @Column(nullable = false)
-    @Builder.Default
-    private String avatarType = "FOX";
-
     private LocalDateTime createdAt;
+
     private LocalDateTime updatedAt;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private Pet currentPet;
 
     @PrePersist
     public void prePersist() {
-        this.createdAt = LocalDateTime.now();
+        createdAt = LocalDateTime.now();
+        updatedAt = createdAt;
     }
 
     @PreUpdate
     public void preUpdate() {
-        this.updatedAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
     }
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    private Pet pet;
 }

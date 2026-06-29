@@ -1,9 +1,8 @@
 package com.vocabpet.backend.controller;
 
-import com.vocabpet.backend.dto.AuthResponse;
-import com.vocabpet.backend.dto.LoginRequest;
-import com.vocabpet.backend.dto.RegisterRequest;
-
+import com.vocabpet.backend.dto.AuthRe.AuthResponse;
+import com.vocabpet.backend.dto.AuthRe.LoginRequest;
+import com.vocabpet.backend.dto.AuthRe.RegisterRequest;
 import com.vocabpet.backend.service.AuthService;
 
 import lombok.RequiredArgsConstructor;

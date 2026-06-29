@@ -3,9 +3,9 @@ package com.vocabpet.backend.service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.vocabpet.backend.dto.AuthResponse;
-import com.vocabpet.backend.dto.LoginRequest;
-import com.vocabpet.backend.dto.RegisterRequest;
+import com.vocabpet.backend.dto.AuthRe.AuthResponse;
+import com.vocabpet.backend.dto.AuthRe.LoginRequest;
+import com.vocabpet.backend.dto.AuthRe.RegisterRequest;
 import com.vocabpet.backend.entity.User;
 import com.vocabpet.backend.entity.enums.Role;
 import com.vocabpet.backend.exception.EmailAlreadyExistsException;
@@ -18,50 +18,50 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
+        private final UserRepository userRepository;
+        private final PasswordEncoder passwordEncoder;
+        private final JwtService jwtService;
 
-    public void register(RegisterRequest request) {
+        public void register(RegisterRequest request) {
 
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new EmailAlreadyExistsException(
-                    "Email already exists");
+                if (userRepository.existsByEmail(request.getEmail())) {
+                        throw new EmailAlreadyExistsException(
+                                        "Email already exists");
+                }
+
+                User user = User.builder()
+                                .email(request.getEmail())
+                                .password(passwordEncoder.encode(request.getPassword()))
+                                .name(request.getName())
+                                .role(Role.USER)
+                                .level(1)
+                                .xp(0)
+                                .build();
+
+                userRepository.save(user);
         }
 
-        User user = User.builder()
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .name(request.getName())
-                .role(Role.USER)
-                .level(1)
-                .xp(0)
-                .build();
+        public AuthResponse login(LoginRequest request) {
 
-        userRepository.save(user);
-    }
+                User user = userRepository
+                                .findByEmail(request.getEmail())
+                                .orElseThrow(() -> new InvalidCredentialsException(
+                                                "Invalid email or password"));
 
-    public AuthResponse login(LoginRequest request) {
+                if (!passwordEncoder.matches(
+                                request.getPassword(),
+                                user.getPassword())) {
 
-        User user = userRepository
-                .findByEmail(request.getEmail())
-                .orElseThrow(() -> new InvalidCredentialsException(
-                        "Invalid email or password"));
+                        throw new InvalidCredentialsException(
+                                        "Invalid email or password");
+                }
 
-        if (!passwordEncoder.matches(
-                request.getPassword(),
-                user.getPassword())) {
+                String token = jwtService.generateToken(user);
 
-            throw new InvalidCredentialsException(
-                    "Invalid email or password");
+                return new AuthResponse(
+                                token,
+                                user.getId(),
+                                user.getName(),
+                                user.getEmail());
         }
-
-        String token = jwtService.generateToken(user);
-
-        return new AuthResponse(
-                token,
-                user.getId(),
-                user.getName(),
-                user.getEmail());
-    }
 }

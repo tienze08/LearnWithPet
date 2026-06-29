@@ -1,4 +1,6 @@
-package com.vocabpet.backend.dto;
+package com.vocabpet.backend.dto.UserRe;
+
+import com.vocabpet.backend.dto.PetResponse;
 
 import lombok.Builder;
 import lombok.Data;
@@ -8,11 +10,23 @@ import lombok.Data;
 public class UserResponse {
 
     private Long id;
+
     private String name;
+
     private String email;
-    private Integer level;
-    private Integer xp;
+
+    private String avatar;
+
+    private int level;
+
+    private int xp;
+
+    private int totalXp;
+
+    private int streak;
+
     private Boolean onboarded;
-    private String avatarType;
+
     private PetResponse pet;
+
 }

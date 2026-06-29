@@ -1,7 +1,7 @@
 package com.vocabpet.backend.controller;
 
-import com.vocabpet.backend.dto.OnboardingRequest;
-import com.vocabpet.backend.dto.UserResponse;
+import com.vocabpet.backend.dto.AuthRe.OnboardingRequest;
+import com.vocabpet.backend.dto.UserRe.UserResponse;
 import com.vocabpet.backend.service.UserService;
 
 import jakarta.servlet.FilterChain;

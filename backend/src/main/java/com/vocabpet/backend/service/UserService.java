@@ -1,14 +1,13 @@
 package com.vocabpet.backend.service;
 
-import com.vocabpet.backend.dto.OnboardingRequest;
 import com.vocabpet.backend.dto.PetResponse;
-import com.vocabpet.backend.dto.UserResponse;
+import com.vocabpet.backend.dto.AuthRe.OnboardingRequest;
+import com.vocabpet.backend.dto.UserRe.UserResponse;
 import com.vocabpet.backend.entity.Pet;
 import com.vocabpet.backend.entity.User;
-import com.vocabpet.backend.entity.enums.PetColor;
+import com.vocabpet.backend.entity.enums.AvatarType;
+import com.vocabpet.backend.entity.enums.PetMood;
 import com.vocabpet.backend.entity.enums.PetSpecies;
-import com.vocabpet.backend.entity.enums.PetStage;
-import com.vocabpet.backend.repository.PetRepository;
 import com.vocabpet.backend.repository.UserRepository;
 
 import jakarta.transaction.Transactional;
@@ -23,72 +22,64 @@ public class UserService {
 
         private final UserRepository userRepository;
 
-        private final PetRepository petRepository;
+        public UserResponse getCurrentUser(Authentication authentication) {
 
-        public UserResponse getCurrentUser(
-                        Authentication authentication) {
-
-                String email = authentication.getName();
-
-                User user = userRepository
-                                .findByEmail(email)
+                User user = userRepository.findByEmail(authentication.getName())
                                 .orElseThrow();
 
-                PetResponse petResponse = petRepository
-                                .findByUser(user)
-                                .map(pet -> PetResponse.builder()
-                                                .id(pet.getId())
-                                                .name(pet.getName())
-                                                .species(pet.getSpecies().name())
-                                                .color(pet.getColor().name())
-                                                .stage(pet.getStage().name())
-                                                .level(pet.getLevel())
-                                                .exp(pet.getExp())
-                                                .happiness(pet.getHappiness())
-                                                .energy(pet.getEnergy())
-                                                .build())
-                                .orElse(null);
+                Pet pet = user.getCurrentPet();
+
+                PetResponse petResponse = null;
+
+                if (pet != null) {
+                        petResponse = PetResponse.builder()
+                                        .id(pet.getId())
+                                        .name(pet.getName())
+                                        .species(pet.getSpecies().name())
+                                        .mood(pet.getMood().name())
+                                        .level(pet.getLevel())
+                                        .xp(pet.getXp())
+                                        .build();
+                }
 
                 return UserResponse.builder()
                                 .id(user.getId())
                                 .name(user.getName())
                                 .email(user.getEmail())
+                                .avatar(user.getAvatar().name())
                                 .level(user.getLevel())
                                 .xp(user.getXp())
+                                .totalXp(user.getTotalXp())
+                                .streak(user.getStreak())
                                 .onboarded(user.getOnboarded())
-                                .avatarType(user.getAvatarType())
                                 .pet(petResponse)
                                 .build();
         }
 
         @Transactional
-        public void completeOnboarding(Authentication authentication, OnboardingRequest request) {
+        public void completeOnboarding(Authentication authentication,
+                        OnboardingRequest request) {
 
-                String email = authentication.getName();
-
-                User user = userRepository.findByEmail(email)
+                User user = userRepository.findByEmail(authentication.getName())
                                 .orElseThrow();
 
                 if (Boolean.TRUE.equals(user.getOnboarded())) {
                         return;
                 }
 
-                user.setAvatarType(request.getAvatarType());
+                user.setAvatar(AvatarType.valueOf(request.getAvatarType().toUpperCase()));
                 user.setOnboarded(true);
 
                 Pet pet = Pet.builder()
                                 .user(user)
                                 .name(request.getPetName())
-                                .species(PetSpecies.FOX)
-                                .color(PetColor.valueOf(request.getPetColor()))
-                                .stage(PetStage.BABY)
+                                .species(PetSpecies.CAT)
+                                .mood(PetMood.HAPPY)
                                 .level(1)
-                                .exp(0)
-                                .happiness(100)
-                                .energy(100)
+                                .xp(0)
                                 .build();
 
-                user.setPet(pet);
+                user.setCurrentPet(pet);
 
                 userRepository.save(user);
         }

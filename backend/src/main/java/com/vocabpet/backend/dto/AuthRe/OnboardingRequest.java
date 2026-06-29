@@ -1,4 +1,4 @@
-package com.vocabpet.backend.dto;
+package com.vocabpet.backend.dto.AuthRe;
 
 import lombok.Data;
 
@@ -9,5 +9,5 @@ public class OnboardingRequest {
 
     private String petName;
 
-    private String petColor;
+    private String petSpecies;
 }

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import com.vocabpet.backend.entity.enums.Difficulty;
+import com.vocabpet.backend.entity.enums.PartOfSpeech;
 
 @Entity
 @Table(name = "vocabularies")
@@ -29,9 +30,10 @@ public class Vocabulary {
     @Enumerated(EnumType.STRING)
     private Difficulty difficulty;
 
-    private String topic;
+    @Enumerated(EnumType.STRING)
+    private PartOfSpeech partOfSpeech;
 
-    @ManyToOne
-    @JoinColumn(name = "deck_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "deck_id", nullable = false)
     private Deck deck;
 }

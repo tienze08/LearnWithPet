@@ -1,4 +1,4 @@
-package com.vocabpet.backend.dto;
+package com.vocabpet.backend.dto.AuthRe;
 
 import lombok.Builder;
 import lombok.Data;
