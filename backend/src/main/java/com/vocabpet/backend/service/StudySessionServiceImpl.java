@@ -32,6 +32,7 @@ public class StudySessionServiceImpl implements StudySessionService {
     private final StudyReviewRepository reviewRepository;
     private final VocabularyRepository vocabularyRepository;
     private final FsrsService fsrsService;
+    private final StreakService streakService;
 
     private final DeckRepository deckRepository;
     private final CurrentUserService currentUserService;
@@ -132,6 +133,8 @@ public class StudySessionServiceImpl implements StudySessionService {
 
         session.setTotalReviews(session.getTotalReviews() + 1);
         sessionRepository.save(session);
+
+        streakService.updateMyStreak();
 
         return ReviewResponse.builder()
                 .nextReviewTime(progress.getNextReviewTime())

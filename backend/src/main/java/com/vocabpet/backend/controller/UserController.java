@@ -2,6 +2,8 @@ package com.vocabpet.backend.controller;
 
 import com.vocabpet.backend.dto.AuthRe.OnboardingRequest;
 import com.vocabpet.backend.dto.UserRe.UserResponse;
+import com.vocabpet.backend.entity.UserStreak;
+import com.vocabpet.backend.service.StreakService;
 import com.vocabpet.backend.service.UserService;
 
 import jakarta.servlet.FilterChain;
@@ -24,6 +26,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class UserController {
 
     private final UserService userService;
+    private final StreakService streakService;
 
     @GetMapping("/me")
     public UserResponse me(
@@ -31,6 +34,11 @@ public class UserController {
 
         return userService
                 .getCurrentUser(authentication);
+    }
+
+    @GetMapping("/streak")
+    public ResponseEntity<UserStreak> getStreak() {
+        return ResponseEntity.ok(streakService.getMyStreak());
     }
 
     @PostMapping("/onboarding")
