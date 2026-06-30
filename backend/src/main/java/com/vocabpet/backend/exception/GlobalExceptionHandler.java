@@ -36,4 +36,12 @@ public class GlobalExceptionHandler {
                                                                 .timestamp(LocalDateTime.now())
                                                                 .build());
         }
+
+        @ExceptionHandler(NoMoreCardsException.class)
+        public ResponseEntity<?> handle(NoMoreCardsException ex) {
+
+                return ResponseEntity
+                                .status(204)
+                                .body(ex.getMessage());
+        }
 }

@@ -34,15 +34,19 @@ public class UserVocabularyProgress {
     private Status status = Status.NEW;
 
     @Builder.Default
-    private int correctCount = 0;
-    @Builder.Default
-    private int wrongCount = 0;
+    private double stability = 0;
 
     @Builder.Default
-    private double easeFactor = 2.5;
-    @Builder.Default
-    private int intervalDays = 1;
+    private double difficulty = 0;
 
-    private LocalDateTime nextReviewTime;
+    @Builder.Default
+    private int repetitions = 0;
+
+    @Builder.Default
+    private int lapses = 0;
+
     private LocalDateTime lastReviewTime;
+
+    @Builder.Default
+    private LocalDateTime nextReviewTime = LocalDateTime.now();
 }
