@@ -33,4 +33,12 @@ public class VocabularyMapper {
                 .build();
     }
 
+    public void updateEntity(Vocabulary vocabulary, VocabularyRequest request) {
+
+        vocabulary.setWord(request.getWord());
+        vocabulary.setMeaning(request.getMeaning());
+        vocabulary.setExample(request.getExample());
+        vocabulary.setDifficulty(request.getDifficulty());
+        vocabulary.setPartOfSpeech(request.getPartOfSpeech());
+    }
 }

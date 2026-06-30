@@ -3,9 +3,11 @@ package com.vocabpet.backend.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -41,5 +43,24 @@ public class VocabularyController {
 
         return ResponseEntity.ok(
                 vocabularyService.getVocabulariesByDeck(deckId));
+    }
+
+    @PutMapping("/{vocabularyId}")
+    public ResponseEntity<VocabularyResponse> updateVocabulary(
+            @PathVariable Long deckId,
+            @PathVariable Long vocabularyId,
+            @Valid @RequestBody VocabularyRequest request) {
+
+        return ResponseEntity.ok(
+                vocabularyService.updateVocabulary(deckId, vocabularyId, request));
+    }
+
+    @DeleteMapping("/{vocabularyId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteVocabulary(
+            @PathVariable Long deckId,
+            @PathVariable Long vocabularyId) {
+
+        vocabularyService.deleteVocabulary(deckId, vocabularyId);
     }
 }
