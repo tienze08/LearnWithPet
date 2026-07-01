@@ -70,10 +70,14 @@ public class UserService {
                 user.setAvatar(AvatarType.valueOf(request.getAvatarType().toUpperCase()));
                 user.setOnboarded(true);
 
+                if (request.getPetSpecies() != PetSpecies.CAT) {
+                        throw new IllegalArgumentException("Pet is locked.");
+                }
+
                 Pet pet = Pet.builder()
                                 .user(user)
                                 .name(request.getPetName())
-                                .species(PetSpecies.CAT)
+                                .species(request.getPetSpecies())
                                 .mood(PetMood.HAPPY)
                                 .level(1)
                                 .xp(0)

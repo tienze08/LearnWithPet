@@ -1,5 +1,7 @@
 package com.vocabpet.backend.service;
 
-public class PetService {
+import com.vocabpet.backend.dto.PetRe.PetResponse;
 
+public interface PetService {
+    PetResponse getMyPet();
 }

@@ -2,18 +2,20 @@ package com.vocabpet.backend.entity.enums;
 
 public enum PetAction {
 
+    IDLE,
+
+    WALK,
+
     STUDY,
 
-    DAILY_COMPLETE,
+    HAPPY,
 
-    QUIZ_WIN,
+    SAD,
 
-    STREAK_KEEP,
+    CRY,
 
-    STREAK_LOST,
+    CELEBRATE,
 
-    PET_LEVEL_UP,
-
-    PET_UNLOCK
+    SLEEP
 
 }

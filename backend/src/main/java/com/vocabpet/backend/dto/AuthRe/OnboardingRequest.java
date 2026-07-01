@@ -1,5 +1,7 @@
 package com.vocabpet.backend.dto.AuthRe;
 
+import com.vocabpet.backend.entity.enums.PetSpecies;
+
 import lombok.Data;
 
 @Data
@@ -9,5 +11,5 @@ public class OnboardingRequest {
 
     private String petName;
 
-    private String petSpecies;
+    private PetSpecies petSpecies;
 }
