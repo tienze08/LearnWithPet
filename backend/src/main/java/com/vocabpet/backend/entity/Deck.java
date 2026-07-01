@@ -26,6 +26,12 @@ public class Deck {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(nullable = false)
+    private String emoji;
+
+    @Column(nullable = false)
+    private String color;
+
     @Builder.Default
     @Column(nullable = false)
     private boolean isPublic = false;
@@ -42,6 +48,9 @@ public class Deck {
 
     @PrePersist
     public void prePersist() {
+
         createdAt = LocalDateTime.now();
+
     }
+
 }
