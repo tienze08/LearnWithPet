@@ -136,11 +136,25 @@ function load(): GameState {
 
 type Ctx = {
   state: GameState;
+
   setState: (updater: (s: GameState) => GameState) => void;
+
   recordAnswer: (wordId: string, correct: boolean) => void;
+
   addDeck: (deck: Omit<Deck, "id">) => string;
+
   addWord: (w: Omit<Word, "id">) => void;
+
+  updateDeck: (id: string, patch: Partial<Omit<Deck, "id">>) => void;
+
+  deleteDeck: (id: string) => void;
+
+  updateWord: (id: string, patch: Partial<Omit<Word, "id" | "deckId">>) => void;
+
+  deleteWord: (id: string) => void;
+
   toggleFavorite: (wordId: string) => void;
+
   setPetInterval: (min: number) => void;
 };
 
@@ -252,6 +266,46 @@ export function GameProvider({ children }: { children: ReactNode }) {
       addWord(w) {
         const id = "w_" + Math.random().toString(36).slice(2, 8);
         setStateRaw((s) => ({ ...s, words: [...s.words, { ...w, id }] }));
+      },
+      updateDeck(id, patch) {
+        setStateRaw((s) => ({
+          ...s,
+          decks: s.decks.map((deck) =>
+            deck.id === id
+              ? {
+                  ...deck,
+                  ...patch,
+                }
+              : deck,
+          ),
+        }));
+      },
+      deleteDeck(id) {
+        setStateRaw((s) => ({
+          ...s,
+          decks: s.decks.filter((d) => d.id !== id),
+
+          words: s.words.filter((w) => w.deckId !== id),
+        }));
+      },
+      updateWord(id, patch) {
+        setStateRaw((s) => ({
+          ...s,
+          words: s.words.map((word) =>
+            word.id === id
+              ? {
+                  ...word,
+                  ...patch,
+                }
+              : word,
+          ),
+        }));
+      },
+      deleteWord(id) {
+        setStateRaw((s) => ({
+          ...s,
+          words: s.words.filter((word) => word.id !== id),
+        }));
       },
       toggleFavorite(wordId) {
         setStateRaw((s) => ({

@@ -19,4 +19,8 @@ public class DeckResponse {
 
     private int wordCount;
 
+    private String emoji;
+
+    private String color;
+
 }

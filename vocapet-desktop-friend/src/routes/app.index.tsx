@@ -27,13 +27,8 @@ function Dashboard() {
             {state.petName} is feeling <span className="capitalize">{state.petMood}</span>
           </h1>
           <p className="text-muted-foreground mt-1 text-sm max-w-md">
-<<<<<<< HEAD
             Your desktop companion reacts to your learning momentum. It will pop up every{" "}
             {state.popupIntervalMin} min with a quick review or mini quiz.
-=======
-            Hit your daily goal to keep your streak alive. Your pet pops up every{" "}
-            {state.popupIntervalMin} min for a quick quiz.
->>>>>>> 40376e2 (UI of choose pet)
           </p>
           <div className="mt-4 flex flex-wrap gap-2 justify-center md:justify-start">
             <Button asChild className="btn-pop">

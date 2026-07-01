@@ -1,23 +1,15 @@
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-<<<<<<< HEAD
 import type { PetMood, PetVariant, PetStage } from "@/lib/store";
-=======
-import type { PetMood, PetVariant } from "@/lib/store";
->>>>>>> 40376e2 (UI of choose pet)
 
 type Props = {
   mood?: PetMood;
   variant?: PetVariant;
-<<<<<<< HEAD
   stage?: PetStage;
-=======
->>>>>>> 40376e2 (UI of choose pet)
   size?: number;
   className?: string;
 };
 
-<<<<<<< HEAD
 type Species = {
   baseName: string;
   stageNames: [string, string, string];
@@ -431,76 +423,6 @@ function Stage3Accessory({ variant, p }: { variant: PetVariant; p: Species }) {
 export function Pet({ mood = "happy", variant = "CAT", stage = 2, size = 96, className }: Props) {
   const p = SPECIES[variant] ?? SPECIES.CAT;
   const bodyColor = mood === "sad" ? p.bodySoft : mood === "sleepy" ? p.bodyDim : p.body;
-=======
-const PALETTES: Record<
-  PetVariant,
-  {
-    body: string;
-    bodyDim: string;
-    bodySoft: string;
-    stroke: string;
-    belly: string;
-    leaf: string;
-    leafStroke: string;
-    accent: string;
-  }
-> = {
-  leaf: {
-    body: "#7ed957",
-    bodyDim: "#8fcf6a",
-    bodySoft: "#a7e26d",
-    stroke: "#3a8a2e",
-    belly: "#f4ffe5",
-    leaf: "#a8e063",
-    leafStroke: "#3a8a2e",
-    accent: "#ffb3c6",
-  },
-  ocean: {
-    body: "#5fb8ff",
-    bodyDim: "#6fbff0",
-    bodySoft: "#9ed8ff",
-    stroke: "#1d6fb8",
-    belly: "#eaf6ff",
-    leaf: "#a0d8ff",
-    leafStroke: "#1d6fb8",
-    accent: "#ffd1e0",
-  },
-  blossom: {
-    body: "#ff9bc6",
-    bodyDim: "#f4a8c8",
-    bodySoft: "#ffc1d9",
-    stroke: "#c34a85",
-    belly: "#fff0f6",
-    leaf: "#ffd1e6",
-    leafStroke: "#c34a85",
-    accent: "#ffe0a8",
-  },
-  sunny: {
-    body: "#ffd95a",
-    bodyDim: "#f5cf5c",
-    bodySoft: "#ffe89a",
-    stroke: "#c48a13",
-    belly: "#fffbe7",
-    leaf: "#ffeaa1",
-    leafStroke: "#c48a13",
-    accent: "#ffb37a",
-  },
-  cocoa: {
-    body: "#b07853",
-    bodyDim: "#a87856",
-    bodySoft: "#caa07f",
-    stroke: "#5e3a22",
-    belly: "#fbeede",
-    leaf: "#caa07f",
-    leafStroke: "#5e3a22",
-    accent: "#ffb3c6",
-  },
-};
-
-export function Pet({ mood = "happy", variant = "leaf", size = 96, className }: Props) {
-  const p = PALETTES[variant] ?? PALETTES.leaf;
-  const bodyColor = mood === "hungry" ? p.bodySoft : mood === "sleepy" ? p.bodyDim : p.body;
->>>>>>> 40376e2 (UI of choose pet)
   const cheek = mood === "excited" ? "#ff8fb0" : p.accent;
   const eyeShape = mood === "sleepy" ? "sleepy" : "open";
   const eyeColor = variant === "PANDA" ? "#fff" : "#1b1b1b";
@@ -522,7 +444,6 @@ export function Pet({ mood = "happy", variant = "leaf", size = 96, className }: 
       transition={{ repeat: mood === "excited" ? Infinity : 0, duration: 0.6 }}
     >
       <svg viewBox="0 0 100 100" width={size} height={size}>
-<<<<<<< HEAD
         <defs>
           <radialGradient id={`aura-${variant}`} cx="50%" cy="50%" r="50%">
             <stop offset="0%" stopColor={p.aura} stopOpacity="0.55" />
@@ -541,19 +462,10 @@ export function Pet({ mood = "happy", variant = "leaf", size = 96, className }: 
           cy={head.cy}
           rx={head.rx}
           ry={head.ry}
-=======
-        <ellipse cx="50" cy="92" rx="28" ry="4" fill="rgba(0,0,0,0.12)" />
-        <ellipse
-          cx="50"
-          cy="58"
-          rx="32"
-          ry="30"
->>>>>>> 40376e2 (UI of choose pet)
           fill={bodyColor}
           stroke={p.stroke}
           strokeWidth="2.5"
         />
-<<<<<<< HEAD
         <ellipse
           cx={head.cx}
           cy={head.cy + 6}
@@ -569,13 +481,6 @@ export function Pet({ mood = "happy", variant = "leaf", size = 96, className }: 
         <circle cx="72" cy="62" r={stage === 1 ? 5.5 : 5} fill={cheek} opacity="0.85" />
 
         {/* eyes */}
-=======
-        <ellipse cx="50" cy="64" rx="20" ry="18" fill={p.belly} />
-        <path d="M22 36 L18 18 L34 28 Z" fill={bodyColor} stroke={p.stroke} strokeWidth="2" />
-        <path d="M78 36 L82 18 L66 28 Z" fill={bodyColor} stroke={p.stroke} strokeWidth="2" />
-        <circle cx="28" cy="60" r="5" fill={cheek} opacity="0.8" />
-        <circle cx="72" cy="60" r="5" fill={cheek} opacity="0.8" />
->>>>>>> 40376e2 (UI of choose pet)
         {eyeShape === "open" ? (
           <g className="animate-blink">
             <ellipse cx="38" cy={head.eyeY} rx={head.eyeR} ry={head.eyeR + 1.5} fill={eyeColor} />
@@ -595,7 +500,6 @@ export function Pet({ mood = "happy", variant = "leaf", size = 96, className }: 
             <path d={`M57 ${head.eyeY} Q62 ${head.eyeY + 4} 67 ${head.eyeY}`} />
           </g>
         )}
-<<<<<<< HEAD
 
         {/* mouth */}
         {variant === "DRAGON" ? (
@@ -628,19 +532,11 @@ export function Pet({ mood = "happy", variant = "leaf", size = 96, className }: 
         ) : mood === "sleepy" ? (
           <path
             d="M46 66 Q50 68 54 66"
-=======
-        {mood === "hungry" ? (
-          <ellipse cx="50" cy="64" rx="4" ry="5" fill="#3a1f1f" />
-        ) : mood === "sleepy" ? (
-          <path
-            d="M46 64 Q50 66 54 64"
->>>>>>> 40376e2 (UI of choose pet)
             stroke="#3a1f1f"
             strokeWidth="2"
             fill="none"
             strokeLinecap="round"
           />
-<<<<<<< HEAD
         ) : mood === "waiting" ? (
           <path
             d="M44 65 L56 65"
@@ -676,25 +572,6 @@ export function Pet({ mood = "happy", variant = "leaf", size = 96, className }: 
         )}
 
         {stage === 3 && <Stage3Accessory variant={variant} p={p} />}
-=======
-        ) : (
-          <path
-            d="M44 62 Q50 70 56 62"
-            stroke="#3a1f1f"
-            strokeWidth="2.5"
-            fill="none"
-            strokeLinecap="round"
-          />
-        )}
-        <path
-          d="M50 22 Q56 14 64 16 Q60 24 52 26 Z"
-          fill={p.leaf}
-          stroke={p.leafStroke}
-          strokeWidth="1.5"
-        />
-        <ellipse cx="38" cy="88" rx="7" ry="4" fill={p.stroke} />
-        <ellipse cx="62" cy="88" rx="7" ry="4" fill={p.stroke} />
->>>>>>> 40376e2 (UI of choose pet)
       </svg>
       {mood === "sleepy" && (
         <div className="absolute -top-2 right-0 text-info text-lg font-bold animate-bob">z</div>
@@ -703,7 +580,6 @@ export function Pet({ mood = "happy", variant = "leaf", size = 96, className }: 
   );
 }
 
-<<<<<<< HEAD
 export function getStageName(variant: PetVariant, stage: PetStage) {
   return SPECIES[variant].stageNames[stage - 1];
 }
@@ -721,12 +597,3 @@ export const PET_VARIANTS: {
   emoji: SPECIES[id].emoji,
   stageNames: SPECIES[id].stageNames,
 }));
-=======
-export const PET_VARIANTS: { id: PetVariant; name: string; desc: string }[] = [
-  { id: "leaf", name: "Sprout", desc: "Loves forests and fresh starts." },
-  { id: "ocean", name: "Splash", desc: "A curious tide-pool explorer." },
-  { id: "blossom", name: "Petal", desc: "Sweet, gentle, always cheering you on." },
-  { id: "sunny", name: "Sunny", desc: "Warm energy, never misses a streak." },
-  { id: "cocoa", name: "Cocoa", desc: "Cozy bookworm who adores study time." },
-];
->>>>>>> 40376e2 (UI of choose pet)

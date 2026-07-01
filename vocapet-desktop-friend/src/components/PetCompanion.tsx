@@ -117,74 +117,8 @@ export function PetCompanion() {
     }, 1600);
   }
 
-<<<<<<< HEAD
   const reactionMood: PetMood =
     picked === null ? "waiting" : picked === quiz?.target.id ? "excited" : "sad";
-=======
-  return (
-    <>
-      {/* Floating pet button */}
-      <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-2">
-        {showSettings && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="rounded-2xl border-2 border-border bg-card p-4 card-pop w-64"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <p className="font-bold">{state.petName}</p>
-              <button onClick={() => setShowSettings(false)} className="text-muted-foreground">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <p className="text-xs text-muted-foreground mb-3 capitalize">
-              Mood: {state.petMood} · Lv {state.petLevel}
-            </p>
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center justify-between">
-                <span>Hunger</span>
-                <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-warning" style={{ width: `${state.petHunger}%` }} />
-                </div>
-              </div>
-              <Button
-                size="sm"
-                variant="secondary"
-                className="w-full"
-                onClick={feedPet}
-                disabled={state.coins < 10}
-              >
-                <Heart className="w-4 h-4 mr-1" /> Feed (10 <Coins className="w-3 h-3 inline" />)
-              </Button>
-              <div className="pt-2">
-                <p className="text-xs text-muted-foreground mb-1">Quiz me every…</p>
-                <div className="flex gap-1">
-                  {[1, 5, 10, 20, 30].map((m) => (
-                    <button
-                      key={m}
-                      onClick={() => setPetInterval(m)}
-                      className={`flex-1 text-xs py-1 rounded-md border-2 ${state.popupIntervalMin === m ? "border-primary bg-primary/10 font-bold" : "border-border"}`}
-                    >
-                      {m}m
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <Button size="sm" className="w-full btn-pop" onClick={() => setOpen(true)}>
-                <Sparkles className="w-4 h-4 mr-1" /> Quiz me now
-              </Button>
-            </div>
-          </motion.div>
-        )}
-        <button
-          onClick={() => setShowSettings((v) => !v)}
-          className="rounded-full bg-card border-2 border-border p-2 card-pop hover:scale-105 transition-transform"
-          aria-label="Open pet"
-        >
-          <Pet mood={state.petMood} variant={state.petVariant} size={64} />
-        </button>
-      </div>
->>>>>>> 40376e2 (UI of choose pet)
 
   return (
     <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-2 pointer-events-none">
@@ -216,7 +150,6 @@ export function PetCompanion() {
                   setOpen(true);
                 }}
               >
-<<<<<<< HEAD
                 <Sparkles className="w-3 h-3 mr-1" /> Quiz me
               </Button>
               <Button size="sm" variant="outline" className="h-7 text-xs border-2" asChild>
@@ -225,67 +158,6 @@ export function PetCompanion() {
                 </Link>
               </Button>
             </div>
-=======
-                <X className="w-5 h-5" />
-              </button>
-              <div className="flex items-center gap-3 mb-4">
-                <Pet
-                  mood={
-                    picked === null ? "excited" : picked === quiz.target.id ? "happy" : "sleepy"
-                  }
-                  variant={state.petVariant}
-                  size={72}
-                />
-                <div>
-                  <p className="text-xs font-bold uppercase text-primary">Surprise quiz!</p>
-                  <p className="text-sm text-muted-foreground">What does this word mean?</p>
-                </div>
-                <div
-                  className={`ml-auto text-2xl font-extrabold ${timeLeft <= 3 ? "text-destructive" : "text-foreground"}`}
-                >
-                  {picked === null ? timeLeft : ""}
-                </div>
-              </div>
-              <div className="text-center my-4">
-                <p className="text-4xl font-extrabold tracking-tight">{quiz.target.word}</p>
-                <p className="text-xs text-muted-foreground italic mt-1">{quiz.target.pos}</p>
-              </div>
-              <div className="grid gap-2">
-                {quiz.options.map((opt) => {
-                  const isCorrect = opt.id === quiz.target.id;
-                  const isPicked = picked === opt.id;
-                  const showResult = picked !== null;
-                  return (
-                    <button
-                      key={opt.id}
-                      onClick={() => picked === null && handleAnswer(opt.id)}
-                      disabled={picked !== null}
-                      className={`text-left text-sm p-3 rounded-xl border-2 transition-colors ${
-                        showResult && isCorrect
-                          ? "border-success bg-success/10 font-semibold"
-                          : showResult && isPicked && !isCorrect
-                            ? "border-destructive bg-destructive/10"
-                            : "border-border hover:border-primary hover:bg-primary/5"
-                      }`}
-                    >
-                      {opt.text}
-                    </button>
-                  );
-                })}
-              </div>
-              {picked !== null && (
-                <p className="text-center mt-3 text-sm font-bold">
-                  {picked === quiz.target.id ? (
-                    <span className="text-success">+10 XP · +5 🪙 Nice!</span>
-                  ) : (
-                    <span className="text-destructive">
-                      The right answer is highlighted. Keep going!
-                    </span>
-                  )}
-                </p>
-              )}
-            </motion.div>
->>>>>>> 40376e2 (UI of choose pet)
           </motion.div>
         )}
       </AnimatePresence>

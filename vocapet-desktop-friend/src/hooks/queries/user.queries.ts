@@ -14,7 +14,6 @@ export function useOnboardingMutation() {
   return useMutation({
     mutationFn: onboardingApi,
     onSuccess: () => {
-      // Invalidate the "me" query so fresh data is fetched
       queryClient.invalidateQueries({ queryKey: ["me"] });
 
     },

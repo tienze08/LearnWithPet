@@ -83,10 +83,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/welcome': typeof WelcomeRoute
-<<<<<<< HEAD
   '/app/pets': typeof AppPetsRoute
-=======
->>>>>>> 40376e2 (UI of choose pet)
   '/app/profile': typeof AppProfileRoute
   '/app/welcome': typeof AppWelcomeRoute
   '/app/': typeof AppIndexRoute
@@ -98,10 +95,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/welcome': typeof WelcomeRoute
-<<<<<<< HEAD
   '/app/pets': typeof AppPetsRoute
-=======
->>>>>>> 40376e2 (UI of choose pet)
   '/app/profile': typeof AppProfileRoute
   '/app/welcome': typeof AppWelcomeRoute
   '/app': typeof AppIndexRoute
@@ -115,10 +109,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/welcome': typeof WelcomeRoute
-<<<<<<< HEAD
   '/app/pets': typeof AppPetsRoute
-=======
->>>>>>> 40376e2 (UI of choose pet)
   '/app/profile': typeof AppProfileRoute
   '/app/welcome': typeof AppWelcomeRoute
   '/app/': typeof AppIndexRoute
@@ -133,10 +124,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/welcome'
-<<<<<<< HEAD
     | '/app/pets'
-=======
->>>>>>> 40376e2 (UI of choose pet)
     | '/app/profile'
     | '/app/welcome'
     | '/app/'
@@ -148,10 +136,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/welcome'
-<<<<<<< HEAD
     | '/app/pets'
-=======
->>>>>>> 40376e2 (UI of choose pet)
     | '/app/profile'
     | '/app/welcome'
     | '/app'
@@ -164,10 +149,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/welcome'
-<<<<<<< HEAD
     | '/app/pets'
-=======
->>>>>>> 40376e2 (UI of choose pet)
     | '/app/profile'
     | '/app/welcome'
     | '/app/'
