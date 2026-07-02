@@ -33,6 +33,7 @@ import {
   useAddBookmarkMutation,
   useRemoveBookmarkMutation,
 } from "@/hooks/queries/bookmark.queries";
+import SrsFlashCard from "@/components/deck/SrsFlashCard";
 
 export const Route = createFileRoute("/app/decks/$deckId")({
   component: DeckDetail,
@@ -243,6 +244,8 @@ export default function DeckDetail() {
           }}
         />
       )}
+
+      {mode === "srs" && <SrsFlashCard deckId={deck.id} />}
 
       {mode === "flashcards" && <Flashcards words={words} onAnswer={recordAnswer} />}
 

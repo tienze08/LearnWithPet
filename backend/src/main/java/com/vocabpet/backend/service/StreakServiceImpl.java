@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import org.springframework.stereotype.Service;
 
+import com.vocabpet.backend.dto.StudyCardRe.StreakUpdateResult;
 import com.vocabpet.backend.entity.User;
 import com.vocabpet.backend.entity.UserStreak;
 import com.vocabpet.backend.repository.UserStreakRepository;
@@ -18,7 +19,7 @@ public class StreakServiceImpl implements StreakService {
     private final CurrentUserService currentUserService;
 
     @Override
-    public void updateMyStreak() {
+    public StreakUpdateResult updateMyStreak() {
 
         User user = currentUserService.getCurrentUser();
         LocalDate today = LocalDate.now();
@@ -35,7 +36,11 @@ public class StreakServiceImpl implements StreakService {
 
         // đã hoạt động hôm nay → KHÔNG update nữa
         if (last != null && last.equals(today)) {
-            return;
+            return StreakUpdateResult.builder()
+                    .updated(false)
+                    .currentStreak(streak.getCurrentStreak())
+                    .longestStreak(streak.getLongestStreak())
+                    .build();
         }
 
         if (last == null) {
@@ -52,6 +57,12 @@ public class StreakServiceImpl implements StreakService {
                 Math.max(streak.getLongestStreak(), streak.getCurrentStreak()));
 
         streakRepository.save(streak);
+
+        return StreakUpdateResult.builder()
+                .updated(true)
+                .currentStreak(streak.getCurrentStreak())
+                .longestStreak(streak.getLongestStreak())
+                .build();
     }
 
     @Override

@@ -2,7 +2,17 @@ import { useEffect } from "react";
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { GameProvider, useGame } from "@/lib/store";
 import { PetCompanion } from "@/components/PetCompanion";
-import { Coins, Flame, Zap, LayoutDashboard, Library, User, PawPrintIcon } from "lucide-react";
+import {
+  Coins,
+  Flame,
+  Zap,
+  LayoutDashboard,
+  Library,
+  User,
+  PawPrintIcon,
+  Target,
+  PawPrint,
+} from "lucide-react";
 
 function TopBar() {
   const { state } = useGame();
@@ -17,6 +27,7 @@ function TopBar() {
         <nav className="hidden md:flex items-center gap-1 ml-4">
           <NavLink to="/app" icon={<LayoutDashboard className="w-4 h-4" />} label="Home" />
           <NavLink to="/app/decks" icon={<Library className="w-4 h-4" />} label="Decks" />
+          <NavLink to="/app/tasks" icon={<Target className="w-4 h-4" />} label="Tasks" />
           <NavLink to="/app/pets" icon={<PawPrintIcon className="w-4 h-4" />} label="Pets" />
           <NavLink to="/app/profile" icon={<User className="w-4 h-4" />} label="Profile" />
         </nav>
@@ -81,6 +92,8 @@ function MobileNav() {
       <div className="flex justify-around py-2">
         <NavLink to="/app" icon={<LayoutDashboard className="w-5 h-5" />} label="Home" />
         <NavLink to="/app/decks" icon={<Library className="w-5 h-5" />} label="Decks" />
+        <NavLink to="/app/tasks" icon={<Target className="w-5 h-5" />} label="Tasks" />
+        <NavLink to="/app/pets" icon={<PawPrint className="w-5 h-5" />} label="Pets" />
         <NavLink to="/app/profile" icon={<User className="w-5 h-5" />} label="Profile" />
       </div>
     </nav>

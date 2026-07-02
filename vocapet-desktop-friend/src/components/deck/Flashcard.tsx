@@ -44,7 +44,7 @@ export default function Flashcards({ words, onAnswer }: FlashcardsProps) {
           transition={{
             duration: 0.5,
           }}
-          className="relative w-full cursor-pointer"
+          className="relative w-full aspect-4/3 cursor-pointer"
           style={{
             transformStyle: "preserve-3d",
           }}

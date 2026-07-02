@@ -1,6 +1,9 @@
 const API_URL = "http://localhost:8080";
 
-export async function apiFetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
+export async function apiFetch<T>(
+  endpoint: string,
+  options?: RequestInit,
+): Promise<T> {
   const token = localStorage.getItem("vocapet_token");
 
   const response = await fetch(`${API_URL}${endpoint}`, {
@@ -12,12 +15,15 @@ export async function apiFetch<T>(endpoint: string, options?: RequestInit): Prom
     },
   });
 
-  const data = await response.json().catch(() => null);
+  if (response.status === 204) {
+    return null as T;
+  }
+
+  const data = await response.json();
 
   if (!response.ok) {
-
     throw new Error(
-      data?.message || `HTTP ${response.status} - Unknown error`
+      data?.message || `HTTP ${response.status} - Unknown error`,
     );
   }
 

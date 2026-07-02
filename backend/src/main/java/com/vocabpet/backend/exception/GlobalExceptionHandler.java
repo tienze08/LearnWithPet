@@ -38,10 +38,7 @@ public class GlobalExceptionHandler {
         }
 
         @ExceptionHandler(NoMoreCardsException.class)
-        public ResponseEntity<?> handle(NoMoreCardsException ex) {
-
-                return ResponseEntity
-                                .status(204)
-                                .body(ex.getMessage());
+        public ResponseEntity<Void> handle(NoMoreCardsException ex) {
+                return ResponseEntity.noContent().build();
         }
 }
