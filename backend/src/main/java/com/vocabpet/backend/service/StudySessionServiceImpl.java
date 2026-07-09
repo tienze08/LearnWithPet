@@ -34,6 +34,7 @@ public class StudySessionServiceImpl implements StudySessionService {
         private final VocabularyRepository vocabularyRepository;
         private final FsrsService fsrsService;
         private final StreakService streakService;
+        private final MissionService missionService;
 
         private final DeckRepository deckRepository;
         private final CurrentUserService currentUserService;
@@ -107,15 +108,16 @@ public class StudySessionServiceImpl implements StudySessionService {
 
                 Long userId = session.getUser().getId();
 
-                UserVocabularyProgress progress = progressRepository.findByUserIdAndVocabularyId(
+                var progressOptional = progressRepository.findByUserIdAndVocabularyId(
                                 userId,
-                                request.getVocabularyId())
-                                .orElseGet(() -> UserVocabularyProgress.builder()
-                                                .user(session.getUser())
-                                                .vocabulary(
-                                                                vocabularyRepository.getReferenceById(
-                                                                                request.getVocabularyId()))
-                                                .build());
+                                request.getVocabularyId());
+
+                boolean isNewCard = progressOptional.isEmpty();
+
+                UserVocabularyProgress progress = progressOptional.orElseGet(() -> UserVocabularyProgress.builder()
+                                .user(session.getUser())
+                                .vocabulary(vocabularyRepository.getReferenceById(request.getVocabularyId()))
+                                .build());
 
                 // FSRS UPDATE
                 fsrsService.review(progress, request.getRating());
@@ -135,6 +137,12 @@ public class StudySessionServiceImpl implements StudySessionService {
                 session.setTotalReviews(session.getTotalReviews() + 1);
                 sessionRepository.save(session);
 
+                missionService.trackReview(userId);
+
+                if (isNewCard) {
+                        missionService.trackLearnWord(userId);
+                }
+
                 StreakUpdateResult streakResult = streakService.updateMyStreak();
 
                 return ReviewResponse.builder()
@@ -153,6 +161,8 @@ public class StudySessionServiceImpl implements StudySessionService {
                                 .orElseThrow();
 
                 session.setFinishedAt(LocalDateTime.now());
+
+                missionService.trackSessionCompleted(session.getUser().getId());
 
                 sessionRepository.save(session);
         }

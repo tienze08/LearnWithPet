@@ -2,6 +2,7 @@ package com.vocabpet.backend.service;
 
 import com.vocabpet.backend.dto.PetResponse;
 import com.vocabpet.backend.dto.AuthRe.OnboardingRequest;
+import com.vocabpet.backend.dto.UserRe.AvatarUpdateRequest;
 import com.vocabpet.backend.dto.UserRe.UserResponse;
 import com.vocabpet.backend.entity.Pet;
 import com.vocabpet.backend.entity.User;
@@ -84,6 +85,21 @@ public class UserService {
                                 .build();
 
                 user.setCurrentPet(pet);
+
+                userRepository.save(user);
+        }
+
+        @Transactional
+        public void updateAvatar(
+                        Authentication authentication,
+                        AvatarUpdateRequest request) {
+
+                User user = userRepository
+                                .findByEmail(authentication.getName())
+                                .orElseThrow();
+
+                user.setAvatar(
+                                AvatarType.valueOf(request.getAvatar().toUpperCase()));
 
                 userRepository.save(user);
         }

@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { GameProvider, useGame } from "@/lib/store";
 import { PetCompanion } from "@/components/PetCompanion";
+import { useMeQuery } from "@/hooks/queries/user.queries";
+import { avatarMap } from "@/types/avatar";
 import {
   Coins,
   Flame,
@@ -16,7 +18,11 @@ import {
 
 function TopBar() {
   const { state } = useGame();
+  const { data: me } = useMeQuery();
   const pct = state.xp % 100;
+  const avatarEmoji = me?.avatar ? (avatarMap[me.avatar] ?? "🦊") : state.user.avatarEmoji;
+  const displayName = me?.name || state.user.displayName || "You";
+
   return (
     <header className="sticky top-0 z-30 bg-background/90 backdrop-blur border-b-2 border-border">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center gap-4">
@@ -47,11 +53,9 @@ function TopBar() {
             aria-label="Your profile"
           >
             <span className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-lg">
-              {state.user.avatarEmoji}
+              {avatarEmoji}
             </span>
-            <span className="hidden sm:inline text-sm font-bold truncate">
-              {state.user.displayName || "You"}
-            </span>
+            <span className="hidden sm:inline text-sm font-bold truncate">{displayName}</span>
           </Link>
         </div>
       </div>

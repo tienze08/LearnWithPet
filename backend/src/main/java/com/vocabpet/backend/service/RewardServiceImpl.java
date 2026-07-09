@@ -2,7 +2,9 @@ package com.vocabpet.backend.service;
 
 import org.springframework.stereotype.Service;
 
+import com.vocabpet.backend.entity.User;
 import com.vocabpet.backend.entity.UserReward;
+import com.vocabpet.backend.repository.UserRepository;
 import com.vocabpet.backend.repository.UserRewardRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -12,9 +14,17 @@ import lombok.RequiredArgsConstructor;
 public class RewardServiceImpl implements RewardService {
 
     private final UserRewardRepository rewardRepository;
+    private final UserRepository userRepository;
 
     @Override
     public void grantReward(Long userId, int xp, int coin) {
+
+        User user = userRepository.findById(userId).orElse(null);
+        if (user != null) {
+            user.setXp(user.getXp() + xp);
+            user.setTotalXp(user.getTotalXp() + xp);
+            userRepository.save(user);
+        }
 
         UserReward reward = rewardRepository.findById(userId)
                 .orElseGet(() -> {

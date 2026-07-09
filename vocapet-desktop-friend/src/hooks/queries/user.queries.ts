@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getMeApi, onboardingApi } from "@/api/user.api";
+import { getMeApi, onboardingApi, updateAvatarApi } from "@/api/user.api";
+import type { UserResponse } from "@/types/user";
 
 export function useMeQuery() {
   return useQuery({
@@ -16,6 +17,21 @@ export function useOnboardingMutation() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["me"] });
 
+    },
+  });
+}
+
+export function useUpdateAvatarMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: updateAvatarApi,
+    onSuccess: (_, avatar) => {
+      queryClient.setQueryData(["me"], (oldData: UserResponse | undefined) => {
+        if (!oldData) return oldData;
+        return { ...oldData, avatar };
+      });
+      queryClient.invalidateQueries({ queryKey: ["me"] });
     },
   });
 }

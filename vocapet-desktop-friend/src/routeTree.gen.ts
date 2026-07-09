@@ -16,6 +16,7 @@ import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppWelcomeRouteImport } from './routes/app.welcome'
+import { Route as AppTasksRouteImport } from './routes/app.tasks'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
 import { Route as AppPetsRouteImport } from './routes/app.pets'
 import { Route as AppDecksIndexRouteImport } from './routes/app.decks.index'
@@ -56,6 +57,11 @@ const AppWelcomeRoute = AppWelcomeRouteImport.update({
   path: '/welcome',
   getParentRoute: () => AppRoute,
 } as any)
+const AppTasksRoute = AppTasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppProfileRoute = AppProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -85,6 +91,7 @@ export interface FileRoutesByFullPath {
   '/welcome': typeof WelcomeRoute
   '/app/pets': typeof AppPetsRoute
   '/app/profile': typeof AppProfileRoute
+  '/app/tasks': typeof AppTasksRoute
   '/app/welcome': typeof AppWelcomeRoute
   '/app/': typeof AppIndexRoute
   '/app/decks/$deckId': typeof AppDecksDeckIdRoute
@@ -97,6 +104,7 @@ export interface FileRoutesByTo {
   '/welcome': typeof WelcomeRoute
   '/app/pets': typeof AppPetsRoute
   '/app/profile': typeof AppProfileRoute
+  '/app/tasks': typeof AppTasksRoute
   '/app/welcome': typeof AppWelcomeRoute
   '/app': typeof AppIndexRoute
   '/app/decks/$deckId': typeof AppDecksDeckIdRoute
@@ -111,6 +119,7 @@ export interface FileRoutesById {
   '/welcome': typeof WelcomeRoute
   '/app/pets': typeof AppPetsRoute
   '/app/profile': typeof AppProfileRoute
+  '/app/tasks': typeof AppTasksRoute
   '/app/welcome': typeof AppWelcomeRoute
   '/app/': typeof AppIndexRoute
   '/app/decks/$deckId': typeof AppDecksDeckIdRoute
@@ -126,6 +135,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/app/pets'
     | '/app/profile'
+    | '/app/tasks'
     | '/app/welcome'
     | '/app/'
     | '/app/decks/$deckId'
@@ -138,6 +148,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/app/pets'
     | '/app/profile'
+    | '/app/tasks'
     | '/app/welcome'
     | '/app'
     | '/app/decks/$deckId'
@@ -151,6 +162,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/app/pets'
     | '/app/profile'
+    | '/app/tasks'
     | '/app/welcome'
     | '/app/'
     | '/app/decks/$deckId'
@@ -216,6 +228,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppWelcomeRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/tasks': {
+      id: '/app/tasks'
+      path: '/tasks'
+      fullPath: '/app/tasks'
+      preLoaderRoute: typeof AppTasksRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/profile': {
       id: '/app/profile'
       path: '/profile'
@@ -250,6 +269,7 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppPetsRoute: typeof AppPetsRoute
   AppProfileRoute: typeof AppProfileRoute
+  AppTasksRoute: typeof AppTasksRoute
   AppWelcomeRoute: typeof AppWelcomeRoute
   AppIndexRoute: typeof AppIndexRoute
   AppDecksDeckIdRoute: typeof AppDecksDeckIdRoute
@@ -259,6 +279,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppPetsRoute: AppPetsRoute,
   AppProfileRoute: AppProfileRoute,
+  AppTasksRoute: AppTasksRoute,
   AppWelcomeRoute: AppWelcomeRoute,
   AppIndexRoute: AppIndexRoute,
   AppDecksDeckIdRoute: AppDecksDeckIdRoute,

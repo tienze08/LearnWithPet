@@ -22,3 +22,12 @@ export function onboardingApi(
     },
   );
 }
+
+export function updateAvatarApi(avatar: string) {
+  return apiFetch<void>("/api/users/avatar", {
+    method: "PATCH",
+    body: JSON.stringify({
+      avatar,
+    }),
+  });
+}

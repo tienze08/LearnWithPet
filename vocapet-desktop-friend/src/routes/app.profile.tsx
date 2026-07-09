@@ -4,13 +4,27 @@ import { PetCard } from "@/components/PetCard";
 import { PetSpecies } from "@/components/PetSpecies";
 import { Button } from "@/components/ui/button";
 import { Trophy, Flame, Zap, Coins, Star, Calendar, Pencil } from "lucide-react";
-import { useMeQuery } from "@/hooks/queries/user.queries";
+import { useMeQuery, useUpdateAvatarMutation } from "@/hooks/queries/user.queries";
+import { avatarMap } from "@/types/avatar";
 
 export const Route = createFileRoute("/app/profile")({
   component: Profile,
 });
 
-const AVATARS = ["🦊", "🐼", "🐨", "🐸", "🐵", "🦄", "🐯", "🐧", "🐙", "🌟", "🚀", "🍀"];
+const AVATARS = [
+  { type: "FOX", emoji: "🦊" },
+  { type: "PANDA", emoji: "🐼" },
+  { type: "KOALA", emoji: "🐨" },
+  { type: "FROG", emoji: "🐸" },
+  { type: "MONKEY", emoji: "🐵" },
+  { type: "UNICORN", emoji: "🦄" },
+  { type: "TIGER", emoji: "🐯" },
+  { type: "PENGUIN", emoji: "🐧" },
+  { type: "OCTOPUS", emoji: "🐙" },
+  { type: "STAR", emoji: "🌟" },
+  { type: "ROCKET", emoji: "🚀" },
+  { type: "CLOVER", emoji: "🍀" },
+];
 
 const ACHIEVEMENTS = [
   { id: "first", label: "First word reviewed", check: (s: any) => s.reviewHistory.length >= 1 },
@@ -27,7 +41,7 @@ const ACHIEVEMENTS = [
 function Profile() {
   const { state, setState } = useGame();
   const { data: me } = useMeQuery();
-  console.log(me);
+  console.log("User data:", me);
   const accuracy = state.reviewHistory.length
     ? Math.round(
         (state.reviewHistory.filter((r) => r.correct).length / state.reviewHistory.length) * 100,
@@ -40,6 +54,8 @@ function Profile() {
     day: "numeric",
   });
 
+  const updateAvatarMutation = useUpdateAvatarMutation();
+
   return (
     <div className="space-y-6">
       {/* User card */}
@@ -47,7 +63,7 @@ function Profile() {
         <div className="rounded-3xl border-2 border-border bg-card p-6 card-pop">
           <div className="flex flex-col sm:flex-row items-center gap-5">
             <div className="w-24 h-24 rounded-3xl bg-primary/10 border-2 border-border flex items-center justify-center text-5xl">
-              {me.avatar}
+              {avatarMap[me.avatar] ?? "🦊"}
             </div>
             <div className="flex-1 text-center sm:text-left">
               <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1 justify-center sm:justify-start">
@@ -80,17 +96,17 @@ function Profile() {
           <div className="mt-5">
             <p className="text-xs font-bold uppercase text-muted-foreground mb-2">Avatar</p>
             <div className="flex flex-wrap gap-2">
-              {AVATARS.map((emo) => (
+              {AVATARS.map((avatar) => (
                 <button
-                  key={emo}
-                  onClick={() => setState((s) => ({ ...s, user: { ...s.user, avatarEmoji: emo } }))}
+                  key={avatar.type}
+                  onClick={() => updateAvatarMutation.mutate(avatar.type)}
                   className={`w-10 h-10 text-xl rounded-xl border-2 flex items-center justify-center transition-transform hover:scale-105 ${
-                    state.user.avatarEmoji === emo
+                    me?.avatar === avatar.type
                       ? "border-primary bg-primary/10"
                       : "border-border bg-background"
                   }`}
                 >
-                  {emo}
+                  {avatar.emoji}
                 </button>
               ))}
             </div>

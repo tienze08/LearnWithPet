@@ -19,7 +19,8 @@ export async function apiFetch<T>(
     return null as T;
   }
 
-  const data = await response.json();
+  const text = await response.text();
+  const data = text ? JSON.parse(text) : null;
 
   if (!response.ok) {
     throw new Error(
@@ -27,5 +28,5 @@ export async function apiFetch<T>(
     );
   }
 
-  return data;
+  return data as T;
 }
