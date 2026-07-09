@@ -19,7 +19,10 @@ import {
 function TopBar() {
   const { state } = useGame();
   const { data: me } = useMeQuery();
-  const pct = state.xp % 100;
+  const userLevel = me?.level ?? state.level;
+  const userXp = me?.xp ?? state.xp;
+  const userCoins = me?.coin ?? state.coins;
+  const pct = userXp % 100;
   const avatarEmoji = me?.avatar ? (avatarMap[me.avatar] ?? "🦊") : state.user.avatarEmoji;
   const displayName = me?.name || state.user.displayName || "You";
 
@@ -38,11 +41,14 @@ function TopBar() {
           <NavLink to="/app/profile" icon={<User className="w-4 h-4" />} label="Profile" />
         </nav>
         <div className="ml-auto flex items-center gap-3 text-sm font-bold">
-          <Stat icon={<Flame className="w-4 h-4 text-streak" />} value={state.streak} />
-          <Stat icon={<Coins className="w-4 h-4 text-coin" />} value={state.coins} />
+          <Stat
+            icon={<Flame className="w-4 h-4 text-streak" />}
+            value={me?.streak ?? state.streak}
+          />
+          <Stat icon={<Coins className="w-4 h-4 text-coin" />} value={userCoins} />
           <div className="hidden sm:flex items-center gap-2">
             <Zap className="w-4 h-4 text-xp" />
-            <span>Lv {state.level}</span>
+            <span>Lv {userLevel}</span>
             <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
               <div className="h-full bg-xp" style={{ width: `${pct}%` }} />
             </div>

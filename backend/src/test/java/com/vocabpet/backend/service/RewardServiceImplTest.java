@@ -47,5 +47,7 @@ class RewardServiceImplTest {
         User savedUser = userCaptor.getValue();
         assertEquals(35, savedUser.getXp());
         assertEquals(40, savedUser.getTotalXp());
+        assertEquals(5, savedUser.getCoin());
+        assertEquals(1, savedUser.getLevel());
     }
 }

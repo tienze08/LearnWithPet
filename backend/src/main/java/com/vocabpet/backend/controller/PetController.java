@@ -15,41 +15,46 @@ import com.vocabpet.backend.service.PetService;
 @RequiredArgsConstructor
 public class PetController {
 
-    private final PetService petService;
+        private final PetService petService;
 
-    @GetMapping("/me")
-    public PetResponse getMyPet() {
-        return petService.getMyPet();
-    }
+        @GetMapping("/me")
+        public PetResponse getMyPet() {
+                return petService.getMyPet();
+        }
 
-    @GetMapping("/starter")
-    public List<PetResponse> starterPets() {
+        @PostMapping("/unlock")
+        public PetResponse unlockPet(@RequestBody PetSpecies species) {
+                return petService.unlockPet(species);
+        }
 
-        return List.of(
-                PetResponse.builder()
-                        .species(PetSpecies.CAT)
-                        .locked(false)
-                        .build(),
+        @GetMapping("/starter")
+        public List<PetResponse> starterPets() {
 
-                PetResponse.builder()
-                        .species(PetSpecies.FOX)
-                        .locked(true)
-                        .build(),
+                return List.of(
+                                PetResponse.builder()
+                                                .species(PetSpecies.CAT)
+                                                .locked(false)
+                                                .build(),
 
-                PetResponse.builder()
-                        .species(PetSpecies.BUNNY)
-                        .locked(true)
-                        .build(),
+                                PetResponse.builder()
+                                                .species(PetSpecies.FOX)
+                                                .locked(true)
+                                                .build(),
 
-                PetResponse.builder()
-                        .species(PetSpecies.PANDA)
-                        .locked(true)
-                        .build(),
+                                PetResponse.builder()
+                                                .species(PetSpecies.BUNNY)
+                                                .locked(true)
+                                                .build(),
 
-                PetResponse.builder()
-                        .species(PetSpecies.DRAGON)
-                        .locked(true)
-                        .build());
-    }
+                                PetResponse.builder()
+                                                .species(PetSpecies.PANDA)
+                                                .locked(true)
+                                                .build(),
+
+                                PetResponse.builder()
+                                                .species(PetSpecies.DRAGON)
+                                                .locked(true)
+                                                .build());
+        }
 
 }

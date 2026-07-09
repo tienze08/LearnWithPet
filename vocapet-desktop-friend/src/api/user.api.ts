@@ -1,6 +1,7 @@
 import { OnboardingPayload } from "@/types/auth";
 import { apiFetch } from "./client";
 import type { UserResponse } from "@/types/user";
+import type { PetVariant } from "@/lib/store";
 
 export function getMeApi() {
   return apiFetch<UserResponse>(
@@ -29,5 +30,12 @@ export function updateAvatarApi(avatar: string) {
     body: JSON.stringify({
       avatar,
     }),
+  });
+}
+
+export function unlockPetApi(species: PetVariant) {
+  return apiFetch<{ locked: boolean }>("/api/pets/unlock", {
+    method: "POST",
+    body: JSON.stringify(species),
   });
 }

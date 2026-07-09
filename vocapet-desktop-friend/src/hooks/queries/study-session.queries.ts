@@ -43,6 +43,7 @@ export function useReviewStudyCardMutation(
       queryClient.invalidateQueries({
         queryKey: ["study-session", sessionId, "next-card"],
       });
+      queryClient.invalidateQueries({ queryKey: ["me"] });
     },
   });
 }

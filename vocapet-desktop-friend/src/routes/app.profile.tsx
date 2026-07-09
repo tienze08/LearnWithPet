@@ -41,7 +41,7 @@ const ACHIEVEMENTS = [
 function Profile() {
   const { state, setState } = useGame();
   const { data: me } = useMeQuery();
-  console.log("User data:", me);
+  console.log("me", me);
   const accuracy = state.reviewHistory.length
     ? Math.round(
         (state.reviewHistory.filter((r) => r.correct).length / state.reviewHistory.length) * 100,
@@ -74,16 +74,20 @@ function Profile() {
               </p>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <Tile icon={<Zap className="w-4 h-4 text-xp" />} label="Level" value={state.level} />
+              <Tile
+                icon={<Zap className="w-4 h-4 text-xp" />}
+                label="Level"
+                value={me?.level ?? state.level}
+              />
               <Tile
                 icon={<Flame className="w-4 h-4 text-streak" />}
                 label="Streak"
-                value={state.streak}
+                value={me?.streak ?? state.streak}
               />
               <Tile
                 icon={<Coins className="w-4 h-4 text-coin" />}
                 label="Coins"
-                value={state.coins}
+                value={me?.coin ?? state.coins}
               />
               <Tile
                 icon={<Trophy className="w-4 h-4 text-primary" />}

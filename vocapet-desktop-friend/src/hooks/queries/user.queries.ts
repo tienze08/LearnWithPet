@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getMeApi, onboardingApi, updateAvatarApi } from "@/api/user.api";
+import { getMeApi, onboardingApi, unlockPetApi, updateAvatarApi } from "@/api/user.api";
 import type { UserResponse } from "@/types/user";
 
 export function useMeQuery() {
@@ -31,6 +31,17 @@ export function useUpdateAvatarMutation() {
         if (!oldData) return oldData;
         return { ...oldData, avatar };
       });
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+    },
+  });
+}
+
+export function useUnlockPetMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: unlockPetApi,
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["me"] });
     },
   });

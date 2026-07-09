@@ -4,16 +4,24 @@ import { useGame } from "@/lib/store";
 import type { GameState, PetVariant } from "@/lib/store";
 import { Lock, Check, Sparkles, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useMeQuery, useUnlockPetMutation } from "@/hooks/queries/user.queries";
+
+type UnlockProgress = {
+  level: number;
+  xp: number;
+  streak: number;
+  masteredWords: number;
+};
 
 type Unlock = {
   id: PetVariant;
   title: string;
   requirement: string;
   goal: number;
-  progress: (s: GameState) => number;
+  progress: (stats: UnlockProgress) => number;
 };
 
-const masteredCount = (s: GameState) => Object.values(s.masteryByWord).filter((m) => m >= 4).length;
+const masteredCount = (stats: UnlockProgress) => stats.masteredWords;
 
 export const PET_UNLOCKS: Unlock[] = [
   {
@@ -28,21 +36,21 @@ export const PET_UNLOCKS: Unlock[] = [
     title: "Sharp Learner",
     requirement: "Reach Level 3",
     goal: 3,
-    progress: (s) => s.level,
+    progress: (stats) => stats.level,
   },
   {
     id: "BUNNY",
     title: "Streak Hopper",
     requirement: "Maintain a 5-day streak",
     goal: 5,
-    progress: (s) => s.streak,
+    progress: (stats) => stats.streak,
   },
   {
     id: "PANDA",
     title: "Focused Scholar",
     requirement: "Reach Level 5",
     goal: 5,
-    progress: (s) => s.level,
+    progress: (stats) => stats.level,
   },
   {
     id: "DRAGON",
@@ -59,7 +67,22 @@ export const Route = createFileRoute("/app/pets")({
 
 function PetsPage() {
   const { state, setState } = useGame();
-  const unlockedIds = PET_UNLOCKS.filter((u) => u.progress(state) >= u.goal).map((u) => u.id);
+  const { data: me } = useMeQuery();
+  const unlockMutation = useUnlockPetMutation();
+  const userLevel = me?.level ?? state.level;
+  const userXp = me?.xp ?? state.xp;
+  const userStreak = me?.streak ?? state.streak;
+  const masteredWords = Object.values(state.masteryByWord).filter((m) => m >= 4).length;
+
+  const unlockedIds = PET_UNLOCKS.filter(
+    (u) =>
+      u.progress({
+        level: userLevel,
+        xp: userXp,
+        streak: userStreak,
+        masteredWords,
+      }) >= u.goal,
+  ).map((u) => u.id);
 
   return (
     <div className="space-y-6">
@@ -81,7 +104,15 @@ function PetsPage() {
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {PET_UNLOCKS.map((u) => {
           const meta = PET_VARIANTS.find((v) => v.id === u.id)!;
-          const progress = Math.min(u.goal, u.progress(state));
+          const progress = Math.min(
+            u.goal,
+            u.progress({
+              level: userLevel,
+              xp: userXp,
+              streak: userStreak,
+              masteredWords,
+            }),
+          );
           const unlocked = progress >= u.goal;
           const active = state.petVariant === u.id;
           const pct = Math.round((progress / u.goal) * 100);
@@ -160,8 +191,13 @@ function PetsPage() {
                     {active ? "Currently Active" : "Set as Companion"}
                   </Button>
                 ) : (
-                  <Button asChild className="w-full" variant="outline">
-                    <Link to="/app/decks">Train to unlock</Link>
+                  <Button
+                    className="w-full"
+                    variant="outline"
+                    onClick={() => unlockMutation.mutate(u.id)}
+                    disabled={unlockMutation.isPending}
+                  >
+                    {unlockMutation.isPending ? "Unlocking..." : "Unlock with 50 coins"}
                   </Button>
                 )}
               </div>

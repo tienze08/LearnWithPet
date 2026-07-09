@@ -23,6 +23,8 @@ public class RewardServiceImpl implements RewardService {
         if (user != null) {
             user.setXp(user.getXp() + xp);
             user.setTotalXp(user.getTotalXp() + xp);
+            user.setCoin(user.getCoin() + coin);
+            user.setLevel(Math.max(1, Math.floorDiv(user.getXp(), 100) + 1));
             userRepository.save(user);
         }
 

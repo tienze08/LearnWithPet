@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.vocabpet.backend.dto.StudyCardRe.StreakUpdateResult;
 import com.vocabpet.backend.entity.User;
 import com.vocabpet.backend.entity.UserStreak;
+import com.vocabpet.backend.repository.UserRepository;
 import com.vocabpet.backend.repository.UserStreakRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 public class StreakServiceImpl implements StreakService {
 
     private final UserStreakRepository streakRepository;
+    private final UserRepository userRepository;
     private final CurrentUserService currentUserService;
 
     @Override
@@ -56,6 +58,8 @@ public class StreakServiceImpl implements StreakService {
         streak.setLongestStreak(
                 Math.max(streak.getLongestStreak(), streak.getCurrentStreak()));
 
+        user.setStreak(streak.getCurrentStreak());
+        userRepository.save(user);
         streakRepository.save(streak);
 
         return StreakUpdateResult.builder()

@@ -51,6 +51,7 @@ public class UserService {
                                 .level(user.getLevel())
                                 .xp(user.getXp())
                                 .totalXp(user.getTotalXp())
+                                .coin(user.getCoin())
                                 .streak(user.getStreak())
                                 .onboarded(user.getOnboarded())
                                 .pet(petResponse)
