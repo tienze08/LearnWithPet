@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Pet } from "@/components/Pet";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Bell, Trophy, BookOpen, Zap, Heart } from "lucide-react";
+import Pet from "@/components/PixiPet/Pet";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -81,7 +81,7 @@ function Landing() {
             <div className="absolute bottom-6 right-6 bg-card border-2 border-border rounded-2xl px-4 py-2 card-pop text-sm font-bold flex items-center gap-2">
               <Zap className="w-4 h-4 text-xp" /> +10 XP
             </div>
-            <Pet size={260} mood="excited" />
+            <Pet size={300} mood="excited" />
           </div>
         </div>
       </section>

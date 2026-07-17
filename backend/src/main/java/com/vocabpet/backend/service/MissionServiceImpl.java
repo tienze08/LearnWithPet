@@ -42,6 +42,11 @@ public class MissionServiceImpl implements MissionService {
         updateMission(userId, MissionType.REVIEW_COUNT, 1);
     }
 
+    @Override
+    public void trackQuiz(Long userId) {
+        updateMission(userId, MissionType.DESKTOP_QUIZ, 1);
+    }
+
     private void ensureMission(Long userId, DailyQuest quest) {
 
         LocalDate today = LocalDate.now();

@@ -4,5 +4,6 @@ public enum MissionType {
     LEARN_WORDS,
     FINISH_SESSION,
     REVIEW_COUNT,
-    STUDY_TIME
+    STUDY_TIME,
+    DESKTOP_QUIZ
 }

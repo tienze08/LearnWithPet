@@ -12,6 +12,8 @@ public interface MissionService {
 
     void trackReview(Long userId);
 
+    void trackQuiz(Long userId);
+
     List<UserMissionResponse> getTodayMissions();
 
     void claimMission(Long missionId);

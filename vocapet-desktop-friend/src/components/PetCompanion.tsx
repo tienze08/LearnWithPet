@@ -1,26 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "@tanstack/react-router";
-import { Pet } from "./Pet";
 import { useGame, stageForLevel, computePetMood, type PetMood } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { BookOpen, PencilLine, Sparkles, Target, X } from "lucide-react";
-import type { Word } from "@/lib/vocab-seed";
-
-function pickQuiz(words: Word[]) {
-  if (words.length < 4) return null;
-  const target = words[Math.floor(Math.random() * words.length)];
-  const distractorsPool = words.filter((w) => w.id !== target.id);
-  const distractors: Word[] = [];
-  while (distractors.length < 3 && distractorsPool.length) {
-    const i = Math.floor(Math.random() * distractorsPool.length);
-    distractors.push(distractorsPool.splice(i, 1)[0]);
-  }
-  const options = [target, ...distractors]
-    .sort(() => Math.random() - 0.5)
-    .map((w) => ({ id: w.id, text: w.meaning }));
-  return { target, options };
-}
+import { useAnswerQuizMutation, useRandomQuizMutation } from "@/hooks/queries/quiz.queries";
+import { QuizAnswerResponse, QuizQuestionResponse } from "@/types/quiz";
+import Pet, { PetHandle } from "./PixiPet/Pet";
+import { useRef } from "react";
+import { PetAction } from "./PixiPet/AnimationController";
+import { PetSpeechBubble } from "./PetSpeech";
+import { speakPet, usePetSpeech } from "@/hooks/stores/petSpeech";
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
@@ -50,14 +40,44 @@ function reminderFor(mood: PetMood, name: string, goal: number, progress: number
 }
 
 export function PetCompanion() {
-  const { state, recordAnswer, setPetInterval } = useGame();
+  const petRef = useRef<PetHandle>(null);
+  const { state, setPetInterval } = useGame();
   const [reminder, setReminder] = useState(false);
   const [open, setOpen] = useState(false);
   const [timeLeft, setTimeLeft] = useState(15);
   const [picked, setPicked] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
 
-  const quiz = useMemo(() => (open ? pickQuiz(state.words) : null), [open, state.words]);
+  const { mutateAsync: getQuiz } = useRandomQuizMutation();
+
+  const triggerPetAnimation = (action: PetAction = "STUDY") => {
+    window.requestAnimationFrame(() => {
+      petRef.current?.play(action);
+    });
+  };
+
+  useEffect(() => {
+    const timer = setInterval(
+      async () => {
+        if (open) return;
+
+        try {
+          const quiz = await getQuiz();
+
+          setQuiz(quiz);
+          setOpen(true);
+          triggerPetAnimation("STUDY");
+        } catch (e) {
+          // Không có quiz hoặc lỗi
+        }
+      },
+      state.popupIntervalMin * 60 * 1000,
+    );
+
+    return () => clearInterval(timer);
+  }, [open, state.popupIntervalMin]);
+
+  const [quiz, setQuiz] = useState<QuizQuestionResponse | null>(null);
   const studiedToday = state.lastStudyDate === todayISO();
   const liveMood = computePetMood({
     reviewsToday: state.dailyDate === todayISO() ? state.dailyProgress : 0,
@@ -81,12 +101,22 @@ export function PetCompanion() {
   // auto-open quiz a few seconds after reminder appears
   useEffect(() => {
     if (!reminder) return;
-    const t = setTimeout(() => {
+
+    const t = setTimeout(async () => {
       setReminder(false);
-      setOpen(true);
+
+      try {
+        const quiz = await getQuiz();
+        setQuiz(quiz);
+        setOpen(true);
+        triggerPetAnimation("STUDY");
+      } catch (e) {
+        console.error(e);
+      }
     }, 6000);
+
     return () => clearTimeout(t);
-  }, [reminder]);
+  }, [reminder, getQuiz]);
 
   // countdown
   useEffect(() => {
@@ -103,22 +133,42 @@ export function PetCompanion() {
       });
     }, 1000);
     return () => clearInterval(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, quiz?.target.id]);
+  }, [open, quiz?.vocabularyId]);
 
-  function handleAnswer(optionId: string | null) {
+  const { mutateAsync: answerQuiz } = useAnswerQuizMutation();
+
+  const [answerResult, setAnswerResult] = useState<QuizAnswerResponse | null>(null);
+
+  async function handleAnswer(answer: string | null) {
     if (!quiz) return;
-    setPicked(optionId ?? "__timeout__");
-    const correct = optionId === quiz.target.id;
-    recordAnswer(quiz.target.id, correct);
+
+    setPicked(answer);
+
+    const result = await answerQuiz({
+      vocabularyId: quiz.vocabularyId,
+      answer: answer ?? "",
+    });
+
+    setAnswerResult(result);
+
+    triggerPetAnimation(result.petBehavior.action as PetAction);
+
+    // Đợi người dùng xem kết quả
     setTimeout(() => {
       setOpen(false);
       setPicked(null);
-    }, 1600);
+      setAnswerResult(null);
+
+      speakPet(
+        result.petBehavior.message,
+        result.petBehavior.priority,
+        5, // hoặc Math.max(result.petBehavior.duration, 5)
+      );
+    }, 1800);
   }
 
   const reactionMood: PetMood =
-    picked === null ? "waiting" : picked === quiz?.target.id ? "excited" : "sad";
+    picked === null ? "waiting" : answerResult?.correct ? "excited" : "sad";
 
   return (
     <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-2 pointer-events-none">
@@ -145,9 +195,11 @@ export function PetCompanion() {
               <Button
                 size="sm"
                 className="btn-pop h-7 text-xs"
-                onClick={() => {
-                  setReminder(false);
+                onClick={async () => {
+                  const quiz = await getQuiz();
+                  setQuiz(quiz);
                   setOpen(true);
+                  triggerPetAnimation("STUDY");
                 }}
               >
                 <Sparkles className="w-3 h-3 mr-1" /> Quiz me
@@ -182,12 +234,12 @@ export function PetCompanion() {
             >
               <X className="w-4 h-4" />
             </button>
-            <div className="flex items-center gap-2 mb-2">
+            <div className="relative flex items-center gap-2 mb-2">
               <Pet
-                mood={reactionMood}
+                ref={petRef}
                 variant={state.petVariant}
                 stage={stageForLevel(state.petLevel)}
-                size={44}
+                size={64}
               />
               <div className="flex-1 min-w-0">
                 <p className="text-[10px] font-bold uppercase text-primary leading-tight">
@@ -204,35 +256,23 @@ export function PetCompanion() {
               </div>
             </div>
             <div className="text-center my-2">
-              <p className="text-2xl font-extrabold tracking-tight">{quiz.target.word}</p>
-              <p className="text-[10px] text-muted-foreground italic">{quiz.target.pos}</p>
+              <p className="text-2xl font-extrabold tracking-tight">{quiz.word}</p>
+              <p className="text-[10px] text-muted-foreground italic">{quiz.partOfSpeech}</p>
             </div>
             <div className="grid gap-1.5">
-              {quiz.options.map((opt) => {
-                const isCorrect = opt.id === quiz.target.id;
-                const isPicked = picked === opt.id;
-                const showResult = picked !== null;
-                return (
-                  <button
-                    key={opt.id}
-                    onClick={() => picked === null && handleAnswer(opt.id)}
-                    disabled={picked !== null}
-                    className={`text-left text-xs p-2 rounded-lg border-2 transition-colors ${
-                      showResult && isCorrect
-                        ? "border-success bg-success/10 font-semibold"
-                        : showResult && isPicked && !isCorrect
-                          ? "border-destructive bg-destructive/10"
-                          : "border-border hover:border-primary hover:bg-primary/5"
-                    }`}
-                  >
-                    {opt.text}
-                  </button>
-                );
-              })}
+              {quiz.options.map((option) => (
+                <button
+                  key={option}
+                  onClick={() => picked === null && handleAnswer(option)}
+                  disabled={picked !== null}
+                >
+                  {option}
+                </button>
+              ))}
             </div>
             {picked !== null && (
               <p className="text-center mt-2 text-xs font-bold">
-                {picked === quiz.target.id ? (
+                {answerResult?.correct ? (
                   <span className="text-success">✨ Amazing! +10 XP · +5 🪙</span>
                 ) : (
                   <span className="text-destructive">😅 Don't worry — we'll learn together.</span>
@@ -279,12 +319,21 @@ export function PetCompanion() {
               size="sm"
               variant="outline"
               className="h-auto flex-col py-2 border-2 text-xs"
-              onClick={() => {
+              onClick={async () => {
                 setShowSettings(false);
-                setOpen(true);
+
+                try {
+                  const quiz = await getQuiz();
+                  setQuiz(quiz);
+                  setOpen(true);
+                  triggerPetAnimation("STUDY");
+                } catch (e) {
+                  console.error(e);
+                }
               }}
             >
-              <PencilLine className="w-4 h-4 mb-0.5" /> Practice
+              <PencilLine className="w-4 h-4 mb-0.5" />
+              Practice
             </Button>
             <Button
               size="sm"
@@ -314,18 +363,25 @@ export function PetCompanion() {
       )}
 
       {/* Floating pet button */}
-      <button
-        onClick={() => setShowSettings((v) => !v)}
-        className="pointer-events-auto rounded-full bg-card border-2 border-border p-2 card-pop hover:scale-105 transition-transform"
-        aria-label="Open pet"
-      >
-        <Pet
-          mood={state.petMood}
-          variant={state.petVariant}
-          stage={stageForLevel(state.petLevel)}
-          size={64}
-        />
-      </button>
+      {/* Floating pet */}
+      <div className="relative pointer-events-auto">
+        <PetSpeechBubble />
+
+        <button
+          onClick={() => setShowSettings((v) => !v)}
+          aria-label="Open pet"
+          className="hover:scale-105 transition-transform"
+        >
+          <div className="w-20 h-20 flex items-center justify-center">
+            <Pet
+              ref={petRef}
+              variant={state.petVariant}
+              stage={stageForLevel(state.petLevel)}
+              size={124}
+            />
+          </div>
+        </button>
+      </div>
     </div>
   );
 }

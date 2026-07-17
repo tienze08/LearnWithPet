@@ -1,4 +1,4 @@
-import { Pet, PET_VARIANTS } from "@/components/Pet";
+import { Pet, PET_VARIANTS } from "@/components/PixiPet/Pet";
 import { useGame } from "@/lib/store";
 import type { GameState, PetVariant } from "@/lib/store";
 import { Lock, Check } from "lucide-react";

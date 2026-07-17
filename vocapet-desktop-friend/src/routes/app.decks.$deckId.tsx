@@ -137,9 +137,15 @@ export default function DeckDetail() {
         <DeleteDeckDialog
           deckName={deck.name}
           onConfirm={() => {
-            deleteDeck.mutate(deck.id);
-
-            toast.success("Deck deleted");
+            deleteDeck.mutate(deck.id, {
+              onSuccess: () => {
+                toast.success("Deck deleted");
+                navigate({ to: "/app/decks" });
+              },
+              onError: (err) => {
+                toast.error("Delete failed");
+              },
+            });
 
             navigate({
               to: "/app/decks",

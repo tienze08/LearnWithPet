@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Pet, getStageName } from "./Pet";
+import { Pet } from "./PixiPet/Pet";
 import { useGame, stageForLevel } from "@/lib/store";
 import { Sparkles, Star, Zap } from "lucide-react";
 import PetCanvas from "./PixiPet/PixiPet";
@@ -133,7 +133,7 @@ export function PetCard() {
               transition={{ duration: evolving ? 1.8 : 0.7 }}
               className="relative z-10"
             >
-              <PetCanvas variant={state.petVariant} mood={state.petMood} stage={stage} size={300} />
+              <PetCanvas variant={state.petVariant} mood={state.petMood} stage={stage} size={400} />
             </motion.div>
           </AnimatePresence>
 

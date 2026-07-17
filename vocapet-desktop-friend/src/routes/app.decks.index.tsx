@@ -54,7 +54,7 @@ function DecksPage() {
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
   const [emoji, setEmoji] = useState(EMOJIS[0]);
-  const [color, setColor] = useState("emerald");
+  const [color, setColor] = useState(COLORS[0].class);
 
   const filteredDecks = decks.filter((d) => d.name.toLowerCase().includes(q.toLowerCase()));
 
@@ -136,6 +136,23 @@ function DecksPage() {
                       >
                         {e}
                       </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <Label>Color</Label>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {COLORS.map((c) => (
+                      <button
+                        key={c.name}
+                        type="button"
+                        onClick={() => setColor(c.class)}
+                        className={`
+          h-10 w-10 rounded-full border-2 transition
+          ${c.class}
+          ${color === c.class ? "border-primary ring-2 ring-primary/30" : "border-border"}
+        `}
+                      />
                     ))}
                   </div>
                 </div>
