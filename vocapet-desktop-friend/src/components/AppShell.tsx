@@ -3,6 +3,7 @@ import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-route
 import { GameProvider, useGame } from "@/lib/store";
 import { PetCompanion } from "@/components/PetCompanion";
 import { useMeQuery } from "@/hooks/queries/user.queries";
+import { useAuthStore } from "@/hooks/stores/auth.store";
 import { avatarMap } from "@/types/avatar";
 import {
   Coins,
@@ -14,10 +15,13 @@ import {
   PawPrintIcon,
   Target,
   PawPrint,
+  LogOut,
 } from "lucide-react";
 
 function TopBar() {
   const { state } = useGame();
+  const logout = useAuthStore((auth) => auth.logout);
+  const navigate = useNavigate();
   const { data: me } = useMeQuery();
   const userLevel = me?.level ?? state.level;
   const userXp = me?.xp ?? state.xp;
@@ -63,6 +67,18 @@ function TopBar() {
             </span>
             <span className="hidden sm:inline text-sm font-bold truncate">{displayName}</span>
           </Link>
+          <button
+            type="button"
+            onClick={() => {
+              logout();
+              navigate({ to: "/login" });
+            }}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border-2 border-border text-muted-foreground transition-colors hover:border-destructive hover:bg-destructive/10 hover:text-destructive"
+            aria-label="Log out"
+            title="Log out"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
         </div>
       </div>
     </header>

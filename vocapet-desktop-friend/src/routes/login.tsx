@@ -62,7 +62,7 @@ function LoginPage() {
       const res = await loginMutation.mutateAsync(parsed.data);
       console.log(res);
 
-      authStore.login(res.token, res.name);
+      authStore.login(res.token, res.name, false, res.refreshToken);
 
       localStorage.setItem("vocapet_token", res.token);
       localStorage.setItem("vocapet_name", res.name);
