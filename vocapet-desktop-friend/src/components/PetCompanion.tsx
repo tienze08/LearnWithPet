@@ -10,13 +10,16 @@ import Pet, { PetHandle } from "./PixiPet/Pet";
 import { useRef } from "react";
 import { PetAction } from "./PixiPet/AnimationController";
 import { PetSpeechBubble } from "./PetSpeech";
-import { speakPet, usePetSpeech } from "@/hooks/stores/petSpeech";
+import { speakPet } from "@/hooks/stores/petSpeech";
+import { reactionFor } from "@/lib/pet/behavior";
+import { petEvents } from "@/lib/pet/events";
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
 }
 
 const MOOD_META: Record<PetMood, { emoji: string; label: string; tone: string }> = {
+  crying: { emoji: "😭", label: "Missed the streak", tone: "text-destructive" },
   sad: { emoji: "😢", label: "Sad", tone: "text-destructive" },
   waiting: { emoji: "😐", label: "Waiting", tone: "text-muted-foreground" },
   happy: { emoji: "😊", label: "Happy", tone: "text-success" },
@@ -47,6 +50,9 @@ export function PetCompanion() {
   const [timeLeft, setTimeLeft] = useState(15);
   const [picked, setPicked] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [eventMood, setEventMood] = useState<PetMood | null>(null);
+  const [roamTarget, setRoamTarget] = useState({ x: 0, y: 0 });
+  const roamSideRef = useRef<"left" | "right">("right");
 
   const { mutateAsync: getQuiz } = useRandomQuizMutation();
 
@@ -57,16 +63,29 @@ export function PetCompanion() {
   };
 
   useEffect(() => {
+    return petEvents.subscribe((event) => {
+      const reaction = reactionFor(event);
+      setEventMood(reaction.emotion);
+      triggerPetAnimation(reaction.action);
+      if (
+        reaction.message &&
+        event.type !== "ANSWER_CORRECT" &&
+        event.type !== "ANSWER_WRONG"
+      ) {
+        speakPet(`${state.petName}: ${reaction.message}`, reaction.priority, 3);
+      }
+      window.setTimeout(() => setEventMood(null), 1800);
+    });
+  }, [state.petName]);
+
+  useEffect(() => {
     const timer = setInterval(
       async () => {
         if (open) return;
 
         try {
-          const quiz = await getQuiz();
-
-          setQuiz(quiz);
-          setOpen(true);
-          triggerPetAnimation("STUDY");
+          petEvents.emit({ type: "REMINDER_TRIGGERED" });
+          setReminder(true);
         } catch (e) {
           // Không có quiz hoặc lỗi
         }
@@ -87,6 +106,53 @@ export function PetCompanion() {
   });
   const moodMeta = MOOD_META[state.petMood] ?? MOOD_META.waiting;
 
+  useEffect(() => {
+    const canRoam = !open && !reminder && !showSettings;
+    if (!canRoam || typeof window === "undefined") {
+      setRoamTarget({ x: 0, y: 0 });
+      triggerPetAnimation("IDLE");
+      return;
+    }
+
+    let turnTimer: number | undefined;
+    const chooseNextSpot = () => {
+      const horizontalRoom = Math.min(340, Math.max(0, window.innerWidth - 170));
+      const nextSide = roamSideRef.current === "right" ? "left" : "right";
+
+      // Pause at each edge so the change is visibly a turn, rather than an
+      // instant mirrored slide while the pet is already moving.
+      triggerPetAnimation("IDLE");
+      turnTimer = window.setTimeout(() => {
+        roamSideRef.current = nextSide;
+        petRef.current?.setFacing(nextSide);
+        setRoamTarget({ x: nextSide === "left" ? -horizontalRoom : 0, y: 0 });
+        triggerPetAnimation("WALK");
+      }, 360);
+    };
+
+    chooseNextSpot();
+    const id = window.setInterval(chooseNextSpot, 6000);
+    return () => {
+      window.clearInterval(id);
+      if (turnTimer) window.clearTimeout(turnTimer);
+    };
+  }, [open, reminder, showSettings]);
+
+  useEffect(() => {
+    const notes = [
+      "Tiny review, big progress!",
+      "I saved a word for us to practice.",
+      "One question at a time — you've got this.",
+      "Want to make your streak sparkle today?",
+    ];
+    const id = setInterval(() => {
+      if (!open && !reminder) {
+        speakPet(`${state.petName}: ${notes[Math.floor(Math.random() * notes.length)]}`, 0, 4);
+      }
+    }, 90_000);
+    return () => clearInterval(id);
+  }, [open, reminder, state.petName]);
+
   // schedule reminder bubble; auto-promote to quiz after a few seconds
   useEffect(() => {
     const id = setInterval(
@@ -101,22 +167,8 @@ export function PetCompanion() {
   // auto-open quiz a few seconds after reminder appears
   useEffect(() => {
     if (!reminder) return;
-
-    const t = setTimeout(async () => {
-      setReminder(false);
-
-      try {
-        const quiz = await getQuiz();
-        setQuiz(quiz);
-        setOpen(true);
-        triggerPetAnimation("STUDY");
-      } catch (e) {
-        console.error(e);
-      }
-    }, 6000);
-
-    return () => clearTimeout(t);
-  }, [reminder, getQuiz]);
+    // Reminders stay visible until the learner dismisses them or chooses an action.
+  }, [reminder]);
 
   // countdown
   useEffect(() => {
@@ -151,7 +203,7 @@ export function PetCompanion() {
 
     setAnswerResult(result);
 
-    triggerPetAnimation(result.petBehavior.action as PetAction);
+    petEvents.emit({ type: result.correct ? "ANSWER_CORRECT" : "ANSWER_WRONG" });
 
     // Đợi người dùng xem kết quả
     setTimeout(() => {
@@ -168,7 +220,8 @@ export function PetCompanion() {
   }
 
   const reactionMood: PetMood =
-    picked === null ? "waiting" : answerResult?.correct ? "excited" : "sad";
+    picked === null ? "waiting" : answerResult?.correct ? "happy" : "waiting";
+  const visibleMood = eventMood ?? (open ? reactionMood : state.petMood);
 
   return (
     <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-2 pointer-events-none">
@@ -240,6 +293,7 @@ export function PetCompanion() {
                 variant={state.petVariant}
                 stage={stageForLevel(state.petLevel)}
                 size={64}
+                mood={visibleMood}
               />
               <div className="flex-1 min-w-0">
                 <p className="text-[10px] font-bold uppercase text-primary leading-tight">
@@ -364,7 +418,11 @@ export function PetCompanion() {
 
       {/* Floating pet button */}
       {/* Floating pet */}
-      <div className="relative pointer-events-auto">
+      <motion.div
+        className="relative pointer-events-auto"
+        animate={roamTarget}
+        transition={{ duration: 5.5, ease: "easeInOut" }}
+      >
         <PetSpeechBubble />
 
         <button
@@ -378,10 +436,11 @@ export function PetCompanion() {
               variant={state.petVariant}
               stage={stageForLevel(state.petLevel)}
               size={124}
+              mood={visibleMood}
             />
           </div>
         </button>
-      </div>
+      </motion.div>
     </div>
   );
 }

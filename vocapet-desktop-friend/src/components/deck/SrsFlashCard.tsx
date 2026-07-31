@@ -13,6 +13,7 @@ import {
   useStartStudySessionMutation,
 } from "@/hooks/queries/study-session.queries";
 import StreakPopup from "./StreakPopup";
+import { petEvents } from "@/lib/pet/events";
 
 interface Props {
   deckId: number;
@@ -63,6 +64,7 @@ export default function StudySessionFlashcards({ deckId }: Props) {
     if (started && sessionId && !isLoading && data === null && !finished) {
       finishMutation.mutate(sessionId);
       setFinished(true);
+      petEvents.emit({ type: "SESSION_FINISHED" });
     }
   }, [started, sessionId, isLoading, data, finished, finishMutation]);
 
@@ -133,6 +135,7 @@ export default function StudySessionFlashcards({ deckId }: Props) {
 
     setSessionId(session.sessionId);
     setStarted(true);
+    petEvents.emit({ type: "SESSION_STARTED" });
   }
 
   async function review(rating: "AGAIN" | "HARD" | "GOOD" | "EASY") {
@@ -148,7 +151,9 @@ export default function StudySessionFlashcards({ deckId }: Props) {
     if (result.streakUpdated) {
       setStreak(result.currentStreak);
       setShowStreak(true);
+      petEvents.emit({ type: "STREAK_UPDATED", detail: { streak: result.currentStreak } });
     }
+    petEvents.emit({ type: "CARD_REVIEWED" });
   }
 
   return (

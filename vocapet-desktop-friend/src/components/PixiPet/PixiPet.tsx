@@ -9,13 +9,24 @@ type Props = {
   variant: PetVariant;
   stage: PetStage;
   size: number;
+  mood?: "happy" | "excited" | "sad" | "sleepy" | "waiting" | "crying";
 };
 
 export interface PetCanvasHandle {
   play(action: PetAction): void;
+  setFacing(direction: "left" | "right"): void;
 }
 
-const PetCanvas = forwardRef<PetCanvasHandle, Props>(({ variant, stage, size }, ref) => {
+const actionForMood: Record<NonNullable<Props["mood"]>, PetAction> = {
+  happy: "HAPPY",
+  excited: "CELEBRATE",
+  sad: "SAD",
+  crying: "SAD",
+  sleepy: "SLEEP",
+  waiting: "IDLE",
+};
+
+const PetCanvas = forwardRef<PetCanvasHandle, Props>(({ variant, stage, size, mood }, ref) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const appRef = useRef<PIXI.Application | null>(null);
@@ -27,6 +38,11 @@ const PetCanvas = forwardRef<PetCanvasHandle, Props>(({ variant, stage, size }, 
   useImperativeHandle(ref, () => ({
     play(action) {
       controllerRef.current?.play(action);
+    },
+    setFacing(direction) {
+      const sprite = spriteRef.current;
+      if (!sprite) return;
+      sprite.scale.x = Math.abs(sprite.scale.x) * (direction === "right" ? 1 : -1);
     },
   }));
 
@@ -69,13 +85,17 @@ const PetCanvas = forwardRef<PetCanvasHandle, Props>(({ variant, stage, size }, 
       const bounds = sprite.getLocalBounds();
       const maxDimension = Math.max(bounds.width, bounds.height);
 
-      const scale = (size * 3.0) / maxDimension;
+      // Keep the full character inside the canvas. The old 3x scale was made
+      // for the previous tightly-cropped sheets and cuts off this game atlas.
+      const scale = (size * 0.9) / maxDimension;
 
       sprite.scale.set(scale);
 
       app.stage.addChild(sprite);
 
       controllerRef.current = controller;
+
+      if (mood) controller.play(actionForMood[mood]);
 
       spriteRef.current = sprite;
     }
@@ -85,6 +105,7 @@ const PetCanvas = forwardRef<PetCanvasHandle, Props>(({ variant, stage, size }, 
     return () => {
       destroyed = true;
 
+      controllerRef.current?.destroy();
       controllerRef.current = null;
 
       spriteRef.current = null;
@@ -94,6 +115,10 @@ const PetCanvas = forwardRef<PetCanvasHandle, Props>(({ variant, stage, size }, 
       appRef.current = null;
     };
   }, [size]);
+
+  useEffect(() => {
+    if (mood) controllerRef.current?.play(actionForMood[mood]);
+  }, [mood]);
 
   return (
     <div

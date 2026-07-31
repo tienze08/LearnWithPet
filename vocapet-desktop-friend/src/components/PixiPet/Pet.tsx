@@ -9,17 +9,20 @@ type Props = {
   variant: PetVariant;
   stage?: PetStage;
   size?: number;
-  mood?: "happy" | "excited" | "sad" | "waiting";
+  mood?: "happy" | "excited" | "sad" | "sleepy" | "waiting" | "crying";
 };
 
 export interface PetHandle {
   play(action: PetAction): void;
+  setFacing(direction: "left" | "right"): void;
 }
 
 export const PET_VARIANTS = [
   { id: "CAT", name: "Cat", desc: "A cheerful study buddy" },
-  { id: "DOG", name: "Dog", desc: "A loyal companion" },
+  { id: "FOX", name: "Fox", desc: "A clever study buddy" },
   { id: "BUNNY", name: "Bunny", desc: "A calm little helper" },
+  { id: "PANDA", name: "Panda", desc: "A focused study pal" },
+  { id: "DRAGON", name: "Dragon", desc: "A legendary study pal" },
 ] as const;
 
 const Pet = forwardRef<PetHandle, Props>(({ variant, stage, size = 96, mood }, ref) => {
@@ -29,9 +32,12 @@ const Pet = forwardRef<PetHandle, Props>(({ variant, stage, size = 96, mood }, r
     play(action) {
       canvasRef.current?.play(action);
     },
+    setFacing(direction) {
+      canvasRef.current?.setFacing(direction);
+    },
   }));
 
-  return <PetCanvas ref={canvasRef} variant={variant} stage={stage ?? 1} size={size} />;
+  return <PetCanvas ref={canvasRef} variant={variant} stage={stage ?? 1} size={size} mood={mood} />;
 });
 
 Pet.displayName = "Pet";

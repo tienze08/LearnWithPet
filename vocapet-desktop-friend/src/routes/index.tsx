@@ -52,7 +52,7 @@ function Landing() {
           </h1>
           <p className="mt-5 text-lg text-muted-foreground max-w-lg">
             VocaPet lives on your screen and pops up every few minutes with a 10-second vocabulary
-            challenge. Feed it words, watch it grow, crush your streak.
+            challenge. Learn new words together, watch it grow, and build your streak.
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
             <Button asChild size="lg" className="btn-pop text-base h-12 px-6">
