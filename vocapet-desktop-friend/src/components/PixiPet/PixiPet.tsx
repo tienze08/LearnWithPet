@@ -70,7 +70,7 @@ const PetCanvas = forwardRef<PetCanvasHandle, Props>(({ variant, stage, size, mo
       // Empty sprite
       //----------------------------------
 
-      const controller = new AnimationController();
+      const controller = new AnimationController(variant);
 
       await controller.load();
 
@@ -114,7 +114,7 @@ const PetCanvas = forwardRef<PetCanvasHandle, Props>(({ variant, stage, size, mo
 
       appRef.current = null;
     };
-  }, [size]);
+  }, [size, variant]);
 
   useEffect(() => {
     if (mood) controllerRef.current?.play(actionForMood[mood]);

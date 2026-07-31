@@ -1,7 +1,12 @@
 import * as PIXI from "pixi.js";
 
+import type { PetVariant } from "@/lib/store";
 import kittenAtlas from "@/assets/gray-study-kitten-6x8.png";
 import microAtlas from "@/assets/gray-study-kitten-micro-10x4-packed.png";
+import foxAtlas from "@/assets/fox-study-companion-6x8.png";
+import pandaAtlas from "@/assets/panda-study-companion-6x8.png";
+import bunnyAtlas from "@/assets/bunny-study-companion-6x8.png";
+import dragonAtlas from "@/assets/dragon-study-companion-6x8.png";
 
 export type PetAction =
   | "IDLE"
@@ -38,6 +43,14 @@ type MicroAction =
   | "DOZE_OFF";
 
 type AnimationKey = PetAction | MicroAction;
+
+const VARIANT_ATLASES: Record<PetVariant, string> = {
+  CAT: kittenAtlas,
+  FOX: foxAtlas,
+  PANDA: pandaAtlas,
+  BUNNY: bunnyAtlas,
+  DRAGON: dragonAtlas,
+};
 
 export const PET_ANIMATIONS: Record<PetAction, AnimationConfig> = {
   IDLE: { source: kittenAtlas, columns: 8, rows: 6, row: 0, fps: 4 },
@@ -86,6 +99,8 @@ export default class AnimationController {
 
   private microTimer?: number;
 
+  constructor(private readonly variant: PetVariant = "CAT") {}
+
   //----------------------------------------
   // Load tất cả animation
   //----------------------------------------
@@ -93,9 +108,11 @@ export default class AnimationController {
   async load() {
     await Promise.all(
       (Object.entries(PET_ANIMATIONS) as [PetAction, AnimationConfig][]).map(async ([action, config]) => {
-        const texture = await PIXI.Assets.load(config.source);
-        this.configs.set(action, config);
-        this.animations.set(action, this.buildFrames(texture, config));
+        const source = VARIANT_ATLASES[this.variant];
+        const texture = await PIXI.Assets.load(source);
+        const variantConfig = { ...config, source };
+        this.configs.set(action, variantConfig);
+        this.animations.set(action, this.buildFrames(texture, variantConfig));
       }),
     );
 
@@ -212,6 +229,10 @@ export default class AnimationController {
     const frameWidth = texture.width / config.columns;
     const frameHeight = texture.height / (config.rows ?? 1);
     const y = (config.row ?? 0) * frameHeight;
+    // Generated sheets can leave a faint antialiased pixel at a cell edge.
+    // Keeping a tiny gutter prevents Pixi's linear sampling from showing a
+    // fragment of the next frame (most noticeable in the walk tail).
+    const gutter = 2;
 
     const frames: PIXI.Texture[] = [];
 
@@ -220,10 +241,10 @@ export default class AnimationController {
         new PIXI.Texture({
           source: texture.source,
           frame: new PIXI.Rectangle(
-            i * frameWidth,
-            y,
-            frameWidth,
-            frameHeight,
+            i * frameWidth + gutter,
+            y + gutter,
+            frameWidth - gutter * 2,
+            frameHeight - gutter * 2,
           ),
         }),
       );

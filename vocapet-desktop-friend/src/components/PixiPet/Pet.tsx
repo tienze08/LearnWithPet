@@ -6,7 +6,7 @@ import { PetAction } from "./AnimationController";
 import PetCanvas, { PetCanvasHandle } from "./PixiPet";
 
 type Props = {
-  variant: PetVariant;
+  variant?: PetVariant;
   stage?: PetStage;
   size?: number;
   mood?: "happy" | "excited" | "sad" | "sleepy" | "waiting" | "crying";
@@ -25,7 +25,7 @@ export const PET_VARIANTS = [
   { id: "DRAGON", name: "Dragon", desc: "A legendary study pal" },
 ] as const;
 
-const Pet = forwardRef<PetHandle, Props>(({ variant, stage, size = 96, mood }, ref) => {
+const Pet = forwardRef<PetHandle, Props>(({ variant = "CAT", stage, size = 96, mood }, ref) => {
   const canvasRef = useRef<PetCanvasHandle>(null);
 
   useImperativeHandle(ref, () => ({

@@ -44,7 +44,7 @@ function reminderFor(mood: PetMood, name: string, goal: number, progress: number
 
 export function PetCompanion() {
   const petRef = useRef<PetHandle>(null);
-  const { state, setPetInterval } = useGame();
+  const { state, setPetInterval, recordAnswer } = useGame();
   const [reminder, setReminder] = useState(false);
   const [open, setOpen] = useState(false);
   const [timeLeft, setTimeLeft] = useState(15);
@@ -79,10 +79,10 @@ export function PetCompanion() {
   }, [state.petName]);
 
   useEffect(() => {
-    const timer = setInterval(
-      async () => {
-        if (open) return;
+    if (reminder || open || showSettings || typeof window === "undefined") return;
 
+    const timer = window.setTimeout(
+      async () => {
         try {
           petEvents.emit({ type: "REMINDER_TRIGGERED" });
           setReminder(true);
@@ -93,8 +93,8 @@ export function PetCompanion() {
       state.popupIntervalMin * 60 * 1000,
     );
 
-    return () => clearInterval(timer);
-  }, [open, state.popupIntervalMin]);
+    return () => window.clearTimeout(timer);
+  }, [open, reminder, showSettings, state.popupIntervalMin]);
 
   const [quiz, setQuiz] = useState<QuizQuestionResponse | null>(null);
   const studiedToday = state.lastStudyDate === todayISO();
@@ -153,17 +153,6 @@ export function PetCompanion() {
     return () => clearInterval(id);
   }, [open, reminder, state.petName]);
 
-  // schedule reminder bubble; auto-promote to quiz after a few seconds
-  useEffect(() => {
-    const id = setInterval(
-      () => {
-        setReminder((r) => r || !open);
-      },
-      Math.max(1, state.popupIntervalMin) * 60 * 1000,
-    );
-    return () => clearInterval(id);
-  }, [state.popupIntervalMin, open]);
-
   // auto-open quiz a few seconds after reminder appears
   useEffect(() => {
     if (!reminder) return;
@@ -202,6 +191,7 @@ export function PetCompanion() {
     });
 
     setAnswerResult(result);
+    recordAnswer(String(quiz.vocabularyId), result.correct);
 
     petEvents.emit({ type: result.correct ? "ANSWER_CORRECT" : "ANSWER_WRONG" });
 
