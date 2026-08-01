@@ -16,11 +16,11 @@ export interface UserResponse {
   email: string;
 
   avatar: string;
-
   level: number;
   xp: number;
   totalXp: number;
   streak: number;
+  coin: number;
 
   onboarded: boolean;
 

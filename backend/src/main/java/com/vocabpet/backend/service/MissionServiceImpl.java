@@ -6,11 +6,15 @@ import java.util.List;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.vocabpet.backend.dto.UserMissionRe.UserMissionResponse;
+import com.vocabpet.backend.entity.DailyQuest;
 import com.vocabpet.backend.entity.UserMission;
 import com.vocabpet.backend.entity.enums.MissionType;
+import com.vocabpet.backend.repository.DailyQuestRepository;
 import com.vocabpet.backend.repository.UserMissionRepository;
 import com.vocabpet.backend.repository.UserRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -20,6 +24,8 @@ public class MissionServiceImpl implements MissionService {
     private final UserMissionRepository missionRepository;
     private final RewardService rewardService;
     private final UserRepository userRepository;
+    private final CurrentUserService currentUserService;
+    private final DailyQuestRepository dailyQuestRepository;
 
     @Override
     public void trackLearnWord(Long userId) {
@@ -36,43 +42,27 @@ public class MissionServiceImpl implements MissionService {
         updateMission(userId, MissionType.REVIEW_COUNT, 1);
     }
 
-    private void ensureMission(Long userId, MissionType type) {
+    @Override
+    public void trackQuiz(Long userId) {
+        updateMission(userId, MissionType.DESKTOP_QUIZ, 1);
+    }
+
+    private void ensureMission(Long userId, DailyQuest quest) {
 
         LocalDate today = LocalDate.now();
 
         missionRepository
-                .findByUserIdAndTypeAndDate(userId, type, today)
+                .findByUserIdAndDailyQuestIdAndDate(
+                        userId,
+                        quest.getId(),
+                        today)
                 .orElseGet(() -> {
-                    UserMission mission = new UserMission();
-                    mission.setUserId(userId);
-                    mission.setType(type);
-                    mission.setDate(today);
 
-                    mission.setCurrentValue(0);
-                    mission.setCompleted(false);
-
-                    switch (type) {
-                        case LEARN_WORDS -> {
-                            mission.setTargetValue(10);
-                            mission.setRewardXp(50);
-                            mission.setRewardCoin(20);
-                        }
-                        case FINISH_SESSION -> {
-                            mission.setTargetValue(3);
-                            mission.setRewardXp(30);
-                            mission.setRewardCoin(10);
-                        }
-                        case REVIEW_COUNT -> {
-                            mission.setTargetValue(20);
-                            mission.setRewardXp(40);
-                            mission.setRewardCoin(15);
-                        }
-                        case STUDY_TIME -> {
-                            mission.setTargetValue(60); // phút học
-                            mission.setRewardXp(60);
-                            mission.setRewardCoin(25);
-                        }
-                    }
+                    UserMission mission = UserMission.builder()
+                            .userId(userId)
+                            .dailyQuest(quest)
+                            .date(today)
+                            .build();
 
                     return missionRepository.save(mission);
                 });
@@ -80,37 +70,108 @@ public class MissionServiceImpl implements MissionService {
 
     @Scheduled(cron = "0 0 0 * * *")
     public void generateAllUsersMissions() {
-        List<Long> userIds = userRepository.findAllIds();
+        List<DailyQuest> quests = dailyQuestRepository.findByActiveTrue();
 
-        for (Long userId : userIds) {
-            for (MissionType type : MissionType.values()) {
-                ensureMission(userId, type);
+        for (Long userId : userRepository.findAllIds()) {
+
+            for (DailyQuest quest : quests) {
+
+                ensureMission(userId, quest);
+
             }
+
         }
     }
 
-    private void updateMission(Long userId, MissionType type, int increment) {
+    private void updateMission(Long userId,
+            MissionType type,
+            int increment) {
 
-        LocalDate today = LocalDate.now();
+        DailyQuest quest = dailyQuestRepository
+                .findByType(type)
+                .orElseThrow();
+
+        ensureMission(userId, quest);
 
         UserMission mission = missionRepository
-                .findByUserIdAndTypeAndDate(userId, type, today)
-                .orElseThrow(() -> new RuntimeException("Mission not generated yet"));
+                .findByUserIdAndDailyQuestIdAndDate(
+                        userId,
+                        quest.getId(),
+                        LocalDate.now())
+                .orElseThrow();
 
-        if (mission.isCompleted())
+        if (mission.isCompleted()) {
             return;
+        }
 
-        mission.setCurrentValue(mission.getCurrentValue() + increment);
+        mission.setCurrentValue(
+                mission.getCurrentValue() + increment);
 
-        if (mission.getCurrentValue() >= mission.getTargetValue()) {
+        if (mission.getCurrentValue() >= quest.getTarget()) {
             mission.setCompleted(true);
-
-            rewardService.grantReward(
-                    userId,
-                    mission.getRewardXp(),
-                    mission.getRewardCoin());
         }
 
         missionRepository.save(mission);
     }
+
+    @Transactional
+    @Override
+    public void claimMission(Long missionId) {
+
+        UserMission mission = missionRepository.findById(missionId)
+                .orElseThrow();
+
+        if (!mission.isCompleted()) {
+            throw new RuntimeException("Mission is not completed");
+        }
+
+        if (mission.isRewardClaimed()) {
+            throw new RuntimeException("Reward already claimed");
+        }
+
+        rewardService.grantReward(
+                mission.getUserId(),
+                mission.getDailyQuest().getRewardXp(),
+                mission.getDailyQuest().getRewardCoin());
+
+        mission.setRewardClaimed(true);
+
+        missionRepository.saveAndFlush(mission);
+    }
+
+    @Override
+    public List<UserMissionResponse> getTodayMissions() {
+
+        Long userId = currentUserService.getCurrentUser().getId();
+        LocalDate today = LocalDate.now();
+
+        List<DailyQuest> quests = dailyQuestRepository.findByActiveTrue();
+
+        for (DailyQuest quest : quests) {
+            ensureMission(userId, quest);
+        }
+
+        return missionRepository
+                .findAllByUserIdAndDate(userId, today)
+                .stream()
+                .map(mission -> {
+
+                    DailyQuest quest = mission.getDailyQuest();
+
+                    return UserMissionResponse.builder()
+                            .id(mission.getId())
+                            .type(quest.getType().name())
+                            .title(quest.getTitle())
+                            .description(quest.getDescription())
+                            .currentValue(mission.getCurrentValue())
+                            .targetValue(quest.getTarget())
+                            .completed(mission.isCompleted())
+                            .rewardClaimed(mission.isRewardClaimed())
+                            .rewardXp(quest.getRewardXp())
+                            .rewardCoin(quest.getRewardCoin())
+                            .build();
+                })
+                .toList();
+    }
+
 }

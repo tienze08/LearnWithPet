@@ -1,19 +1,28 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Pet, PET_VARIANTS } from "@/components/Pet";
+import { Pet, PET_VARIANTS } from "@/components/PixiPet/Pet";
 import { useGame } from "@/lib/store";
 import type { GameState, PetVariant } from "@/lib/store";
 import { Lock, Check, Sparkles, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useMeQuery, useUnlockPetMutation } from "@/hooks/queries/user.queries";
+import { useSelectPetMutation, useUnlockedPetsQuery } from "@/hooks/queries/pet.queries";
+
+type UnlockProgress = {
+  level: number;
+  xp: number;
+  streak: number;
+  masteredWords: number;
+};
 
 type Unlock = {
   id: PetVariant;
   title: string;
   requirement: string;
   goal: number;
-  progress: (s: GameState) => number;
+  progress: (stats: UnlockProgress) => number;
 };
 
-const masteredCount = (s: GameState) => Object.values(s.masteryByWord).filter((m) => m >= 4).length;
+const masteredCount = (stats: UnlockProgress) => stats.masteredWords;
 
 export const PET_UNLOCKS: Unlock[] = [
   {
@@ -28,21 +37,21 @@ export const PET_UNLOCKS: Unlock[] = [
     title: "Sharp Learner",
     requirement: "Reach Level 3",
     goal: 3,
-    progress: (s) => s.level,
+    progress: (stats) => stats.level,
   },
   {
     id: "BUNNY",
     title: "Streak Hopper",
     requirement: "Maintain a 5-day streak",
     goal: 5,
-    progress: (s) => s.streak,
+    progress: (stats) => stats.streak,
   },
   {
     id: "PANDA",
     title: "Focused Scholar",
     requirement: "Reach Level 5",
     goal: 5,
-    progress: (s) => s.level,
+    progress: (stats) => stats.level,
   },
   {
     id: "DRAGON",
@@ -59,7 +68,17 @@ export const Route = createFileRoute("/app/pets")({
 
 function PetsPage() {
   const { state, setState } = useGame();
-  const unlockedIds = PET_UNLOCKS.filter((u) => u.progress(state) >= u.goal).map((u) => u.id);
+  const { data: me } = useMeQuery();
+  const { data: unlockedPets = [] } = useUnlockedPetsQuery();
+  const unlockMutation = useUnlockPetMutation();
+  const selectPetMutation = useSelectPetMutation();
+  const userLevel = me?.level ?? state.level;
+  const userXp = me?.xp ?? state.xp;
+  const userStreak = me?.streak ?? state.streak;
+  const userCoins = me?.coin ?? state.coins;
+  const masteredWords = Object.values(state.masteryByWord).filter((m) => m >= 4).length;
+
+  const unlockedIds = unlockedPets.map((pet) => pet.species);
 
   return (
     <div className="space-y-6">
@@ -81,10 +100,19 @@ function PetsPage() {
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {PET_UNLOCKS.map((u) => {
           const meta = PET_VARIANTS.find((v) => v.id === u.id)!;
-          const progress = Math.min(u.goal, u.progress(state));
-          const unlocked = progress >= u.goal;
-          const active = state.petVariant === u.id;
+          const progress = Math.min(
+            u.goal,
+            u.progress({
+              level: userLevel,
+              xp: userXp,
+              streak: userStreak,
+              masteredWords,
+            }),
+          );
+          const unlocked = unlockedIds.includes(u.id);
+          const active = me?.pet?.species === u.id;
           const pct = Math.round((progress / u.goal) * 100);
+          const canUnlock = progress >= u.goal && userCoins >= 50;
 
           return (
             <article
@@ -154,14 +182,25 @@ function PetsPage() {
                   <Button
                     className="w-full"
                     variant={active ? "secondary" : "default"}
-                    onClick={() => setState((s) => ({ ...s, petVariant: u.id }))}
-                    disabled={active}
+                    onClick={() => selectPetMutation.mutate(u.id, {
+                      onSuccess: () => setState((s) => ({ ...s, petVariant: u.id })),
+                    })}
+                    disabled={active || selectPetMutation.isPending}
                   >
                     {active ? "Currently Active" : "Set as Companion"}
                   </Button>
                 ) : (
-                  <Button asChild className="w-full" variant="outline">
-                    <Link to="/app/decks">Train to unlock</Link>
+                  <Button
+                    className="w-full"
+                    variant="outline"
+                    onClick={() => unlockMutation.mutate(u.id)}
+                    disabled={unlockMutation.isPending || !canUnlock}
+                  >
+                    {unlockMutation.isPending
+                      ? "Unlocking..."
+                      : !canUnlock
+                        ? `${u.requirement} + 50 coins required`
+                        : "Unlock with 50 coins"}
                   </Button>
                 )}
               </div>

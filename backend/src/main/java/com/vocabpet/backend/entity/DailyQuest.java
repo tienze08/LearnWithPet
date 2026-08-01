@@ -1,6 +1,7 @@
 package com.vocabpet.backend.entity;
 
-import com.vocabpet.backend.entity.enums.DailyQuestType;
+import com.vocabpet.backend.entity.enums.MissionType;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,7 +24,7 @@ public class DailyQuest {
     private String description;
 
     @Enumerated(EnumType.STRING)
-    private DailyQuestType type;
+    private MissionType type;
 
     /**
      * Ví dụ:
@@ -36,7 +37,7 @@ public class DailyQuest {
     private int rewardXp = 0;
 
     @Builder.Default
-    private int rewardPetXp = 0;
+    private int rewardCoin = 0;
 
     @Builder.Default
     private boolean active = true;

@@ -1,7 +1,7 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Pet, PET_VARIANTS } from "@/components/Pet";
+import { Pet, PET_VARIANTS } from "@/components/PixiPet/Pet";
 import { type PetVariant } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Check } from "lucide-react";

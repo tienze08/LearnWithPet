@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { SEED_DECKS, SEED_WORDS, type Deck, type Word } from "./vocab-seed";
 
-export type PetMood = "happy" | "sad" | "sleepy" | "excited" | "waiting";
+export type PetMood = "happy" | "sad" | "sleepy" | "excited" | "waiting" | "crying";
 
 export function computePetMood(opts: {
   reviewsToday: number;
@@ -10,7 +10,8 @@ export function computePetMood(opts: {
   studiedToday: boolean;
 }): PetMood {
   const { reviewsToday, dailyGoal, streak, studiedToday } = opts;
-  if (!studiedToday || reviewsToday === 0) return "sad";
+  const hour = new Date().getHours();
+  if (!studiedToday || reviewsToday === 0) return hour >= 23 || hour < 6 ? "sleepy" : "waiting";
   if (reviewsToday >= dailyGoal && streak >= 7) return "excited";
   if (reviewsToday >= dailyGoal) return "happy";
   return "waiting";
@@ -139,7 +140,7 @@ type Ctx = {
 
   setState: (updater: (s: GameState) => GameState) => void;
 
-  recordAnswer: (wordId: string, correct: boolean) => void;
+  recordAnswer: (wordId: string, correct: boolean, reward?: { xp: number; coin: number }) => void;
 
   addDeck: (deck: Omit<Deck, "id">) => string;
 
@@ -182,42 +183,24 @@ export function GameProvider({ children }: { children: ReactNode }) {
     }
   }, [hydrated, state.dailyDate]);
 
-  useEffect(() => {
-    if (!hydrated) return;
-    const id = setInterval(() => {
-      setStateRaw((s) => {
-        const t = todayISO();
-        const studiedToday = s.lastStudyDate === t;
-        const reviewsToday = s.dailyDate === t ? s.dailyProgress : 0;
-        const mood = computePetMood({
-          reviewsToday,
-          dailyGoal: s.dailyGoal,
-          streak: s.streak,
-          studiedToday,
-        });
-        return s.petMood === mood ? s : { ...s, petMood: mood };
-      });
-    }, 30_000);
-    return () => clearInterval(id);
-  }, [hydrated]);
-
   const api = useMemo<Ctx>(() => {
     const setState: Ctx["setState"] = (updater) => setStateRaw((s) => updater(s));
     return {
       state,
       setState,
-      recordAnswer(wordId, correct) {
+      recordAnswer(wordId, correct, reward) {
         setStateRaw((s) => {
           const mastery = { ...s.masteryByWord };
           const cur = mastery[wordId] ?? 0;
           mastery[wordId] = Math.max(0, Math.min(5, cur + (correct ? 1 : -1)));
-          const xpGain = correct ? 10 : 2;
-          const coinGain = correct ? 5 : 0;
+          const xpGain = reward?.xp ?? (correct ? 10 : 2);
+          const coinGain = reward?.coin ?? (correct ? 5 : 0);
           const newXp = s.xp + xpGain;
           const newLevel = Math.floor(newXp / 100) + 1;
           const t = todayISO();
           const sameDay = s.lastStudyDate === t;
           const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+          const streakWasLost = !sameDay && s.streak > 0 && s.lastStudyDate !== yesterday;
           const streak = sameDay ? s.streak : s.lastStudyDate === yesterday ? s.streak + 1 : 1;
 
           // ---- Pet EXP / level curve ----
@@ -231,14 +214,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
           }
 
           const newDailyProgress = s.dailyDate === t ? s.dailyProgress + 1 : 1;
-          const mood = correct
-            ? computePetMood({
-                reviewsToday: newDailyProgress,
-                dailyGoal: s.dailyGoal,
-                streak,
-                studiedToday: true,
-              })
-            : "sad";
+          const mood: PetMood = streakWasLost
+            ? "crying"
+            : correct
+              ? "happy"
+              : "waiting";
 
           return {
             ...s,

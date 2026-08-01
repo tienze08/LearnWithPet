@@ -1,6 +1,7 @@
 import type { Vocabulary } from "@/types/vocabulary";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Empty from "./EmptyState";
+import { petEvents } from "@/lib/pet/events";
 
 interface QuizGameProps {
   words: Vocabulary[];
@@ -11,6 +12,10 @@ interface QuizGameProps {
 export default function QuizGame({ words, allWords, onAnswer }: QuizGameProps) {
   const [round, setRound] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
+
+  useEffect(() => {
+    petEvents.emit({ type: "QUIZ_STARTED" });
+  }, []);
 
   const question = useMemo(() => {
     if (!words.length) return null;
@@ -59,10 +64,12 @@ export default function QuizGame({ words, allWords, onAnswer }: QuizGameProps) {
                 setPicked(option.id);
 
                 onAnswer(question.target.id, isCorrect);
+                petEvents.emit({ type: isCorrect ? "ANSWER_CORRECT" : "ANSWER_WRONG" });
 
                 setTimeout(() => {
                   setPicked(null);
                   setRound((r) => r + 1);
+                  petEvents.emit({ type: "QUIZ_COMPLETED" });
                 }, 900);
               }}
               className={`rounded-xl border-2 p-3 text-left text-sm transition-colors ${

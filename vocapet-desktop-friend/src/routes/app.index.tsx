@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useGame } from "@/lib/store";
-import { Pet } from "@/components/Pet";
+import { Pet } from "@/components/PixiPet/Pet";
 import { Button } from "@/components/ui/button";
 import { Flame, Target, BookOpen, Trophy, TrendingUp } from "lucide-react";
 

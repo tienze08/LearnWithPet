@@ -23,6 +23,8 @@ public class UserResponse {
 
     private int totalXp;
 
+    private int coin;
+
     private int streak;
 
     private Boolean onboarded;

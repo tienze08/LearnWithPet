@@ -1,7 +1,15 @@
-import { Pet, PET_VARIANTS } from "@/components/Pet";
+import { Pet, PET_VARIANTS } from "@/components/PixiPet/Pet";
 import { useGame } from "@/lib/store";
 import type { GameState, PetVariant } from "@/lib/store";
 import { Lock, Check } from "lucide-react";
+
+const SPECIES_STYLE: Record<PetVariant, { emoji: string; tint: string }> = {
+  CAT: { emoji: "🐱", tint: "from-slate-100 to-slate-200" },
+  FOX: { emoji: "🦊", tint: "from-orange-100 to-amber-100" },
+  BUNNY: { emoji: "🐰", tint: "from-pink-100 to-rose-100" },
+  PANDA: { emoji: "🐼", tint: "from-zinc-100 to-slate-100" },
+  DRAGON: { emoji: "🐲", tint: "from-violet-100 to-purple-100" },
+};
 
 export type PetSpeciesUnlock = {
   id: PetVariant;
@@ -41,6 +49,7 @@ export function PetSpecies() {
           const meta = PET_VARIANTS.find((v) => v.id === u.id)!;
           const unlocked = u.isUnlocked(state);
           const active = state.petVariant === u.id;
+          const style = SPECIES_STYLE[u.id];
           return (
             <button
               key={u.id}
@@ -55,8 +64,11 @@ export function PetSpecies() {
                   <Check className="w-3.5 h-3.5" />
                 </span>
               )}
-              <div className="relative">
+              <div className={`relative rounded-2xl bg-linear-to-br ${style.tint} p-1`}>
                 <Pet variant={u.id} size={72} />
+                <span className="absolute -top-2 -left-2 rounded-full border-2 border-border bg-card px-1.5 py-0.5 text-sm">
+                  {style.emoji}
+                </span>
                 {!unlocked && (
                   <div className="absolute inset-0 flex items-center justify-center bg-background/60 rounded-full">
                     <Lock className="w-6 h-6 text-muted-foreground" />

@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search } from "lucide-react";
+import { BookOpen, Plus, Search } from "lucide-react";
 import { useState } from "react";
 import {
   Dialog,
@@ -54,7 +54,7 @@ function DecksPage() {
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
   const [emoji, setEmoji] = useState(EMOJIS[0]);
-  const [color, setColor] = useState("emerald");
+  const [color, setColor] = useState(COLORS[0].class);
 
   const filteredDecks = decks.filter((d) => d.name.toLowerCase().includes(q.toLowerCase()));
 
@@ -139,6 +139,23 @@ function DecksPage() {
                     ))}
                   </div>
                 </div>
+                <div>
+                  <Label>Color</Label>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {COLORS.map((c) => (
+                      <button
+                        key={c.name}
+                        type="button"
+                        onClick={() => setColor(c.class)}
+                        className={`
+          h-10 w-10 rounded-full border-2 transition
+          ${c.class}
+          ${color === c.class ? "border-primary ring-2 ring-primary/30" : "border-border"}
+        `}
+                      />
+                    ))}
+                  </div>
+                </div>
                 <Button className="btn-pop w-full" onClick={handleCreate}>
                   Create deck
                 </Button>
@@ -150,6 +167,11 @@ function DecksPage() {
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredDecks.map((d) => {
+          const wordCount = d.wordCount ?? 0;
+          // The API currently exposes the number of words, not per-word mastery.
+          // Keep progress honest at 0 until study progress is available from the API.
+          const studiedCount = 0;
+          const progress = wordCount > 0 ? Math.round((studiedCount / wordCount) * 100) : 0;
           return (
             <Link
               key={d.id}
@@ -166,13 +188,30 @@ function DecksPage() {
               </div>
               <h3 className="font-extrabold text-lg mt-3">{d.name}</h3>
               <p className="text-xs text-muted-foreground">{d.description}</p>
-              <div className="mt-3 flex items-center justify-between text-xs font-bold">
-                <span>0 words</span>
-                <span className="text-primary">0 mastered</span>
-              </div>
-
-              <div className="mt-2 h-2 bg-muted rounded-full overflow-hidden">
-                <div className="h-full bg-primary w-0" />
+              <div className="mt-5 rounded-2xl border border-border bg-muted/45 p-3">
+                <div className="flex items-center justify-between gap-3 text-xs font-bold">
+                  <span className="inline-flex items-center gap-1.5 text-foreground">
+                    <BookOpen className="h-3.5 w-3.5 text-primary" />
+                    {wordCount} {wordCount === 1 ? "word" : "words"}
+                  </span>
+                  <span className="text-primary">{progress}% mastered</span>
+                </div>
+                <div
+                  className="mt-2.5 h-2.5 overflow-hidden rounded-full bg-background ring-1 ring-border/70"
+                  role="progressbar"
+                  aria-label={`Mastery progress for ${d.name}`}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={progress}
+                >
+                  <div
+                    className="h-full rounded-full bg-linear-to-r from-primary/75 via-primary to-emerald-400 transition-[width] duration-500 ease-out"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+                <p className="mt-2 text-[11px] font-medium text-muted-foreground">
+                  {wordCount === 0 ? "Add words to begin studying." : `${studiedCount} of ${wordCount} words mastered`}
+                </p>
               </div>
             </Link>
           );

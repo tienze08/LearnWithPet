@@ -33,6 +33,8 @@ import {
   useAddBookmarkMutation,
   useRemoveBookmarkMutation,
 } from "@/hooks/queries/bookmark.queries";
+import SrsFlashCard from "@/components/deck/SrsFlashCard";
+import { useGame } from "@/lib/store";
 
 export const Route = createFileRoute("/app/decks/$deckId")({
   component: DeckDetail,
@@ -41,6 +43,7 @@ export const Route = createFileRoute("/app/decks/$deckId")({
 type Mode = "browse" | "srs" | "flashcards" | "quiz" | "type";
 
 export default function DeckDetail() {
+  const { recordAnswer: recordStudyAnswer } = useGame();
   const { deckId } = Route.useParams();
 
   const navigate = useNavigate();
@@ -70,7 +73,7 @@ export default function DeckDetail() {
   const [mode, setMode] = useState<Mode>("browse");
 
   function recordAnswer(id: number, correct: boolean) {
-    console.log("answer", id, correct);
+    recordStudyAnswer(String(id), correct);
 
     // sau này nối SRS backend ở đây
   }
@@ -136,9 +139,15 @@ export default function DeckDetail() {
         <DeleteDeckDialog
           deckName={deck.name}
           onConfirm={() => {
-            deleteDeck.mutate(deck.id);
-
-            toast.success("Deck deleted");
+            deleteDeck.mutate(deck.id, {
+              onSuccess: () => {
+                toast.success("Deck deleted");
+                navigate({ to: "/app/decks" });
+              },
+              onError: (err) => {
+                toast.error("Delete failed");
+              },
+            });
 
             navigate({
               to: "/app/decks",
@@ -243,6 +252,8 @@ export default function DeckDetail() {
           }}
         />
       )}
+
+      {mode === "srs" && <SrsFlashCard deckId={deck.id} />}
 
       {mode === "flashcards" && <Flashcards words={words} onAnswer={recordAnswer} />}
 

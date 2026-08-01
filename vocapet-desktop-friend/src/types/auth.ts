@@ -11,6 +11,7 @@ export interface RegisterPayload {
 
 export interface AuthResponse {
   token: string;
+  refreshToken?: string;
   id: number;
   name: string;
   email: string;
