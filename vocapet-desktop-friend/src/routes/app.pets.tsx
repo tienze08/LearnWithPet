@@ -5,6 +5,7 @@ import type { GameState, PetVariant } from "@/lib/store";
 import { Lock, Check, Sparkles, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useMeQuery, useUnlockPetMutation } from "@/hooks/queries/user.queries";
+import { useSelectPetMutation, useUnlockedPetsQuery } from "@/hooks/queries/pet.queries";
 
 type UnlockProgress = {
   level: number;
@@ -68,21 +69,16 @@ export const Route = createFileRoute("/app/pets")({
 function PetsPage() {
   const { state, setState } = useGame();
   const { data: me } = useMeQuery();
+  const { data: unlockedPets = [] } = useUnlockedPetsQuery();
   const unlockMutation = useUnlockPetMutation();
+  const selectPetMutation = useSelectPetMutation();
   const userLevel = me?.level ?? state.level;
   const userXp = me?.xp ?? state.xp;
   const userStreak = me?.streak ?? state.streak;
+  const userCoins = me?.coin ?? state.coins;
   const masteredWords = Object.values(state.masteryByWord).filter((m) => m >= 4).length;
 
-  const unlockedIds = PET_UNLOCKS.filter(
-    (u) =>
-      u.progress({
-        level: userLevel,
-        xp: userXp,
-        streak: userStreak,
-        masteredWords,
-      }) >= u.goal,
-  ).map((u) => u.id);
+  const unlockedIds = unlockedPets.map((pet) => pet.species);
 
   return (
     <div className="space-y-6">
@@ -113,9 +109,10 @@ function PetsPage() {
               masteredWords,
             }),
           );
-          const unlocked = progress >= u.goal;
-          const active = state.petVariant === u.id;
+          const unlocked = unlockedIds.includes(u.id);
+          const active = me?.pet?.species === u.id;
           const pct = Math.round((progress / u.goal) * 100);
+          const canUnlock = progress >= u.goal && userCoins >= 50;
 
           return (
             <article
@@ -185,8 +182,10 @@ function PetsPage() {
                   <Button
                     className="w-full"
                     variant={active ? "secondary" : "default"}
-                    onClick={() => setState((s) => ({ ...s, petVariant: u.id }))}
-                    disabled={active}
+                    onClick={() => selectPetMutation.mutate(u.id, {
+                      onSuccess: () => setState((s) => ({ ...s, petVariant: u.id })),
+                    })}
+                    disabled={active || selectPetMutation.isPending}
                   >
                     {active ? "Currently Active" : "Set as Companion"}
                   </Button>
@@ -195,9 +194,13 @@ function PetsPage() {
                     className="w-full"
                     variant="outline"
                     onClick={() => unlockMutation.mutate(u.id)}
-                    disabled={unlockMutation.isPending}
+                    disabled={unlockMutation.isPending || !canUnlock}
                   >
-                    {unlockMutation.isPending ? "Unlocking..." : "Unlock with 50 coins"}
+                    {unlockMutation.isPending
+                      ? "Unlocking..."
+                      : !canUnlock
+                        ? `${u.requirement} + 50 coins required`
+                        : "Unlock with 50 coins"}
                   </Button>
                 )}
               </div>

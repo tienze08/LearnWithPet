@@ -140,7 +140,7 @@ type Ctx = {
 
   setState: (updater: (s: GameState) => GameState) => void;
 
-  recordAnswer: (wordId: string, correct: boolean) => void;
+  recordAnswer: (wordId: string, correct: boolean, reward?: { xp: number; coin: number }) => void;
 
   addDeck: (deck: Omit<Deck, "id">) => string;
 
@@ -188,13 +188,13 @@ export function GameProvider({ children }: { children: ReactNode }) {
     return {
       state,
       setState,
-      recordAnswer(wordId, correct) {
+      recordAnswer(wordId, correct, reward) {
         setStateRaw((s) => {
           const mastery = { ...s.masteryByWord };
           const cur = mastery[wordId] ?? 0;
           mastery[wordId] = Math.max(0, Math.min(5, cur + (correct ? 1 : -1)));
-          const xpGain = correct ? 10 : 2;
-          const coinGain = correct ? 5 : 0;
+          const xpGain = reward?.xp ?? (correct ? 10 : 2);
+          const coinGain = reward?.coin ?? (correct ? 5 : 0);
           const newXp = s.xp + xpGain;
           const newLevel = Math.floor(newXp / 100) + 1;
           const t = todayISO();

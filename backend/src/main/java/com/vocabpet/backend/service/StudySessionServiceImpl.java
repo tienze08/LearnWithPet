@@ -31,6 +31,7 @@ public class StudySessionServiceImpl implements StudySessionService {
         private final StudySessionRepository sessionRepository;
         private final UserVocabularyProgressRepository progressRepository;
         private final StudyReviewRepository reviewRepository;
+        private final AchievementService achievementService;
         private final VocabularyRepository vocabularyRepository;
         private final FsrsService fsrsService;
         private final StreakService streakService;
@@ -144,6 +145,7 @@ public class StudySessionServiceImpl implements StudySessionService {
                 }
 
                 StreakUpdateResult streakResult = streakService.updateMyStreak();
+                achievementService.checkForUser(session.getUser());
 
                 return ReviewResponse.builder()
                                 .nextReviewTime(progress.getNextReviewTime())

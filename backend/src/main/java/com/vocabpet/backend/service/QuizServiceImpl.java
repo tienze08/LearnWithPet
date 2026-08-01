@@ -34,6 +34,7 @@ public class QuizServiceImpl implements QuizService {
     private final RewardService rewardService;
     private final MissionService missionService;
     private final StreakService streakService;
+    private final AchievementService achievementService;
     private final PetBehaviorService petBehaviorService;
 
     @Override
@@ -80,6 +81,7 @@ public class QuizServiceImpl implements QuizService {
             streakService.updateMyStreak();
 
             missionService.trackReview(user.getId());
+            achievementService.recordQuizReview(user);
 
             petBehavior = petBehaviorService.triggerEvent(
                     PetEvent.CORRECT_ANSWER);

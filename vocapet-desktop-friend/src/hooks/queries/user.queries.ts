@@ -43,6 +43,7 @@ export function useUnlockPetMutation() {
     mutationFn: unlockPetApi,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["me"] });
+      queryClient.invalidateQueries({ queryKey: ["pets", "unlocked"] });
     },
   });
 }

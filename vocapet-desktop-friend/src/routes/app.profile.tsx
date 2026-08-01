@@ -6,6 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Trophy, Flame, Zap, Coins, Star, Calendar, Pencil } from "lucide-react";
 import { useMeQuery, useUpdateAvatarMutation } from "@/hooks/queries/user.queries";
 import { avatarMap } from "@/types/avatar";
+import { useMyAchievementsQuery } from "@/hooks/queries/achievement.queries";
+import { useUnlockedPetsQuery } from "@/hooks/queries/pet.queries";
+import { ACHIEVEMENTS as AWARD_DEFINITIONS, achievementStatus } from "@/lib/achievements";
+
+const PET_EMOJI = { CAT: "🐱", FOX: "🦊", BUNNY: "🐰", PANDA: "🐼", DRAGON: "🐲" } as const;
+const ACHIEVEMENT_CODES: Record<string, string> = {
+  first: "first-review",
+  ten: "reviews-50",
+  streak3: "streak-3",
+  lvl5: "level-5",
+};
 
 export const Route = createFileRoute("/app/profile")({
   component: Profile,
@@ -41,6 +52,17 @@ const ACHIEVEMENTS = [
 function Profile() {
   const { state, setState } = useGame();
   const { data: me } = useMeQuery();
+  const { data: unlockedPets = [] } = useUnlockedPetsQuery();
+  const { data: serverAchievements = [] } = useMyAchievementsQuery();
+  const serverAchievementsByCode = new Map(
+    serverAchievements.map((achievement) => [achievement.code, achievement]),
+  );
+  // Keep Profile in sync with the Awards page: backend status takes priority
+  // when available, while client-only award definitions still render correctly.
+  const awardedAchievements = AWARD_DEFINITIONS.filter((award) => {
+    const remote = serverAchievementsByCode.get(award.id);
+    return remote ? remote.unlocked : achievementStatus(award, state).unlocked;
+  });
   console.log("me", me);
   const accuracy = state.reviewHistory.length
     ? Math.round(
@@ -121,6 +143,18 @@ function Profile() {
       {/* RPG Pet card */}
       <PetCard />
 
+      <div>
+        <h2 className="text-xl font-extrabold mb-3">Unlocked pets</h2>
+        <div className="flex flex-wrap gap-3">
+          {unlockedPets.map((pet) => (
+            <div key={pet.species} className="rounded-2xl border-2 border-primary bg-primary/5 px-4 py-3 flex items-center gap-2">
+              <span className="text-2xl">{PET_EMOJI[pet.species]}</span>
+              <div><p className="font-bold capitalize">{pet.species.toLowerCase()}</p><p className="text-xs text-primary">Unlocked</p></div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <PetSpecies />
 
       <div>
@@ -139,27 +173,25 @@ function Profile() {
       </div>
 
       <div>
-        <h2 className="text-xl font-extrabold mb-3">Achievements</h2>
+        <h2 className="text-xl font-extrabold mb-3">Awarded achievements</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {ACHIEVEMENTS.map((a) => {
-            const got = a.check(state);
+          {awardedAchievements.map((award) => {
             return (
               <div
-                key={a.id}
-                className={`rounded-2xl border-2 p-4 flex items-center gap-3 ${got ? "border-primary bg-primary/5" : "border-border bg-card opacity-60"}`}
+                key={award.id}
+                className="rounded-2xl border-2 border-primary bg-primary/5 p-4 flex items-center gap-3"
               >
-                <div
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center ${got ? "bg-primary text-primary-foreground" : "bg-muted"}`}
-                >
-                  <Star className="w-5 h-5" />
-                </div>
+                <div className="w-10 h-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center text-xl">{award.icon}</div>
                 <div>
-                  <p className="font-bold text-sm">{a.label}</p>
-                  <p className="text-xs text-muted-foreground">{got ? "Unlocked" : "Locked"}</p>
+                  <p className="font-bold text-sm">{award.title}</p>
+                  <p className="text-xs text-primary">Awarded</p>
                 </div>
               </div>
             );
           })}
+          {awardedAchievements.length === 0 && (
+            <p className="text-sm text-muted-foreground sm:col-span-2 lg:col-span-3">No awards yet — keep learning to unlock your first achievement.</p>
+          )}
         </div>
       </div>
 

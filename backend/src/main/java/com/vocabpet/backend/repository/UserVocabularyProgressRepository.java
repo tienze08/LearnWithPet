@@ -56,4 +56,6 @@ public interface UserVocabularyProgressRepository
         List<Vocabulary> findNewCards(
                         Long userId,
                         Long deckId);
+
+        long countByUserIdAndRepetitionsGreaterThanEqual(Long userId, int repetitions);
 }

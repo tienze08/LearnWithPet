@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
-import { GameProvider, useGame } from "@/lib/store";
+import { GameProvider, useGame, type PetVariant } from "@/lib/store";
 import { PetCompanion } from "@/components/PetCompanion";
 import { useMeQuery } from "@/hooks/queries/user.queries";
 import { useAuthStore } from "@/hooks/stores/auth.store";
@@ -16,10 +16,11 @@ import {
   Target,
   PawPrint,
   LogOut,
+  Trophy,
 } from "lucide-react";
 
 function TopBar() {
-  const { state } = useGame();
+  const { state, setState } = useGame();
   const logout = useAuthStore((auth) => auth.logout);
   const navigate = useNavigate();
   const { data: me } = useMeQuery();
@@ -29,6 +30,13 @@ function TopBar() {
   const pct = userXp % 100;
   const avatarEmoji = me?.avatar ? (avatarMap[me.avatar] ?? "🦊") : state.user.avatarEmoji;
   const displayName = me?.name || state.user.displayName || "You";
+
+  useEffect(() => {
+    const selectedSpecies = me?.pet?.species as PetVariant | undefined;
+    if (selectedSpecies && selectedSpecies !== state.petVariant) {
+      setState((current) => ({ ...current, petVariant: selectedSpecies }));
+    }
+  }, [me?.pet?.species, setState, state.petVariant]);
 
   return (
     <header className="sticky top-0 z-30 bg-background/90 backdrop-blur border-b-2 border-border">
@@ -42,6 +50,7 @@ function TopBar() {
           <NavLink to="/app/decks" icon={<Library className="w-4 h-4" />} label="Decks" />
           <NavLink to="/app/tasks" icon={<Target className="w-4 h-4" />} label="Tasks" />
           <NavLink to="/app/pets" icon={<PawPrintIcon className="w-4 h-4" />} label="Pets" />
+          <NavLink to="/app/achievements" icon={<Trophy className="w-4 h-4" />} label="Awards" />
           <NavLink to="/app/profile" icon={<User className="w-4 h-4" />} label="Profile" />
         </nav>
         <div className="ml-auto flex items-center gap-3 text-sm font-bold">

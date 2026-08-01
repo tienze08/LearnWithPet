@@ -19,6 +19,7 @@ import { Route as AppWelcomeRouteImport } from './routes/app.welcome'
 import { Route as AppTasksRouteImport } from './routes/app.tasks'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
 import { Route as AppPetsRouteImport } from './routes/app.pets'
+import { Route as AppAchievementsRouteImport } from './routes/app.achievements'
 import { Route as AppDecksIndexRouteImport } from './routes/app.decks.index'
 import { Route as AppDecksDeckIdRouteImport } from './routes/app.decks.$deckId'
 
@@ -72,6 +73,11 @@ const AppPetsRoute = AppPetsRouteImport.update({
   path: '/pets',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAchievementsRoute = AppAchievementsRouteImport.update({
+  id: '/achievements',
+  path: '/achievements',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDecksIndexRoute = AppDecksIndexRouteImport.update({
   id: '/decks/',
   path: '/decks/',
@@ -89,6 +95,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/welcome': typeof WelcomeRoute
+  '/app/achievements': typeof AppAchievementsRoute
   '/app/pets': typeof AppPetsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/tasks': typeof AppTasksRoute
@@ -102,6 +109,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/welcome': typeof WelcomeRoute
+  '/app/achievements': typeof AppAchievementsRoute
   '/app/pets': typeof AppPetsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/tasks': typeof AppTasksRoute
@@ -117,6 +125,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/welcome': typeof WelcomeRoute
+  '/app/achievements': typeof AppAchievementsRoute
   '/app/pets': typeof AppPetsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/tasks': typeof AppTasksRoute
@@ -133,6 +142,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/welcome'
+    | '/app/achievements'
     | '/app/pets'
     | '/app/profile'
     | '/app/tasks'
@@ -146,6 +156,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/welcome'
+    | '/app/achievements'
     | '/app/pets'
     | '/app/profile'
     | '/app/tasks'
@@ -160,6 +171,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/welcome'
+    | '/app/achievements'
     | '/app/pets'
     | '/app/profile'
     | '/app/tasks'
@@ -249,6 +261,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPetsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/achievements': {
+      id: '/app/achievements'
+      path: '/achievements'
+      fullPath: '/app/achievements'
+      preLoaderRoute: typeof AppAchievementsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/decks/': {
       id: '/app/decks/'
       path: '/decks'
@@ -267,6 +286,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppRouteChildren {
+  AppAchievementsRoute: typeof AppAchievementsRoute
   AppPetsRoute: typeof AppPetsRoute
   AppProfileRoute: typeof AppProfileRoute
   AppTasksRoute: typeof AppTasksRoute
@@ -277,6 +297,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAchievementsRoute: AppAchievementsRoute,
   AppPetsRoute: AppPetsRoute,
   AppProfileRoute: AppProfileRoute,
   AppTasksRoute: AppTasksRoute,

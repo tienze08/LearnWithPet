@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { useGame, stageForLevel, computePetMood, type PetMood } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { BookOpen, PencilLine, Sparkles, Target, X } from "lucide-react";
@@ -13,6 +14,7 @@ import { PetSpeechBubble } from "./PetSpeech";
 import { speakPet } from "@/hooks/stores/petSpeech";
 import { reactionFor } from "@/lib/pet/behavior";
 import { petEvents } from "@/lib/pet/events";
+import type { UserResponse } from "@/types/user";
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
@@ -43,7 +45,8 @@ function reminderFor(mood: PetMood, name: string, goal: number, progress: number
 }
 
 export function PetCompanion() {
-  const petRef = useRef<PetHandle>(null);
+    const petRef = useRef<PetHandle>(null);
+    const queryClient = useQueryClient();
   const { state, setPetInterval, recordAnswer } = useGame();
   const [reminder, setReminder] = useState(false);
   const [open, setOpen] = useState(false);
@@ -190,8 +193,22 @@ export function PetCompanion() {
       answer: answer ?? "",
     });
 
-    setAnswerResult(result);
-    recordAnswer(String(quiz.vocabularyId), result.correct);
+      setAnswerResult(result);
+      recordAnswer(String(quiz.vocabularyId), result.correct, { xp: result.xp, coin: result.coin });
+      queryClient.setQueryData<UserResponse>(["me"], (currentUser) =>
+        currentUser
+          ? {
+              ...currentUser,
+              xp: currentUser.xp + result.xp,
+              totalXp: currentUser.totalXp + result.xp,
+              coin: currentUser.coin + result.coin,
+            }
+          : currentUser,
+      );
+      void Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["achievements", "me"] }),
+        queryClient.invalidateQueries({ queryKey: ["me"] }),
+      ]);
 
     petEvents.emit({ type: result.correct ? "ANSWER_CORRECT" : "ANSWER_WRONG" });
 
@@ -317,7 +334,7 @@ export function PetCompanion() {
             {picked !== null && (
               <p className="text-center mt-2 text-xs font-bold">
                 {answerResult?.correct ? (
-                  <span className="text-success">✨ Amazing! +10 XP · +5 🪙</span>
+                  <span className="text-success">✨ Amazing! +{answerResult.xp} XP · +{answerResult.coin} 🪙</span>
                 ) : (
                   <span className="text-destructive">😅 Don't worry — we'll learn together.</span>
                 )}

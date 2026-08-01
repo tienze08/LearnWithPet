@@ -13,4 +13,6 @@ public interface StudyReviewRepository
 
     long countBySessionId(Long sessionId);
 
+    long countByUserId(Long userId);
+
 }

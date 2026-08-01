@@ -27,6 +27,11 @@ public class PetController {
                 return petService.unlockPet(species);
         }
 
+        @PostMapping("/select")
+        public PetResponse selectPet(@RequestBody PetSpecies species) {
+                return petService.selectPet(species);
+        }
+
         @GetMapping("/starter")
         public List<PetResponse> starterPets() {
 
@@ -55,6 +60,11 @@ public class PetController {
                                                 .species(PetSpecies.DRAGON)
                                                 .locked(true)
                                                 .build());
+        }
+
+        @GetMapping("/unlocked")
+        public List<PetResponse> unlockedPets() {
+                return petService.getUnlockedPets();
         }
 
 }
