@@ -53,6 +53,7 @@
     "framer-motion": "^12.40.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.575.0",
+    "pdfjs-dist": "^6.2.108",
     "pixi.js": "^8.19.0",
     "pngjs": "^7.0.0",
     "react": "^19.2.0",
