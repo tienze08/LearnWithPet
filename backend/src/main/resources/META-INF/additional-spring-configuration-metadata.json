@@ -1,0 +1,9 @@
+{
+  "properties": [
+    {
+      "name": "app.gemini.api-key",
+      "type": "java.lang.String",
+      "description": "Gemini API key used by Reader flashcard generation. Configure it with GEMINI_API_KEY."
+    }
+  ]
+}

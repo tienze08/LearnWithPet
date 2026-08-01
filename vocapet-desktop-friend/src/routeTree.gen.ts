@@ -17,6 +17,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppWelcomeRouteImport } from './routes/app.welcome'
 import { Route as AppTasksRouteImport } from './routes/app.tasks'
+import { Route as AppReaderRouteImport } from './routes/app.reader'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
 import { Route as AppPetsRouteImport } from './routes/app.pets'
 import { Route as AppAchievementsRouteImport } from './routes/app.achievements'
@@ -63,6 +64,11 @@ const AppTasksRoute = AppTasksRouteImport.update({
   path: '/tasks',
   getParentRoute: () => AppRoute,
 } as any)
+const AppReaderRoute = AppReaderRouteImport.update({
+  id: '/reader',
+  path: '/reader',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppProfileRoute = AppProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -98,6 +104,7 @@ export interface FileRoutesByFullPath {
   '/app/achievements': typeof AppAchievementsRoute
   '/app/pets': typeof AppPetsRoute
   '/app/profile': typeof AppProfileRoute
+  '/app/reader': typeof AppReaderRoute
   '/app/tasks': typeof AppTasksRoute
   '/app/welcome': typeof AppWelcomeRoute
   '/app/': typeof AppIndexRoute
@@ -112,6 +119,7 @@ export interface FileRoutesByTo {
   '/app/achievements': typeof AppAchievementsRoute
   '/app/pets': typeof AppPetsRoute
   '/app/profile': typeof AppProfileRoute
+  '/app/reader': typeof AppReaderRoute
   '/app/tasks': typeof AppTasksRoute
   '/app/welcome': typeof AppWelcomeRoute
   '/app': typeof AppIndexRoute
@@ -128,6 +136,7 @@ export interface FileRoutesById {
   '/app/achievements': typeof AppAchievementsRoute
   '/app/pets': typeof AppPetsRoute
   '/app/profile': typeof AppProfileRoute
+  '/app/reader': typeof AppReaderRoute
   '/app/tasks': typeof AppTasksRoute
   '/app/welcome': typeof AppWelcomeRoute
   '/app/': typeof AppIndexRoute
@@ -145,6 +154,7 @@ export interface FileRouteTypes {
     | '/app/achievements'
     | '/app/pets'
     | '/app/profile'
+    | '/app/reader'
     | '/app/tasks'
     | '/app/welcome'
     | '/app/'
@@ -159,6 +169,7 @@ export interface FileRouteTypes {
     | '/app/achievements'
     | '/app/pets'
     | '/app/profile'
+    | '/app/reader'
     | '/app/tasks'
     | '/app/welcome'
     | '/app'
@@ -174,6 +185,7 @@ export interface FileRouteTypes {
     | '/app/achievements'
     | '/app/pets'
     | '/app/profile'
+    | '/app/reader'
     | '/app/tasks'
     | '/app/welcome'
     | '/app/'
@@ -247,6 +259,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTasksRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/reader': {
+      id: '/app/reader'
+      path: '/reader'
+      fullPath: '/app/reader'
+      preLoaderRoute: typeof AppReaderRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/profile': {
       id: '/app/profile'
       path: '/profile'
@@ -289,6 +308,7 @@ interface AppRouteChildren {
   AppAchievementsRoute: typeof AppAchievementsRoute
   AppPetsRoute: typeof AppPetsRoute
   AppProfileRoute: typeof AppProfileRoute
+  AppReaderRoute: typeof AppReaderRoute
   AppTasksRoute: typeof AppTasksRoute
   AppWelcomeRoute: typeof AppWelcomeRoute
   AppIndexRoute: typeof AppIndexRoute
@@ -300,6 +320,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAchievementsRoute: AppAchievementsRoute,
   AppPetsRoute: AppPetsRoute,
   AppProfileRoute: AppProfileRoute,
+  AppReaderRoute: AppReaderRoute,
   AppTasksRoute: AppTasksRoute,
   AppWelcomeRoute: AppWelcomeRoute,
   AppIndexRoute: AppIndexRoute,

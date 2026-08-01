@@ -17,6 +17,7 @@ import {
   PawPrint,
   LogOut,
   Trophy,
+  BookOpen,
 } from "lucide-react";
 
 function TopBar() {
@@ -48,6 +49,7 @@ function TopBar() {
         <nav className="hidden md:flex items-center gap-1 ml-4">
           <NavLink to="/app" icon={<LayoutDashboard className="w-4 h-4" />} label="Home" />
           <NavLink to="/app/decks" icon={<Library className="w-4 h-4" />} label="Decks" />
+          <NavLink to="/app/reader" icon={<BookOpen className="w-4 h-4" />} label="Reader" />
           <NavLink to="/app/tasks" icon={<Target className="w-4 h-4" />} label="Tasks" />
           <NavLink to="/app/pets" icon={<PawPrintIcon className="w-4 h-4" />} label="Pets" />
           <NavLink to="/app/achievements" icon={<Trophy className="w-4 h-4" />} label="Awards" />
