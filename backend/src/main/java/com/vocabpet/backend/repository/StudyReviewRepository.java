@@ -13,4 +13,10 @@ public interface StudyReviewRepository
 
     long countBySessionId(Long sessionId);
 
+    long countByUserId(Long userId);
+
+    List<StudyReview> findTop6ByUserIdOrderByReviewedAtDesc(Long userId);
+
+    List<StudyReview> findTop20ByUserIdOrderByReviewedAtDesc(Long userId);
+
 }

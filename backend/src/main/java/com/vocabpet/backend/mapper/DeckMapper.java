@@ -12,21 +12,45 @@ public class DeckMapper {
     public Deck toEntity(DeckRequest request) {
 
         return Deck.builder()
+
                 .name(request.getName())
+
                 .description(request.getDescription())
+
+                .emoji(request.getEmoji())
+
+                .color(request.getColor())
+
                 .build();
+
     }
 
     public DeckResponse toResponse(Deck deck) {
 
         return DeckResponse.builder()
+
                 .id(deck.getId())
+
                 .name(deck.getName())
+
                 .description(deck.getDescription())
+
+                .emoji(deck.getEmoji())
+
+                .color(deck.getColor())
+
                 .wordCount(
+
                         deck.getVocabularies() == null
+
                                 ? 0
-                                : deck.getVocabularies().size())
+
+                                : deck.getVocabularies().size()
+
+                )
+
                 .build();
+
     }
+
 }

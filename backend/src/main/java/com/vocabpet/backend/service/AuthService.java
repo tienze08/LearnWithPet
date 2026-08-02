@@ -11,8 +11,13 @@ import com.vocabpet.backend.entity.enums.Role;
 import com.vocabpet.backend.exception.EmailAlreadyExistsException;
 import com.vocabpet.backend.exception.InvalidCredentialsException;
 import com.vocabpet.backend.repository.UserRepository;
+import com.vocabpet.backend.repository.RefreshTokenRepository;
+import com.vocabpet.backend.entity.RefreshToken;
 
 import lombok.RequiredArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.UUID;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +26,7 @@ public class AuthService {
         private final UserRepository userRepository;
         private final PasswordEncoder passwordEncoder;
         private final JwtService jwtService;
+        private final RefreshTokenRepository refreshTokenRepository;
 
         public void register(RegisterRequest request) {
 
@@ -41,6 +47,7 @@ public class AuthService {
                 userRepository.save(user);
         }
 
+        @Transactional
         public AuthResponse login(LoginRequest request) {
 
                 User user = userRepository
@@ -57,11 +64,40 @@ public class AuthService {
                 }
 
                 String token = jwtService.generateToken(user);
+                String refreshToken = createRefreshToken(user);
 
                 return new AuthResponse(
                                 token,
+                                refreshToken,
                                 user.getId(),
                                 user.getName(),
                                 user.getEmail());
+        }
+
+        @Transactional
+        public AuthResponse refresh(String refreshToken) {
+                RefreshToken savedToken = refreshTokenRepository.findByToken(refreshToken)
+                                .filter(token -> token.getExpiryDate().isAfter(LocalDateTime.now()))
+                                .orElseThrow(() -> new InvalidCredentialsException("Session expired. Please sign in again."));
+
+                User user = savedToken.getUser();
+                return new AuthResponse(
+                                jwtService.generateToken(user),
+                                refreshToken,
+                                user.getId(),
+                                user.getName(),
+                                user.getEmail());
+        }
+
+        private String createRefreshToken(User user) {
+                refreshTokenRepository.deleteByUser(user);
+                String token = UUID.randomUUID().toString();
+                refreshTokenRepository.save(RefreshToken.builder()
+                                .token(token)
+                                .user(user)
+                                .createdAt(LocalDateTime.now())
+                                .expiryDate(LocalDateTime.now().plusDays(30))
+                                .build());
+                return token;
         }
 }

@@ -1,43 +1,41 @@
 import { createFileRoute } from "@tanstack/react-router";
-<<<<<<< HEAD
 import { useGame } from "@/lib/store";
-
-import { PetSpecies } from "@/components/PetSpecies";
-import { Button } from "@/components/ui/button";
-import { Trophy, Flame, Zap, Coins, Star, Calendar, Pencil } from "lucide-react";
-import { useMeQuery } from "@/hooks/queries/user.queries";
 import { PetCard } from "@/components/PetCard";
-=======
-import { Button } from "@/components/ui/button";
-import { Trophy, Zap, Calendar } from "lucide-react";
-import { useMeQuery } from "@/hooks/queries/user.queries";
->>>>>>> 40376e2 (UI of choose pet)
+import { PetSpecies } from "@/components/PetSpecies";
+import { Trophy, Flame, Zap, Coins, Calendar } from "lucide-react";
+import { useMeQuery, useUpdateAvatarMutation } from "@/hooks/queries/user.queries";
+import { avatarMap } from "@/types/avatar";
+import { useMyAchievementsQuery } from "@/hooks/queries/achievement.queries";
+import { useUnlockedPetsQuery } from "@/hooks/queries/pet.queries";
+import { ACHIEVEMENTS as AWARD_DEFINITIONS, achievementStatus } from "@/lib/achievements";
+
+const PET_EMOJI = { CAT: "🐱", FOX: "🦊", BUNNY: "🐰", PANDA: "🐼", DRAGON: "🐲" } as const;
+const ACHIEVEMENT_CODES: Record<string, string> = {
+  first: "first-review",
+  ten: "reviews-50",
+  streak3: "streak-3",
+  lvl5: "level-5",
+};
 
 export const Route = createFileRoute("/app/profile")({
   component: Profile,
 });
 
-<<<<<<< HEAD
-const AVATARS = ["🦊", "🐼", "🐨", "🐸", "🐵", "🦄", "🐯", "🐧", "🐙", "🌟", "🚀", "🍀"];
+const AVATARS = [
+  { type: "FOX", emoji: "🦊" },
+  { type: "PANDA", emoji: "🐼" },
+  { type: "KOALA", emoji: "🐨" },
+  { type: "FROG", emoji: "🐸" },
+  { type: "MONKEY", emoji: "🐵" },
+  { type: "UNICORN", emoji: "🦄" },
+  { type: "TIGER", emoji: "🐯" },
+  { type: "PENGUIN", emoji: "🐧" },
+  { type: "OCTOPUS", emoji: "🐙" },
+  { type: "STAR", emoji: "🌟" },
+  { type: "ROCKET", emoji: "🚀" },
+  { type: "CLOVER", emoji: "🍀" },
+];
 
-=======
->>>>>>> 40376e2 (UI of choose pet)
-const avatarMap: Record<string, string> = {
-  FOX: "🦊",
-  PANDA: "🐼",
-  KOALA: "🐨",
-  FROG: "🐸",
-  MONKEY: "🐵",
-  UNICORN: "🦄",
-  TIGER: "🐯",
-  PENGUIN: "🐧",
-  OCTOPUS: "🐙",
-  STAR: "🌟",
-  ROCKET: "🚀",
-  CLOVER: "🍀",
-};
-
-<<<<<<< HEAD
 const ACHIEVEMENTS = [
   { id: "first", label: "First word reviewed", check: (s: any) => s.reviewHistory.length >= 1 },
   { id: "ten", label: "10 reviews", check: (s: any) => s.reviewHistory.length >= 10 },
@@ -51,32 +49,25 @@ const ACHIEVEMENTS = [
 ];
 
 function Profile() {
-  const { data: me, isLoading } = useMeQuery();
-  console.log(me);
   const { state, setState } = useGame();
-  if (isLoading || !me) {
-    return <div>Loading...</div>;
-  }
-
+  const { data: me } = useMeQuery();
+  const { data: unlockedPets = [] } = useUnlockedPetsQuery();
+  const { data: serverAchievements = [] } = useMyAchievementsQuery();
+  const serverAchievementsByCode = new Map(
+    serverAchievements.map((achievement) => [achievement.code, achievement]),
+  );
+  // Keep Profile in sync with the Awards page: backend status takes priority
+  // when available, while client-only award definitions still render correctly.
+  const awardedAchievements = AWARD_DEFINITIONS.filter((award) => {
+    const remote = serverAchievementsByCode.get(award.id);
+    return remote ? remote.unlocked : achievementStatus(award, state).unlocked;
+  });
+  console.log("me", me);
   const accuracy = state.reviewHistory.length
     ? Math.round(
         (state.reviewHistory.filter((r) => r.correct).length / state.reviewHistory.length) * 100,
       )
     : 0;
-=======
-const AVATARS = Object.keys(avatarMap);
-
-function Profile() {
-  const { data: me, isLoading } = useMeQuery();
-
-  if (isLoading) {
-    return <div className="flex items-center justify-center py-20">Loading...</div>;
-  }
-
-  if (!me) {
-    return <div className="flex items-center justify-center py-20">Cannot load profile</div>;
-  }
->>>>>>> 40376e2 (UI of choose pet)
 
   const joined = new Date(state.user.joinedAt).toLocaleDateString(undefined, {
     year: "numeric",
@@ -84,214 +75,135 @@ function Profile() {
     day: "numeric",
   });
 
+  const updateAvatarMutation = useUpdateAvatarMutation();
+
   return (
     <div className="space-y-6">
-<<<<<<< HEAD
       {/* User card */}
-      <div className="rounded-3xl border-2 border-border bg-card p-6 card-pop">
-=======
-      {/* USER CARD */}
-      <div className="rounded-3xl border-2 border-border bg-card p-6">
->>>>>>> 40376e2 (UI of choose pet)
-        <div className="flex flex-col sm:flex-row items-center gap-5">
-          <div className="w-24 h-24 rounded-3xl bg-primary/10 border-2 border-border flex items-center justify-center text-5xl">
-            {avatarMap[me.avatarType] ?? "🦊"}
-          </div>
-<<<<<<< HEAD
-          <div className="flex-1 text-center sm:text-left">
-            <h2 className="text-3xl font-extrabold">{me.name}</h2>
-            <p className="text-muted-foreground">{me.email}</p>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <Tile icon={<Zap className="w-4 h-4 text-xp" />} label="Level" value={me.level} />
-            <Tile
-              icon={<Flame className="w-4 h-4 text-streak" />}
-              label="Streak"
-              value={state.streak}
-            />
-            <Tile
-              icon={<Coins className="w-4 h-4 text-coin" />}
-              label="Coins"
-              value={state.coins}
-            />
-            <Tile
-              icon={<Trophy className="w-4 h-4 text-primary" />}
-              label="Accuracy"
-              value={`${accuracy}%`}
-            />
-          </div>
-        </div>
-
-        <div className="mt-5">
-          <p className="text-xs font-bold uppercase text-muted-foreground mb-2">Avatar</p>
-          <div className="flex flex-wrap gap-2">
-            {AVATARS.map((emo) => (
-              <button
-                key={emo}
-                onClick={() => setState((s) => ({ ...s, user: { ...s.user, avatarEmoji: emo } }))}
-                className={`w-10 h-10 text-xl rounded-xl border-2 flex items-center justify-center transition-transform hover:scale-105 ${
-                  state.user.avatarEmoji === emo
-                    ? "border-primary bg-primary/10"
-                    : "border-border bg-background"
-                }`}
-              >
-                {emo}
-              </button>
-            ))}
-=======
-
-          <div className="flex-1 text-center sm:text-left">
-            <p className="text-xs font-bold uppercase text-muted-foreground">User</p>
-
-            <h2 className="text-3xl font-extrabold">{me.name}</h2>
-
-            <p className="text-muted-foreground">{me.email}</p>
-
-            <p className="text-sm text-muted-foreground mt-2 flex items-center gap-1">
-              <Calendar className="w-3 h-3" />
-              Member
-            </p>
+      {me && (
+        <div className="rounded-3xl border-2 border-border bg-card p-6 card-pop">
+          <div className="flex flex-col sm:flex-row items-center gap-5">
+            <div className="w-24 h-24 rounded-3xl bg-primary/10 border-2 border-border flex items-center justify-center text-5xl">
+              {avatarMap[me.avatar] ?? "🦊"}
+            </div>
+            <div className="flex-1 text-center sm:text-left">
+              <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1 justify-center sm:justify-start">
+                <Calendar className="w-3 h-3" /> {me.name}
+              </p>
+              <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1 justify-center sm:justify-start">
+                <Calendar className="w-3 h-3" /> {me.email}
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <Tile
+                icon={<Zap className="w-4 h-4 text-xp" />}
+                label="Level"
+                value={me?.level ?? state.level}
+              />
+              <Tile
+                icon={<Flame className="w-4 h-4 text-streak" />}
+                label="Streak"
+                value={me?.streak ?? state.streak}
+              />
+              <Tile
+                icon={<Coins className="w-4 h-4 text-coin" />}
+                label="Coins"
+                value={me?.coin ?? state.coins}
+              />
+              <Tile
+                icon={<Trophy className="w-4 h-4 text-primary" />}
+                label="Accuracy"
+                value={`${accuracy}%`}
+              />
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <Tile icon={<Zap className="w-4 h-4" />} label="Level" value={me.level} />
-
-            <Tile icon={<Trophy className="w-4 h-4" />} label="XP" value={me.xp} />
->>>>>>> 40376e2 (UI of choose pet)
+          <div className="mt-5">
+            <p className="text-xs font-bold uppercase text-muted-foreground mb-2">Avatar</p>
+            <div className="flex flex-wrap gap-2">
+              {AVATARS.map((avatar) => (
+                <button
+                  key={avatar.type}
+                  onClick={() => updateAvatarMutation.mutate(avatar.type)}
+                  className={`w-10 h-10 text-xl rounded-xl border-2 flex items-center justify-center transition-transform hover:scale-105 ${
+                    me?.avatar === avatar.type
+                      ? "border-primary bg-primary/10"
+                      : "border-border bg-background"
+                  }`}
+                >
+                  {avatar.emoji}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-<<<<<<< HEAD
       {/* RPG Pet card */}
       <PetCard />
 
-      <div className="rounded-2xl border-2 border-border bg-card p-4">
-        <label className="text-xs font-bold uppercase text-muted-foreground">Pet name</label>
-        <input
-          value={state.petName}
-          onChange={(e) => setState((s) => ({ ...s, petName: e.target.value }))}
-          className="block mt-1 text-2xl font-extrabold bg-transparent outline-none border-b-2 border-transparent focus:border-primary w-full"
-        />
+      <div>
+        <h2 className="text-xl font-extrabold mb-3">Unlocked pets</h2>
+        <div className="flex flex-wrap gap-3">
+          {unlockedPets.map((pet) => (
+            <div key={pet.species} className="rounded-2xl border-2 border-primary bg-primary/5 px-4 py-3 flex items-center gap-2">
+              <span className="text-2xl">{PET_EMOJI[pet.species]}</span>
+              <div><p className="font-bold capitalize">{pet.species.toLowerCase()}</p><p className="text-xs text-primary">Unlocked</p></div>
+            </div>
+          ))}
+        </div>
       </div>
 
       <PetSpecies />
 
       <div>
         <h2 className="text-xl font-extrabold mb-3">Daily goal</h2>
-=======
-      {/* AVATAR CARD */}
-      <div className="rounded-3xl border-2 border-border bg-card p-6">
-        <h2 className="text-xl font-extrabold mb-4">Avatar</h2>
-
->>>>>>> 40376e2 (UI of choose pet)
         <div className="flex flex-wrap gap-2">
-          {AVATARS.map((avatar) => (
-            <div
-              key={avatar}
-              className={`w-12 h-12 rounded-xl border-2 flex items-center justify-center text-2xl ${
-                me.avatarType === avatar ? "border-primary bg-primary/10" : "border-border"
-              }`}
+          {[5, 10, 20, 30].map((g) => (
+            <button
+              key={g}
+              onClick={() => setState((s) => ({ ...s, dailyGoal: g }))}
+              className={`px-4 py-2 rounded-xl border-2 text-sm font-bold ${state.dailyGoal === g ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card"}`}
             >
-              {avatarMap[avatar]}
-            </div>
+              {g} words / day
+            </button>
           ))}
         </div>
       </div>
 
-<<<<<<< HEAD
       <div>
-        <h2 className="text-xl font-extrabold mb-3">Achievements</h2>
+        <h2 className="text-xl font-extrabold mb-3">Awarded achievements</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {ACHIEVEMENTS.map((a) => {
-            const got = a.check(state);
+          {awardedAchievements.map((award) => {
             return (
               <div
-                key={a.id}
-                className={`rounded-2xl border-2 p-4 flex items-center gap-3 ${got ? "border-primary bg-primary/5" : "border-border bg-card opacity-60"}`}
+                key={award.id}
+                className="rounded-2xl border-2 border-primary bg-primary/5 p-4 flex items-center gap-3"
               >
-                <div
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center ${got ? "bg-primary text-primary-foreground" : "bg-muted"}`}
-                >
-                  <Star className="w-5 h-5" />
-                </div>
+                <div className="w-10 h-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center text-xl">{award.icon}</div>
                 <div>
-                  <p className="font-bold text-sm">{a.label}</p>
-                  <p className="text-xs text-muted-foreground">{got ? "Unlocked" : "Locked"}</p>
+                  <p className="font-bold text-sm">{award.title}</p>
+                  <p className="text-xs text-primary">Awarded</p>
                 </div>
               </div>
             );
           })}
+          {awardedAchievements.length === 0 && (
+            <p className="text-sm text-muted-foreground sm:col-span-2 lg:col-span-3">No awards yet — keep learning to unlock your first achievement.</p>
+          )}
         </div>
       </div>
-=======
-      {/* PET CARD */}
-      {me.pet && (
-        <div className="rounded-3xl border-2 border-border bg-card p-6">
-          <h2 className="text-xl font-extrabold mb-4">My Pet</h2>
->>>>>>> 40376e2 (UI of choose pet)
-
-          <div className="space-y-2">
-            <p>
-              <strong>Name:</strong> {me.pet.name}
-            </p>
-
-            <p>
-              <strong>Species:</strong> {me.pet.species}
-            </p>
-
-            <p>
-              <strong>Level:</strong> {me.pet.level}
-            </p>
-
-            <p>
-              <strong>EXP:</strong> {me.pet.exp}
-            </p>
-
-            <p>
-              <strong>Stage:</strong> {me.pet.stage}
-            </p>
-
-            <p>
-              <strong>Energy:</strong> {me.pet.energy}
-            </p>
-
-            <p>
-              <strong>Happiness:</strong> {me.pet.happiness}
-            </p>
-          </div>
-        </div>
-      )}
-
-      <Button variant="outline">Edit Profile</Button>
     </div>
   );
 }
 
-function Tile({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: React.ReactNode;
-}) {
+function Tile({ icon, label, value }: { icon: React.ReactNode; label: string; value: any }) {
   return (
-<<<<<<< HEAD
-    <div className="rounded-2xl border-2 border-border bg-card p-3 ]">
+    <div className="rounded-2xl border-2 border-border bg-card p-3">
       <div className="flex items-center gap-1 text-xs font-bold text-muted-foreground uppercase">
         {icon}
         {label}
       </div>
-=======
-    <div className="rounded-2xl border-2 border-border bg-card p-3">
-      <div className="flex items-center gap-1 text-xs font-bold uppercase text-muted-foreground">
-        {icon}
-        {label}
-      </div>
-
->>>>>>> 40376e2 (UI of choose pet)
       <p className="text-2xl font-extrabold mt-1">{value}</p>
     </div>
   );

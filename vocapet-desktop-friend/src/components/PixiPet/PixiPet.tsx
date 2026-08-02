@@ -1,115 +1,124 @@
-import { useEffect, useRef } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
+
 import * as PIXI from "pixi.js";
-import { PetMood, PetStage, PetVariant } from "@/lib/store";
-import catidl from "@/assets/cat_idl.png";
+
+import { PetStage, PetVariant } from "@/lib/store";
+import AnimationController, { PetAction } from "./AnimationController";
 
 type Props = {
   variant: PetVariant;
-  mood: PetMood;
   stage: PetStage;
-  size?: number;
+  size: number;
+  mood?: "happy" | "excited" | "sad" | "sleepy" | "waiting" | "crying";
 };
 
-interface CustomApplication extends PIXI.Application {
-  handleResizeEvent?: () => void;
+export interface PetCanvasHandle {
+  play(action: PetAction): void;
+  setFacing(direction: "left" | "right"): void;
 }
 
-export default function PetCanvas({ variant, mood, stage, size = 240 }: Props) {
+const actionForMood: Record<NonNullable<Props["mood"]>, PetAction> = {
+  happy: "HAPPY",
+  excited: "CELEBRATE",
+  sad: "SAD",
+  crying: "SAD",
+  sleepy: "SLEEP",
+  waiting: "IDLE",
+};
+
+const PetCanvas = forwardRef<PetCanvasHandle, Props>(({ variant, stage, size, mood }, ref) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const appRef = useRef<PIXI.Application | null>(null);
+
+  const spriteRef = useRef<PIXI.AnimatedSprite | null>(null);
+
+  const controllerRef = useRef<AnimationController | null>(null);
+
+  useImperativeHandle(ref, () => ({
+    play(action) {
+      controllerRef.current?.play(action);
+    },
+    setFacing(direction) {
+      const sprite = spriteRef.current;
+      if (!sprite) return;
+      sprite.scale.x = Math.abs(sprite.scale.x) * (direction === "right" ? 1 : -1);
+    },
+  }));
+
   useEffect(() => {
-    let app: CustomApplication | null = null;
-    let isDestroyed = false;
+    let destroyed = false;
 
     async function init() {
-      app = new PIXI.Application() as CustomApplication;
+      const app = new PIXI.Application();
 
       await app.init({
         width: size,
         height: size,
         backgroundAlpha: 0,
         antialias: true,
-        roundPixels: true,
-        resolution: window.devicePixelRatio || 1,
-        autoDensity: false,
+        autoDensity: true,
       });
 
-      if (isDestroyed) {
-        if (app) {
-          app.destroy(true); // ✅ FIX: Safe standard parameter for Pixi v8 Application
-        }
-        return;
-      }
+      if (destroyed) return;
 
-      if (containerRef.current && app?.canvas) {
-        containerRef.current.innerHTML = "";
-        containerRef.current.appendChild(app.canvas);
-      }
+      appRef.current = app;
 
-      const texture = await PIXI.Assets.load(catidl);
-      if (isDestroyed) return;
+      containerRef.current?.appendChild(app.canvas);
 
-      const FRAME_COUNT = 8;
-      const FRAME_W = texture.width / FRAME_COUNT;
-      const FRAME_H = texture.height;
-      const frames: PIXI.Texture[] = [];
+      //----------------------------------
+      // Empty sprite
+      //----------------------------------
 
-      for (let i = 0; i < FRAME_COUNT; i++) {
-        const rect = new PIXI.Rectangle(i * FRAME_W, 0, FRAME_W, FRAME_H);
-        frames.push(
-          new PIXI.Texture({
-            source: texture.source,
-            frame: rect,
-          }),
-        );
-      }
+      const controller = new AnimationController(variant);
 
-      const cat = new PIXI.AnimatedSprite(frames);
+      await controller.load();
 
-      const scale = (size / FRAME_H) * 0.9;
-      cat.scale.set(scale);
+      const sprite = controller.getSprite();
 
-      cat.anchor.set(0.5, 1);
-      cat.x = size / 2;
-      cat.y = size;
+      sprite.anchor.set(0.5);
 
-      cat.animationSpeed = 0.1;
-      cat.loop = true;
-      cat.play();
+      sprite.x = size / 2;
 
-      if (app.stage) {
-        app.stage.addChild(cat);
-      }
+      sprite.y = size / 2;
 
-      const handleResize = () => {
-        if (app?.renderer) {
-          app.renderer.resize(size, size);
-        }
-      };
+      const bounds = sprite.getLocalBounds();
+      const maxDimension = Math.max(bounds.width, bounds.height);
 
-      window.addEventListener("resize", handleResize);
-      app.handleResizeEvent = handleResize;
+      // Keep the full character inside the canvas. The old 3x scale was made
+      // for the previous tightly-cropped sheets and cuts off this game atlas.
+      const scale = (size * 0.9) / maxDimension;
+
+      sprite.scale.set(scale);
+
+      app.stage.addChild(sprite);
+
+      controllerRef.current = controller;
+
+      if (mood) controller.play(actionForMood[mood]);
+
+      spriteRef.current = sprite;
     }
 
     init();
 
     return () => {
-      isDestroyed = true;
-      if (app) {
-        if (app.handleResizeEvent) {
-          window.removeEventListener("resize", app.handleResizeEvent);
-        }
-        try {
-          if (containerRef.current) {
-            containerRef.current.innerHTML = "";
-          }
-          app.destroy(true); // ✅ FIX: Clears internal WebGL/WebGPU structures natively
-        } catch (e) {
-          console.warn("PixiJS cleanup early:", e);
-        }
-      }
+      destroyed = true;
+
+      controllerRef.current?.destroy();
+      controllerRef.current = null;
+
+      spriteRef.current = null;
+
+      appRef.current?.destroy(true);
+
+      appRef.current = null;
     };
-  }, [size, variant, mood, stage]);
+  }, [size, variant]);
+
+  useEffect(() => {
+    if (mood) controllerRef.current?.play(actionForMood[mood]);
+  }, [mood]);
 
   return (
     <div
@@ -118,11 +127,12 @@ export default function PetCanvas({ variant, mood, stage, size = 240 }: Props) {
         width: size,
         height: size,
         pointerEvents: "none",
-        display: "flex",
-        alignItems: "flex-end",
-        justifyContent: "center",
         overflow: "visible",
       }}
     />
   );
-}
+});
+
+PetCanvas.displayName = "PetCanvas";
+
+export default PetCanvas;

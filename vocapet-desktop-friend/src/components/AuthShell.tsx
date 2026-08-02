@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import type { ReactNode } from "react";
-import { Pet } from "./Pet";
+import { Pet } from "./PixiPet/Pet";
 
 interface AuthShellProps {
   title: string;
@@ -22,7 +22,7 @@ export function AuthShell({ title, subtitle, children }: AuthShellProps) {
         className="relative z-10 w-full max-w-md"
       >
         <div className="flex flex-col items-center text-center">
-          <Pet />
+          <Pet variant="CAT" stage={1} size={120} />
           <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-foreground">{title}</h1>
           <p className="mt-1 text-sm font-semibold text-muted-foreground">{subtitle}</p>
         </div>

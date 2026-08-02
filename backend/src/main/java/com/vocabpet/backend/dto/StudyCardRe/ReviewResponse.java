@@ -9,8 +9,12 @@ import lombok.Data;
 @Builder
 public class ReviewResponse {
 
-    private int intervalDays;
-
     private LocalDateTime nextReviewTime;
+
+    private boolean streakUpdated;
+
+    private int currentStreak;
+
+    private int longestStreak;
 
 }

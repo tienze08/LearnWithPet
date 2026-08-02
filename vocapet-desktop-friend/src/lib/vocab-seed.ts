@@ -12,7 +12,7 @@ export type Deck = {
   name: string;
   emoji: string;
   description: string;
-  color: string;
+  color: string; // tailwind bg class
 };
 
 export const SEED_DECKS: Deck[] = [

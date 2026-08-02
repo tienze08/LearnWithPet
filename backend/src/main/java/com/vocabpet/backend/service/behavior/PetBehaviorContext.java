@@ -2,6 +2,7 @@ package com.vocabpet.backend.service.behavior;
 
 import com.vocabpet.backend.entity.Pet;
 import com.vocabpet.backend.entity.User;
+import com.vocabpet.backend.entity.enums.PetEvent;
 
 import lombok.Builder;
 import lombok.Data;
@@ -21,4 +22,6 @@ public class PetBehaviorContext {
     private boolean weeklyCompleted;
 
     private int currentHour;
+
+    private PetEvent event;
 }

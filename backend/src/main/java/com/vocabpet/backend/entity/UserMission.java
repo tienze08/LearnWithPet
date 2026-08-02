@@ -2,42 +2,42 @@ package com.vocabpet.backend.entity;
 
 import java.time.LocalDate;
 
-import com.vocabpet.backend.entity.enums.MissionType;
-
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
 @Table(name = "user_missions", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "user_id", "type", "date" })
-}, indexes = {
-        @Index(name = "idx_user_date", columnList = "user_id, date")
+                @UniqueConstraint(columnNames = {
+                                "user_id",
+                                "daily_quest_id",
+                                "date"
+                })
 })
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class UserMission {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
 
-    @Column(name = "user_id")
-    private Long userId;
+        private Long userId;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "type")
-    private MissionType type;
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "daily_quest_id")
+        private DailyQuest dailyQuest;
 
-    @Column(name = "date")
-    private LocalDate date;
+        private LocalDate date;
 
-    private LocalDate weekStart;
+        @Builder.Default
+        private int currentValue = 0;
 
-    private int targetValue;
-    private int currentValue;
+        @Builder.Default
+        private boolean completed = false;
 
-    private boolean completed;
-
-    private int rewardXp;
-    private int rewardCoin;
+        @Builder.Default
+        private boolean rewardClaimed = false;
 }

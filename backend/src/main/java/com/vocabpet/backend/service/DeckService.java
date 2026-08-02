@@ -60,17 +60,39 @@ public class DeckService {
 
         Deck deck = deckRepository
                 .findByIdAndUser(deckId, user)
-                .orElseThrow(() -> new RuntimeException("Deck not found"));
+                .orElseThrow(
+                        () -> new RuntimeException("Deck not found"));
 
         if (request.getName() != null) {
-            deck.setName(request.getName());
+
+            deck.setName(
+                    request.getName());
+
         }
 
         if (request.getDescription() != null) {
-            deck.setDescription(request.getDescription());
+
+            deck.setDescription(
+                    request.getDescription());
+
+        }
+
+        if (request.getEmoji() != null) {
+
+            deck.setEmoji(
+                    request.getEmoji());
+
+        }
+
+        if (request.getColor() != null) {
+
+            deck.setColor(
+                    request.getColor());
+
         }
 
         return deckMapper.toResponse(deck);
+
     }
 
     @Transactional

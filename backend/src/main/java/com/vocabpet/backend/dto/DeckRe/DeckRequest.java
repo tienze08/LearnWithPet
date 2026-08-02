@@ -15,4 +15,10 @@ public class DeckRequest {
 
     @Size(max = 500, message = "Description must not exceed 500 characters")
     private String description;
+
+    @NotBlank(message = "Emoji is required")
+    private String emoji;
+
+    @NotBlank(message = "Color is required")
+    private String color;
 }

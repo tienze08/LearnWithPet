@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Pet, getStageName } from "./Pet";
-import { useGame, stageForLevel } from "@/lib/store";
+import { Pet } from "./PixiPet/Pet";
+import { useGame, stageForLevel, type PetVariant } from "@/lib/store";
 import { Sparkles, Star, Zap } from "lucide-react";
 import PetCanvas from "./PixiPet/PixiPet";
 
@@ -14,6 +14,18 @@ const CONFETTI_COLORS = [
   "#ec4899",
   "#14b8a6",
 ];
+
+const STAGE_NAMES: Record<PetVariant, readonly [string, string, string]> = {
+  CAT: ["Curious Kitten", "Study Cat", "Scholar Cat"],
+  FOX: ["Fox Cub", "Clever Fox", "Sage Fox"],
+  BUNNY: ["Bunny", "Book Bunny", "Wise Bunny"],
+  PANDA: ["Panda Cub", "Study Panda", "Master Panda"],
+  DRAGON: ["Dragon Hatchling", "Study Dragon", "Elder Dragon"],
+};
+
+function getStageName(variant: PetVariant, stage: 1 | 2 | 3) {
+  return STAGE_NAMES[variant][stage - 1];
+}
 
 function Confetti() {
   const pieces = Array.from({ length: 32 });
@@ -91,7 +103,7 @@ export function PetCard() {
 
       <div className="flex flex-col md:flex-row items-center gap-6 relative">
         {/* Pet display with evolution glow */}
-        <div className="relative w-60 h-60 flex items-center justify-center">
+        <div className="relative w-48 h-48 flex items-center justify-center">
           <AnimatePresence>
             {(evolving || levelUp) && (
               <motion.div
@@ -133,7 +145,7 @@ export function PetCard() {
               transition={{ duration: evolving ? 1.8 : 0.7 }}
               className="relative z-10"
             >
-              <PetCanvas variant={state.petVariant} mood={state.petMood} stage={stage} size={300} />
+              <PetCanvas variant={state.petVariant} mood={state.petMood} stage={stage} size={200} />
             </motion.div>
           </AnimatePresence>
 

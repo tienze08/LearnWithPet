@@ -1,0 +1,7 @@
+# Local credentials and editor launch settings
+.env
+backend/.env
+.vscode/launch.json
+
+# Local pnpm package cache
+.pnpm-store/

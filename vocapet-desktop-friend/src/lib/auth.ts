@@ -1,8 +1,10 @@
 const TOKEN_KEY = "vocapet_token";
 const NAME_KEY = "vocapet_name";
+const REFRESH_TOKEN_KEY = "vocapet_refresh_token";
 
 export interface AuthResponse {
   token: string;
+  refreshToken?: string;
   name: string;
 }
 
@@ -52,10 +54,11 @@ export function loginUser(payload: LoginPayload) {
 
 /* ---- localStorage session helpers (ready for protected routes) ---- */
 
-export function saveSession({ token, name }: AuthResponse) {
+export function saveSession({ token, name, refreshToken }: AuthResponse) {
   if (typeof window === "undefined") return;
   localStorage.setItem(TOKEN_KEY, token);
   localStorage.setItem(NAME_KEY, name);
+  if (refreshToken) localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
 }
 
 export function getToken() {
@@ -80,4 +83,5 @@ export function clearSession() {
   if (typeof window === "undefined") return;
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(NAME_KEY);
+  localStorage.removeItem(REFRESH_TOKEN_KEY);
 }

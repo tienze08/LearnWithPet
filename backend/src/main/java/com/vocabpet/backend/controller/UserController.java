@@ -1,6 +1,7 @@
 package com.vocabpet.backend.controller;
 
 import com.vocabpet.backend.dto.AuthRe.OnboardingRequest;
+import com.vocabpet.backend.dto.UserRe.AvatarUpdateRequest;
 import com.vocabpet.backend.dto.UserRe.UserResponse;
 import com.vocabpet.backend.entity.UserStreak;
 import com.vocabpet.backend.service.StreakService;
@@ -62,5 +63,15 @@ public class UserController {
 
             filterChain.doFilter(request, response);
         }
+    }
+
+    @PatchMapping("/avatar")
+    public ResponseEntity<Void> updateAvatar(
+            Authentication authentication,
+            @RequestBody AvatarUpdateRequest request) {
+
+        userService.updateAvatar(authentication, request);
+
+        return ResponseEntity.ok().build();
     }
 }

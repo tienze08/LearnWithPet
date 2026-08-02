@@ -1,7 +1,7 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Pet, PET_VARIANTS } from "@/components/Pet";
+import { Pet, PET_VARIANTS } from "@/components/PixiPet/Pet";
 import { type PetVariant } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Check } from "lucide-react";
@@ -51,7 +51,7 @@ function Welcome() {
   const [step, setStep] = useState<0 | 1>(0);
   const [name, setName] = useState("");
   const [avatar, setAvatar] = useState<keyof typeof avatarMap>("FOX");
-  const [variant, setVariant] = useState<PetVariant>("leaf");
+  const [variant, setVariant] = useState<PetVariant>("CAT");
   const [petName, setPetName] = useState("Pip");
 
   const onboardingMutation = useOnboardingMutation();
@@ -60,7 +60,7 @@ function Welcome() {
       await onboardingMutation.mutateAsync({
         avatarType: avatar,
         petName,
-        petColor: variant,
+        petSpecies: variant,
       });
 
       nav({

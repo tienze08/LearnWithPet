@@ -45,6 +45,9 @@ public class User {
     @Builder.Default
     private int totalXp = 0;
 
+    @Builder.Default
+    private int coin = 0;
+
     /**
      * Chuỗi học liên tiếp
      */

@@ -1,18 +1,20 @@
 package com.vocabpet.backend.service;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.vocabpet.backend.dto.PetRe.PetBehaviorResponse;
 import com.vocabpet.backend.dto.PetRe.PetResponse;
 import com.vocabpet.backend.entity.Pet;
+import com.vocabpet.backend.entity.PetUnlock;
 import com.vocabpet.backend.entity.User;
+import com.vocabpet.backend.entity.enums.PetSpecies;
 import com.vocabpet.backend.repository.PetRepository;
-import com.vocabpet.backend.service.behavior.PetBehaviorContext;
-import com.vocabpet.backend.service.behavior.PetBehaviorEngine;
-import com.vocabpet.backend.service.personality.PersonalityEngine;
+import com.vocabpet.backend.repository.PetUnlockRepository;
+import com.vocabpet.backend.repository.UserRepository;
+import com.vocabpet.backend.repository.UserVocabularyProgressRepository;
+import com.vocabpet.backend.service.behavior.PetBehaviorService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,56 +22,115 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PetServiceImpl implements PetService {
 
-    private final PetRepository petRepository;
-    private final CurrentUserService currentUserService;
+        private final PetBehaviorService petBehaviorService;
+        private final CurrentUserService currentUserService;
+        private final PetRepository petRepository;
 
-    private final PetBehaviorEngine behaviorEngine;
-    private final PersonalityEngine personalityEngine;
+        private final PetUnlockRepository petUnlockRepository;
+        private final UserRepository userRepository;
+        private final UserVocabularyProgressRepository vocabularyProgressRepository;
 
-    @Override
-    public PetResponse getMyPet() {
+        @Override
+        public PetResponse getMyPet() {
 
-        User user = currentUserService.getCurrentUser();
+                User user = currentUserService.getCurrentUser();
 
-        Pet pet = petRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new RuntimeException("Pet not found"));
+                Pet pet = petRepository.findByUserId(user.getId())
+                                .orElseThrow(() -> new RuntimeException("Pet not found"));
 
-        boolean studiedToday = user.getLastStudyAt() != null &&
-                user.getLastStudyAt()
-                        .toLocalDate()
-                        .equals(LocalDate.now());
+                return PetResponse.builder()
+                                .id(pet.getId())
+                                .name(pet.getName())
+                                .species(pet.getSpecies())
+                                .level(pet.getLevel())
+                                .xp(pet.getXp())
+                                .behavior(petBehaviorService.calculateCurrentBehavior())
+                                .build();
+        }
 
-        PetBehaviorContext context = PetBehaviorContext.builder()
-                .user(user)
-                .pet(pet)
-                .studiedToday(studiedToday)
-                .dailyCompleted(false)
-                .weeklyCompleted(false)
-                .currentHour(LocalTime.now().getHour())
-                .build();
+        @Override
+        public PetResponse unlockPet(PetSpecies species) {
+                User user = currentUserService.getCurrentUser();
 
-        PetBehaviorResponse behavior = behaviorEngine.calculate(context);
+                if (species == PetSpecies.CAT) {
+                        return PetResponse.builder().species(species).locked(false).build();
+                }
 
-        PetBehaviorResponse finalBehavior = PetBehaviorResponse.builder()
-                .mood(behavior.getMood())
-                .action(behavior.getAction())
-                .priority(behavior.getPriority())
-                .duration(behavior.getDuration())
-                .message(personalityEngine.buildMessage(pet.getSpecies(), behavior))
-                .build();
+                boolean alreadyUnlocked = petUnlockRepository.existsByUserAndSpecies(user, species);
+                if (alreadyUnlocked) {
+                        return PetResponse.builder()
+                                        .species(species)
+                                        .locked(false)
+                                        .build();
+                }
 
-        pet.setMood(behavior.getMood());
+                int requiredCoins = 50;
+                long masteredWords = vocabularyProgressRepository
+                                .countByUserIdAndRepetitionsGreaterThanEqual(user.getId(), 4);
+                boolean requirementMet = switch (species) {
+                        case FOX -> user.getLevel() >= 3;
+                        case BUNNY -> user.getStreak() >= 5;
+                        case PANDA -> user.getLevel() >= 5;
+                        case DRAGON -> masteredWords >= 10;
+                        case CAT -> true;
+                };
 
-        petRepository.save(pet);
+                // A pet can only be unlocked when both its learning requirement
+                // and its coin cost are satisfied.
+                if (!requirementMet || user.getCoin() < requiredCoins) {
+                        throw new IllegalStateException("Requirements not met");
+                }
 
-        return PetResponse.builder()
-                .id(pet.getId())
-                .name(pet.getName())
-                .species(pet.getSpecies())
-                .level(pet.getLevel())
-                .xp(pet.getXp())
-                .behavior(finalBehavior)
-                .behavior(behavior)
-                .build();
-    }
+                PetUnlock unlock = PetUnlock.builder()
+                                .user(user)
+                                .species(species)
+                                .unlockedAt(LocalDateTime.now())
+                                .build();
+
+                user.setCoin(user.getCoin() - requiredCoins);
+                userRepository.save(user);
+                petUnlockRepository.save(unlock);
+
+                return PetResponse.builder()
+                                .species(species)
+                                .locked(false)
+                                .build();
+        }
+
+        @Override
+        public PetResponse selectPet(PetSpecies species) {
+                User user = currentUserService.getCurrentUser();
+                boolean isUnlocked = species == PetSpecies.CAT
+                                || petUnlockRepository.existsByUserAndSpecies(user, species);
+                if (!isUnlocked) {
+                        throw new IllegalStateException("Pet is not unlocked for this user");
+                }
+
+                Pet pet = petRepository.findByUserId(user.getId()).orElseGet(() -> Pet.builder()
+                                .user(user).name("Pip")
+                                .mood(com.vocabpet.backend.entity.enums.PetMood.HAPPY)
+                                .level(1).xp(0).build());
+                pet.setSpecies(species);
+                pet = petRepository.save(pet);
+                user.setCurrentPet(pet);
+                userRepository.save(user);
+
+                return PetResponse.builder().id(pet.getId()).name(pet.getName())
+                                .species(pet.getSpecies()).level(pet.getLevel()).xp(pet.getXp())
+                                .locked(false).build();
+        }
+
+        @Override
+        public List<PetResponse> getUnlockedPets() {
+                User user = currentUserService.getCurrentUser();
+                List<PetResponse> unlocked = petUnlockRepository.findByUserId(user.getId()).stream()
+                                .map(item -> PetResponse.builder().species(item.getSpecies()).locked(false).build())
+                                .toList();
+                if (unlocked.stream().noneMatch(item -> item.getSpecies() == PetSpecies.CAT)) {
+                        return java.util.stream.Stream.concat(
+                                        java.util.stream.Stream.of(PetResponse.builder().species(PetSpecies.CAT).locked(false).build()),
+                                        unlocked.stream()).toList();
+                }
+                return unlocked;
+        }
 }

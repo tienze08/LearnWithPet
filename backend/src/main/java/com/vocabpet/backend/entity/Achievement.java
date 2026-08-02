@@ -18,6 +18,9 @@ public class Achievement {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true, nullable = false)
+    private String code;
+
     private String name;
 
     @Column(columnDefinition = "TEXT")

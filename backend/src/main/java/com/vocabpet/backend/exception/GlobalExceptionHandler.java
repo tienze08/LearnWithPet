@@ -1,6 +1,7 @@
 package com.vocabpet.backend.exception;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,10 +39,18 @@ public class GlobalExceptionHandler {
         }
 
         @ExceptionHandler(NoMoreCardsException.class)
-        public ResponseEntity<?> handle(NoMoreCardsException ex) {
+        public ResponseEntity<Void> handle(NoMoreCardsException ex) {
+                return ResponseEntity.noContent().build();
+        }
 
-                return ResponseEntity
-                                .status(204)
-                                .body(ex.getMessage());
+        @ExceptionHandler(GeminiQuotaExceededException.class)
+        public ResponseEntity<ErrorResponse> handleGeminiQuota(GeminiQuotaExceededException ex) {
+                return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                                .header(HttpHeaders.RETRY_AFTER, String.valueOf(ex.getRetryAfterSeconds()))
+                                .body(ErrorResponse.builder()
+                                                .status(HttpStatus.TOO_MANY_REQUESTS.value())
+                                                .message(ex.getMessage() + " Try again in about " + ex.getRetryAfterSeconds() + " seconds.")
+                                                .timestamp(LocalDateTime.now())
+                                                .build());
         }
 }
