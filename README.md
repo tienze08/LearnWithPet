@@ -43,7 +43,7 @@ LearnWithPet/
 ## Prerequisites
 
 - Node.js 20+ and npm
-- JDK 25 (matching `backend/pom.xml`)
+- JDK 21+ (the deployment image uses Java 21 LTS)
 - MySQL 8+
 - A Gemini API key only if you want AI flashcard generation
 
