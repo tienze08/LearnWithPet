@@ -1,9 +1,19 @@
 {
   "properties": [
     {
+      "name": "app.jwt.secret",
+      "type": "java.lang.String",
+      "description": "Secret used to sign and verify JWT access tokens."
+    },
+    {
+      "name": "app.cors.allowed-origins",
+      "type": "java.lang.String",
+      "description": "Comma-separated list of origins allowed to call the API."
+    },
+    {
       "name": "app.gemini.api-key",
       "type": "java.lang.String",
-      "description": "Gemini API key used by Reader flashcard generation. Configure it with GEMINI_API_KEY."
+      "description": "Google Gemini API key used by the reader flashcard generator."
     }
   ]
 }
