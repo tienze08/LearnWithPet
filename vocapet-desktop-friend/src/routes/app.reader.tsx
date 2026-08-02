@@ -41,11 +41,13 @@ import { stageForLevel } from "@/lib/store";
 import { speakPet } from "@/hooks/stores/petSpeech";
 import { petEvents } from "@/lib/pet/events";
 import { useDecksQuery } from "@/hooks/queries/deck.queries";
-import { useCreateVocabularyMutation } from "@/hooks/queries/vocabulary.queries";
+import { useCreateVocabularyMutation, useMyVocabulariesQuery } from "@/hooks/queries/vocabulary.queries";
 import type { BasketItem, VocabularySuggestion } from "@/components/reader/types";
 import { sentenceAround, speakWord } from "@/components/reader/utils/text";
-import { PdfReaderLoader } from "@/components/reader/PdfReaderLoader";
+import { PdfDocumentViewer, PdfReaderLoader } from "@/components/reader/PdfReaderLoader";
+import { getLatestPdf, saveLatestPdf } from "@/components/reader/pdf-storage";
 import type { Vocabulary } from "@/types/vocabulary";
+import { useMeQuery } from "@/hooks/queries/user.queries";
 
 export const Route = createFileRoute("/app/reader")({
   component: ReaderPage,
@@ -71,6 +73,15 @@ export const Route = createFileRoute("/app/reader")({
 
 type Library = { id: string; title: string; author: string; emoji: string; text: string };
 type HighlightDetail = { meaning: string; lastReviewed: string; retention: number };
+
+function scanDocumentWords(text: string) {
+  const frequencies = new Map<string, number>();
+  for (const raw of text.match(/[\p{L}][\p{L}'-]*/gu) ?? []) {
+    const word = raw.toLocaleLowerCase().replace(/^['-]+|['-]+$/g, "");
+    if (word.length >= 3) frequencies.set(word, (frequencies.get(word) ?? 0) + 1);
+  }
+  return frequencies;
+}
 
 function ReadingParagraph({
   text,
@@ -186,11 +197,14 @@ Looking ahead, we intend to outsource routine maintenance so that in-house engin
 
 export function ReaderPage() {
   const { state } = useGame();
+  const { data: me } = useMeQuery();
   const { data: decks = [] } = useDecksQuery();
+  const { data: myVocabularies = [] } = useMyVocabulariesQuery();
   const createVocabulary = useCreateVocabularyMutation();
   const [sourceId, setSourceId] = useState<string>(LIBRARY[0].id);
   const [customText, setCustomText] = useState("");
   const [customTitle, setCustomTitle] = useState("My document");
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [panelOpen, setPanelOpen] = useState(true);
   const [basket, setBasket] = useState<BasketItem[]>([]);
   const [deckId, setDeckId] = useState("");
@@ -201,10 +215,14 @@ export function ReaderPage() {
   const [preview, setPreview] = useState<GeneratedCard[] | null>(null);
   const [savedThisSession, setSavedThisSession] = useState<string[]>([]);
   const [highlights, setHighlights] = useState<Record<string, HighlightDetail>>({});
+  const [pdfStorageReady, setPdfStorageReady] = useState(false);
+  const [showLearnedWords, setShowLearnedWords] = useState(false);
+  const [importedHighlightTerms, setImportedHighlightTerms] = useState<string[] | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const skipNextBasketPersist = useRef(true);
 
   const doc = useMemo(() => {
-    if (sourceId === "custom") {
+    if (sourceId === "custom" || sourceId === "pdf") {
       return {
         title: customTitle || "My document",
         author: "Pasted text",
@@ -239,6 +257,11 @@ export function ReaderPage() {
     () => new Set(basket.map((item) => item.word.toLowerCase())),
     [basket],
   );
+  const pdfWordFrequencies = useMemo(() => sourceId === "pdf" ? scanDocumentWords(doc.text) : new Map<string, number>(), [sourceId, doc.text]);
+  const learnedPdfWords = useMemo(() => {
+    const userWords = new Set(myVocabularies.map((word) => word.word.toLocaleLowerCase()));
+    return [...pdfWordFrequencies.keys()].filter((word) => userWords.has(word));
+  }, [myVocabularies, pdfWordFrequencies]);
 
   const selected = basket.filter((b) => b.checked);
 
@@ -247,13 +270,92 @@ export function ReaderPage() {
   }, [deckId, decks]);
 
   useEffect(() => {
+    if (!me?.id) return;
+    let active = true;
+
+    void getLatestPdf(me.id).then((stored) => {
+      if (!active || !stored) return;
+      setPdfFile(stored.file);
+      setCustomTitle(stored.title);
+      setCustomText(stored.text);
+      setBasket((stored.basket as BasketItem[] | undefined) ?? []);
+      setHighlights((stored.highlights as Record<string, HighlightDetail> | undefined) ?? {});
+      setSourceId("pdf");
+      setPdfStorageReady(true);
+    });
+
+    return () => { active = false; };
+  }, [me?.id]);
+
+  async function handlePdfLoaded({ title, text, file, importedHighlights = [] }: { title: string; text: string; file: File; importedHighlights?: string[] }) {
+    setCustomTitle(title);
+    setCustomText(text);
+    setPdfFile(file);
+    setBasket([]);
+    setHighlights({});
+    setSourceId("pdf");
+    setPdfStorageReady(true);
+    setAiStatus("Your PDF is open. I can analyse its text while you read the original pages.");
+    if (importedHighlights.length) {
+      setImportedHighlightTerms(importedHighlights);
+      setAiStatus(`I found ${importedHighlights.length} highlights you made earlier. Review them before adding to your basket.`);
+    }
+    speakPet("Your PDF is ready. Let’s find useful words together!", 1, 5);
+
+    if (me?.id) {
+      try {
+        await saveLatestPdf({ userId: me.id, title, text, file, savedAt: Date.now(), basket: [], highlights: {} });
+      } catch {
+        toast.error("Your PDF could not be saved locally. Check browser storage permissions.");
+      }
+    }
+  }
+
+  useEffect(() => {
+    if (sourceId === "pdf") return;
     const stored = localStorage.getItem(`vocapet:reader-highlights:${doc.title}`);
     setHighlights(stored ? JSON.parse(stored) : {});
-  }, [doc.title]);
+  }, [doc.title, sourceId]);
 
-  function handleSelection() {
+  useEffect(() => {
+    if (sourceId === "pdf") return;
+    const stored = localStorage.getItem(`vocapet:reader-basket:${doc.title}`);
+    skipNextBasketPersist.current = true;
+    try {
+      setBasket(stored ? JSON.parse(stored) : []);
+    } catch {
+      setBasket([]);
+    }
+  }, [doc.title, sourceId]);
+
+  useEffect(() => {
+    if (sourceId === "pdf") return;
+    if (skipNextBasketPersist.current) {
+      skipNextBasketPersist.current = false;
+      return;
+    }
+    localStorage.setItem(`vocapet:reader-basket:${doc.title}`, JSON.stringify(basket));
+  }, [basket, doc.title, sourceId]);
+
+  useEffect(() => {
+    if (!me?.id || !pdfFile || sourceId !== "pdf" || !pdfStorageReady) return;
+    void saveLatestPdf({
+      userId: me.id,
+      title: customTitle,
+      text: customText,
+      file: pdfFile,
+      basket,
+      highlights,
+      savedAt: Date.now(),
+    });
+  }, [me?.id, pdfFile, sourceId, pdfStorageReady, customTitle, customText, basket, highlights]);
+
+  function handleSelection(event?: { clientX?: number; clientY?: number; fromPdf?: boolean }) {
     const sel = typeof window !== "undefined" ? window.getSelection() : null;
-    const text = sel?.toString().trim().replace(/\s+/g, " ") ?? "";
+    let text = sel?.toString().trim().replace(/\s+/g, " ") ?? "";
+    if (event?.fromPdf && event.clientX !== undefined && event.clientY !== undefined && /\s/.test(text)) {
+      text = wordAtPointer(event.clientX, event.clientY) ?? text;
+    }
     if (!text || text.length > 60) return;
     const clean = text.replace(/^[^\p{L}]+|[^\p{L}]+$/gu, "");
     if (!clean) return;
@@ -273,6 +375,44 @@ export function ReaderPage() {
     setAiStatus(`I saved “${clean}” with its sentence context. Add more when you spot them!`);
     speakPet(`Nice choice! I’ll help you remember ${clean}.`, 1, 4);
     sel?.removeAllRanges();
+  }
+
+  function wordAtPointer(clientX: number, clientY: number) {
+    const documentWithCaret = document as Document & {
+      caretRangeFromPoint?: (x: number, y: number) => Range | null;
+    };
+    const range = documentWithCaret.caretRangeFromPoint?.(clientX, clientY);
+    const node = range?.startContainer;
+    if (!node || node.nodeType !== Node.TEXT_NODE) return null;
+
+    const value = node.textContent ?? "";
+    const offset = Math.min(range?.startOffset ?? 0, value.length);
+    const before = value.slice(0, offset).match(/[\p{L}'-]+$/u)?.[0] ?? "";
+    const after = value.slice(offset).match(/^[\p{L}'-]+/u)?.[0] ?? "";
+    const word = `${before}${after}`.replace(/^['-]+|['-]+$/g, "");
+    return word || null;
+  }
+
+  function importExistingHighlights() {
+    if (!importedHighlightTerms?.length) return;
+    setBasket((current) => {
+      const seen = new Set(current.map((item) => item.word.toLocaleLowerCase()));
+      const next = [...current];
+      for (const word of importedHighlightTerms) {
+        if (seen.has(word.toLocaleLowerCase())) continue;
+        seen.add(word.toLocaleLowerCase());
+        next.push({
+          id: `${word}-${Date.now()}-${next.length}`,
+          word,
+          checked: true,
+          sentence: sentenceAround(doc.text, word),
+        });
+      }
+      return next;
+    });
+    setPanelOpen(true);
+    setImportedHighlightTerms(null);
+    speakPet("I added your previous highlights to the basket. Let’s make flashcards!", 1, 5);
   }
 
   async function generate() {
@@ -458,6 +598,7 @@ export function ReaderPage() {
             <SelectValue placeholder="Choose a text" />
           </SelectTrigger>
           <SelectContent>
+            {pdfFile && <SelectItem value="pdf">Uploaded PDF: {customTitle || "Untitled"}</SelectItem>}
             {LIBRARY.map((l) => (
               <SelectItem key={l.id} value={l.id}>
                 {l.emoji} {l.title}
@@ -488,13 +629,22 @@ export function ReaderPage() {
           Ask Pip for suggestions
         </Button>
         <input ref={fileRef} type="file" accept=".txt,.md,text/plain" hidden onChange={onFile} />
-        <PdfReaderLoader onLoaded={({ title, text }) => {
+        <PdfReaderLoader onLoaded={({ title, text, file, importedHighlights }) => {
+          void handlePdfLoaded({ title, text, file, importedHighlights });
           setCustomTitle(title);
           setCustomText(text);
-          setSourceId("custom");
-          setAiStatus("I extracted the PDF text. Highlight anything you want to learn!");
+          setPdfFile(file);
+          setSourceId("pdf");
+          setAiStatus("Your PDF is open. I can analyse its text while you read the original pages.");
           speakPet("Your PDF is ready. Let’s find useful words together!", 1, 5);
         }} />
+
+        {sourceId === "pdf" && (
+          <label className="flex items-center gap-2 rounded-xl border-2 border-border bg-card px-3 py-2 text-xs font-bold">
+            <input type="checkbox" checked={showLearnedWords} onChange={(event) => setShowLearnedWords(event.target.checked)} className="accent-primary" />
+            Show learned words ({learnedPdfWords.length})
+          </label>
+        )}
 
         {!panelOpen && (
           <Button className="rounded-xl font-bold ml-auto" onClick={() => setPanelOpen(true)}>
@@ -530,7 +680,22 @@ export function ReaderPage() {
           </div>
           <p className="text-xs font-bold text-muted-foreground mb-4">{doc.author}</p>
 
-          {doc.text.trim() ? (
+          {sourceId === "pdf" && (
+            <div className="mb-4 grid grid-cols-3 gap-2 rounded-2xl border border-primary/20 bg-primary/5 p-3 text-center text-xs">
+              <div><p className="text-lg font-extrabold">{pdfWordFrequencies.size}</p><p className="text-muted-foreground">unique words</p></div>
+              <div><p className="text-lg font-extrabold text-primary">{learnedPdfWords.length}</p><p className="text-muted-foreground">already learned</p></div>
+              <div><p className="text-lg font-extrabold text-amber-600">{basketWords.size}</p><p className="text-muted-foreground">in basket</p></div>
+            </div>
+          )}
+
+          {sourceId === "pdf" && pdfFile ? (
+            <PdfDocumentViewer
+              file={pdfFile}
+              onTextSelected={handleSelection}
+              basketWords={[...basketWords]}
+              learnedWords={showLearnedWords ? learnedPdfWords : []}
+            />
+          ) : doc.text.trim() ? (
             <div
               onMouseUp={handleSelection}
               onTouchEnd={handleSelection}
@@ -779,6 +944,30 @@ export function ReaderPage() {
             className="w-full rounded-xl font-extrabold"
           >
             <Check className="w-4 h-4 mr-2" /> Save All
+          </Button>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!importedHighlightTerms} onOpenChange={(open) => !open && setImportedHighlightTerms(null)}>
+        <DialogContent className="max-w-lg rounded-3xl border-2">
+          <DialogHeader>
+            <DialogTitle className="font-extrabold">Import previous highlights</DialogTitle>
+            <DialogDescription>
+              Pip found {importedHighlightTerms?.length ?? 0} highlights embedded in this PDF. Remove anything you do not want, then add the rest to your basket.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-72 space-y-2 overflow-auto pr-1">
+            {importedHighlightTerms?.map((word) => (
+              <div key={word} className="flex items-center justify-between rounded-xl border border-border bg-muted/30 px-3 py-2">
+                <span className="font-bold">{word}</span>
+                <button type="button" onClick={() => setImportedHighlightTerms((terms) => terms?.filter((term) => term !== word) ?? null)} className="text-muted-foreground hover:text-destructive" aria-label={`Remove ${word}`}>
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+          <Button onClick={importExistingHighlights} disabled={!importedHighlightTerms?.length} className="rounded-xl font-extrabold">
+            <ShoppingBasket className="mr-2 h-4 w-4" /> Add to basket
           </Button>
         </DialogContent>
       </Dialog>

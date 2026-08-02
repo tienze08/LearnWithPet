@@ -58,4 +58,6 @@ public interface UserVocabularyProgressRepository
                         Long deckId);
 
         long countByUserIdAndRepetitionsGreaterThanEqual(Long userId, int repetitions);
+
+        long countByUserIdAndRepetitionsBetween(Long userId, int minimumRepetitions, int maximumRepetitions);
 }

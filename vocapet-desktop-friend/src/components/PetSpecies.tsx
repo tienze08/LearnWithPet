@@ -2,6 +2,8 @@ import { Pet, PET_VARIANTS } from "@/components/PixiPet/Pet";
 import { useGame } from "@/lib/store";
 import type { GameState, PetVariant } from "@/lib/store";
 import { Lock, Check } from "lucide-react";
+import { useMeQuery } from "@/hooks/queries/user.queries";
+import { useSelectPetMutation, useUnlockedPetsQuery } from "@/hooks/queries/pet.queries";
 
 const SPECIES_STYLE: Record<PetVariant, { emoji: string; tint: string }> = {
   CAT: { emoji: "🐱", tint: "from-slate-100 to-slate-200" },
@@ -31,7 +33,23 @@ export const PET_UNLOCKS: PetSpeciesUnlock[] = [
 
 export function PetSpecies() {
   const { state, setState } = useGame();
-  const unlockedCount = PET_UNLOCKS.filter((u) => u.isUnlocked(state)).length;
+  const { data: me } = useMeQuery();
+  const { data: unlockedPets = [] } = useUnlockedPetsQuery();
+  const selectPetMutation = useSelectPetMutation();
+  const unlockedSpecies = new Set(unlockedPets.map((pet) => pet.species));
+  // CAT is the starter pet. The rest must come from the user's own unlock records,
+  // rather than from locally cached XP/streak data shared by the browser.
+  unlockedSpecies.add("CAT");
+  const unlockedCount = unlockedSpecies.size;
+  const activeSpecies = me?.pet?.species ?? state.petVariant;
+
+  const selectPet = (species: PetVariant) => {
+    if (!unlockedSpecies.has(species) || selectPetMutation.isPending) return;
+
+    selectPetMutation.mutate(species, {
+      onSuccess: () => setState((current) => ({ ...current, petVariant: species })),
+    });
+  };
 
   return (
     <div>
@@ -47,14 +65,14 @@ export function PetSpecies() {
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         {PET_UNLOCKS.map((u) => {
           const meta = PET_VARIANTS.find((v) => v.id === u.id)!;
-          const unlocked = u.isUnlocked(state);
-          const active = state.petVariant === u.id;
+          const unlocked = unlockedSpecies.has(u.id);
+          const active = activeSpecies === u.id;
           const style = SPECIES_STYLE[u.id];
           return (
             <button
               key={u.id}
               disabled={!unlocked}
-              onClick={() => unlocked && setState((s) => ({ ...s, petVariant: u.id }))}
+              onClick={() => selectPet(u.id)}
               className={`relative rounded-2xl border-2 p-3 flex flex-col items-center text-center transition-transform ${
                 unlocked ? "hover:scale-[1.03] cursor-pointer" : "cursor-not-allowed opacity-60"
               } ${active ? "border-primary bg-primary/10" : "border-border bg-card"}`}

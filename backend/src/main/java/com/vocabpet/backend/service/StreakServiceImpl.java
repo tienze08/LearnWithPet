@@ -38,6 +38,12 @@ public class StreakServiceImpl implements StreakService {
 
         // đã hoạt động hôm nay → KHÔNG update nữa
         if (last != null && last.equals(today)) {
+            // Keep the value returned by /api/users/me aligned with the
+            // persisted streak record for users with older data.
+            if (user.getStreak() != streak.getCurrentStreak()) {
+                user.setStreak(streak.getCurrentStreak());
+                userRepository.save(user);
+            }
             return StreakUpdateResult.builder()
                     .updated(false)
                     .currentStreak(streak.getCurrentStreak())

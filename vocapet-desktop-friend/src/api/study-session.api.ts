@@ -13,6 +13,21 @@ export type ReviewResponse = {
   streakUpdated: boolean;
 };
 
+export type RecentReview = {
+  vocabularyId: number;
+  word: string;
+  meaning: string;
+  rating: "AGAIN" | "HARD" | "GOOD" | "EASY";
+  reviewedAt: string;
+};
+
+export type StudyDashboardStats = {
+  learningWords: number;
+  masteredWords: number;
+  recentCorrect: number;
+  recentReviews: number;
+};
+
 export function startStudySessionApi(
   payload: StartStudySessionRequest,
 ) {
@@ -55,4 +70,12 @@ export function finishStudySessionApi(
       method: "POST",
     },
   );
+}
+
+export function getRecentReviewsApi() {
+  return apiFetch<RecentReview[]>("/api/study-sessions/recent");
+}
+
+export function getStudyDashboardStatsApi() {
+  return apiFetch<StudyDashboardStats>("/api/study-sessions/dashboard");
 }

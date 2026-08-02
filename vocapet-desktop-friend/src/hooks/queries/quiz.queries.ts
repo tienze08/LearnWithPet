@@ -1,5 +1,5 @@
 import { answerQuiz, getRandomQuiz } from "@/api/quiz.api";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export function useRandomQuizMutation() {
   return useMutation({
@@ -8,7 +8,14 @@ export function useRandomQuizMutation() {
 }
 
 export function useAnswerQuizMutation() {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: answerQuiz,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+      queryClient.invalidateQueries({ queryKey: ["study-reviews", "recent"] });
+      queryClient.invalidateQueries({ queryKey: ["study-dashboard"] });
+    },
   });
 }

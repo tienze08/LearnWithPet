@@ -5,12 +5,16 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.vocabpet.backend.entity.Vocabulary;
 
 public interface VocabularyRepository extends JpaRepository<Vocabulary, Long> {
 
     List<Vocabulary> findByDeckId(Long deckId);
+
+    @Query("SELECT v FROM Vocabulary v WHERE v.deck.user.id = :userId")
+    List<Vocabulary> findByDeckUserId(@Param("userId") Long userId);
 
     @Query(value = """
             SELECT *
