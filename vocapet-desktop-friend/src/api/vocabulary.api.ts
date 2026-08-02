@@ -82,3 +82,7 @@ export function deleteVocabularyApi(
     }
   );
 }
+
+export function getMyVocabulariesApi() {
+  return apiFetch<VocabularyResponse[]>("/api/vocabularies", { method: "GET" });
+}

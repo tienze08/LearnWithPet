@@ -2,8 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useGame } from "@/lib/store";
 import { PetCard } from "@/components/PetCard";
 import { PetSpecies } from "@/components/PetSpecies";
-import { Button } from "@/components/ui/button";
-import { Trophy, Flame, Zap, Coins, Star, Calendar, Pencil } from "lucide-react";
+import { Trophy, Flame, Zap, Coins, Calendar } from "lucide-react";
 import { useMeQuery, useUpdateAvatarMutation } from "@/hooks/queries/user.queries";
 import { avatarMap } from "@/types/avatar";
 import { useMyAchievementsQuery } from "@/hooks/queries/achievement.queries";
@@ -193,21 +192,6 @@ function Profile() {
             <p className="text-sm text-muted-foreground sm:col-span-2 lg:col-span-3">No awards yet — keep learning to unlock your first achievement.</p>
           )}
         </div>
-      </div>
-
-      <div className="pt-4">
-        <Button
-          variant="outline"
-          className="border-2"
-          onClick={() => {
-            if (confirm("Reset all progress?")) {
-              localStorage.removeItem("vocapet:v1");
-              location.reload();
-            }
-          }}
-        >
-          Reset progress
-        </Button>
       </div>
     </div>
   );

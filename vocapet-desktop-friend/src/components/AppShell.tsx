@@ -6,6 +6,14 @@ import { useMeQuery } from "@/hooks/queries/user.queries";
 import { useAuthStore } from "@/hooks/stores/auth.store";
 import { avatarMap } from "@/types/avatar";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Coins,
   Flame,
   Zap,
@@ -53,7 +61,6 @@ function TopBar() {
           <NavLink to="/app/tasks" icon={<Target className="w-4 h-4" />} label="Tasks" />
           <NavLink to="/app/pets" icon={<PawPrintIcon className="w-4 h-4" />} label="Pets" />
           <NavLink to="/app/achievements" icon={<Trophy className="w-4 h-4" />} label="Awards" />
-          <NavLink to="/app/profile" icon={<User className="w-4 h-4" />} label="Profile" />
         </nav>
         <div className="ml-auto flex items-center gap-3 text-sm font-bold">
           <Stat
@@ -68,28 +75,42 @@ function TopBar() {
               <div className="h-full bg-xp" style={{ width: `${pct}%` }} />
             </div>
           </div>
-          <Link
-            to="/app/profile"
-            className="ml-1 flex items-center gap-2 pl-2 pr-3 py-1 rounded-full border-2 border-border hover:border-primary transition-colors"
-            aria-label="Your profile"
-          >
-            <span className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-lg">
-              {avatarEmoji}
-            </span>
-            <span className="hidden sm:inline text-sm font-bold truncate">{displayName}</span>
-          </Link>
-          <button
-            type="button"
-            onClick={() => {
-              logout();
-              navigate({ to: "/login" });
-            }}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full border-2 border-border text-muted-foreground transition-colors hover:border-destructive hover:bg-destructive/10 hover:text-destructive"
-            aria-label="Log out"
-            title="Log out"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="ml-1 flex items-center gap-2 pl-2 pr-3 py-1 rounded-full border-2 border-border transition-colors hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                aria-label="Open account menu"
+              >
+                <span className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-lg">
+                  {avatarEmoji}
+                </span>
+                <span className="hidden sm:inline max-w-28 text-sm font-bold truncate">{displayName}</span>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-52 rounded-xl border-2">
+              <DropdownMenuLabel>
+                <p className="truncate font-bold">{displayName}</p>
+                {me?.email && <p className="mt-0.5 truncate text-xs font-normal text-muted-foreground">{me.email}</p>}
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onSelect={() => navigate({ to: "/app/profile" })}>
+                <User className="mr-2 h-4 w-4" />
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onSelect={() => {
+                  logout();
+                  navigate({ to: "/login" });
+                }}
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>

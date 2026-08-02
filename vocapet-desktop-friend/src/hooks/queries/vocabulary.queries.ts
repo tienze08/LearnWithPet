@@ -8,6 +8,7 @@ import {
   createVocabularyApi,
   deleteVocabularyApi,
   getVocabulariesApi,
+  getMyVocabulariesApi,
   updateVocabularyApi,
   type VocabularyRequest,
 } from "@/api/vocabulary.api";
@@ -45,6 +46,7 @@ export function useCreateVocabularyMutation() {
       queryClient.invalidateQueries({
         queryKey: ["decks"],
       });
+      queryClient.invalidateQueries({ queryKey: ["vocabularies", "mine"] });
     },
   });
 }
@@ -101,5 +103,12 @@ export function useDeleteVocabularyMutation() {
         queryKey: ["decks"],
       });
     },
+  });
+}
+
+export function useMyVocabulariesQuery() {
+  return useQuery<VocabularyResponse[]>({
+    queryKey: ["vocabularies", "mine"],
+    queryFn: getMyVocabulariesApi,
   });
 }

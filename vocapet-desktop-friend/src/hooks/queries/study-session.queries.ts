@@ -6,6 +6,8 @@ import {
 
 import {
   finishStudySessionApi,
+  getRecentReviewsApi,
+  getStudyDashboardStatsApi,
   getNextStudyCardApi,
   reviewStudyCardApi,
   startStudySessionApi,
@@ -44,6 +46,8 @@ export function useReviewStudyCardMutation(
         queryKey: ["study-session", sessionId, "next-card"],
       });
       queryClient.invalidateQueries({ queryKey: ["me"] });
+      queryClient.invalidateQueries({ queryKey: ["study-reviews", "recent"] });
+      queryClient.invalidateQueries({ queryKey: ["study-dashboard"] });
     },
   });
 }
@@ -52,5 +56,19 @@ export function useFinishStudySessionMutation() {
   return useMutation({
     mutationFn: (sessionId: number) =>
       finishStudySessionApi(sessionId),
+  });
+}
+
+export function useRecentReviewsQuery() {
+  return useQuery({
+    queryKey: ["study-reviews", "recent"],
+    queryFn: getRecentReviewsApi,
+  });
+}
+
+export function useStudyDashboardStatsQuery() {
+  return useQuery({
+    queryKey: ["study-dashboard"],
+    queryFn: getStudyDashboardStatsApi,
   });
 }
