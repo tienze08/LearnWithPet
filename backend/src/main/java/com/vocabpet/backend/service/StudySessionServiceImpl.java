@@ -7,8 +7,10 @@ import org.springframework.stereotype.Service;
 
 import com.vocabpet.backend.dto.StudyCardRe.ReviewRequest;
 import com.vocabpet.backend.dto.StudyCardRe.ReviewResponse;
+import com.vocabpet.backend.dto.StudyCardRe.RecentReviewResponse;
 import com.vocabpet.backend.dto.StudyCardRe.StreakUpdateResult;
 import com.vocabpet.backend.dto.StudyCardRe.StudyCardResponse;
+import com.vocabpet.backend.dto.StudyCardRe.StudyDashboardResponse;
 import com.vocabpet.backend.entity.StudyReview;
 import com.vocabpet.backend.entity.StudySession;
 import com.vocabpet.backend.entity.User;
@@ -167,6 +169,39 @@ public class StudySessionServiceImpl implements StudySessionService {
                 missionService.trackSessionCompleted(session.getUser().getId());
 
                 sessionRepository.save(session);
+        }
+
+        @Override
+        @Transactional
+        public List<RecentReviewResponse> getRecentReviews() {
+                Long userId = currentUserService.getCurrentUser().getId();
+
+                return reviewRepository.findTop6ByUserIdOrderByReviewedAtDesc(userId).stream()
+                                .map(review -> RecentReviewResponse.builder()
+                                                .vocabularyId(review.getVocabulary().getId())
+                                                .word(review.getVocabulary().getWord())
+                                                .meaning(review.getVocabulary().getMeaning())
+                                                .rating(review.getRating())
+                                                .reviewedAt(review.getReviewedAt())
+                                                .build())
+                                .toList();
+        }
+
+        @Override
+        @Transactional
+        public StudyDashboardResponse getDashboardStats() {
+                Long userId = currentUserService.getCurrentUser().getId();
+                var recentReviews = reviewRepository.findTop20ByUserIdOrderByReviewedAtDesc(userId);
+                long correct = recentReviews.stream()
+                                .filter(review -> review.getRating() != com.vocabpet.backend.entity.enums.Rating.AGAIN)
+                                .count();
+
+                return StudyDashboardResponse.builder()
+                                .learningWords(progressRepository.countByUserIdAndRepetitionsBetween(userId, 1, 3))
+                                .masteredWords(progressRepository.countByUserIdAndRepetitionsGreaterThanEqual(userId, 4))
+                                .recentCorrect(correct)
+                                .recentReviews(recentReviews.size())
+                                .build();
         }
 
         private StudyCardResponse map(UserVocabularyProgress p, Vocabulary v) {

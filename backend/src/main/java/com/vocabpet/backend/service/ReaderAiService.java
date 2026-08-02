@@ -9,6 +9,7 @@ import com.vocabpet.backend.dto.ReaderAi.ReaderFlashcardGenerationResponse;
 import com.vocabpet.backend.dto.ReaderAi.ReaderVocabularySuggestionRequest;
 import com.vocabpet.backend.dto.ReaderAi.ReaderVocabularySuggestionResponse;
 import com.vocabpet.backend.dto.ReaderAi.VocabularySuggestionResponse;
+import com.vocabpet.backend.exception.GeminiQuotaExceededException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -42,25 +43,7 @@ public class ReaderAiService {
                     Selected terms: %s
                     """.formatted(request.sourceTitle(), request.context(), String.join(", ", request.words()));
 
-            var payload = new GeminiGenerateContentRequest(
-                    List.of(new GeminiGenerateContentRequest.Content(
-                            List.of(new GeminiGenerateContentRequest.Part(prompt)))),
-                    new GeminiGenerateContentRequest.GenerationConfig("application/json", 1));
-            String body = objectMapper.writeValueAsString(payload);
-            String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent";
-            HttpRequest httpRequest = HttpRequest.newBuilder(URI.create(url))
-                    .header("Content-Type", "application/json")
-                    .header("x-goog-api-key", geminiApiKey)
-                    .POST(HttpRequest.BodyPublishers.ofString(body))
-                    .build();
-            HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() < 200 || response.statusCode() >= 300) {
-                String detail = response.body().replaceAll("\\s+", " ");
-                throw new IllegalStateException("Gemini request failed (" + response.statusCode() + "): "
-                        + detail.substring(0, Math.min(detail.length(), 500)));
-            }
-            GeminiGenerateContentResponse gemini = objectMapper.readValue(response.body(), GeminiGenerateContentResponse.class);
-            String json = gemini.candidates().getFirst().content().parts().getFirst().text();
+            String json = requestGemini(prompt);
             CardsPayload cards = objectMapper.readValue(json, CardsPayload.class);
             return new ReaderFlashcardGenerationResponse(cards.cards(),
                     "I prepared " + cards.cards().size() + " cards from this passage!");
@@ -99,7 +82,12 @@ public class ReaderAiService {
                 .header("Content-Type", "application/json").header("x-goog-api-key", geminiApiKey)
                 .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(payload))).build();
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        if (response.statusCode() < 200 || response.statusCode() >= 300) throw new IllegalStateException("Gemini request failed (" + response.statusCode() + ")");
+        if (response.statusCode() == 429) {
+            throw new GeminiQuotaExceededException(extractRetryAfterSeconds(response.body()));
+        }
+        if (response.statusCode() < 200 || response.statusCode() >= 300) {
+            throw new IllegalStateException("Gemini request failed (" + response.statusCode() + ")");
+        }
         GeminiGenerateContentResponse gemini = objectMapper.readValue(response.body(), GeminiGenerateContentResponse.class);
         return gemini.candidates().getFirst().content().parts().getFirst().text();
     }
@@ -108,5 +96,11 @@ public class ReaderAiService {
     }
 
     private record SuggestionsPayload(List<VocabularySuggestionResponse> suggestions) {
+    }
+
+    private int extractRetryAfterSeconds(String responseBody) {
+        var matcher = java.util.regex.Pattern.compile("retry in\\s+([0-9]+)", java.util.regex.Pattern.CASE_INSENSITIVE)
+                .matcher(responseBody);
+        return matcher.find() ? Math.max(1, Integer.parseInt(matcher.group(1))) : 60;
     }
 }

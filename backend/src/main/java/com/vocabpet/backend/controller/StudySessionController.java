@@ -29,6 +29,16 @@ public class StudySessionController {
                         .build());
     }
 
+    @GetMapping("/recent")
+    public ResponseEntity<?> recentReviews() {
+        return ResponseEntity.ok(studySessionService.getRecentReviews());
+    }
+
+    @GetMapping("/dashboard")
+    public ResponseEntity<?> dashboardStats() {
+        return ResponseEntity.ok(studySessionService.getDashboardStats());
+    }
+
     @GetMapping("/{sessionId}/next-card")
     public ResponseEntity<?> nextCard(@PathVariable Long sessionId) {
 

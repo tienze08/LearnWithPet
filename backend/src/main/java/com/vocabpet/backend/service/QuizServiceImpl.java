@@ -6,15 +6,23 @@ import java.util.Collections;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.vocabpet.backend.dto.PetRe.PetBehaviorResponse;
 import com.vocabpet.backend.dto.QuizRe.QuizAnswerRequest;
 import com.vocabpet.backend.dto.QuizRe.QuizAnswerResponse;
 import com.vocabpet.backend.dto.QuizRe.QuizQuestionResponse;
 import com.vocabpet.backend.entity.User;
+import com.vocabpet.backend.entity.UserVocabularyProgress;
 import com.vocabpet.backend.entity.Vocabulary;
+import com.vocabpet.backend.entity.StudyReview;
+import com.vocabpet.backend.entity.StudySession;
 import com.vocabpet.backend.entity.enums.PetEvent;
+import com.vocabpet.backend.entity.enums.Rating;
+import com.vocabpet.backend.repository.StudyReviewRepository;
+import com.vocabpet.backend.repository.StudySessionRepository;
 import com.vocabpet.backend.repository.UserRepository;
+import com.vocabpet.backend.repository.UserVocabularyProgressRepository;
 import com.vocabpet.backend.repository.VocabularyRepository;
 import com.vocabpet.backend.service.behavior.PetBehaviorService;
 
@@ -30,6 +38,10 @@ public class QuizServiceImpl implements QuizService {
     private final CurrentUserService currentUserService;
     private final VocabularyRepository vocabularyRepository;
     private final UserRepository userRepository;
+    private final UserVocabularyProgressRepository progressRepository;
+    private final StudySessionRepository studySessionRepository;
+    private final StudyReviewRepository studyReviewRepository;
+    private final FsrsService fsrsService;
 
     private final RewardService rewardService;
     private final MissionService missionService;
@@ -52,6 +64,7 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
+    @Transactional
     public QuizAnswerResponse answer(QuizAnswerRequest request) {
 
         User user = currentUserService.getCurrentUser();
@@ -62,6 +75,10 @@ public class QuizServiceImpl implements QuizService {
         boolean correct = vocabulary.getMeaning()
                 .trim()
                 .equalsIgnoreCase(request.getAnswer().trim());
+
+        // Desktop companion quizzes are real study attempts as well. Persisting them
+        // keeps the dashboard's learning count and accuracy in sync with the quiz UI.
+        recordQuizAttempt(user, vocabulary, correct ? Rating.GOOD : Rating.AGAIN);
 
         int xp = 0;
         int coin = 0;
@@ -117,5 +134,34 @@ public class QuizServiceImpl implements QuizService {
         Collections.shuffle(options);
 
         return options;
+    }
+
+    private void recordQuizAttempt(User user, Vocabulary vocabulary, Rating rating) {
+        UserVocabularyProgress progress = progressRepository
+                .findByUserIdAndVocabularyId(user.getId(), vocabulary.getId())
+                .orElseGet(() -> UserVocabularyProgress.builder()
+                        .user(user)
+                        .vocabulary(vocabulary)
+                        .build());
+        fsrsService.review(progress, rating);
+        progressRepository.save(progress);
+
+        LocalDateTime now = LocalDateTime.now();
+        StudySession quizSession = studySessionRepository.save(StudySession.builder()
+                .user(user)
+                .deck(vocabulary.getDeck())
+                .startedAt(now)
+                .finishedAt(now)
+                .totalReviews(1)
+                .uniqueCards(1)
+                .build());
+
+        studyReviewRepository.save(StudyReview.builder()
+                .session(quizSession)
+                .user(user)
+                .vocabulary(vocabulary)
+                .rating(rating)
+                .reviewedAt(now)
+                .build());
     }
 }

@@ -70,6 +70,22 @@ public class VocabularyService {
     }
 
     @Transactional
+    public List<VocabularyResponse> getMyVocabularies() {
+        User user = currentUserService.getCurrentUser();
+        Set<Long> bookmarkedIds = bookmarkRepository.findByUser(user).stream()
+                .map(bookmark -> bookmark.getVocabulary().getId())
+                .collect(Collectors.toSet());
+
+        return vocabularyRepository.findByDeckUserId(user.getId()).stream()
+                .map(vocabulary -> {
+                    VocabularyResponse response = vocabularyMapper.toResponse(vocabulary);
+                    response.setBookmarked(bookmarkedIds.contains(vocabulary.getId()));
+                    return response;
+                })
+                .toList();
+    }
+
+    @Transactional
     public VocabularyResponse updateVocabulary(
             Long deckId,
             Long vocabularyId,
