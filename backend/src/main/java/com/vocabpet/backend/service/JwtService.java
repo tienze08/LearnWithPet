@@ -3,6 +3,7 @@ package com.vocabpet.backend.service;
 import com.vocabpet.backend.entity.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
@@ -11,8 +12,11 @@ import java.util.Date;
 @Service
 public class JwtService {
 
-    private final String SECRET = "mySecretKeymySecretKeymySecretKey123456";
-    private final Key key = Keys.hmacShaKeyFor(SECRET.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    private final Key key;
+
+    public JwtService(@Value("${app.jwt.secret}") String secret) {
+        this.key = Keys.hmacShaKeyFor(secret.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    }
 
     public String generateToken(User user) {
         return Jwts.builder()
