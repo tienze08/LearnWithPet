@@ -57,4 +57,5 @@ jobs:
           distribution: temurin
           java-version: "21"
           cache: maven
+      - run: chmod +x mvnw
       - run: ./mvnw -B -ntp verify
