@@ -1,6 +1,7 @@
 package com.vocabpet.backend.repository;
 
 import java.util.List;
+import java.time.LocalDateTime;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -14,6 +15,8 @@ public interface StudyReviewRepository
     long countBySessionId(Long sessionId);
 
     long countByUserId(Long userId);
+
+    long countByUserIdAndReviewedAtBetween(Long userId, LocalDateTime from, LocalDateTime to);
 
     List<StudyReview> findTop6ByUserIdOrderByReviewedAtDesc(Long userId);
 

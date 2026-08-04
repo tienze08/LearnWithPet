@@ -1,6 +1,7 @@
 export type PetMood =
   | "HAPPY"
   | "SAD"
+  | "CRY"
   | "CRYING"
   | "WAITING";
 
