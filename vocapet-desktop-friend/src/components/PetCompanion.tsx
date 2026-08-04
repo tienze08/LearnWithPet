@@ -15,6 +15,8 @@ import { speakPet } from "@/hooks/stores/petSpeech";
 import { reactionFor } from "@/lib/pet/behavior";
 import { petEvents } from "@/lib/pet/events";
 import type { UserResponse } from "@/types/user";
+import { useMeQuery } from "@/hooks/queries/user.queries";
+import { useCompanion } from "@/hooks/useCompanion";
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
@@ -45,9 +47,11 @@ function reminderFor(mood: PetMood, name: string, goal: number, progress: number
 }
 
 export function PetCompanion() {
-    const petRef = useRef<PetHandle>(null);
-    const queryClient = useQueryClient();
+  const petRef = useRef<PetHandle>(null);
+  const queryClient = useQueryClient();
   const { state, setPetInterval, recordAnswer } = useGame();
+  const { data: me } = useMeQuery();
+  const companion = useCompanion(me?.id, me?.name || state.petName, state.reviewHistory.length);
   const [reminder, setReminder] = useState(false);
   const [open, setOpen] = useState(false);
   const [timeLeft, setTimeLeft] = useState(15);
