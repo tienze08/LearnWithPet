@@ -17,14 +17,14 @@ import com.vocabpet.backend.entity.UserVocabularyProgress;
 import com.vocabpet.backend.entity.Vocabulary;
 import com.vocabpet.backend.entity.StudyReview;
 import com.vocabpet.backend.entity.StudySession;
-import com.vocabpet.backend.entity.enums.PetEvent;
+import com.vocabpet.backend.entity.enums.PetAction;
+import com.vocabpet.backend.entity.enums.PetMood;
 import com.vocabpet.backend.entity.enums.Rating;
 import com.vocabpet.backend.repository.StudyReviewRepository;
 import com.vocabpet.backend.repository.StudySessionRepository;
 import com.vocabpet.backend.repository.UserRepository;
 import com.vocabpet.backend.repository.UserVocabularyProgressRepository;
 import com.vocabpet.backend.repository.VocabularyRepository;
-import com.vocabpet.backend.service.behavior.PetBehaviorService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -47,7 +47,7 @@ public class QuizServiceImpl implements QuizService {
     private final MissionService missionService;
     private final StreakService streakService;
     private final AchievementService achievementService;
-    private final PetBehaviorService petBehaviorService;
+    private final CompanionService companionService;
 
     @Override
     public QuizQuestionResponse randomQuestion() {
@@ -98,15 +98,14 @@ public class QuizServiceImpl implements QuizService {
             streakService.updateMyStreak();
 
             missionService.trackReview(user.getId());
+            missionService.trackQuiz(user.getId());
             achievementService.recordQuizReview(user);
 
-            petBehavior = petBehaviorService.triggerEvent(
-                    PetEvent.CORRECT_ANSWER);
+            petBehavior = companionService.recordQuizOutcome(user, vocabulary, true);
 
         } else {
 
-            petBehavior = petBehaviorService.triggerEvent(
-                    PetEvent.WRONG_ANSWER);
+            petBehavior = companionService.recordQuizOutcome(user, vocabulary, false);
         }
 
         return QuizAnswerResponse.builder()
@@ -115,6 +114,17 @@ public class QuizServiceImpl implements QuizService {
                 .xp(xp)
                 .coin(coin)
                 .petBehavior(petBehavior)
+                .build();
+    }
+
+    @SuppressWarnings("unused")
+    private PetBehaviorResponse fallbackQuizReaction(boolean correct) {
+        return PetBehaviorResponse.builder()
+                .mood(correct ? PetMood.HAPPY : PetMood.SAD)
+                .action(correct ? PetAction.HAPPY : PetAction.SAD)
+                .message(correct ? "Great job!" : "No worries — we'll learn it together.")
+                .priority(correct ? 2 : 1)
+                .duration(3)
                 .build();
     }
 

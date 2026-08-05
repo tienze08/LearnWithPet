@@ -47,11 +47,11 @@ public class MissionServiceImpl implements MissionService {
         updateMission(userId, MissionType.DESKTOP_QUIZ, 1);
     }
 
-    private void ensureMission(Long userId, DailyQuest quest) {
+    private UserMission ensureMission(Long userId, DailyQuest quest) {
 
         LocalDate today = LocalDate.now();
 
-        missionRepository
+        return missionRepository
                 .findByUserIdAndDailyQuestIdAndDate(
                         userId,
                         quest.getId(),
@@ -69,6 +69,7 @@ public class MissionServiceImpl implements MissionService {
     }
 
     @Scheduled(cron = "0 0 0 * * *")
+    @Override
     public void generateAllUsersMissions() {
         List<DailyQuest> quests = dailyQuestRepository.findByActiveTrue();
 
@@ -87,18 +88,14 @@ public class MissionServiceImpl implements MissionService {
             MissionType type,
             int increment) {
 
-        DailyQuest quest = dailyQuestRepository
-                .findByType(type)
-                .orElseThrow();
+        DailyQuest quest = dailyQuestRepository.findByType(type).orElse(null);
+        // A newly created/local database may not have seeded daily quests yet.
+        // Mission progress is optional and must never block an actual review.
+        if (quest == null) {
+            return;
+        }
 
-        ensureMission(userId, quest);
-
-        UserMission mission = missionRepository
-                .findByUserIdAndDailyQuestIdAndDate(
-                        userId,
-                        quest.getId(),
-                        LocalDate.now())
-                .orElseThrow();
+        UserMission mission = ensureMission(userId, quest);
 
         if (mission.isCompleted()) {
             return;
