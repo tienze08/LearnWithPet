@@ -1,6 +1,15 @@
 import type { PetBehaviorResponse } from "./pet";
 
 export type CompanionPersonality = "GENTLE" | "PLAYFUL" | "FOCUSED";
+export type PetIntent =
+  | "REST"
+  | "MORNING_GREETING"
+  | "RECONNECT"
+  | "USUAL_STUDY_TIME"
+  | "REVISIT_TRICKY_WORD"
+  | "INVITE_STUDY"
+  | "CELEBRATE_PROGRESS"
+  | "AMBIENT_WAITING";
 export type CompanionEventType =
   | "APP_OPENED"
   | "STUDY_STARTED"
@@ -23,6 +32,11 @@ export interface CompanionStateResponse {
   streak: number;
   reviewsToday: number;
   dailyGoal: number;
+  daysTogether: number;
+  totalSessionsTogether: number;
+  usualStudyHour: number;
+  frequentlyWrongWord: string | null;
+  intent: PetIntent;
   reaction: PetBehaviorResponse;
 }
 

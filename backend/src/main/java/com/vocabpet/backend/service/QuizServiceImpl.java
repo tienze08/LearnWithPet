@@ -47,6 +47,7 @@ public class QuizServiceImpl implements QuizService {
     private final MissionService missionService;
     private final StreakService streakService;
     private final AchievementService achievementService;
+    private final CompanionService companionService;
 
     @Override
     public QuizQuestionResponse randomQuestion() {
@@ -100,11 +101,11 @@ public class QuizServiceImpl implements QuizService {
             missionService.trackQuiz(user.getId());
             achievementService.recordQuizReview(user);
 
-            petBehavior = fallbackQuizReaction(true);
+            petBehavior = companionService.recordQuizOutcome(user, vocabulary, true);
 
         } else {
 
-            petBehavior = fallbackQuizReaction(false);
+            petBehavior = companionService.recordQuizOutcome(user, vocabulary, false);
         }
 
         return QuizAnswerResponse.builder()
@@ -116,6 +117,7 @@ public class QuizServiceImpl implements QuizService {
                 .build();
     }
 
+    @SuppressWarnings("unused")
     private PetBehaviorResponse fallbackQuizReaction(boolean correct) {
         return PetBehaviorResponse.builder()
                 .mood(correct ? PetMood.HAPPY : PetMood.SAD)

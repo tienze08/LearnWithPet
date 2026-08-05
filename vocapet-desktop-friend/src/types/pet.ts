@@ -1,15 +1,16 @@
 export type PetMood =
   | "HAPPY"
   | "SAD"
-  | "CRY"
   | "CRYING"
   | "WAITING";
 
 export type PetAction =
   | "IDLE"
   | "WALK"
+  | "THINK"
   | "HAPPY"
   | "SAD"
+  | "CRY"
   | "SLEEP"
   | "CELEBRATE"
   | "STUDY";

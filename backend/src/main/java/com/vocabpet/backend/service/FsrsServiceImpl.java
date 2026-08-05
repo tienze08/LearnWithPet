@@ -38,34 +38,24 @@ public class FsrsServiceImpl implements FsrsService {
         double stabilityFactor;
         double difficultyDelta;
 
-        switch (rating) {
-
-            case AGAIN -> {
-                stabilityFactor = 0.3;
-                difficultyDelta = 0.2;
-
-                lapses++;
-            }
-
-            case HARD -> {
-                stabilityFactor = 0.9;
-                difficultyDelta = 0.05;
-            }
-
-            case GOOD -> {
-                stabilityFactor = 1.2;
-                difficultyDelta = -0.02;
-            }
-
-            case EASY -> {
-                stabilityFactor = 1.6;
-                difficultyDelta = -0.05;
-            }
-
-            default -> {
-                stabilityFactor = 1.0;
-                difficultyDelta = 0;
-            }
+        // Avoid an enum-switch helper class here. A stale dev build can retain
+        // FsrsServiceImpl.class but miss its generated FsrsServiceImpl$1 class.
+        if (rating == Rating.AGAIN) {
+            stabilityFactor = 0.3;
+            difficultyDelta = 0.2;
+            lapses++;
+        } else if (rating == Rating.HARD) {
+            stabilityFactor = 0.9;
+            difficultyDelta = 0.05;
+        } else if (rating == Rating.GOOD) {
+            stabilityFactor = 1.2;
+            difficultyDelta = -0.02;
+        } else if (rating == Rating.EASY) {
+            stabilityFactor = 1.6;
+            difficultyDelta = -0.05;
+        } else {
+            stabilityFactor = 1.0;
+            difficultyDelta = 0;
         }
 
         // FSRS core update
