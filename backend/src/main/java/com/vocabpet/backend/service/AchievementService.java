@@ -8,7 +8,6 @@ import com.vocabpet.backend.entity.enums.AchievementType;
 import com.vocabpet.backend.repository.AchievementRepository;
 import com.vocabpet.backend.repository.StudyReviewRepository;
 import com.vocabpet.backend.repository.UserAchievementRepository;
-import jakarta.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -25,8 +24,9 @@ public class AchievementService {
     private final UserAchievementRepository userAchievementRepository;
     private final StudyReviewRepository studyReviewRepository;
 
-    @PostConstruct
-    void seedDefaults() {
+    /** Called after Hibernate has created/updated tables. */
+    @Transactional
+    public void seedDefaults() {
         seed("first-review", "First Steps", "Review your very first word.", 1, AchievementType.STUDY_WORD);
         seed("reviews-50", "Getting Warm", "Review 50 words in total.", 50, AchievementType.STUDY_WORD);
         seed("reviews-250", "Bookworm", "Review 250 words in total.", 250, AchievementType.STUDY_WORD);
