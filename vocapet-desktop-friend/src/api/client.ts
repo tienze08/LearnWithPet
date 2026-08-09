@@ -1,5 +1,13 @@
 const API_URL = (import.meta.env.VITE_API_URL ?? "http://localhost:8080").replace(/\/$/, "");
 
+function clearExpiredSession() {
+  localStorage.removeItem("vocapet_token");
+  localStorage.removeItem("vocapet_refresh_token");
+  if (window.location.pathname !== "/login" && window.location.pathname !== "/register") {
+    window.location.assign("/login");
+  }
+}
+
 export async function apiFetch<T>(
   endpoint: string,
   options?: RequestInit,
@@ -28,8 +36,14 @@ export async function apiFetch<T>(
         const session = await refreshResponse.json();
         localStorage.setItem("vocapet_token", session.token);
         response = await request(session.token);
+      } else {
+        clearExpiredSession();
       }
     }
+  }
+
+  if (response.status === 401) {
+    clearExpiredSession();
   }
 
   if (response.status === 204) {

@@ -19,6 +19,12 @@ interface Props {
   deckId: number;
 }
 
+function scheduleMessage(rating: "AGAIN" | "HARD" | "GOOD" | "EASY", nextReviewTime: string) {
+  if (rating === "AGAIN") return "Pip will bring this word back in about 10 minutes.";
+  const next = new Date(nextReviewTime);
+  return `Next review: ${next.toLocaleDateString([], { month: "short", day: "numeric" })}.`;
+}
+
 const RATINGS = [
   {
     label: "Again",
@@ -51,6 +57,7 @@ export default function StudySessionFlashcards({ deckId }: Props) {
   const [flipped, setFlipped] = useState(false);
   const [showStreak, setShowStreak] = useState(false);
   const [streak, setStreak] = useState(0);
+  const [scheduleNotice, setScheduleNotice] = useState<string | null>(null);
 
   const startMutation = useStartStudySessionMutation();
   const finishMutation = useFinishStudySessionMutation();
@@ -146,7 +153,7 @@ export default function StudySessionFlashcards({ deckId }: Props) {
       rating,
     });
 
-    console.log(result);
+    setScheduleNotice(scheduleMessage(rating, result.nextReviewTime));
 
     if (result.streakUpdated) {
       setStreak(result.currentStreak);
@@ -161,6 +168,15 @@ export default function StudySessionFlashcards({ deckId }: Props) {
       <StreakPopup open={showStreak} streak={streak} onClose={() => setShowStreak(false)} />
 
       <div className="max-w-xl mx-auto space-y-4">
+        {scheduleNotice && (
+          <motion.p
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-xl border border-primary/20 bg-primary/5 px-3 py-2 text-center text-sm text-muted-foreground"
+          >
+            {scheduleNotice}
+          </motion.p>
+        )}
         <div onClick={() => setFlipped((f) => !f)} className="cursor-pointer">
           <AnimatePresence mode="wait">
             <motion.div
@@ -229,6 +245,7 @@ export default function StudySessionFlashcards({ deckId }: Props) {
               <Button
                 key={rating.value}
                 onClick={() => review(rating.value)}
+                disabled={reviewMutation.isPending}
                 className={rating.className}
               >
                 {rating.label}

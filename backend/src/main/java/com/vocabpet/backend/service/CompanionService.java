@@ -12,4 +12,5 @@ public interface CompanionService {
     CompanionStateResponse recordEvent(CompanionEventRequest request);
     CompanionStateResponse updatePreferences(CompanionPreferencesRequest request);
     PetBehaviorResponse recordQuizOutcome(User user, Vocabulary vocabulary, boolean correct);
+    PetBehaviorResponse recordReviewOutcome(User user, Vocabulary vocabulary, boolean correct);
 }
