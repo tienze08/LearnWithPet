@@ -51,15 +51,23 @@ public class QuizServiceImpl implements QuizService {
 
     @Override
     public QuizQuestionResponse randomQuestion() {
+        User user = currentUserService.getCurrentUser();
 
-        Vocabulary vocabulary = vocabularyRepository.findRandomVocabulary()
-                .orElseThrow(() -> new RuntimeException("No vocabulary available"));
+        // Companion quizzes reinforce real FSRS work. The oldest due card is
+        // always selected first; an unseen card is used only when nothing is due.
+        Vocabulary vocabulary = progressRepository
+                .findDueCardsForQuiz(user.getId(), LocalDateTime.now())
+                .stream()
+                .findFirst()
+                .map(UserVocabularyProgress::getVocabulary)
+                .orElseGet(() -> progressRepository.findNewCardsForQuiz(user.getId()).stream().findFirst()
+                        .orElseThrow(() -> new RuntimeException("No words available to review")));
 
         return QuizQuestionResponse.builder()
                 .vocabularyId(vocabulary.getId())
                 .word(vocabulary.getWord())
                 .partOfSpeech(vocabulary.getPartOfSpeech().name())
-                .options(buildOptions(vocabulary))
+                .options(buildOptions(vocabulary, user.getId()))
                 .build();
     }
 
@@ -69,8 +77,8 @@ public class QuizServiceImpl implements QuizService {
 
         User user = currentUserService.getCurrentUser();
 
-        Vocabulary vocabulary = vocabularyRepository.findById(request.getVocabularyId())
-                .orElseThrow(() -> new RuntimeException("Vocabulary not found"));
+        Vocabulary vocabulary = vocabularyRepository.findByIdAndDeckUserId(request.getVocabularyId(), user.getId())
+                .orElseThrow(() -> new RuntimeException("Vocabulary not found for this user"));
 
         boolean correct = vocabulary.getMeaning()
                 .trim()
@@ -128,22 +136,21 @@ public class QuizServiceImpl implements QuizService {
                 .build();
     }
 
-    private List<String> buildOptions(Vocabulary correctVocabulary) {
+    private List<String> buildOptions(Vocabulary correctVocabulary, Long userId) {
 
         List<String> options = new ArrayList<>();
 
         options.add(correctVocabulary.getMeaning());
 
-        List<Vocabulary> wrongAnswers = vocabularyRepository.findRandomWrongOptions(
-                correctVocabulary.getId());
-
-        for (Vocabulary vocabulary : wrongAnswers) {
-            options.add(vocabulary.getMeaning());
+        for (Vocabulary vocabulary : vocabularyRepository.findByDeckUserId(userId)) {
+            if (!vocabulary.getId().equals(correctVocabulary.getId())
+                    && !options.contains(vocabulary.getMeaning())) {
+                options.add(vocabulary.getMeaning());
+            }
         }
 
         Collections.shuffle(options);
-
-        return options;
+        return options.stream().limit(4).toList();
     }
 
     private void recordQuizAttempt(User user, Vocabulary vocabulary, Rating rating) {

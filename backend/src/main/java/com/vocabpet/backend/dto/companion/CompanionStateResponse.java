@@ -20,6 +20,7 @@ public class CompanionStateResponse {
     private int quietHoursEnd;
     private int streak;
     private long reviewsToday;
+    private long dueReviews;
     private int dailyGoal;
     private long daysTogether;
     private long totalSessionsTogether;

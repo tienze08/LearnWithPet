@@ -21,6 +21,7 @@ import com.vocabpet.backend.repository.CompanionProfileRepository;
 import com.vocabpet.backend.repository.CompanionWordMemoryRepository;
 import com.vocabpet.backend.repository.PetRepository;
 import com.vocabpet.backend.repository.StudyReviewRepository;
+import com.vocabpet.backend.repository.UserVocabularyProgressRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -40,6 +41,7 @@ public class CompanionServiceImpl implements CompanionService {
     private final CompanionMemoryRepository memoryRepository;
     private final CompanionWordMemoryRepository wordMemoryRepository;
     private final StudyReviewRepository studyReviewRepository;
+    private final UserVocabularyProgressRepository progressRepository;
 
     @Override
     @Transactional
@@ -90,12 +92,13 @@ public class CompanionServiceImpl implements CompanionService {
         LocalDateTime start = LocalDate.now().atStartOfDay();
         long reviewsToday = studyReviewRepository.countByUserIdAndReviewedAtBetween(user.getId(), start,
                 start.plusDays(1));
+        long dueReviews = progressRepository.countDueCards(user.getId(), now);
         return CompanionStateResponse.builder()
                 .petName(pet.getName()).species(pet.getSpecies()).petLevel(pet.getLevel())
                 .personality(profile.getPersonality()).energy(memory.getEnergy())
                 .remindersEnabled(profile.isRemindersEnabled())
                 .quietHoursStart(profile.getQuietHoursStart()).quietHoursEnd(profile.getQuietHoursEnd())
-                .streak(user.getStreak()).reviewsToday(reviewsToday).dailyGoal(DAILY_GOAL)
+                .streak(user.getStreak()).reviewsToday(reviewsToday).dueReviews(dueReviews).dailyGoal(DAILY_GOAL)
                 .daysTogether(memory.getFirstStudyDate() == null ? 0
                         : ChronoUnit.DAYS.between(memory.getFirstStudyDate(), LocalDate.now()) + 1)
                 .totalSessionsTogether(memory.getTotalSessionsTogether())
@@ -192,6 +195,12 @@ public class CompanionServiceImpl implements CompanionService {
         return reaction(PetMood.HAPPY, PetAction.HAPPY, line(profile.getPersonality(), "You got it!"), 2, 3);
     }
 
+    @Override
+    @Transactional
+    public PetBehaviorResponse recordReviewOutcome(User user, Vocabulary vocabulary, boolean correct) {
+        return recordQuizOutcome(user, vocabulary, correct);
+    }
+
     private int rollingHour(int previousHour, long totalSessions, int currentHour) {
         if (previousHour < 0 || totalSessions <= 1) return currentHour;
         return (int) Math.round(((previousHour * (totalSessions - 1)) + currentHour) / (double) totalSessions);
@@ -213,6 +222,13 @@ public class CompanionServiceImpl implements CompanionService {
             memory.setLastReminderAt(now);
             return reaction(PetMood.WAITING, PetAction.IDLE,
                     "It's almost our usual study time. Ready for a quick session together?", 2, 6);
+        }
+        long dueReviews = progressRepository.countDueCards(user.getId(), now);
+        if (profile.isRemindersEnabled() && dueReviews > 0 && canNudge(memory, now, 3)) {
+            memory.setLastReminderAt(now);
+            String noun = dueReviews == 1 ? "card is" : "cards are";
+            return reaction(PetMood.WAITING, PetAction.STUDY,
+                    "I picked " + dueReviews + " " + noun + " ready for review. Let's study together.", 2, 6);
         }
         String trickyWord = mostDifficultWord(profile);
         if (profile.isRemindersEnabled() && trickyWord != null && canNudge(memory, now, 6)) {
@@ -248,6 +264,9 @@ public class CompanionServiceImpl implements CompanionService {
         if (profile.isRemindersEnabled() && memory.getUsualStudyHour() >= 0
                 && Math.abs(now.getHour() - memory.getUsualStudyHour()) <= 1 && canNudge(memory, now, 12))
             return PetIntent.USUAL_STUDY_TIME;
+        if (profile.isRemindersEnabled() && progressRepository.countDueCards(user.getId(), now) > 0
+                && canNudge(memory, now, 3))
+            return PetIntent.INVITE_STUDY;
         if (profile.isRemindersEnabled() && mostDifficultWord(profile) != null && canNudge(memory, now, 6))
             return PetIntent.REVISIT_TRICKY_WORD;
         if (profile.isRemindersEnabled() && user.getLastStudyAt() != null

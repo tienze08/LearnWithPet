@@ -114,6 +114,14 @@ public class StudySessionServiceImpl implements StudySessionService {
 
                 Long userId = session.getUser().getId();
 
+                if (request == null || request.getVocabularyId() == null || request.getRating() == null) {
+                        throw new IllegalArgumentException("A vocabulary and rating are required");
+                }
+
+                Vocabulary vocabulary = vocabularyRepository.findByIdAndDeckId(
+                                request.getVocabularyId(), session.getDeck().getId())
+                                .orElseThrow(() -> new RuntimeException("Vocabulary is not in this study deck"));
+
                 var progressOptional = progressRepository.findByUserIdAndVocabularyId(
                                 userId,
                                 request.getVocabularyId());
@@ -122,7 +130,7 @@ public class StudySessionServiceImpl implements StudySessionService {
 
                 UserVocabularyProgress progress = progressOptional.orElseGet(() -> UserVocabularyProgress.builder()
                                 .user(session.getUser())
-                                .vocabulary(vocabularyRepository.getReferenceById(request.getVocabularyId()))
+                                .vocabulary(vocabulary)
                                 .build());
 
                 // FSRS UPDATE
@@ -152,15 +160,14 @@ public class StudySessionServiceImpl implements StudySessionService {
                 StreakUpdateResult streakResult = streakService.updateMyStreak();
                 achievementService.checkForUser(session.getUser());
 
-                CompanionEventRequest companionEvent = new CompanionEventRequest();
-                companionEvent.setEvent(CompanionEventType.REVIEW_COMPLETED);
+                boolean correct = request.getRating() != com.vocabpet.backend.entity.enums.Rating.AGAIN;
 
                 return ReviewResponse.builder()
                                 .nextReviewTime(progress.getNextReviewTime())
                                 .streakUpdated(streakResult.isUpdated())
                                 .currentStreak(streakResult.getCurrentStreak())
                                 .longestStreak(streakResult.getLongestStreak())
-                                .companionReaction(companionService.recordEvent(companionEvent).getReaction())
+                                .companionReaction(companionService.recordReviewOutcome(session.getUser(), vocabulary, correct))
                                 .build();
         }
 

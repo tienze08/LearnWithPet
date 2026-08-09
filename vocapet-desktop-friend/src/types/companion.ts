@@ -31,6 +31,7 @@ export interface CompanionStateResponse {
   quietHoursEnd: number;
   streak: number;
   reviewsToday: number;
+  dueReviews: number;
   dailyGoal: number;
   daysTogether: number;
   totalSessionsTogether: number;
