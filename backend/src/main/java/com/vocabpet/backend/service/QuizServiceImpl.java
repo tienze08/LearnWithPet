@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.vocabpet.backend.dto.PetRe.PetBehaviorResponse;
 import com.vocabpet.backend.dto.QuizRe.QuizAnswerRequest;
@@ -58,10 +60,17 @@ public class QuizServiceImpl implements QuizService {
         Vocabulary vocabulary = progressRepository
                 .findDueCardsForQuiz(user.getId(), LocalDateTime.now())
                 .stream()
-                .findFirst()
+                // This second ownership check protects users from legacy progress
+                // rows that may have been created before quizzes were user-scoped.
+                .filter(progress -> progress.getVocabulary() != null
+                        && progress.getVocabulary().getDeck() != null
+                        && progress.getVocabulary().getDeck().getUser() != null
+                        && user.getId().equals(progress.getVocabulary().getDeck().getUser().getId()))
                 .map(UserVocabularyProgress::getVocabulary)
+                .findFirst()
                 .orElseGet(() -> progressRepository.findNewCardsForQuiz(user.getId()).stream().findFirst()
-                        .orElseThrow(() -> new RuntimeException("No words available to review")));
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                "No words available to review for this user")));
 
         return QuizQuestionResponse.builder()
                 .vocabularyId(vocabulary.getId())
@@ -78,7 +87,8 @@ public class QuizServiceImpl implements QuizService {
         User user = currentUserService.getCurrentUser();
 
         Vocabulary vocabulary = vocabularyRepository.findByIdAndDeckUserId(request.getVocabularyId(), user.getId())
-                .orElseThrow(() -> new RuntimeException("Vocabulary not found for this user"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.CONFLICT,
+                        "This quiz card is no longer available. Please get a new question."));
 
         boolean correct = vocabulary.getMeaning()
                 .trim()

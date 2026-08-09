@@ -22,6 +22,7 @@ public interface UserVocabularyProgressRepository
                         SELECT p
                         FROM UserVocabularyProgress p
                         WHERE p.user.id=:userId
+                        AND p.vocabulary.deck.user.id=:userId
                         AND p.vocabulary.deck.id=:deckId
                         AND (p.nextReviewTime IS NULL OR p.nextReviewTime<=:now)
                         ORDER BY p.nextReviewTime ASC
@@ -36,6 +37,7 @@ public interface UserVocabularyProgressRepository
                         SELECT p
                         FROM UserVocabularyProgress p
                         WHERE p.user.id=:userId
+                        AND p.vocabulary.deck.user.id=:userId
                         AND (p.nextReviewTime IS NULL OR p.nextReviewTime<=:now)
                         ORDER BY p.nextReviewTime ASC
                         """)
@@ -47,6 +49,7 @@ public interface UserVocabularyProgressRepository
                         SELECT COUNT(p)
                         FROM UserVocabularyProgress p
                         WHERE p.user.id=:userId
+                        AND p.vocabulary.deck.user.id=:userId
                         AND (p.nextReviewTime IS NULL OR p.nextReviewTime<=:now)
                         """)
         long countDueCards(Long userId, LocalDateTime now);
