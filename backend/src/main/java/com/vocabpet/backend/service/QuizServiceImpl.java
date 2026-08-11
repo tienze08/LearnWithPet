@@ -53,12 +53,20 @@ public class QuizServiceImpl implements QuizService {
 
     @Override
     public QuizQuestionResponse randomQuestion() {
+        return randomQuestion(null);
+    }
+
+    @Override
+    public QuizQuestionResponse randomQuestion(Long deckId) {
         User user = currentUserService.getCurrentUser();
 
         // Companion quizzes reinforce real FSRS work. The oldest due card is
-        // always selected first; an unseen card is used only when nothing is due.
-        Vocabulary vocabulary = progressRepository
-                .findDueCardsForQuiz(user.getId(), LocalDateTime.now())
+        // selected first, then an unseen card. Practice remains available even
+        // when every card is scheduled for the future.
+        List<UserVocabularyProgress> dueCards = deckId == null
+                ? progressRepository.findDueCardsForQuiz(user.getId(), LocalDateTime.now())
+                : progressRepository.findDueCardsForQuizAndDeck(user.getId(), deckId, LocalDateTime.now());
+        Vocabulary vocabulary = dueCards
                 .stream()
                 // This second ownership check protects users from legacy progress
                 // rows that may have been created before quizzes were user-scoped.
@@ -68,9 +76,11 @@ public class QuizServiceImpl implements QuizService {
                         && user.getId().equals(progress.getVocabulary().getDeck().getUser().getId()))
                 .map(UserVocabularyProgress::getVocabulary)
                 .findFirst()
-                .orElseGet(() -> progressRepository.findNewCardsForQuiz(user.getId()).stream().findFirst()
-                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                "No words available to review for this user")));
+                .orElseGet(() -> (deckId == null
+                        ? progressRepository.findNewCardsForQuiz(user.getId())
+                        : progressRepository.findNewCards(user.getId(), deckId))
+                        .stream().findFirst()
+                        .orElseGet(() -> practiceVocabularyFor(user, deckId)));
 
         return QuizQuestionResponse.builder()
                 .vocabularyId(vocabulary.getId())
@@ -78,6 +88,16 @@ public class QuizServiceImpl implements QuizService {
                 .partOfSpeech(vocabulary.getPartOfSpeech().name())
                 .options(buildOptions(vocabulary, user.getId()))
                 .build();
+    }
+
+    private Vocabulary practiceVocabularyFor(User user, Long deckId) {
+        List<Vocabulary> vocabulary = deckId == null
+                ? vocabularyRepository.findByDeckUserId(user.getId())
+                : vocabularyRepository.findByDeckIdAndDeckUserId(deckId, user.getId());
+        return vocabulary.stream()
+                .findFirst()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Add a word to one of your decks before starting a quiz."));
     }
 
     @Override

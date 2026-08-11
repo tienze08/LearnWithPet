@@ -35,14 +35,15 @@ function Dashboard() {
   return (
     <div className="space-y-6">
       {/* Hero card */}
-      <div className="rounded-3xl border-2 border-border from-primary/15 via-accent to-secondary p-6 card-pop flex flex-col md:flex-row gap-6 items-center">
+      <div className="relative overflow-hidden rounded-[2rem] border border-border/80 bg-card/75 p-7 md:p-8 card-pop flex flex-col md:flex-row gap-7 items-center">
+        <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
         <Pet variant={petVariant} stage={petStage} mood={petMood} size={140} />
         <div className="flex-1 text-center md:text-left">
-          <p className="text-xs font-bold uppercase text-primary">Good to see you, {userName}</p>
-          <h1 className="text-3xl font-extrabold mt-1">
+          <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">Your study space</p>
+          <h1 className="text-3xl font-extrabold mt-2 tracking-tight md:text-4xl">
             {petName} is feeling <span className="capitalize">{petMood}</span>
           </h1>
-          <p className="text-muted-foreground mt-1 text-sm max-w-md">
+          <p className="text-muted-foreground mt-3 text-sm leading-relaxed max-w-md">
             Your desktop companion reacts to your learning momentum. It will pop up every{" "}
             {state.popupIntervalMin} min with a quick review or mini quiz.
           </p>
@@ -99,7 +100,7 @@ function Dashboard() {
                 key={d.id}
                 to="/app/decks/$deckId"
                 params={{ deckId: String(d.id) }}
-                className="rounded-2xl border-2 border-border bg-card p-4 card-pop hover:border-primary transition-colors"
+            className="rounded-2xl border border-border bg-card/80 p-5 card-pop transition-all hover:-translate-y-0.5 hover:border-primary/50"
               >
                 <div
                   className={`w-12 h-12 rounded-xl ${d.color} flex items-center justify-center text-2xl`}
@@ -122,7 +123,7 @@ function Dashboard() {
       {/* Recent activity */}
       <div>
         <h2 className="text-xl font-extrabold mb-3">Recently studied words</h2>
-        <div className="rounded-2xl border-2 border-border bg-card card-pop divide-y">
+        <div className="overflow-hidden rounded-2xl border border-border bg-card/80 card-pop divide-y">
           {recentReviews.map((review, i) => {
             const w = { word: review.word, meaning: review.meaning };
             const r = { correct: review.rating !== "AGAIN" };
@@ -178,7 +179,7 @@ function StatCard({
   progress?: number;
 }) {
   return (
-    <div className="rounded-2xl border-2 border-border bg-card p-4 card-pop">
+    <div className="rounded-2xl border border-border bg-card/80 p-5 card-pop">
       <div className="flex items-center gap-2 text-xs font-bold uppercase text-muted-foreground">
         {icon}
         {label}

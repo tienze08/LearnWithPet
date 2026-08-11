@@ -4,6 +4,7 @@ import com.vocabpet.backend.dto.PetRe.PetBehaviorResponse;
 import com.vocabpet.backend.dto.companion.CompanionEventRequest;
 import com.vocabpet.backend.dto.companion.CompanionPreferencesRequest;
 import com.vocabpet.backend.dto.companion.CompanionStateResponse;
+import com.vocabpet.backend.dto.companion.LearningProfileResponse;
 import com.vocabpet.backend.entity.CompanionMemory;
 import com.vocabpet.backend.entity.CompanionProfile;
 import com.vocabpet.backend.entity.CompanionWordMemory;
@@ -29,6 +30,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -42,12 +44,19 @@ public class CompanionServiceImpl implements CompanionService {
     private final CompanionWordMemoryRepository wordMemoryRepository;
     private final StudyReviewRepository studyReviewRepository;
     private final UserVocabularyProgressRepository progressRepository;
+    private final LearningProfileService learningProfileService;
 
     @Override
     @Transactional
     public CompanionStateResponse getState() {
         User user = currentUserService.getCurrentUser();
         return stateFor(user, null);
+    }
+
+    @Override
+    @Transactional
+    public LearningProfileResponse getLearningProfile() {
+        return learningProfileService.profileFor(currentUserService.getCurrentUser());
     }
 
     @Override
@@ -77,6 +86,7 @@ public class CompanionServiceImpl implements CompanionService {
 
     private CompanionStateResponse stateFor(User user, CompanionEventType event) {
         LocalDateTime now = LocalDateTime.now();
+        LearningProfileResponse learningProfile = learningProfileService.profileFor(user);
         Pet pet = requiredPet(user);
         CompanionProfile profile = profileFor(pet, user);
         CompanionMemory memory = memoryFor(profile, now);
@@ -103,6 +113,7 @@ public class CompanionServiceImpl implements CompanionService {
                         : ChronoUnit.DAYS.between(memory.getFirstStudyDate(), LocalDate.now()) + 1)
                 .totalSessionsTogether(memory.getTotalSessionsTogether())
                 .usualStudyHour(memory.getUsualStudyHour())
+                .learningProfile(learningProfile)
                 .frequentlyWrongWord(mostDifficultWord(profile))
                 .intent(intent)
                 .reaction(reaction).build();
@@ -231,6 +242,14 @@ public class CompanionServiceImpl implements CompanionService {
                     "I picked " + dueReviews + " " + noun + " ready for review. Let's study together.", 2, 6);
         }
         String trickyWord = mostDifficultWord(profile);
+        LearningProfileResponse learningProfile = learningProfileService.profileFor(user);
+        if (profile.isRemindersEnabled() && learningProfile.getWeakestTopic() != null && canNudge(memory, now, 8)) {
+            memory.setLastReminderAt(now);
+            return reaction(PetMood.WAITING, PetAction.THINK,
+                    "Hmm, " + learningProfile.getWeakestTopic()
+                            + " words seem a little tricky. Want a quick five-card review?",
+                    2, 6);
+        }
         if (profile.isRemindersEnabled() && trickyWord != null && canNudge(memory, now, 6)) {
             memory.setLastReminderAt(now);
             return reaction(PetMood.WAITING, PetAction.THINK,
@@ -318,6 +337,8 @@ public class CompanionServiceImpl implements CompanionService {
 
     private PetBehaviorResponse appOpened(User user, CompanionProfile profile, CompanionMemory memory,
             LocalDateTime now) {
+        PetBehaviorResponse yesterdayRecall = yesterdayRecall(user, profile, memory, now);
+        if (yesterdayRecall != null) return yesterdayRecall;
         if (!isQuiet(profile, now) && now.getHour() >= 5 && now.getHour() < 11
                 && !now.toLocalDate().equals(memory.getLastGreetingDate())) {
             memory.setLastGreetingDate(now.toLocalDate());
@@ -325,6 +346,32 @@ public class CompanionServiceImpl implements CompanionService {
                     "Good morning, " + user.getName() + "! Ready to learn today?", 2, 6);
         }
         return ambientReaction(user, profile, memory, now);
+    }
+
+    /**
+     * A concrete, once-a-day recall prompt gives the pet continuity without
+     * making it repeat a generic greeting. We use saved study reviews, not a
+     * random vocabulary list, so every mentioned word belongs to this user.
+     */
+    private PetBehaviorResponse yesterdayRecall(User user, CompanionProfile profile, CompanionMemory memory,
+            LocalDateTime now) {
+        LocalDate today = now.toLocalDate();
+        if (isQuiet(profile, now) || today.equals(memory.getLastYesterdayRecallDate())) return null;
+
+        LocalDateTime yesterdayStart = today.minusDays(1).atStartOfDay();
+        List<com.vocabpet.backend.entity.StudyReview> reviews = studyReviewRepository.findOwnedReviewsBetween(
+                user.getId(), yesterdayStart, today.atStartOfDay());
+        if (reviews.isEmpty()) return null;
+
+        memory.setLastYesterdayRecallDate(today);
+        String message;
+        if (reviews.size() == 1) {
+            message = "Do you still remember " + reviews.getFirst().getVocabulary().getWord() + "?";
+        } else {
+            String word = reviews.getFirst().getVocabulary().getWord();
+            message = "We studied " + reviews.size() + " words yesterday. Do you still remember " + word + "?";
+        }
+        return reaction(PetMood.WAITING, PetAction.THINK, line(profile.getPersonality(), message), 2, 6);
     }
 
     private String studyStartLine(CompanionProfile profile, CompanionMemory memory) {

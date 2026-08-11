@@ -16,8 +16,8 @@ public class QuizController {
     private final QuizService quizService;
 
     @GetMapping("/random")
-    public QuizQuestionResponse randomQuestion() {
-        return quizService.randomQuestion();
+    public QuizQuestionResponse randomQuestion(@RequestParam(required = false) Long deckId) {
+        return quizService.randomQuestion(deckId);
     }
 
     @PostMapping("/answer")

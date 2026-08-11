@@ -33,6 +33,8 @@ public class CompanionMemory {
     private LocalDateTime lastBreakSuggestionAt;
     private LocalDateTime lastIntentAt;
     private LocalDate lastGreetingDate;
+    /** Prevents repeating the same yesterday-recall prompt after each refresh. */
+    private LocalDate lastYesterdayRecallDate;
 
     @Enumerated(EnumType.STRING)
     private com.vocabpet.backend.entity.enums.PetIntent lastIntent;

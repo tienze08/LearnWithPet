@@ -32,7 +32,7 @@ export default function Flashcards({ words, onAnswer }: FlashcardsProps) {
 
   return (
     <div className="mx-auto max-w-xl">
-      <p className="mb-3 text-center text-sm text-muted-foreground">
+      <p className="mb-4 text-center text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
         Card {(index % words.length) + 1} of {words.length}
       </p>
 
@@ -78,7 +78,7 @@ export default function Flashcards({ words, onAnswer }: FlashcardsProps) {
       </div>
 
       <div className="mt-5 grid grid-cols-2 gap-3">
-        <Button variant="outline" className="h-12 border-2" onClick={() => nextCard(false)}>
+        <Button variant="outline" className="h-12" onClick={() => nextCard(false)}>
           Still learning
         </Button>
 

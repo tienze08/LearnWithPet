@@ -45,10 +45,12 @@ export default function QuizGame({ words, allWords, onAnswer }: QuizGameProps) {
   }
 
   return (
-    <div className="mx-auto max-w-xl rounded-3xl border-2 border-border bg-card p-6 card-pop">
-      <p className="text-xs font-bold uppercase text-muted-foreground">Pick the meaning</p>
+    <div className="mx-auto max-w-xl rounded-[2rem] border border-border bg-card/85 p-6 md:p-8 card-pop">
+      <div className="flex items-center justify-between text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
+        <span>Quick practice</span><span>Pick the meaning</span>
+      </div>
 
-      <h2 className="my-6 text-center text-4xl font-extrabold">{question.target.word}</h2>
+      <h2 className="my-8 text-center text-4xl font-extrabold tracking-tight md:text-5xl">{question.target.word}</h2>
 
       <div className="grid gap-2">
         {question.options.map((option) => {
@@ -72,12 +74,12 @@ export default function QuizGame({ words, allWords, onAnswer }: QuizGameProps) {
                   petEvents.emit({ type: "QUIZ_COMPLETED" });
                 }, 900);
               }}
-              className={`rounded-xl border-2 p-3 text-left text-sm transition-colors ${
+              className={`rounded-xl border p-4 text-left text-sm font-medium transition-all ${
                 picked !== null && isCorrect
                   ? "border-success bg-success/10 font-bold"
                   : picked !== null && isPicked && !isCorrect
                     ? "border-destructive bg-destructive/10"
-                    : "border-border hover:border-primary"
+                    : "border-border bg-card/70 hover:-translate-y-px hover:border-primary/60 hover:bg-primary/5"
               }`}
             >
               {option.meaning}

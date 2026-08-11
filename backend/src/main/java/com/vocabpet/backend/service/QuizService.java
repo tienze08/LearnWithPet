@@ -7,6 +7,7 @@ import com.vocabpet.backend.dto.QuizRe.QuizQuestionResponse;
 public interface QuizService {
 
     QuizQuestionResponse randomQuestion();
+    QuizQuestionResponse randomQuestion(Long deckId);
 
     QuizAnswerResponse answer(QuizAnswerRequest request);
 

@@ -81,8 +81,9 @@ export default function StudySessionFlashcards({ deckId }: Props) {
 
   if (!started) {
     return (
-      <div className="max-w-xl mx-auto rounded-3xl border-2 border-border bg-card p-10 text-center">
-        <h2 className="text-3xl font-bold">Ready to study?</h2>
+      <div className="max-w-xl mx-auto rounded-[2rem] border border-border bg-card/85 p-8 md:p-10 text-center card-pop">
+        <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">Focused session</p>
+        <h2 className="mt-2 text-3xl font-bold tracking-tight">Ready to study?</h2>
 
         <p className="mt-3 text-muted-foreground">Review today's due cards with FSRS.</p>
 
@@ -105,7 +106,7 @@ export default function StudySessionFlashcards({ deckId }: Props) {
     return (
       <>
         {streakPopup}
-        <div className="max-w-xl mx-auto rounded-3xl border-2 border-border bg-card p-10 text-center">
+        <div className="max-w-xl mx-auto rounded-[2rem] border border-border bg-card/85 p-10 text-center card-pop">
           <div className="text-6xl">🎉</div>
 
           <h2 className="mt-4 text-3xl font-extrabold">Finished!</h2>
@@ -115,7 +116,7 @@ export default function StudySessionFlashcards({ deckId }: Props) {
           </p>
 
           <Button variant="outline" className="mt-8 w-full h-12" disabled>
-            Reset Progress (Coming Soon)
+            Session complete
           </Button>
         </div>
       </>
@@ -167,7 +168,11 @@ export default function StudySessionFlashcards({ deckId }: Props) {
     <>
       <StreakPopup open={showStreak} streak={streak} onClose={() => setShowStreak(false)} />
 
-      <div className="max-w-xl mx-auto space-y-4">
+      <div className="max-w-xl mx-auto space-y-5">
+        <div className="flex items-center justify-between px-1 text-xs font-semibold text-muted-foreground">
+          <span>Study session</span>
+          <span>Tap the card to reveal</span>
+        </div>
         {scheduleNotice && (
           <motion.p
             initial={{ opacity: 0, y: 4 }}
@@ -195,11 +200,11 @@ export default function StudySessionFlashcards({ deckId }: Props) {
               }}
               className="
             relative
-            rounded-3xl
-            border-2
+            rounded-[2rem]
+            border
             border-border
             bg-card
-            p-8
+            p-8 md:p-10
             aspect-4/3
             min-h-420px
             card-pop
@@ -214,7 +219,7 @@ export default function StudySessionFlashcards({ deckId }: Props) {
                 <>
                   <p className="text-xs italic text-muted-foreground">{data.partOfSpeech}</p>
 
-                  <h2 className="text-4xl font-extrabold mt-2">{data.word}</h2>
+                  <h2 className="text-4xl font-extrabold mt-2 tracking-tight md:text-5xl">{data.word}</h2>
 
                   <button
                     onClick={(e) => {
@@ -240,7 +245,7 @@ export default function StudySessionFlashcards({ deckId }: Props) {
         </div>
 
         {flipped ? (
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {RATINGS.map((rating) => (
               <Button
                 key={rating.value}

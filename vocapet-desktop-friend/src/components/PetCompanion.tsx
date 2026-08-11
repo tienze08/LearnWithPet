@@ -155,7 +155,7 @@ export function PetCompanion() {
 
         invitationTimer = window.setTimeout(async () => {
           try {
-            const nextQuiz = await getQuiz();
+            const nextQuiz = await getQuiz(undefined);
             setQuiz(nextQuiz);
             setPicked(null);
             setAnswerResult(null);
@@ -390,7 +390,7 @@ export function PetCompanion() {
                 size="sm"
                 className="btn-pop h-7 text-xs"
                 onClick={async () => {
-                  const quiz = await getQuiz();
+                  const quiz = await getQuiz(undefined);
                   setQuiz(quiz);
                   setOpen(true);
                   triggerPetAnimation("STUDY");
@@ -515,6 +515,40 @@ export function PetCompanion() {
                   Let's revisit: {companionState.frequentlyWrongWord}
                 </p>
               )}
+              {companionState.learningProfile?.weakestTopic && (
+                <div className="mt-1">
+                  <p className="text-[11px] text-muted-foreground">
+                    Focus next: {companionState.learningProfile.weakestTopic}
+                    {companionState.learningProfile.averageQuizScore > 0
+                      ? ` (${companionState.learningProfile.averageQuizScore}% recent accuracy)`
+                      : ""}
+                  </p>
+                  {companionState.learningProfile.weakestDeckId && (
+                    <button
+                      className="mt-1 text-xs font-medium text-primary hover:underline"
+                      onClick={async () => {
+                        try {
+                          const quiz = await getQuiz(companionState.learningProfile.weakestDeckId!);
+                          setQuiz(quiz);
+                          setShowSettings(false);
+                          setOpen(true);
+                          triggerPetAnimation("THINK");
+                        } catch (error) {
+                          console.error("Weak-topic quiz failed", error);
+                          speakPet(`${state.petName}: I couldn't prepare that practice set yet.`, 1, 4);
+                        }
+                      }}
+                    >
+                      Practice {companionState.learningProfile.weakestTopic}
+                    </button>
+                  )}
+                </div>
+              )}
+              {companionState.learningProfile?.totalStudyMinutes > 0 && (
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  We have studied {companionState.learningProfile.totalStudyMinutes} minutes together.
+                </p>
+              )}
               <button
                 className="mt-1 text-xs font-medium text-primary hover:underline"
                 onClick={() => updateCompanionPreferences({ remindersEnabled: !companionState.remindersEnabled })}
@@ -543,12 +577,13 @@ export function PetCompanion() {
                 setShowSettings(false);
 
                 try {
-                  const quiz = await getQuiz();
+                  const quiz = await getQuiz(undefined);
                   setQuiz(quiz);
                   setOpen(true);
                   triggerPetAnimation("STUDY");
                 } catch (e) {
                   console.error(e);
+                  speakPet(`${state.petName}: Add a word to one of your decks, then we can practise together.`, 1, 5);
                 }
               }}
             >

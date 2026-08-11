@@ -36,9 +36,21 @@ export interface CompanionStateResponse {
   daysTogether: number;
   totalSessionsTogether: number;
   usualStudyHour: number;
+  learningProfile: LearningProfile;
   frequentlyWrongWord: string | null;
   intent: PetIntent;
   reaction: PetBehaviorResponse;
+}
+
+export interface LearningProfile {
+  totalWordsLearned: number;
+  totalReviews: number;
+  totalStudyMinutes: number;
+  averageQuizScore: number;
+  strongestTopic: string | null;
+  weakestTopic: string | null;
+  weakestDeckId: number | null;
+  preferredStudyHour: number;
 }
 
 export interface CompanionPreferences {

@@ -3,6 +3,7 @@ package com.vocabpet.backend.controller;
 import com.vocabpet.backend.dto.companion.CompanionEventRequest;
 import com.vocabpet.backend.dto.companion.CompanionPreferencesRequest;
 import com.vocabpet.backend.dto.companion.CompanionStateResponse;
+import com.vocabpet.backend.dto.companion.LearningProfileResponse;
 import com.vocabpet.backend.service.CompanionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,11 @@ public class CompanionController {
     @GetMapping("/state")
     public CompanionStateResponse state() {
         return companionService.getState();
+    }
+
+    @GetMapping("/learning-profile")
+    public LearningProfileResponse learningProfile() {
+        return companionService.getLearningProfile();
     }
 
     @PostMapping("/events")

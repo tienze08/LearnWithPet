@@ -46,6 +46,18 @@ public interface UserVocabularyProgressRepository
                         LocalDateTime now);
 
         @Query("""
+                        SELECT p
+                        FROM UserVocabularyProgress p
+                        WHERE p.user.id = :userId
+                        AND p.vocabulary.deck.user.id = :userId
+                        AND p.vocabulary.deck.id = :deckId
+                        AND (p.nextReviewTime IS NULL OR p.nextReviewTime <= :now)
+                        ORDER BY p.nextReviewTime ASC
+                        """)
+        List<UserVocabularyProgress> findDueCardsForQuizAndDeck(
+                        Long userId, Long deckId, LocalDateTime now);
+
+        @Query("""
                         SELECT COUNT(p)
                         FROM UserVocabularyProgress p
                         WHERE p.user.id=:userId
@@ -55,9 +67,18 @@ public interface UserVocabularyProgressRepository
         long countDueCards(Long userId, LocalDateTime now);
 
         @Query("""
+                        SELECT COUNT(p)
+                        FROM UserVocabularyProgress p
+                        WHERE p.user.id = :userId
+                        AND p.vocabulary.deck.user.id = :userId
+                        """)
+        long countOwnedByUserId(Long userId);
+
+        @Query("""
                         SELECT v
                         FROM Vocabulary v
                         WHERE v.deck.id=:deckId
+                        AND v.deck.user.id=:userId
                         AND v.id NOT IN (
                             SELECT p.vocabulary.id
                             FROM UserVocabularyProgress p
