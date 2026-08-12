@@ -33,6 +33,7 @@ public class FoxPersonality implements PetPersonality {
             case WALK -> "Khởi động thôi.";
 
             case SLEEP -> "Mai tiếp tục nhé!";
+            case THINK -> "Let me think this through~";
         };
     }
 }

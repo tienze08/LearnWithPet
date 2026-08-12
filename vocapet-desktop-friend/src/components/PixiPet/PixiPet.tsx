@@ -34,9 +34,13 @@ const PetCanvas = forwardRef<PetCanvasHandle, Props>(({ variant, stage, size, mo
   const spriteRef = useRef<PIXI.AnimatedSprite | null>(null);
 
   const controllerRef = useRef<AnimationController | null>(null);
+  const manualAnimationUntil = useRef(0);
 
   useImperativeHandle(ref, () => ({
     play(action) {
+      // A companion behavior (walk, think, celebrate…) is deliberate. Keep a
+      // simultaneous mood render from immediately replacing it with Idle.
+      manualAnimationUntil.current = Date.now() + 5000;
       controllerRef.current?.play(action);
     },
     setFacing(direction) {
@@ -117,7 +121,9 @@ const PetCanvas = forwardRef<PetCanvasHandle, Props>(({ variant, stage, size, mo
   }, [size, variant]);
 
   useEffect(() => {
-    if (mood) controllerRef.current?.play(actionForMood[mood]);
+    if (mood && Date.now() >= manualAnimationUntil.current) {
+      controllerRef.current?.play(actionForMood[mood]);
+    }
   }, [mood]);
 
   return (

@@ -16,7 +16,8 @@ import { reactionFor } from "@/lib/pet/behavior";
 import { petEvents } from "@/lib/pet/events";
 import type { UserResponse } from "@/types/user";
 import { useMeQuery } from "@/hooks/queries/user.queries";
-import { useCompanion } from "@/hooks/useCompanion";
+import { useCompanionEventMutation, useCompanionPreferencesMutation, useCompanionStateQuery } from "@/hooks/queries/companion.queries";
+import type { PetBehaviorResponse as ServerPetBehaviorResponse } from "@/types/pet";
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
@@ -46,22 +47,36 @@ function reminderFor(mood: PetMood, name: string, goal: number, progress: number
   }
 }
 
+const serverMood: Record<ServerPetBehaviorResponse["mood"], PetMood> = {
+  HAPPY: "happy",
+  SAD: "sad",
+  CRYING: "crying",
+  WAITING: "waiting",
+};
+
+function serverAction(action: ServerPetBehaviorResponse["action"]): PetAction {
+  return action === "CRY" ? "SAD" : action;
+}
+
 export function PetCompanion() {
   const petRef = useRef<PetHandle>(null);
   const queryClient = useQueryClient();
   const { state, setPetInterval, recordAnswer } = useGame();
   const { data: me } = useMeQuery();
-  const companion = useCompanion(me?.id, me?.name || state.petName, state.reviewHistory.length);
+  const { data: companionState, refetch: refreshCompanionState } = useCompanionStateQuery(Boolean(me?.pet));
   const [reminder, setReminder] = useState(false);
   const [open, setOpen] = useState(false);
   const [timeLeft, setTimeLeft] = useState(15);
   const [picked, setPicked] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [eventMood, setEventMood] = useState<PetMood | null>(null);
-  const [roamTarget, setRoamTarget] = useState({ x: 0, y: 0 });
-  const roamSideRef = useRef<"left" | "right">("right");
+  const [interrupting, setInterrupting] = useState(false);
+  const lastActivityAt = useRef(Date.now());
+  const interruptionInProgress = useRef(false);
 
   const { mutateAsync: getQuiz } = useRandomQuizMutation();
+  const { mutate: recordCompanionEvent } = useCompanionEventMutation();
+  const { mutate: updateCompanionPreferences } = useCompanionPreferencesMutation();
 
   const triggerPetAnimation = (action: PetAction = "STUDY") => {
     window.requestAnimationFrame(() => {
@@ -69,8 +84,22 @@ export function PetCompanion() {
     });
   };
 
+  const applyServerReaction = (reaction: ServerPetBehaviorResponse) => {
+    setEventMood(serverMood[reaction.mood]);
+    triggerPetAnimation(serverAction(reaction.action));
+    if (reaction.message) {
+      speakPet(`${state.petName}: ${reaction.message}`, reaction.priority, reaction.duration);
+    }
+    window.setTimeout(() => setEventMood(null), reaction.duration * 1000);
+  };
+
   useEffect(() => {
-    return petEvents.subscribe((event) => {
+    if (!me?.id || !me.pet) return;
+    recordCompanionEvent("APP_OPENED", { onSuccess: (snapshot) => applyServerReaction(snapshot.reaction) });
+  }, [me?.id]);
+
+  useEffect(() => {
+    const unsubscribe = petEvents.subscribe((event) => {
       const reaction = reactionFor(event);
       setEventMood(reaction.emotion);
       triggerPetAnimation(reaction.action);
@@ -83,13 +112,86 @@ export function PetCompanion() {
       }
       window.setTimeout(() => setEventMood(null), 1800);
     });
+    return () => {
+      unsubscribe();
+    };
   }, [state.petName]);
 
   useEffect(() => {
-    if (reminder || open || showSettings || typeof window === "undefined") return;
+    const markActivity = () => {
+      lastActivityAt.current = Date.now();
+    };
+    const events: Array<keyof WindowEventMap> = ["pointerdown", "keydown", "scroll", "touchstart"];
+    events.forEach((event) => window.addEventListener(event, markActivity, { passive: true }));
+    return () => events.forEach((event) => window.removeEventListener(event, markActivity));
+  }, []);
 
+  useEffect(() => {
+    if (reminder || open || typeof window === "undefined") return;
+
+    let approachTimer: number | undefined;
+    let invitationTimer: number | undefined;
     const timer = window.setTimeout(
       async () => {
+        // A reminder is deliberately a simple countdown: it should fire even
+        // while the companion settings panel is open or the user is active.
+        const notificationsActive = companionState?.remindersEnabled ?? true;
+        if (!notificationsActive) return;
+
+        // A real reminder changes Pip's state; it never triggers an ambient,
+        // context-free walk around the application.
+        interruptionInProgress.current = true;
+        setInterrupting(true);
+        setEventMood("waiting");
+        triggerPetAnimation("THINK");
+        speakPet(`${state.petName}: Hmm...`, 1, 2);
+
+        approachTimer = window.setTimeout(() => {
+          triggerPetAnimation("THINK");
+          speakPet(`${state.petName}: Hey! Quick question?`, 2, 3);
+        }, 850);
+
+        invitationTimer = window.setTimeout(async () => {
+          try {
+            const nextQuiz = await getQuiz(undefined);
+            setQuiz(nextQuiz);
+            setPicked(null);
+            setAnswerResult(null);
+            setReminder(false);
+            setOpen(true);
+            triggerPetAnimation("STUDY");
+          } catch (error) {
+            console.error("Pet reminder quiz failed", error);
+            speakPet(`${state.petName}: Let's review a word when you're ready.`, 1, 4);
+          } finally {
+            setInterrupting(false);
+            interruptionInProgress.current = false;
+          }
+        }, 2100);
+        return;
+
+        const remindersEnabled = companionState?.remindersEnabled ?? true;
+        if (!remindersEnabled || interruptionInProgress.current) return;
+
+        interruptionInProgress.current = true;
+        setInterrupting(true);
+        setEventMood("waiting");
+        triggerPetAnimation("THINK");
+        speakPet(`${state.petName}: Hmm…`, 1, 2);
+
+        approachTimer = window.setTimeout(() => {
+          triggerPetAnimation("WALK");
+          speakPet(`${state.petName}: I have a quick question for you.`, 1, 3);
+        }, 900);
+
+        invitationTimer = window.setTimeout(() => {
+          triggerPetAnimation("IDLE");
+          setReminder(true);
+          setInterrupting(false);
+          interruptionInProgress.current = false;
+          speakPet(`${state.petName}: Hey! Quick question?`, 2, 5);
+        }, 2300);
+        return;
         try {
           petEvents.emit({ type: "REMINDER_TRIGGERED" });
           setReminder(true);
@@ -100,8 +202,12 @@ export function PetCompanion() {
       state.popupIntervalMin * 60 * 1000,
     );
 
-    return () => window.clearTimeout(timer);
-  }, [open, reminder, showSettings, state.popupIntervalMin]);
+    return () => {
+      window.clearTimeout(timer);
+      if (approachTimer) window.clearTimeout(approachTimer);
+      if (invitationTimer) window.clearTimeout(invitationTimer);
+    };
+  }, [open, reminder, state.popupIntervalMin, companionState?.remindersEnabled, state.petName]);
 
   const [quiz, setQuiz] = useState<QuizQuestionResponse | null>(null);
   const studiedToday = state.lastStudyDate === todayISO();
@@ -114,36 +220,10 @@ export function PetCompanion() {
   const moodMeta = MOOD_META[state.petMood] ?? MOOD_META.waiting;
 
   useEffect(() => {
-    const canRoam = !open && !reminder && !showSettings;
-    if (!canRoam || typeof window === "undefined") {
-      setRoamTarget({ x: 0, y: 0 });
+    if (!open && !reminder && !showSettings && !interrupting) {
       triggerPetAnimation("IDLE");
-      return;
     }
-
-    let turnTimer: number | undefined;
-    const chooseNextSpot = () => {
-      const horizontalRoom = Math.min(340, Math.max(0, window.innerWidth - 170));
-      const nextSide = roamSideRef.current === "right" ? "left" : "right";
-
-      // Pause at each edge so the change is visibly a turn, rather than an
-      // instant mirrored slide while the pet is already moving.
-      triggerPetAnimation("IDLE");
-      turnTimer = window.setTimeout(() => {
-        roamSideRef.current = nextSide;
-        petRef.current?.setFacing(nextSide);
-        setRoamTarget({ x: nextSide === "left" ? -horizontalRoom : 0, y: 0 });
-        triggerPetAnimation("WALK");
-      }, 360);
-    };
-
-    chooseNextSpot();
-    const id = window.setInterval(chooseNextSpot, 6000);
-    return () => {
-      window.clearInterval(id);
-      if (turnTimer) window.clearTimeout(turnTimer);
-    };
-  }, [open, reminder, showSettings]);
+  }, [open, reminder, showSettings, interrupting]);
 
   useEffect(() => {
     const notes = [
@@ -152,13 +232,18 @@ export function PetCompanion() {
       "One question at a time — you've got this.",
       "Want to make your streak sparkle today?",
     ];
-    const id = setInterval(() => {
+    // Ask the behavior engine periodically. It may choose to stay quiet; unlike
+    // the previous implementation, this never chooses a random line locally.
+    const id = window.setInterval(() => {
       if (!open && !reminder) {
-        speakPet(`${state.petName}: ${notes[Math.floor(Math.random() * notes.length)]}`, 0, 4);
+        void refreshCompanionState().then(({ data }) => {
+          if (data?.reaction.message) applyServerReaction(data.reaction);
+        });
       }
     }, 90_000);
-    return () => clearInterval(id);
-  }, [open, reminder, state.petName]);
+    void notes;
+    return () => window.clearInterval(id);
+  }, [open, reminder, refreshCompanionState]);
 
   // auto-open quiz a few seconds after reminder appears
   useEffect(() => {
@@ -195,7 +280,18 @@ export function PetCompanion() {
     const result = await answerQuiz({
       vocabularyId: quiz.vocabularyId,
       answer: answer ?? "",
+    }).catch((error) => {
+      console.error("Quiz answer failed", error);
+      speakPet(`${state.petName}: I couldn't check that answer. Please try again.`, 2, 4);
+      window.setTimeout(() => {
+        setOpen(false);
+        setPicked(null);
+        setAnswerResult(null);
+      }, 1400);
+      return null;
     });
+
+    if (!result) return;
 
       setAnswerResult(result);
       recordAnswer(String(quiz.vocabularyId), result.correct, { xp: result.xp, coin: result.coin });
@@ -214,7 +310,13 @@ export function PetCompanion() {
         queryClient.invalidateQueries({ queryKey: ["me"] }),
       ]);
 
-    petEvents.emit({ type: result.correct ? "ANSWER_CORRECT" : "ANSWER_WRONG" });
+    applyServerReaction(result.petBehavior);
+    recordCompanionEvent(result.correct ? "ANSWER_CORRECT" : "ANSWER_WRONG", {
+      onSuccess: (snapshot) => applyServerReaction(snapshot.reaction),
+      onError: () => {
+        // The companion event is optional: quiz feedback must not be blocked by it.
+      },
+    });
 
     // Đợi người dùng xem kết quả
     setTimeout(() => {
@@ -260,7 +362,7 @@ export function PetCompanion() {
                 size="sm"
                 className="btn-pop h-7 text-xs"
                 onClick={async () => {
-                  const quiz = await getQuiz();
+                  const quiz = await getQuiz(undefined);
                   setQuiz(quiz);
                   setOpen(true);
                   triggerPetAnimation("STUDY");
@@ -337,7 +439,9 @@ export function PetCompanion() {
             </div>
             {picked !== null && (
               <p className="text-center mt-2 text-xs font-bold">
-                {answerResult?.correct ? (
+                {answerResult === null ? (
+                  <span className="text-muted-foreground">Checking your answer…</span>
+                ) : answerResult.correct ? (
                   <span className="text-success">✨ Amazing! +{answerResult.xp} XP · +{answerResult.coin} 🪙</span>
                 ) : (
                   <span className="text-destructive">😅 Don't worry — we'll learn together.</span>
@@ -368,6 +472,63 @@ export function PetCompanion() {
             Today: {state.dailyProgress}/{state.dailyGoal} reviews · {state.streak}d streak
           </p>
 
+          {companionState && (
+            <div className="mb-3 rounded-xl border border-border bg-muted/40 p-2">
+              <p className="text-xs font-semibold capitalize">
+                Companion · {companionState.personality.toLowerCase()} · Energy {companionState.energy}%
+              </p>
+              {companionState.daysTogether > 0 && (
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  Together {companionState.daysTogether} days · {companionState.totalSessionsTogether} study moments
+                </p>
+              )}
+              {companionState.frequentlyWrongWord && (
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  Let's revisit: {companionState.frequentlyWrongWord}
+                </p>
+              )}
+              {companionState.learningProfile?.weakestTopic && (
+                <div className="mt-1">
+                  <p className="text-[11px] text-muted-foreground">
+                    Focus next: {companionState.learningProfile.weakestTopic}
+                    {companionState.learningProfile.averageQuizScore > 0
+                      ? ` (${companionState.learningProfile.averageQuizScore}% recent accuracy)`
+                      : ""}
+                  </p>
+                  {companionState.learningProfile.weakestDeckId && (
+                    <button
+                      className="mt-1 text-xs font-medium text-primary hover:underline"
+                      onClick={async () => {
+                        try {
+                          const quiz = await getQuiz(companionState.learningProfile.weakestDeckId!);
+                          setQuiz(quiz);
+                          setShowSettings(false);
+                          setOpen(true);
+                          triggerPetAnimation("THINK");
+                        } catch (error) {
+                          console.error("Weak-topic quiz failed", error);
+                          speakPet(`${state.petName}: I couldn't prepare that practice set yet.`, 1, 4);
+                        }
+                      }}
+                    >
+                      Practice {companionState.learningProfile.weakestTopic}
+                    </button>
+                  )}
+                </div>
+              )}
+              {companionState.learningProfile?.totalStudyMinutes > 0 && (
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  We have studied {companionState.learningProfile.totalStudyMinutes} minutes together.
+                </p>
+              )}
+              <button
+                className="mt-1 text-xs font-medium text-primary hover:underline"
+                onClick={() => updateCompanionPreferences({ remindersEnabled: !companionState.remindersEnabled })}
+              >
+                {companionState.remindersEnabled ? "Pause companion reminders" : "Turn on companion reminders"}
+              </button>
+            </div>
+          )}
           <p className="text-xs font-bold uppercase text-muted-foreground mb-1.5">Learn now</p>
           <div className="grid grid-cols-3 gap-1.5 mb-3">
             <Button
@@ -388,12 +549,13 @@ export function PetCompanion() {
                 setShowSettings(false);
 
                 try {
-                  const quiz = await getQuiz();
+                  const quiz = await getQuiz(undefined);
                   setQuiz(quiz);
                   setOpen(true);
                   triggerPetAnimation("STUDY");
                 } catch (e) {
                   console.error(e);
+                  speakPet(`${state.petName}: Add a word to one of your decks, then we can practise together.`, 1, 5);
                 }
               }}
             >
@@ -431,22 +593,23 @@ export function PetCompanion() {
       {/* Floating pet */}
       <motion.div
         className="relative pointer-events-auto"
-        animate={roamTarget}
-        transition={{ duration: 5.5, ease: "easeInOut" }}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2 }}
       >
         <PetSpeechBubble />
 
         <button
           onClick={() => setShowSettings((v) => !v)}
           aria-label="Open pet"
-          className="hover:scale-105 transition-transform"
+          className="p-0 transition-transform hover:scale-[1.03]"
         >
-          <div className="w-20 h-20 flex items-center justify-center">
+          <div className="flex h-24 w-24 items-center justify-center">
             <Pet
               ref={petRef}
               variant={state.petVariant}
               stage={stageForLevel(state.petLevel)}
-              size={124}
+              size={104}
               mood={visibleMood}
             />
           </div>

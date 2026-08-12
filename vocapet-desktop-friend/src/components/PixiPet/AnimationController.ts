@@ -2,11 +2,11 @@ import * as PIXI from "pixi.js";
 
 import type { PetVariant } from "@/lib/store";
 import kittenAtlas from "@/assets/gray-study-kitten-6x8.png";
-import microAtlas from "@/assets/gray-study-kitten-micro-10x4-packed.png";
 import foxAtlas from "@/assets/fox-study-companion-6x8.png";
 import pandaAtlas from "@/assets/panda-study-companion-6x8.png";
 import bunnyAtlas from "@/assets/bunny-study-companion-6x8.png";
 import dragonAtlas from "@/assets/dragon-study-companion-6x8.png";
+import kittenMicroAtlas from "@/assets/gray-study-kitten-micro-5x4.png";
 
 export type PetAction =
   | "IDLE"
@@ -44,6 +44,8 @@ type MicroAction =
 
 type AnimationKey = PetAction | MicroAction;
 
+type MicroClip = { action: MicroAction; delay: number };
+
 const VARIANT_ATLASES: Record<PetVariant, string> = {
   CAT: kittenAtlas,
   FOX: foxAtlas,
@@ -59,7 +61,9 @@ export const PET_ANIMATIONS: Record<PetAction, AnimationConfig> = {
   JUMP: { source: kittenAtlas, columns: 8, rows: 6, row: 3, fps: 7 },
   STUDY: { source: kittenAtlas, columns: 8, rows: 6, row: 2, fps: 4 },
   WRITE: { source: kittenAtlas, columns: 8, rows: 6, row: 2, fps: 5 },
-  THINK: { source: kittenAtlas, columns: 8, rows: 6, row: 2, fps: 4 },
+  // The sheet has no separate thinking row. Idle is the correct neutral pose;
+  // micro head/ear motions add expression without showing a study card.
+  THINK: { source: kittenAtlas, columns: 8, rows: 6, row: 0, fps: 4 },
   CONFUSED: { source: kittenAtlas, columns: 8, rows: 6, row: 4, fps: 4 },
   SAD: { source: kittenAtlas, columns: 8, rows: 6, row: 4, fps: 4 },
   SLEEP: { source: kittenAtlas, columns: 8, rows: 6, row: 5, fps: 3 },
@@ -67,29 +71,40 @@ export const PET_ANIMATIONS: Record<PetAction, AnimationConfig> = {
   CELEBRATE: { source: kittenAtlas, columns: 8, rows: 6, row: 3, fps: 7 },
 };
 
-const MICRO_ANIMATIONS: Record<MicroAction, AnimationConfig> = {
-  BLINK: { source: microAtlas, columns: 4, rows: 10, row: 0, fps: 4 },
-  EAR_TWITCH: { source: microAtlas, columns: 4, rows: 10, row: 1, fps: 4 },
-  TAIL_WAG: { source: microAtlas, columns: 4, rows: 10, row: 2, fps: 4 },
-  HEAD_TILT: { source: microAtlas, columns: 4, rows: 10, row: 3, fps: 4 },
-  LOOK_AROUND: { source: microAtlas, columns: 4, rows: 10, row: 4, fps: 4 },
-  NOD: { source: microAtlas, columns: 4, rows: 10, row: 5, fps: 4 },
-  TURN_FLASHCARD: { source: microAtlas, columns: 4, rows: 10, row: 6, fps: 4 },
-  STRETCH: { source: microAtlas, columns: 4, rows: 10, row: 7, fps: 4 },
-  YAWN: { source: microAtlas, columns: 4, rows: 10, row: 8, fps: 4 },
-  DOZE_OFF: { source: microAtlas, columns: 4, rows: 10, row: 9, fps: 4 },
+const CAT_MICRO_ANIMATIONS: Record<MicroAction, AnimationConfig> = {
+  BLINK: { source: kittenMicroAtlas, columns: 4, rows: 5, row: 0, fps: 5 },
+  EAR_TWITCH: { source: kittenMicroAtlas, columns: 4, rows: 5, row: 1, fps: 5 },
+  TAIL_WAG: { source: kittenMicroAtlas, columns: 4, rows: 5, row: 2, fps: 5 },
+  NOD: { source: kittenMicroAtlas, columns: 4, rows: 5, row: 3, fps: 4 },
+  TURN_FLASHCARD: { source: kittenMicroAtlas, columns: 4, rows: 5, row: 4, fps: 4 },
+  HEAD_TILT: { source: kittenMicroAtlas, columns: 4, rows: 5, row: 0, fps: 4 },
+  LOOK_AROUND: { source: kittenMicroAtlas, columns: 4, rows: 5, row: 0, fps: 4 },
+  STRETCH: { source: kittenMicroAtlas, columns: 4, rows: 5, row: 0, fps: 4 },
+  YAWN: { source: kittenMicroAtlas, columns: 4, rows: 5, row: 0, fps: 4 },
+  DOZE_OFF: { source: kittenMicroAtlas, columns: 4, rows: 5, row: 3, fps: 4 },
 };
 
-const MICRO_ACTIONS: Partial<Record<PetAction, MicroAction[]>> = {
-  IDLE: ["TAIL_WAG", "HEAD_TILT", "LOOK_AROUND", "STRETCH", "YAWN", "BLINK", "EAR_TWITCH"],
-  STUDY: ["TURN_FLASHCARD", "NOD", "HEAD_TILT", "TAIL_WAG", "BLINK", "DOZE_OFF"],
-  WALK: ["TAIL_WAG", "EAR_TWITCH", "BLINK"],
+const MICRO_TIMELINES: Partial<Record<PetAction, MicroClip[]>> = {
+  IDLE: [
+    { action: "BLINK", delay: 5500 },
+    { action: "EAR_TWITCH", delay: 8200 },
+    { action: "TAIL_WAG", delay: 9200 },
+  ],
+  STUDY: [
+    { action: "NOD", delay: 5000 },
+    { action: "TURN_FLASHCARD", delay: 8500 },
+    { action: "BLINK", delay: 6200 },
+  ],
+  THINK: [
+    { action: "BLINK", delay: 4200 },
+    { action: "EAR_TWITCH", delay: 7200 },
+  ],
 };
 
 export default class AnimationController {
   private animations = new Map<AnimationKey, PIXI.Texture[]>();
 
-  private currentAction: PetAction | null = null;
+  private currentAction: AnimationKey | null = null;
 
   private sprite!: PIXI.AnimatedSprite;
 
@@ -98,6 +113,8 @@ export default class AnimationController {
   private baseAction: PetAction = "IDLE";
 
   private microTimer?: number;
+  private microTimelineIndex = 0;
+  private keyedTextures = new Map<string, PIXI.Texture>();
 
   constructor(private readonly variant: PetVariant = "CAT") {}
 
@@ -106,15 +123,21 @@ export default class AnimationController {
   //----------------------------------------
 
   async load() {
-    await Promise.all(
-      (Object.entries(PET_ANIMATIONS) as [PetAction, AnimationConfig][]).map(async ([action, config]) => {
-        const source = VARIANT_ATLASES[this.variant];
-        const texture = await PIXI.Assets.load(source);
-        const variantConfig = { ...config, source };
-        this.configs.set(action, variantConfig);
-        this.animations.set(action, this.buildFrames(texture, variantConfig));
-      }),
-    );
+    const source = VARIANT_ATLASES[this.variant];
+    const atlas = this.removeGreenBackground(await PIXI.Assets.load(source), source);
+    (Object.entries(PET_ANIMATIONS) as [PetAction, AnimationConfig][]).forEach(([action, config]) => {
+      const variantConfig = { ...config, source };
+      this.configs.set(action, variantConfig);
+      this.animations.set(action, this.buildFrames(atlas, variantConfig));
+    });
+
+    if (this.variant === "CAT") {
+      const microAtlas = await PIXI.Assets.load(kittenMicroAtlas);
+      (Object.entries(CAT_MICRO_ANIMATIONS) as [MicroAction, AnimationConfig][]).forEach(([action, config]) => {
+        this.configs.set(action, config);
+        this.animations.set(action, this.buildFrames(microAtlas, config));
+      });
+    }
 
     this.sprite = new PIXI.AnimatedSprite(this.animations.get("IDLE")!);
 
@@ -140,6 +163,7 @@ export default class AnimationController {
 
     this.baseAction = normalizedAction;
     this.clearMicroTimer();
+    this.microTimelineIndex = 0;
     this.setAnimation(normalizedAction, true);
     this.scheduleMicroAction();
   }
@@ -155,56 +179,31 @@ export default class AnimationController {
 
     if (!frames) return;
 
-    // Keep the same point in the animation cycle when changing states. Starting
-    // every sheet at frame 0 was the visible "jerk" between quiz reactions.
-    const progress = this.sprite.totalFrames > 0
-      ? this.sprite.currentFrame / this.sprite.totalFrames
-      : 0;
-
-    this.currentAction = action as PetAction;
+    this.currentAction = action;
     this.sprite.textures = frames;
     this.sprite.animationSpeed = (this.configs.get(action)?.fps ?? 6) / 60;
     this.sprite.loop = loop;
     this.sprite.onComplete = undefined;
-    this.sprite.gotoAndPlay(Math.min(frames.length - 1, Math.floor(progress * frames.length)));
-    this.fadeIn();
+    // Every authored row starts from its neutral transition pose. Reusing a
+    // frame index from another action made walks begin mid-stride and look as
+    // though the pet was sliding or walking backwards.
+    this.sprite.gotoAndPlay(0);
   }
 
   private scheduleMicroAction() {
-    const choices = MICRO_ACTIONS[this.baseAction];
-    if (!choices || typeof window === "undefined") return;
-    // Keep the companion visibly alive without interrupting the main action.
-    // A shorter gap lets the user notice the subtle animation layer.
-    const delay = 1800 + Math.random() * 2200;
+    if (this.variant !== "CAT" || typeof window === "undefined") return;
+    const timeline = MICRO_TIMELINES[this.baseAction];
+    if (!timeline?.length) return;
+
+    const clip = timeline[this.microTimelineIndex % timeline.length];
+    this.microTimelineIndex += 1;
     this.microTimer = window.setTimeout(() => {
-      const micro = choices[Math.floor(Math.random() * choices.length)];
-      this.playMicroMotion(micro);
-      this.microTimer = window.setTimeout(() => this.scheduleMicroAction(), 850);
-    }, delay);
-  }
-
-  private playMicroMotion(action: MicroAction) {
-    const baseX = this.sprite.scale.x;
-    const baseY = this.sprite.scale.y;
-    const motion = {
-      BLINK: { rotation: 0, x: 1, y: 0.94 },
-      EAR_TWITCH: { rotation: 0.035, x: 1, y: 1 },
-      TAIL_WAG: { rotation: -0.035, x: 1, y: 1 },
-      HEAD_TILT: { rotation: 0.1, x: 1, y: 1 },
-      LOOK_AROUND: { rotation: -0.06, x: 1.02, y: 1 },
-      NOD: { rotation: 0, x: 1, y: 0.95 },
-      TURN_FLASHCARD: { rotation: 0.04, x: 1.02, y: 1 },
-      STRETCH: { rotation: 0, x: 1.08, y: 0.92 },
-      YAWN: { rotation: -0.025, x: 1, y: 1.04 },
-      DOZE_OFF: { rotation: 0.07, x: 0.98, y: 0.94 },
-    }[action];
-
-    this.sprite.rotation = motion.rotation;
-    this.sprite.scale.set(baseX * motion.x, baseY * motion.y);
-    window.setTimeout(() => {
-      this.sprite.rotation = 0;
-      this.sprite.scale.set(baseX, baseY);
-    }, 700);
+      this.setAnimation(clip.action, false);
+      this.sprite.onComplete = () => {
+        this.setAnimation(this.baseAction, true);
+        this.scheduleMicroAction();
+      };
+    }, clip.delay);
   }
 
   private clearMicroTimer() {
@@ -214,42 +213,65 @@ export default class AnimationController {
 
   //----------------------------------------
 
-  private fadeIn() {
-    this.sprite.alpha = 0.72;
-    const startedAt = performance.now();
-    const tick = () => {
-      const progress = Math.min(1, (performance.now() - startedAt) / 140);
-      this.sprite.alpha = 0.72 + 0.28 * progress;
-      if (progress === 1) PIXI.Ticker.shared.remove(tick);
-    };
-    PIXI.Ticker.shared.add(tick);
-  }
-
   private buildFrames(texture: PIXI.Texture, config: AnimationConfig) {
-    const frameWidth = texture.width / config.columns;
-    const frameHeight = texture.height / (config.rows ?? 1);
-    const y = (config.row ?? 0) * frameHeight;
-    // Generated sheets can leave a faint antialiased pixel at a cell edge.
-    // Keeping a tiny gutter prevents Pixi's linear sampling from showing a
-    // fragment of the next frame (most noticeable in the walk tail).
-    const gutter = 2;
-
+    // Pixi's Texture.width can be resolution-scaled. Frame rectangles however
+    // are expressed in the texture source's physical pixels. Mixing the two
+    // split every row at the wrong Y coordinate, showing feet from one row and
+    // a head from the next one.
+    const sourceWidth = texture.source.width;
+    const sourceHeight = texture.source.height;
+    const rows = config.rows ?? 1;
+    const top = Math.round((config.row ?? 0) * sourceHeight / rows);
+    const bottom = Math.round(((config.row ?? 0) + 1) * sourceHeight / rows);
     const frames: PIXI.Texture[] = [];
 
     for (let i = 0; i < config.columns; i++) {
+      const left = Math.round(i * sourceWidth / config.columns);
+      const right = Math.round((i + 1) * sourceWidth / config.columns);
       frames.push(
         new PIXI.Texture({
           source: texture.source,
           frame: new PIXI.Rectangle(
-            i * frameWidth + gutter,
-            y + gutter,
-            frameWidth - gutter * 2,
-            frameHeight - gutter * 2,
+            left,
+            top,
+            right - left,
+            bottom - top,
           ),
         }),
       );
     }
 
     return frames;
+  }
+
+  private removeGreenBackground(texture: PIXI.Texture, key: string) {
+    const cached = this.keyedTextures.get(key);
+    if (cached || typeof document === "undefined") return cached ?? texture;
+
+    const resource = texture.source.resource as CanvasImageSource | undefined;
+    if (!resource) return texture;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = texture.source.width;
+    canvas.height = texture.source.height;
+    const context = canvas.getContext("2d", { willReadFrequently: true });
+    if (!context) return texture;
+
+    context.drawImage(resource, 0, 0, canvas.width, canvas.height);
+    const pixels = context.getImageData(0, 0, canvas.width, canvas.height);
+    for (let index = 0; index < pixels.data.length; index += 4) {
+      const red = pixels.data[index];
+      const green = pixels.data[index + 1];
+      const blue = pixels.data[index + 2];
+      // Sprite exports use a vivid green backdrop. Key only clearly-green
+      // pixels so the cat's grey fur and gold bell keep their original colour.
+      if (green > 150 && green > red * 1.7 && green > blue * 1.7) {
+        pixels.data[index + 3] = 0;
+      }
+    }
+    context.putImageData(pixels, 0, 0);
+    const keyed = PIXI.Texture.from(canvas);
+    this.keyedTextures.set(key, keyed);
+    return keyed;
   }
 }

@@ -12,15 +12,15 @@ export function PetSpeechBubble() {
           initial={{ opacity: 0, y: 10, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -8 }}
-          className="absolute -top-28 left-1/2 -translate-x-1/2"
+          className="absolute bottom-full right-0 z-50 mb-3 w-72 max-w-[calc(100vw-2rem)]"
         >
-          <div className="relative rounded-2xl bg-card border-2 border-border shadow-xl px-4 py-3">
-            <p className="text-sm font-semibold">{speech.message}</p>
+          <div className="relative rounded-2xl border border-border bg-popover px-4 py-3 shadow-lg">
+            <p className="text-sm font-semibold leading-6 break-words">{speech.message}</p>
 
             <div
-              className="absolute left-1/2 -bottom-2
+              className="absolute right-8 -bottom-2
                         w-4 h-4 rotate-45
-                        bg-card border-r-2 border-b-2 border-border"
+                        bg-popover border-r border-b border-border"
             />
           </div>
         </motion.div>

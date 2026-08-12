@@ -11,11 +11,13 @@ import com.vocabpet.backend.dto.StudyCardRe.RecentReviewResponse;
 import com.vocabpet.backend.dto.StudyCardRe.StreakUpdateResult;
 import com.vocabpet.backend.dto.StudyCardRe.StudyCardResponse;
 import com.vocabpet.backend.dto.StudyCardRe.StudyDashboardResponse;
+import com.vocabpet.backend.dto.companion.CompanionEventRequest;
 import com.vocabpet.backend.entity.StudyReview;
 import com.vocabpet.backend.entity.StudySession;
 import com.vocabpet.backend.entity.User;
 import com.vocabpet.backend.entity.UserVocabularyProgress;
 import com.vocabpet.backend.entity.Vocabulary;
+import com.vocabpet.backend.entity.enums.CompanionEventType;
 import com.vocabpet.backend.exception.NoMoreCardsException;
 import com.vocabpet.backend.repository.DeckRepository;
 import com.vocabpet.backend.repository.StudyReviewRepository;
@@ -38,6 +40,7 @@ public class StudySessionServiceImpl implements StudySessionService {
         private final FsrsService fsrsService;
         private final StreakService streakService;
         private final MissionService missionService;
+        private final CompanionService companionService;
 
         private final DeckRepository deckRepository;
         private final CurrentUserService currentUserService;
@@ -111,6 +114,14 @@ public class StudySessionServiceImpl implements StudySessionService {
 
                 Long userId = session.getUser().getId();
 
+                if (request == null || request.getVocabularyId() == null || request.getRating() == null) {
+                        throw new IllegalArgumentException("A vocabulary and rating are required");
+                }
+
+                Vocabulary vocabulary = vocabularyRepository.findByIdAndDeckId(
+                                request.getVocabularyId(), session.getDeck().getId())
+                                .orElseThrow(() -> new RuntimeException("Vocabulary is not in this study deck"));
+
                 var progressOptional = progressRepository.findByUserIdAndVocabularyId(
                                 userId,
                                 request.getVocabularyId());
@@ -119,7 +130,7 @@ public class StudySessionServiceImpl implements StudySessionService {
 
                 UserVocabularyProgress progress = progressOptional.orElseGet(() -> UserVocabularyProgress.builder()
                                 .user(session.getUser())
-                                .vocabulary(vocabularyRepository.getReferenceById(request.getVocabularyId()))
+                                .vocabulary(vocabulary)
                                 .build());
 
                 // FSRS UPDATE
@@ -149,11 +160,14 @@ public class StudySessionServiceImpl implements StudySessionService {
                 StreakUpdateResult streakResult = streakService.updateMyStreak();
                 achievementService.checkForUser(session.getUser());
 
+                boolean correct = request.getRating() != com.vocabpet.backend.entity.enums.Rating.AGAIN;
+
                 return ReviewResponse.builder()
                                 .nextReviewTime(progress.getNextReviewTime())
                                 .streakUpdated(streakResult.isUpdated())
                                 .currentStreak(streakResult.getCurrentStreak())
                                 .longestStreak(streakResult.getLongestStreak())
+                                .companionReaction(companionService.recordReviewOutcome(session.getUser(), vocabulary, correct))
                                 .build();
         }
 
@@ -167,6 +181,9 @@ public class StudySessionServiceImpl implements StudySessionService {
                 session.setFinishedAt(LocalDateTime.now());
 
                 missionService.trackSessionCompleted(session.getUser().getId());
+                CompanionEventRequest companionEvent = new CompanionEventRequest();
+                companionEvent.setEvent(CompanionEventType.SESSION_COMPLETED);
+                companionService.recordEvent(companionEvent);
 
                 sessionRepository.save(session);
         }

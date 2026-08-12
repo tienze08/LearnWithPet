@@ -28,33 +28,24 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
 
-        System.out.println("\n========== JWT FILTER ==========");
-        System.out.println("URL: " + request.getRequestURI());
-        System.out.println("METHOD: " + request.getMethod());
-
         String authHeader = request.getHeader("Authorization");
-        System.out.println("AUTH HEADER: " + authHeader);
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            System.out.println("NO TOKEN -> SKIP FILTER");
             filterChain.doFilter(request, response);
             return;
         }
 
         String token = authHeader.substring(7);
-        System.out.println("TOKEN: " + token);
 
         if (!jwtService.isValid(token)) {
-            System.out.println("TOKEN INVALID");
+            SecurityContextHolder.clearContext();
             filterChain.doFilter(request, response);
             return;
         }
 
         String email = jwtService.extractEmail(token);
-        System.out.println("EMAIL FROM TOKEN: " + email);
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-        System.out.println("USER DETAILS: " + userDetails.getUsername());
 
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                 userDetails,
@@ -62,8 +53,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 userDetails.getAuthorities());
 
         SecurityContextHolder.getContext().setAuthentication(authToken);
-
-        System.out.println("AUTH SET SUCCESS");
 
         filterChain.doFilter(request, response);
     }

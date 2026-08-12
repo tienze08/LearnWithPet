@@ -7,8 +7,10 @@ export type PetMood =
 export type PetAction =
   | "IDLE"
   | "WALK"
+  | "THINK"
   | "HAPPY"
   | "SAD"
+  | "CRY"
   | "SLEEP"
   | "CELEBRATE"
   | "STUDY";

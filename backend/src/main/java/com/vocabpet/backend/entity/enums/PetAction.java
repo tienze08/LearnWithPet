@@ -6,6 +6,8 @@ public enum PetAction {
 
     WALK,
 
+    THINK,
+
     STUDY,
 
     HAPPY,

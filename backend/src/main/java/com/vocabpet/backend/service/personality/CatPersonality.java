@@ -33,6 +33,7 @@ public class CatPersonality implements PetPersonality {
             case WALK -> "Đi dạo một chút thôi~";
 
             case SLEEP -> "Ngủ chút nha 💤";
+            case THINK -> "Let me think for a moment~";
         };
     }
 }

@@ -2,6 +2,8 @@ package com.vocabpet.backend.dto.StudyCardRe;
 
 import java.time.LocalDateTime;
 
+import com.vocabpet.backend.dto.PetRe.PetBehaviorResponse;
+
 import lombok.Builder;
 import lombok.Data;
 
@@ -16,5 +18,7 @@ public class ReviewResponse {
     private int currentStreak;
 
     private int longestStreak;
+
+    private PetBehaviorResponse companionReaction;
 
 }

@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.vocabpet.backend.dto.PetRe.PetBehaviorResponse;
 import com.vocabpet.backend.dto.QuizRe.QuizAnswerRequest;
@@ -17,14 +19,14 @@ import com.vocabpet.backend.entity.UserVocabularyProgress;
 import com.vocabpet.backend.entity.Vocabulary;
 import com.vocabpet.backend.entity.StudyReview;
 import com.vocabpet.backend.entity.StudySession;
-import com.vocabpet.backend.entity.enums.PetEvent;
+import com.vocabpet.backend.entity.enums.PetAction;
+import com.vocabpet.backend.entity.enums.PetMood;
 import com.vocabpet.backend.entity.enums.Rating;
 import com.vocabpet.backend.repository.StudyReviewRepository;
 import com.vocabpet.backend.repository.StudySessionRepository;
 import com.vocabpet.backend.repository.UserRepository;
 import com.vocabpet.backend.repository.UserVocabularyProgressRepository;
 import com.vocabpet.backend.repository.VocabularyRepository;
-import com.vocabpet.backend.service.behavior.PetBehaviorService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -47,20 +49,55 @@ public class QuizServiceImpl implements QuizService {
     private final MissionService missionService;
     private final StreakService streakService;
     private final AchievementService achievementService;
-    private final PetBehaviorService petBehaviorService;
+    private final CompanionService companionService;
 
     @Override
     public QuizQuestionResponse randomQuestion() {
+        return randomQuestion(null);
+    }
 
-        Vocabulary vocabulary = vocabularyRepository.findRandomVocabulary()
-                .orElseThrow(() -> new RuntimeException("No vocabulary available"));
+    @Override
+    public QuizQuestionResponse randomQuestion(Long deckId) {
+        User user = currentUserService.getCurrentUser();
+
+        // Companion quizzes reinforce real FSRS work. The oldest due card is
+        // selected first, then an unseen card. Practice remains available even
+        // when every card is scheduled for the future.
+        List<UserVocabularyProgress> dueCards = deckId == null
+                ? progressRepository.findDueCardsForQuiz(user.getId(), LocalDateTime.now())
+                : progressRepository.findDueCardsForQuizAndDeck(user.getId(), deckId, LocalDateTime.now());
+        Vocabulary vocabulary = dueCards
+                .stream()
+                // This second ownership check protects users from legacy progress
+                // rows that may have been created before quizzes were user-scoped.
+                .filter(progress -> progress.getVocabulary() != null
+                        && progress.getVocabulary().getDeck() != null
+                        && progress.getVocabulary().getDeck().getUser() != null
+                        && user.getId().equals(progress.getVocabulary().getDeck().getUser().getId()))
+                .map(UserVocabularyProgress::getVocabulary)
+                .findFirst()
+                .orElseGet(() -> (deckId == null
+                        ? progressRepository.findNewCardsForQuiz(user.getId())
+                        : progressRepository.findNewCards(user.getId(), deckId))
+                        .stream().findFirst()
+                        .orElseGet(() -> practiceVocabularyFor(user, deckId)));
 
         return QuizQuestionResponse.builder()
                 .vocabularyId(vocabulary.getId())
                 .word(vocabulary.getWord())
                 .partOfSpeech(vocabulary.getPartOfSpeech().name())
-                .options(buildOptions(vocabulary))
+                .options(buildOptions(vocabulary, user.getId()))
                 .build();
+    }
+
+    private Vocabulary practiceVocabularyFor(User user, Long deckId) {
+        List<Vocabulary> vocabulary = deckId == null
+                ? vocabularyRepository.findByDeckUserId(user.getId())
+                : vocabularyRepository.findByDeckIdAndDeckUserId(deckId, user.getId());
+        return vocabulary.stream()
+                .findFirst()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Add a word to one of your decks before starting a quiz."));
     }
 
     @Override
@@ -69,8 +106,9 @@ public class QuizServiceImpl implements QuizService {
 
         User user = currentUserService.getCurrentUser();
 
-        Vocabulary vocabulary = vocabularyRepository.findById(request.getVocabularyId())
-                .orElseThrow(() -> new RuntimeException("Vocabulary not found"));
+        Vocabulary vocabulary = vocabularyRepository.findByIdAndDeckUserId(request.getVocabularyId(), user.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.CONFLICT,
+                        "This quiz card is no longer available. Please get a new question."));
 
         boolean correct = vocabulary.getMeaning()
                 .trim()
@@ -98,15 +136,14 @@ public class QuizServiceImpl implements QuizService {
             streakService.updateMyStreak();
 
             missionService.trackReview(user.getId());
+            missionService.trackQuiz(user.getId());
             achievementService.recordQuizReview(user);
 
-            petBehavior = petBehaviorService.triggerEvent(
-                    PetEvent.CORRECT_ANSWER);
+            petBehavior = companionService.recordQuizOutcome(user, vocabulary, true);
 
         } else {
 
-            petBehavior = petBehaviorService.triggerEvent(
-                    PetEvent.WRONG_ANSWER);
+            petBehavior = companionService.recordQuizOutcome(user, vocabulary, false);
         }
 
         return QuizAnswerResponse.builder()
@@ -118,22 +155,32 @@ public class QuizServiceImpl implements QuizService {
                 .build();
     }
 
-    private List<String> buildOptions(Vocabulary correctVocabulary) {
+    @SuppressWarnings("unused")
+    private PetBehaviorResponse fallbackQuizReaction(boolean correct) {
+        return PetBehaviorResponse.builder()
+                .mood(correct ? PetMood.HAPPY : PetMood.SAD)
+                .action(correct ? PetAction.HAPPY : PetAction.SAD)
+                .message(correct ? "Great job!" : "No worries — we'll learn it together.")
+                .priority(correct ? 2 : 1)
+                .duration(3)
+                .build();
+    }
+
+    private List<String> buildOptions(Vocabulary correctVocabulary, Long userId) {
 
         List<String> options = new ArrayList<>();
 
         options.add(correctVocabulary.getMeaning());
 
-        List<Vocabulary> wrongAnswers = vocabularyRepository.findRandomWrongOptions(
-                correctVocabulary.getId());
-
-        for (Vocabulary vocabulary : wrongAnswers) {
-            options.add(vocabulary.getMeaning());
+        for (Vocabulary vocabulary : vocabularyRepository.findByDeckUserId(userId)) {
+            if (!vocabulary.getId().equals(correctVocabulary.getId())
+                    && !options.contains(vocabulary.getMeaning())) {
+                options.add(vocabulary.getMeaning());
+            }
         }
 
         Collections.shuffle(options);
-
-        return options;
+        return options.stream().limit(4).toList();
     }
 
     private void recordQuizAttempt(User user, Vocabulary vocabulary, Rating rating) {

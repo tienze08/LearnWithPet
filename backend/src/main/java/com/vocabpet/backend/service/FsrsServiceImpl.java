@@ -2,6 +2,7 @@ package com.vocabpet.backend.service;
 
 import com.vocabpet.backend.entity.UserVocabularyProgress;
 import com.vocabpet.backend.entity.enums.Rating;
+import com.vocabpet.backend.entity.enums.Status;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -38,34 +39,24 @@ public class FsrsServiceImpl implements FsrsService {
         double stabilityFactor;
         double difficultyDelta;
 
-        switch (rating) {
-
-            case AGAIN -> {
-                stabilityFactor = 0.3;
-                difficultyDelta = 0.2;
-
-                lapses++;
-            }
-
-            case HARD -> {
-                stabilityFactor = 0.9;
-                difficultyDelta = 0.05;
-            }
-
-            case GOOD -> {
-                stabilityFactor = 1.2;
-                difficultyDelta = -0.02;
-            }
-
-            case EASY -> {
-                stabilityFactor = 1.6;
-                difficultyDelta = -0.05;
-            }
-
-            default -> {
-                stabilityFactor = 1.0;
-                difficultyDelta = 0;
-            }
+        // Avoid an enum-switch helper class here. A stale dev build can retain
+        // FsrsServiceImpl.class but miss its generated FsrsServiceImpl$1 class.
+        if (rating == Rating.AGAIN) {
+            stabilityFactor = 0.3;
+            difficultyDelta = 0.2;
+            lapses++;
+        } else if (rating == Rating.HARD) {
+            stabilityFactor = 0.9;
+            difficultyDelta = 0.05;
+        } else if (rating == Rating.GOOD) {
+            stabilityFactor = 1.2;
+            difficultyDelta = -0.02;
+        } else if (rating == Rating.EASY) {
+            stabilityFactor = 1.6;
+            difficultyDelta = -0.05;
+        } else {
+            stabilityFactor = 1.0;
+            difficultyDelta = 0;
         }
 
         // FSRS core update
@@ -74,26 +65,22 @@ public class FsrsServiceImpl implements FsrsService {
 
         reps++;
 
-        // interval calculation (FSRS style simplified)
-        double intervalDays;
-
+        // AGAIN enters a short relearning step so a forgotten word returns in
+        // this study period, rather than disappearing for an entire day.
+        LocalDateTime nextReview;
         if (rating == Rating.AGAIN) {
-            intervalDays = 1;
             stability = Math.max(0.2, stability * 0.7);
+            nextReview = now.plusMinutes(10);
+            p.setStatus(Status.LEARNING);
         } else {
-            intervalDays = stability * 2.5;
-        }
+            double intervalDays = stability * 2.5;
+            if (rating == Rating.EASY) intervalDays *= 1.3;
+            if (rating == Rating.HARD) intervalDays *= 0.8;
 
-        if (rating == Rating.EASY) {
-            intervalDays *= 1.3;
+            long wholeDays = Math.max(rating == Rating.EASY ? 2 : 1, (long) Math.ceil(intervalDays));
+            nextReview = now.plusDays(wholeDays);
+            p.setStatus(reps >= 4 && stability >= 2.0 ? Status.MASTERED : Status.LEARNING);
         }
-
-        if (rating == Rating.HARD) {
-            intervalDays *= 0.8;
-        }
-
-        if (intervalDays < 1)
-            intervalDays = 1;
 
         // save back
         p.setStability(stability);
@@ -102,7 +89,7 @@ public class FsrsServiceImpl implements FsrsService {
         p.setLapses(lapses);
 
         p.setLastReviewTime(now);
-        p.setNextReviewTime(now.plusDays((long) intervalDays));
+        p.setNextReviewTime(nextReview);
     }
 
     private double clamp(double v, double min, double max) {

@@ -48,20 +48,12 @@ function TopBar() {
   }, [me?.pet?.species, setState, state.petVariant]);
 
   return (
-    <header className="sticky top-0 z-30 bg-background/90 backdrop-blur border-b-2 border-border">
-      <div className="max-w-6xl mx-auto px-4 h-16 flex items-center gap-4">
-        <Link to="/app" className="flex items-center gap-2 font-extrabold text-lg">
+    <header className="sticky top-0 z-30 border-b border-border/70 bg-background/75 backdrop-blur-xl">
+      <div className="max-w-6xl mx-auto px-4 h-[4.25rem] flex items-center gap-4">
+        <Link to="/app" className="flex items-center gap-2 font-extrabold tracking-tight text-lg">
           <span className="text-2xl">🌱</span>
           <span>VocaPet</span>
         </Link>
-        <nav className="hidden md:flex items-center gap-1 ml-4">
-          <NavLink to="/app" icon={<LayoutDashboard className="w-4 h-4" />} label="Home" />
-          <NavLink to="/app/decks" icon={<Library className="w-4 h-4" />} label="Decks" />
-          <NavLink to="/app/reader" icon={<BookOpen className="w-4 h-4" />} label="Reader" />
-          <NavLink to="/app/tasks" icon={<Target className="w-4 h-4" />} label="Tasks" />
-          <NavLink to="/app/pets" icon={<PawPrintIcon className="w-4 h-4" />} label="Pets" />
-          <NavLink to="/app/achievements" icon={<Trophy className="w-4 h-4" />} label="Awards" />
-        </nav>
         <div className="ml-auto flex items-center gap-3 text-sm font-bold">
           <Stat
             icon={<Flame className="w-4 h-4 text-streak" />}
@@ -79,7 +71,7 @@ function TopBar() {
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="ml-1 flex items-center gap-2 pl-2 pr-3 py-1 rounded-full border-2 border-border transition-colors hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                className="ml-1 flex items-center gap-2 pl-1.5 pr-3 py-1 rounded-full border border-border bg-card/70 shadow-sm transition-colors hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 aria-label="Open account menu"
               >
                 <span className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-lg">
@@ -134,8 +126,8 @@ function NavLink({ to, icon, label }: { to: string; icon: React.ReactNode; label
       to={to}
       className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-bold transition-colors ${
         active
-          ? "bg-primary/10 text-primary"
-          : "text-muted-foreground hover:text-foreground hover:bg-muted"
+          ? "bg-primary/10 text-primary shadow-sm"
+          : "text-muted-foreground hover:text-foreground hover:bg-card/80"
       }`}
     >
       {icon}
@@ -146,7 +138,7 @@ function NavLink({ to, icon, label }: { to: string; icon: React.ReactNode; label
 
 function MobileNav() {
   return (
-    <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-background border-t-2 border-border">
+    <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 border-t border-border/70 bg-background/90 backdrop-blur-xl">
       <div className="flex justify-around py-2">
         <NavLink to="/app" icon={<LayoutDashboard className="w-5 h-5" />} label="Home" />
         <NavLink to="/app/decks" icon={<Library className="w-5 h-5" />} label="Decks" />
@@ -155,6 +147,32 @@ function MobileNav() {
         <NavLink to="/app/profile" icon={<User className="w-5 h-5" />} label="Profile" />
       </div>
     </nav>
+  );
+}
+
+function DesktopSidebar() {
+  return (
+    <aside className="hidden w-56 shrink-0 md:block">
+      <div className="sticky top-[4.25rem] py-8 pr-6">
+        <p className="mb-3 px-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+          Learn
+        </p>
+        <nav className="space-y-1">
+          <NavLink to="/app" icon={<LayoutDashboard className="w-4 h-4" />} label="Home" />
+          <NavLink to="/app/decks" icon={<Library className="w-4 h-4" />} label="Study & decks" />
+          <NavLink to="/app/reader" icon={<BookOpen className="w-4 h-4" />} label="Reader" />
+          <NavLink to="/app/tasks" icon={<Target className="w-4 h-4" />} label="Missions" />
+        </nav>
+        <p className="mb-3 mt-8 px-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+          Your companion
+        </p>
+        <nav className="space-y-1">
+          <NavLink to="/app/pets" icon={<PawPrintIcon className="w-4 h-4" />} label="Pets" />
+          <NavLink to="/app/achievements" icon={<Trophy className="w-4 h-4" />} label="Progress & awards" />
+          <NavLink to="/app/profile" icon={<User className="w-4 h-4" />} label="Settings" />
+        </nav>
+      </div>
+    </aside>
   );
 }
 
@@ -167,9 +185,12 @@ function ShellInner() {
     <div className="min-h-screen flex flex-col pb-20 md:pb-0">
       <TopBar />
 
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6">
-        <Outlet />
-      </main>
+      <div className="mx-auto flex w-full max-w-7xl px-4">
+        <DesktopSidebar />
+        <main className="min-w-0 flex-1 py-8 md:py-10 md:pl-2">
+          <Outlet />
+        </main>
+      </div>
 
       <MobileNav />
       <PetCompanion />

@@ -2,8 +2,9 @@ import React from "react";
 
 export default function Empty() {
   return (
-    <div className="py-10 text-center text-sm text-muted-foreground">
-      Add some words to this deck first.
+    <div className="rounded-2xl border border-dashed border-border bg-card/60 py-12 text-center text-sm text-muted-foreground">
+      <p className="font-semibold text-foreground">Let’s give Pip something new to learn.</p>
+      <p className="mt-1">Add a few words to this deck, then begin your study session.</p>
     </div>
   );
 }
