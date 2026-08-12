@@ -19,6 +19,7 @@ import com.vocabpet.backend.entity.enums.PetSpecies;
 import com.vocabpet.backend.repository.PetRepository;
 import com.vocabpet.backend.repository.PetUnlockRepository;
 import com.vocabpet.backend.repository.UserRepository;
+import com.vocabpet.backend.repository.UserVocabularyProgressRepository;
 
 @ExtendWith(MockitoExtension.class)
 class PetServiceImplTest {
@@ -35,6 +36,9 @@ class PetServiceImplTest {
     @Mock
     private CurrentUserService currentUserService;
 
+    @Mock
+    private UserVocabularyProgressRepository vocabularyProgressRepository;
+
     @InjectMocks
     private PetServiceImpl petService;
 
@@ -47,6 +51,7 @@ class PetServiceImplTest {
 
         when(currentUserService.getCurrentUser()).thenReturn(user);
         when(petUnlockRepository.existsByUserAndSpecies(user, PetSpecies.FOX)).thenReturn(false);
+        when(vocabularyProgressRepository.countByUserIdAndRepetitionsGreaterThanEqual(1L, 4)).thenReturn(0L);
 
         PetResponse response = petService.unlockPet(PetSpecies.FOX);
 

@@ -105,6 +105,10 @@ public class QuizServiceImpl implements QuizService {
     public QuizAnswerResponse answer(QuizAnswerRequest request) {
 
         User user = currentUserService.getCurrentUser();
+        if (request == null || request.getVocabularyId() == null || request.getAnswer() == null
+                || request.getAnswer().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A quiz card and answer are required");
+        }
 
         Vocabulary vocabulary = vocabularyRepository.findByIdAndDeckUserId(request.getVocabularyId(), user.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.CONFLICT,
@@ -123,21 +127,22 @@ public class QuizServiceImpl implements QuizService {
 
         PetBehaviorResponse petBehavior;
 
+        // A wrong answer is still a study attempt. Keep the streak, daily
+        // review count and achievement history truthful for every answer;
+        // rewards remain conditional on correctness.
+        user.setLastStudyAt(LocalDateTime.now());
+        userRepository.save(user);
+        streakService.updateMyStreak();
+        missionService.trackReview(user.getId());
+        missionService.trackQuiz(user.getId());
+        achievementService.recordQuizReview(user);
+
         if (correct) {
 
             xp = QUIZ_XP;
             coin = QUIZ_COIN;
 
             rewardService.grantReward(user.getId(), xp, coin);
-
-            user.setLastStudyAt(LocalDateTime.now());
-            userRepository.save(user);
-
-            streakService.updateMyStreak();
-
-            missionService.trackReview(user.getId());
-            missionService.trackQuiz(user.getId());
-            achievementService.recordQuizReview(user);
 
             petBehavior = companionService.recordQuizOutcome(user, vocabulary, true);
 

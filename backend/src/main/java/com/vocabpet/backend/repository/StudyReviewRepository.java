@@ -15,6 +15,8 @@ public interface StudyReviewRepository
 
     long countBySessionId(Long sessionId);
 
+    boolean existsBySessionIdAndVocabularyId(Long sessionId, Long vocabularyId);
+
     long countByUserId(Long userId);
 
     long countByUserIdAndReviewedAtBetween(Long userId, LocalDateTime from, LocalDateTime to);

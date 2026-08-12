@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.vocabpet.backend.dto.StudyCardRe.ReviewRequest;
 import com.vocabpet.backend.dto.StudyCardRe.ReviewResponse;
@@ -50,9 +52,17 @@ public class StudySessionServiceImpl implements StudySessionService {
 
                 User user = currentUserService.getCurrentUser();
 
+                if (deckId == null) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                        "A deck is required to start a study session");
+                }
+                var deck = deckRepository.findByIdAndUser(deckId, user)
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                "This deck is not available for your account"));
+
                 StudySession session = StudySession.builder()
                                 .user(user)
-                                .deck(deckRepository.getReferenceById(deckId))
+                                .deck(deck)
                                 .startedAt(LocalDateTime.now())
                                 .build();
 
@@ -67,7 +77,8 @@ public class StudySessionServiceImpl implements StudySessionService {
 
                 StudySession session = sessionRepository.findById(sessionId)
                                 .filter(s -> s.getUser().getId().equals(user.getId()))
-                                .orElseThrow(() -> new RuntimeException("Unauthorized session access"));
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                "This study session is not available for your account"));
 
                 Long userId = session.getUser().getId();
                 Long deckId = session.getDeck().getId();
@@ -110,7 +121,13 @@ public class StudySessionServiceImpl implements StudySessionService {
 
                 StudySession session = sessionRepository.findById(sessionId)
                                 .filter(s -> s.getUser().getId().equals(currentUserService.getCurrentUser().getId()))
-                                .orElseThrow();
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                "This study session is not available for your account"));
+
+                if (session.getFinishedAt() != null) {
+                        throw new ResponseStatusException(HttpStatus.CONFLICT,
+                                        "This study session has already finished");
+                }
 
                 Long userId = session.getUser().getId();
 
@@ -118,9 +135,12 @@ public class StudySessionServiceImpl implements StudySessionService {
                         throw new IllegalArgumentException("A vocabulary and rating are required");
                 }
 
-                Vocabulary vocabulary = vocabularyRepository.findByIdAndDeckId(
-                                request.getVocabularyId(), session.getDeck().getId())
-                                .orElseThrow(() -> new RuntimeException("Vocabulary is not in this study deck"));
+                Vocabulary vocabulary = vocabularyRepository.findByDeckIdAndDeckUserId(
+                                session.getDeck().getId(), userId).stream()
+                                .filter(candidate -> candidate.getId().equals(request.getVocabularyId()))
+                                .findFirst()
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                                "This vocabulary is not in the current study deck"));
 
                 var progressOptional = progressRepository.findByUserIdAndVocabularyId(
                                 userId,
@@ -139,6 +159,8 @@ public class StudySessionServiceImpl implements StudySessionService {
                 progressRepository.save(progress);
 
                 // SAVE HISTORY
+                boolean firstReviewOfCardInSession = !reviewRepository.existsBySessionIdAndVocabularyId(
+                                session.getId(), vocabulary.getId());
                 reviewRepository.save(
                                 StudyReview.builder()
                                                 .session(session)
@@ -149,7 +171,12 @@ public class StudySessionServiceImpl implements StudySessionService {
                                                 .build());
 
                 session.setTotalReviews(session.getTotalReviews() + 1);
+                if (firstReviewOfCardInSession) {
+                        session.setUniqueCards(session.getUniqueCards() + 1);
+                }
                 sessionRepository.save(session);
+
+                session.getUser().setLastStudyAt(LocalDateTime.now());
 
                 missionService.trackReview(userId);
 
@@ -176,7 +203,14 @@ public class StudySessionServiceImpl implements StudySessionService {
 
                 StudySession session = sessionRepository.findById(sessionId)
                                 .filter(s -> s.getUser().getId().equals(currentUserService.getCurrentUser().getId()))
-                                .orElseThrow();
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                "This study session is not available for your account"));
+
+                // Browsers can retry a POST. Completion must be idempotent so
+                // missions and companion memory are never counted twice.
+                if (session.getFinishedAt() != null) {
+                        return;
+                }
 
                 session.setFinishedAt(LocalDateTime.now());
 
