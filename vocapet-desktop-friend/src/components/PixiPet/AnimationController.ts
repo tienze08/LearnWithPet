@@ -6,6 +6,7 @@ import foxAtlas from "@/assets/fox-study-companion-6x8.png";
 import pandaAtlas from "@/assets/panda-study-companion-6x8.png";
 import bunnyAtlas from "@/assets/bunny-study-companion-6x8.png";
 import dragonAtlas from "@/assets/dragon-study-companion-6x8.png";
+import kittenMicroAtlas from "@/assets/gray-study-kitten-micro-5x4.png";
 
 export type PetAction =
   | "IDLE"
@@ -43,6 +44,8 @@ type MicroAction =
 
 type AnimationKey = PetAction | MicroAction;
 
+type MicroClip = { action: MicroAction; delay: number };
+
 const VARIANT_ATLASES: Record<PetVariant, string> = {
   CAT: kittenAtlas,
   FOX: foxAtlas,
@@ -68,16 +71,40 @@ export const PET_ANIMATIONS: Record<PetAction, AnimationConfig> = {
   CELEBRATE: { source: kittenAtlas, columns: 8, rows: 6, row: 3, fps: 7 },
 };
 
-const MICRO_ACTIONS: Partial<Record<PetAction, MicroAction[]>> = {
-  IDLE: ["TAIL_WAG", "HEAD_TILT", "LOOK_AROUND", "STRETCH", "YAWN", "BLINK", "EAR_TWITCH"],
-  STUDY: ["TURN_FLASHCARD", "NOD", "HEAD_TILT", "TAIL_WAG", "BLINK", "DOZE_OFF"],
-  WALK: ["TAIL_WAG", "EAR_TWITCH", "BLINK"],
+const CAT_MICRO_ANIMATIONS: Record<MicroAction, AnimationConfig> = {
+  BLINK: { source: kittenMicroAtlas, columns: 4, rows: 5, row: 0, fps: 5 },
+  EAR_TWITCH: { source: kittenMicroAtlas, columns: 4, rows: 5, row: 1, fps: 5 },
+  TAIL_WAG: { source: kittenMicroAtlas, columns: 4, rows: 5, row: 2, fps: 5 },
+  NOD: { source: kittenMicroAtlas, columns: 4, rows: 5, row: 3, fps: 4 },
+  TURN_FLASHCARD: { source: kittenMicroAtlas, columns: 4, rows: 5, row: 4, fps: 4 },
+  HEAD_TILT: { source: kittenMicroAtlas, columns: 4, rows: 5, row: 0, fps: 4 },
+  LOOK_AROUND: { source: kittenMicroAtlas, columns: 4, rows: 5, row: 0, fps: 4 },
+  STRETCH: { source: kittenMicroAtlas, columns: 4, rows: 5, row: 0, fps: 4 },
+  YAWN: { source: kittenMicroAtlas, columns: 4, rows: 5, row: 0, fps: 4 },
+  DOZE_OFF: { source: kittenMicroAtlas, columns: 4, rows: 5, row: 3, fps: 4 },
+};
+
+const MICRO_TIMELINES: Partial<Record<PetAction, MicroClip[]>> = {
+  IDLE: [
+    { action: "BLINK", delay: 5500 },
+    { action: "EAR_TWITCH", delay: 8200 },
+    { action: "TAIL_WAG", delay: 9200 },
+  ],
+  STUDY: [
+    { action: "NOD", delay: 5000 },
+    { action: "TURN_FLASHCARD", delay: 8500 },
+    { action: "BLINK", delay: 6200 },
+  ],
+  THINK: [
+    { action: "BLINK", delay: 4200 },
+    { action: "EAR_TWITCH", delay: 7200 },
+  ],
 };
 
 export default class AnimationController {
   private animations = new Map<AnimationKey, PIXI.Texture[]>();
 
-  private currentAction: PetAction | null = null;
+  private currentAction: AnimationKey | null = null;
 
   private sprite!: PIXI.AnimatedSprite;
 
@@ -86,6 +113,7 @@ export default class AnimationController {
   private baseAction: PetAction = "IDLE";
 
   private microTimer?: number;
+  private microTimelineIndex = 0;
   private keyedTextures = new Map<string, PIXI.Texture>();
 
   constructor(private readonly variant: PetVariant = "CAT") {}
@@ -102,6 +130,14 @@ export default class AnimationController {
       this.configs.set(action, variantConfig);
       this.animations.set(action, this.buildFrames(atlas, variantConfig));
     });
+
+    if (this.variant === "CAT") {
+      const microAtlas = await PIXI.Assets.load(kittenMicroAtlas);
+      (Object.entries(CAT_MICRO_ANIMATIONS) as [MicroAction, AnimationConfig][]).forEach(([action, config]) => {
+        this.configs.set(action, config);
+        this.animations.set(action, this.buildFrames(microAtlas, config));
+      });
+    }
 
     this.sprite = new PIXI.AnimatedSprite(this.animations.get("IDLE")!);
 
@@ -127,6 +163,7 @@ export default class AnimationController {
 
     this.baseAction = normalizedAction;
     this.clearMicroTimer();
+    this.microTimelineIndex = 0;
     this.setAnimation(normalizedAction, true);
     this.scheduleMicroAction();
   }
@@ -142,7 +179,7 @@ export default class AnimationController {
 
     if (!frames) return;
 
-    this.currentAction = action as PetAction;
+    this.currentAction = action;
     this.sprite.textures = frames;
     this.sprite.animationSpeed = (this.configs.get(action)?.fps ?? 6) / 60;
     this.sprite.loop = loop;
@@ -154,43 +191,19 @@ export default class AnimationController {
   }
 
   private scheduleMicroAction() {
-    const choices = MICRO_ACTIONS[this.baseAction];
-    if (!choices || typeof window === "undefined") return;
-    // Keep the companion visibly alive without interrupting the main action.
-    // A shorter gap lets the user notice the subtle animation layer.
-    const delay = 1800 + Math.random() * 2200;
+    if (this.variant !== "CAT" || typeof window === "undefined") return;
+    const timeline = MICRO_TIMELINES[this.baseAction];
+    if (!timeline?.length) return;
+
+    const clip = timeline[this.microTimelineIndex % timeline.length];
+    this.microTimelineIndex += 1;
     this.microTimer = window.setTimeout(() => {
-      const micro = choices[Math.floor(Math.random() * choices.length)];
-      this.playMicroMotion(micro);
-      this.microTimer = window.setTimeout(() => this.scheduleMicroAction(), 850);
-    }, delay);
-  }
-
-  private playMicroMotion(action: MicroAction) {
-    // The generated micro sheet has non-uniform cells, so it cannot be safely
-    // sliced without leaking adjacent frames. Keep micro motions procedural
-    // until a padded, transparent sheet is supplied.
-    const baseX = this.sprite.scale.x;
-    const baseY = this.sprite.scale.y;
-    const motion = {
-      BLINK: { rotation: 0, x: 1, y: 0.94 },
-      EAR_TWITCH: { rotation: 0.035, x: 1, y: 1 },
-      TAIL_WAG: { rotation: -0.035, x: 1, y: 1 },
-      HEAD_TILT: { rotation: 0.1, x: 1, y: 1 },
-      LOOK_AROUND: { rotation: -0.06, x: 1.02, y: 1 },
-      NOD: { rotation: 0, x: 1, y: 0.95 },
-      TURN_FLASHCARD: { rotation: 0.04, x: 1.02, y: 1 },
-      STRETCH: { rotation: 0, x: 1.08, y: 0.92 },
-      YAWN: { rotation: -0.025, x: 1, y: 1.04 },
-      DOZE_OFF: { rotation: 0.07, x: 0.98, y: 0.94 },
-    }[action];
-
-    this.sprite.rotation = motion.rotation;
-    this.sprite.scale.set(baseX * motion.x, baseY * motion.y);
-    window.setTimeout(() => {
-      this.sprite.rotation = 0;
-      this.sprite.scale.set(baseX, baseY);
-    }, 700);
+      this.setAnimation(clip.action, false);
+      this.sprite.onComplete = () => {
+        this.setAnimation(this.baseAction, true);
+        this.scheduleMicroAction();
+      };
+    }, clip.delay);
   }
 
   private clearMicroTimer() {

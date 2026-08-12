@@ -70,8 +70,6 @@ export function PetCompanion() {
   const [picked, setPicked] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [eventMood, setEventMood] = useState<PetMood | null>(null);
-  const [roamTarget, setRoamTarget] = useState({ x: 0, y: 0 });
-  const roamSideRef = useRef<"left" | "right">("right");
   const [interrupting, setInterrupting] = useState(false);
   const lastActivityAt = useRef(Date.now());
   const interruptionInProgress = useRef(false);
@@ -140,8 +138,8 @@ export function PetCompanion() {
         const notificationsActive = companionState?.remindersEnabled ?? true;
         if (!notificationsActive) return;
 
-        // Companion scene: Pip notices the learner, walks over, then opens the
-        // actual question instead of waiting for another click.
+        // A real reminder changes Pip's state; it never triggers an ambient,
+        // context-free walk around the application.
         interruptionInProgress.current = true;
         setInterrupting(true);
         setEventMood("waiting");
@@ -149,7 +147,7 @@ export function PetCompanion() {
         speakPet(`${state.petName}: Hmm...`, 1, 2);
 
         approachTimer = window.setTimeout(() => {
-          triggerPetAnimation("WALK");
+          triggerPetAnimation("THINK");
           speakPet(`${state.petName}: Hey! Quick question?`, 2, 3);
         }, 850);
 
@@ -222,35 +220,9 @@ export function PetCompanion() {
   const moodMeta = MOOD_META[state.petMood] ?? MOOD_META.waiting;
 
   useEffect(() => {
-    const canRoam = !open && !reminder && !showSettings && !interrupting;
-    if (!canRoam || typeof window === "undefined") {
-      setRoamTarget({ x: 0, y: 0 });
+    if (!open && !reminder && !showSettings && !interrupting) {
       triggerPetAnimation("IDLE");
-      return;
     }
-
-    let turnTimer: number | undefined;
-    const chooseNextSpot = () => {
-      const horizontalRoom = Math.min(340, Math.max(0, window.innerWidth - 170));
-      const nextSide = roamSideRef.current === "right" ? "left" : "right";
-
-      // Pause at each edge so the change is visibly a turn, rather than an
-      // instant mirrored slide while the pet is already moving.
-      triggerPetAnimation("IDLE");
-      turnTimer = window.setTimeout(() => {
-        roamSideRef.current = nextSide;
-        petRef.current?.setFacing(nextSide);
-        setRoamTarget({ x: nextSide === "left" ? -horizontalRoom : 0, y: 0 });
-        triggerPetAnimation("WALK");
-      }, 360);
-    };
-
-    chooseNextSpot();
-    const id = window.setInterval(chooseNextSpot, 6000);
-    return () => {
-      window.clearInterval(id);
-      if (turnTimer) window.clearTimeout(turnTimer);
-    };
   }, [open, reminder, showSettings, interrupting]);
 
   useEffect(() => {
@@ -621,22 +593,23 @@ export function PetCompanion() {
       {/* Floating pet */}
       <motion.div
         className="relative pointer-events-auto"
-        animate={roamTarget}
-        transition={{ duration: 5.5, ease: "easeInOut" }}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2 }}
       >
         <PetSpeechBubble />
 
         <button
           onClick={() => setShowSettings((v) => !v)}
           aria-label="Open pet"
-          className="hover:scale-105 transition-transform"
+          className="p-0 transition-transform hover:scale-[1.03]"
         >
-          <div className="w-20 h-20 flex items-center justify-center">
+          <div className="flex h-24 w-24 items-center justify-center">
             <Pet
               ref={petRef}
               variant={state.petVariant}
               stage={stageForLevel(state.petLevel)}
-              size={124}
+              size={104}
               mood={visibleMood}
             />
           </div>
