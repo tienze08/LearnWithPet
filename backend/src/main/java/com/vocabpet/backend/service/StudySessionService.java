@@ -7,6 +7,7 @@ import com.vocabpet.backend.dto.StudyCardRe.ReviewRequest;
 import com.vocabpet.backend.dto.StudyCardRe.ReviewResponse;
 import com.vocabpet.backend.dto.StudyCardRe.StudyCardResponse;
 import com.vocabpet.backend.dto.StudyCardRe.StudyDashboardResponse;
+import com.vocabpet.backend.dto.StudyCardRe.StudyPlanResponse;
 import com.vocabpet.backend.entity.StudySession;
 
 public interface StudySessionService {
@@ -27,5 +28,7 @@ public interface StudySessionService {
         List<RecentReviewResponse> getRecentReviews();
 
         StudyDashboardResponse getDashboardStats();
+
+        StudyPlanResponse getTodayPlan();
 
 }

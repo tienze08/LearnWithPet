@@ -58,6 +58,10 @@ export default function StudySessionFlashcards({ deckId }: Props) {
   const [showStreak, setShowStreak] = useState(false);
   const [streak, setStreak] = useState(0);
   const [scheduleNotice, setScheduleNotice] = useState<string | null>(null);
+  const [startedAt, setStartedAt] = useState<number | null>(null);
+  const [reviewed, setReviewed] = useState(0);
+  const [correct, setCorrect] = useState(0);
+  const [againWords, setAgainWords] = useState<string[]>([]);
 
   const startMutation = useStartStudySessionMutation();
   const finishMutation = useFinishStudySessionMutation();
@@ -103,20 +107,34 @@ export default function StudySessionFlashcards({ deckId }: Props) {
   );
 
   if (finished) {
+    const minutes = Math.max(1, Math.round(((Date.now() - (startedAt ?? Date.now())) / 1000) / 60));
+    const accuracy = reviewed ? Math.round((correct / reviewed) * 100) : 0;
     return (
       <>
         {streakPopup}
-        <div className="max-w-xl mx-auto rounded-[2rem] border border-border bg-card/85 p-10 text-center card-pop">
+        <div className="max-w-xl mx-auto rounded-[2rem] border border-border bg-card/85 p-8 text-center card-pop">
           <div className="text-6xl">🎉</div>
 
-          <h2 className="mt-4 text-3xl font-extrabold">Finished!</h2>
+          <h2 className="mt-4 text-3xl font-extrabold">Session complete</h2>
 
-          <p className="mt-3 text-muted-foreground">
-            You have finished all vocabulary in this study session.
+          <div className="mt-5 grid grid-cols-2 gap-3 text-left sm:grid-cols-4">
+            <SessionStat label="Reviewed" value={String(reviewed)} />
+            <SessionStat label="Accuracy" value={`${accuracy}%`} />
+            <SessionStat label="Time" value={`${minutes} min`} />
+            <SessionStat label="Streak" value={`${streak || "✓"}`} />
+          </div>
+          <p className="mt-5 text-sm text-muted-foreground">
+            {againWords.length
+              ? <>Words to meet again soon: <strong>{againWords.join(", ")}</strong>.</>
+              : "Nothing marked Again — great recall!"}
           </p>
 
-          <Button variant="outline" className="mt-8 w-full h-12" disabled>
-            Session complete
+          <Button variant="outline" className="mt-8 w-full h-12" onClick={() => {
+            setStarted(false);
+            setFinished(false);
+            setSessionId(null);
+          }}>
+            Start another session
           </Button>
         </div>
       </>
@@ -142,6 +160,10 @@ export default function StudySessionFlashcards({ deckId }: Props) {
     });
 
     setSessionId(session.sessionId);
+    setStartedAt(Date.now());
+    setReviewed(0);
+    setCorrect(0);
+    setAgainWords([]);
     setStarted(true);
     petEvents.emit({ type: "SESSION_STARTED" });
   }
@@ -155,6 +177,12 @@ export default function StudySessionFlashcards({ deckId }: Props) {
     });
 
     setScheduleNotice(scheduleMessage(rating, result.nextReviewTime));
+    setReviewed((count) => count + 1);
+    if (rating === "AGAIN") {
+      setAgainWords((words) => words.includes(data.word) ? words : [...words, data.word]);
+    } else {
+      setCorrect((count) => count + 1);
+    }
 
     if (result.streakUpdated) {
       setStreak(result.currentStreak);
@@ -265,4 +293,8 @@ export default function StudySessionFlashcards({ deckId }: Props) {
       </div>
     </>
   );
+}
+
+function SessionStat({ label, value }: { label: string; value: string }) {
+  return <div className="rounded-2xl border border-border bg-background/70 px-3 py-2"><p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">{label}</p><p className="mt-1 text-lg font-extrabold">{value}</p></div>;
 }

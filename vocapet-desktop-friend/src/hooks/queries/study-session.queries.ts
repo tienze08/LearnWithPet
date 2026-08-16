@@ -8,6 +8,7 @@ import {
   finishStudySessionApi,
   getRecentReviewsApi,
   getStudyDashboardStatsApi,
+  getTodayStudyPlanApi,
   getNextStudyCardApi,
   reviewStudyCardApi,
   startStudySessionApi,
@@ -48,14 +49,20 @@ export function useReviewStudyCardMutation(
       queryClient.invalidateQueries({ queryKey: ["me"] });
       queryClient.invalidateQueries({ queryKey: ["study-reviews", "recent"] });
       queryClient.invalidateQueries({ queryKey: ["study-dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["study-plan", "today"] });
     },
   });
 }
 
 export function useFinishStudySessionMutation() {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (sessionId: number) =>
       finishStudySessionApi(sessionId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["study-plan", "today"] });
+      queryClient.invalidateQueries({ queryKey: ["companion", "state"] });
+    },
   });
 }
 
@@ -70,5 +77,12 @@ export function useStudyDashboardStatsQuery() {
   return useQuery({
     queryKey: ["study-dashboard"],
     queryFn: getStudyDashboardStatsApi,
+  });
+}
+
+export function useTodayStudyPlanQuery() {
+  return useQuery({
+    queryKey: ["study-plan", "today"],
+    queryFn: getTodayStudyPlanApi,
   });
 }

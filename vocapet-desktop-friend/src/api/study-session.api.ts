@@ -28,6 +28,31 @@ export type StudyDashboardStats = {
   recentReviews: number;
 };
 
+export type StudyPlan = {
+  dueCards: number;
+  estimatedMinutes: number;
+  reviewsToday: number;
+  dailyGoal: number;
+  streak: number;
+  suggestedDeckId: number | null;
+  suggestedDeckName: string | null;
+  dueReasons: Array<{
+    code: "RELEARNING" | "OVERDUE" | "SCHEDULED";
+    label: string;
+    detail: string;
+    count: number;
+    deckId: number;
+    deckName: string;
+    words: string[];
+  }>;
+  upcomingCards: Array<{
+    vocabularyId: number;
+    word: string;
+    deckName: string;
+    dueAt: string;
+  }>;
+};
+
 export function startStudySessionApi(
   payload: StartStudySessionRequest,
 ) {
@@ -78,4 +103,8 @@ export function getRecentReviewsApi() {
 
 export function getStudyDashboardStatsApi() {
   return apiFetch<StudyDashboardStats>("/api/study-sessions/dashboard");
+}
+
+export function getTodayStudyPlanApi() {
+  return apiFetch<StudyPlan>("/api/study-sessions/plan");
 }

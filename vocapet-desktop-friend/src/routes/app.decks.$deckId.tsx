@@ -37,6 +37,9 @@ import SrsFlashCard from "@/components/deck/SrsFlashCard";
 import { useGame } from "@/lib/store";
 
 export const Route = createFileRoute("/app/decks/$deckId")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    mode: search.mode === "srs" ? "srs" : undefined,
+  }),
   component: DeckDetail,
 });
 
@@ -45,6 +48,7 @@ type Mode = "browse" | "srs" | "flashcards" | "quiz" | "type";
 export default function DeckDetail() {
   const { recordAnswer: recordStudyAnswer } = useGame();
   const { deckId } = Route.useParams();
+  const { mode: requestedMode } = Route.useSearch();
 
   const navigate = useNavigate();
 
@@ -70,7 +74,7 @@ export default function DeckDetail() {
 
   const removeBookmark = useRemoveBookmarkMutation();
 
-  const [mode, setMode] = useState<Mode>("browse");
+  const [mode, setMode] = useState<Mode>(requestedMode ?? "browse");
 
   function recordAnswer(id: number, correct: boolean) {
     recordStudyAnswer(String(id), correct);

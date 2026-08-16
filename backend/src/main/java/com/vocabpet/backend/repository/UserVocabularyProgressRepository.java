@@ -67,6 +67,16 @@ public interface UserVocabularyProgressRepository
         long countDueCards(Long userId, LocalDateTime now);
 
         @Query("""
+                        SELECT p
+                        FROM UserVocabularyProgress p
+                        WHERE p.user.id = :userId
+                        AND p.vocabulary.deck.user.id = :userId
+                        AND p.nextReviewTime > :now
+                        ORDER BY p.nextReviewTime ASC
+                        """)
+        List<UserVocabularyProgress> findUpcomingCards(Long userId, LocalDateTime now);
+
+        @Query("""
                         SELECT COUNT(p)
                         FROM UserVocabularyProgress p
                         WHERE p.user.id = :userId
