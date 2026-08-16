@@ -173,19 +173,25 @@ public class QuizServiceImpl implements QuizService {
 
     private List<String> buildOptions(Vocabulary correctVocabulary, Long userId) {
 
-        List<String> options = new ArrayList<>();
-
-        options.add(correctVocabulary.getMeaning());
-
+        // Pick distractors first. The previous implementation shuffled the
+        // correct answer together with every meaning and then sliced to four,
+        // which could remove the only correct answer completely.
+        List<String> distractors = new ArrayList<>();
         for (Vocabulary vocabulary : vocabularyRepository.findByDeckUserId(userId)) {
             if (!vocabulary.getId().equals(correctVocabulary.getId())
-                    && !options.contains(vocabulary.getMeaning())) {
-                options.add(vocabulary.getMeaning());
+                    && vocabulary.getMeaning() != null
+                    && !vocabulary.getMeaning().isBlank()
+                    && !vocabulary.getMeaning().equalsIgnoreCase(correctVocabulary.getMeaning())
+                    && !distractors.contains(vocabulary.getMeaning())) {
+                distractors.add(vocabulary.getMeaning());
             }
         }
 
+        Collections.shuffle(distractors);
+        List<String> options = new ArrayList<>(distractors.stream().limit(3).toList());
+        options.add(correctVocabulary.getMeaning());
         Collections.shuffle(options);
-        return options.stream().limit(4).toList();
+        return options;
     }
 
     private void recordQuizAttempt(User user, Vocabulary vocabulary, Rating rating) {
