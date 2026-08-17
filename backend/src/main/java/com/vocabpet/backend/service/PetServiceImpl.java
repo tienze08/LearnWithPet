@@ -72,6 +72,7 @@ public class PetServiceImpl implements PetService {
                         case BUNNY -> user.getStreak() >= 5;
                         case PANDA -> user.getLevel() >= 5;
                         case DRAGON -> masteredWords >= 10;
+                        case PUPU -> user.getLevel() >= 2;
                         case CAT -> true;
                 };
 

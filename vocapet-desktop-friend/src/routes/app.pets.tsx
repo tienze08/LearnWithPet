@@ -60,6 +60,13 @@ export const PET_UNLOCKS: Unlock[] = [
     goal: 10,
     progress: masteredCount,
   },
+  {
+    id: "PUPU",
+    title: "Golden Companion",
+    requirement: "Reach Level 2",
+    goal: 2,
+    progress: (stats) => stats.level,
+  },
 ];
 
 export const Route = createFileRoute("/app/pets")({
@@ -88,7 +95,7 @@ function PetsPage() {
             <Sparkles className="w-7 h-7 text-primary" /> Pet Collection
           </h1>
           <p className="text-muted-foreground">
-            Five companions to discover. Keep learning to unlock them all.
+            Six companions to discover. Keep learning to unlock them all.
           </p>
         </div>
         <div className="flex items-center gap-2 rounded-full bg-primary/10 text-primary px-4 py-2 font-bold">

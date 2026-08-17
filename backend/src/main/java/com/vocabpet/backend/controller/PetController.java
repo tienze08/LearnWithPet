@@ -59,6 +59,11 @@ public class PetController {
                                 PetResponse.builder()
                                                 .species(PetSpecies.DRAGON)
                                                 .locked(true)
+                                                .build(),
+
+                                PetResponse.builder()
+                                                .species(PetSpecies.PUPU)
+                                                .locked(true)
                                                 .build());
         }
 

@@ -23,6 +23,7 @@ export const PET_VARIANTS = [
   { id: "BUNNY", name: "Bunny", desc: "A calm little helper" },
   { id: "PANDA", name: "Panda", desc: "A focused study pal" },
   { id: "DRAGON", name: "Dragon", desc: "A legendary study pal" },
+  { id: "PUPU", name: "PUPU", desc: "A golden study companion" },
 ] as const;
 
 const Pet = forwardRef<PetHandle, Props>(({ variant = "CAT", stage, size = 96, mood }, ref) => {

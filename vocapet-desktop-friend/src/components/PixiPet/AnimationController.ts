@@ -6,6 +6,7 @@ import foxAtlas from "@/assets/fox-study-companion-6x8.png";
 import pandaAtlas from "@/assets/panda-study-companion-6x8.png";
 import bunnyAtlas from "@/assets/bunny-study-companion-6x8.png";
 import dragonAtlas from "@/assets/dragon-study-companion-6x8.png";
+import pupuAtlas from "@/assets/pupu-golden-cat-9x8.webp";
 import kittenMicroAtlas from "@/assets/gray-study-kitten-micro-5x4.png";
 
 export type PetAction =
@@ -28,6 +29,7 @@ type AnimationConfig = {
   rows?: number;
   row?: number;
   fps: number;
+  frames?: number;
 };
 
 type MicroAction =
@@ -52,6 +54,7 @@ const VARIANT_ATLASES: Record<PetVariant, string> = {
   PANDA: pandaAtlas,
   BUNNY: bunnyAtlas,
   DRAGON: dragonAtlas,
+  PUPU: pupuAtlas,
 };
 
 export const PET_ANIMATIONS: Record<PetAction, AnimationConfig> = {
@@ -69,6 +72,24 @@ export const PET_ANIMATIONS: Record<PetAction, AnimationConfig> = {
   SLEEP: { source: kittenAtlas, columns: 8, rows: 6, row: 5, fps: 3 },
   HAPPY: { source: kittenAtlas, columns: 8, rows: 6, row: 3, fps: 7 },
   CELEBRATE: { source: kittenAtlas, columns: 8, rows: 6, row: 3, fps: 7 },
+};
+
+// PUPU's downloaded Petdex sheet is a fixed 8-column x 9-row atlas. Some
+// rows intentionally use fewer than eight cells, so `frames` avoids pulling
+// empty cells or a neighbour animation into an AnimatedSprite.
+const PUPU_ANIMATIONS: Record<PetAction, AnimationConfig> = {
+  IDLE: { source: pupuAtlas, columns: 8, rows: 9, row: 0, frames: 6, fps: 4 },
+  WALK: { source: pupuAtlas, columns: 8, rows: 9, row: 1, frames: 8, fps: 7 },
+  RUN: { source: pupuAtlas, columns: 8, rows: 9, row: 7, frames: 6, fps: 10 },
+  JUMP: { source: pupuAtlas, columns: 8, rows: 9, row: 4, frames: 5, fps: 7 },
+  STUDY: { source: pupuAtlas, columns: 8, rows: 9, row: 8, frames: 6, fps: 4 },
+  WRITE: { source: pupuAtlas, columns: 8, rows: 9, row: 8, frames: 6, fps: 4 },
+  THINK: { source: pupuAtlas, columns: 8, rows: 9, row: 6, frames: 6, fps: 4 },
+  CONFUSED: { source: pupuAtlas, columns: 8, rows: 9, row: 3, frames: 4, fps: 4 },
+  SAD: { source: pupuAtlas, columns: 8, rows: 9, row: 5, frames: 8, fps: 5 },
+  SLEEP: { source: pupuAtlas, columns: 8, rows: 9, row: 6, frames: 6, fps: 3 },
+  HAPPY: { source: pupuAtlas, columns: 8, rows: 9, row: 3, frames: 4, fps: 5 },
+  CELEBRATE: { source: pupuAtlas, columns: 8, rows: 9, row: 3, frames: 4, fps: 5 },
 };
 
 const CAT_MICRO_ANIMATIONS: Record<MicroAction, AnimationConfig> = {
@@ -125,7 +146,8 @@ export default class AnimationController {
   async load() {
     const source = VARIANT_ATLASES[this.variant];
     const atlas = this.removeGreenBackground(await PIXI.Assets.load(source), source);
-    (Object.entries(PET_ANIMATIONS) as [PetAction, AnimationConfig][]).forEach(([action, config]) => {
+    const actionConfigs = this.variant === "PUPU" ? PUPU_ANIMATIONS : PET_ANIMATIONS;
+    (Object.entries(actionConfigs) as [PetAction, AnimationConfig][]).forEach(([action, config]) => {
       const variantConfig = { ...config, source };
       this.configs.set(action, variantConfig);
       this.animations.set(action, this.buildFrames(atlas, variantConfig));
@@ -143,7 +165,7 @@ export default class AnimationController {
 
     this.sprite.loop = true;
 
-    this.sprite.animationSpeed = PET_ANIMATIONS.IDLE.fps / 60;
+    this.sprite.animationSpeed = actionConfigs.IDLE.fps / 60;
 
     this.play("IDLE");
   }
@@ -225,7 +247,8 @@ export default class AnimationController {
     const bottom = Math.round(((config.row ?? 0) + 1) * sourceHeight / rows);
     const frames: PIXI.Texture[] = [];
 
-    for (let i = 0; i < config.columns; i++) {
+    const frameCount = config.frames ?? config.columns;
+    for (let i = 0; i < frameCount; i++) {
       const left = Math.round(i * sourceWidth / config.columns);
       const right = Math.round((i + 1) * sourceWidth / config.columns);
       frames.push(

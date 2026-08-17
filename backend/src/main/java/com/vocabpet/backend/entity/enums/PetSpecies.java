@@ -5,5 +5,6 @@ public enum PetSpecies {
     FOX,
     BUNNY,
     PANDA,
-    DRAGON
+    DRAGON,
+    PUPU
 }

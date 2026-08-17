@@ -152,7 +152,7 @@ function Dashboard() {
   );
 }
 
-const PET_VARIANTS: PetVariant[] = ["CAT", "FOX", "BUNNY", "PANDA", "DRAGON"];
+const PET_VARIANTS: PetVariant[] = ["CAT", "FOX", "BUNNY", "PANDA", "DRAGON", "PUPU"];
 const PET_MOODS: PetMood[] = ["happy", "sad", "sleepy", "excited", "waiting", "crying"];
 
 function toPetVariant(species?: string): PetVariant | undefined {
