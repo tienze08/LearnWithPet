@@ -9,7 +9,7 @@ import { useMyAchievementsQuery } from "@/hooks/queries/achievement.queries";
 import { useUnlockedPetsQuery } from "@/hooks/queries/pet.queries";
 import { ACHIEVEMENTS as AWARD_DEFINITIONS, achievementStatus } from "@/lib/achievements";
 
-const PET_EMOJI = { CAT: "🐱", FOX: "🦊", BUNNY: "🐰", PANDA: "🐼", DRAGON: "🐲", PUPU: "🐱" } as const;
+const PET_EMOJI = { CAT: "🐱", FOX: "👻", BUNNY: "🍎", PANDA: "⚽", DRAGON: "🐲" } as const;
 const ACHIEVEMENT_CODES: Record<string, string> = {
   first: "first-review",
   ten: "reviews-50",

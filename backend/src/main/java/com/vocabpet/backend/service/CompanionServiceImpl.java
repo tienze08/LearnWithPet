@@ -123,10 +123,10 @@ public class CompanionServiceImpl implements CompanionService {
     private Pet requiredPet(User user) {
         return petRepository.findByUserId(user.getId()).orElseGet(() -> {
             // A companion should never make a learning action fail. Users who
-            // have not chosen a species yet receive the default Pip cat.
+            // have not chosen a species yet receive the default Burumaru cat.
             Pet pet = Pet.builder()
                     .user(user)
-                    .name("Pip")
+                    .name("Burumaru")
                     .species(PetSpecies.CAT)
                     .mood(PetMood.HAPPY)
                     .level(1)
@@ -346,7 +346,7 @@ public class CompanionServiceImpl implements CompanionService {
                         line(profile.getPersonality(), "Great job! Let's take a short break."), 2, 6);
             }
             case ANSWER_CORRECT ->
-                reaction(PetMood.HAPPY, PetAction.HAPPY, line(profile.getPersonality(), "You got it!"), 2, 3);
+                reaction(PetMood.HAPPY, PetAction.CELEBRATE, line(profile.getPersonality(), "You got it!"), 2, 3);
             case ANSWER_WRONG -> reaction(PetMood.SAD, PetAction.SAD,
                     line(profile.getPersonality(), "No worries. We'll learn this one together."), 1, 4);
             case DAILY_GOAL_COMPLETED -> reaction(PetMood.HAPPY, PetAction.CELEBRATE,

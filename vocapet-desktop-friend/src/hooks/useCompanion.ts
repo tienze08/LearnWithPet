@@ -17,7 +17,7 @@ export function useCompanion(userId: number | undefined, name: string, reviewCou
       memoryRef.current = memory;
       saveCompanionMemory(userId, memory);
       setStatus({ energy: memory.energy, personality: memory.personality, mood: moment?.mood ?? moodForCompanion(memory) });
-      if (moment) speakPet(`Pip: ${moment.message}`, 1, 6);
+      if (moment) speakPet(`Burumaru: ${moment.message}`, 1, 6);
     };
     memoryRef.current = loadCompanionMemory(userId);
     reviewCountRef.current = reviewCount;
@@ -31,7 +31,7 @@ export function useCompanion(userId: number | undefined, name: string, reviewCou
     const now = Date.now();
     let memory = recordCompanionStudy(memoryRef.current, now);
     const completed = studyCompleteMoment(memory, name, now);
-    if (completed) { memory = completed.memory; speakPet(`Pip: ${completed.moment.message}`, 2, 5); }
+    if (completed) { memory = completed.memory; speakPet(`Burumaru: ${completed.moment.message}`, 2, 5); }
     memoryRef.current = memory;
     reviewCountRef.current = reviewCount;
     saveCompanionMemory(userId, memory);

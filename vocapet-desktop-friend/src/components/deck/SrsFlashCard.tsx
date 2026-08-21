@@ -20,7 +20,7 @@ interface Props {
 }
 
 function scheduleMessage(rating: "AGAIN" | "HARD" | "GOOD" | "EASY", nextReviewTime: string) {
-  if (rating === "AGAIN") return "Pip will bring this word back in about 10 minutes.";
+  if (rating === "AGAIN") return "Burumaru will bring this word back in about 10 minutes.";
   const next = new Date(nextReviewTime);
   return `Next review: ${next.toLocaleDateString([], { month: "short", day: "numeric" })}.`;
 }

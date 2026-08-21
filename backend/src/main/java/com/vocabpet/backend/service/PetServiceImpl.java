@@ -72,7 +72,6 @@ public class PetServiceImpl implements PetService {
                         case BUNNY -> user.getStreak() >= 5;
                         case PANDA -> user.getLevel() >= 5;
                         case DRAGON -> masteredWords >= 10;
-                        case PUPU -> user.getLevel() >= 2;
                         case CAT -> true;
                 };
 
@@ -108,7 +107,7 @@ public class PetServiceImpl implements PetService {
                 }
 
                 Pet pet = petRepository.findByUserId(user.getId()).orElseGet(() -> Pet.builder()
-                                .user(user).name("Pip")
+                                .user(user).name("Burumaru")
                                 .mood(com.vocabpet.backend.entity.enums.PetMood.HAPPY)
                                 .level(1).xp(0).build());
                 pet.setSpecies(species);

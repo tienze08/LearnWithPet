@@ -52,7 +52,7 @@ function Welcome() {
   const [name, setName] = useState("");
   const [avatar, setAvatar] = useState<keyof typeof avatarMap>("FOX");
   const [variant, setVariant] = useState<PetVariant>("CAT");
-  const [petName, setPetName] = useState("Pip");
+  const [petName, setPetName] = useState("Burumaru");
 
   const onboardingMutation = useOnboardingMutation();
   async function finish() {

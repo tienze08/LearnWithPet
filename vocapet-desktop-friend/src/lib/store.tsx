@@ -16,7 +16,7 @@ export function computePetMood(opts: {
   if (reviewsToday >= dailyGoal) return "happy";
   return "waiting";
 }
-export type PetVariant = "CAT" | "FOX" | "BUNNY" | "PANDA" | "DRAGON" | "PUPU";
+export type PetVariant = "CAT" | "FOX" | "BUNNY" | "PANDA" | "DRAGON";
 export type PetStage = 1 | 2 | 3;
 
 export type UserProfile = {
@@ -91,7 +91,7 @@ const initialState: GameState = {
   masteryByWord: {},
   favorites: [],
   petMood: "happy",
-  petName: "Pip",
+  petName: "Burumaru",
   petVariant: "CAT",
   petLevel: 1,
   petExp: 0,
@@ -108,7 +108,7 @@ const initialState: GameState = {
   },
 };
 
-const VALID_VARIANTS: PetVariant[] = ["CAT", "FOX", "BUNNY", "PANDA", "DRAGON", "PUPU"];
+const VALID_VARIANTS: PetVariant[] = ["CAT", "FOX", "BUNNY", "PANDA", "DRAGON"];
 
 function load(): GameState {
   if (typeof window === "undefined") return initialState;

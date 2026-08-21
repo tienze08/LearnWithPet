@@ -1,13 +1,11 @@
 import * as PIXI from "pixi.js";
 
 import type { PetVariant } from "@/lib/store";
-import kittenAtlas from "@/assets/gray-study-kitten-6x8.png";
-import foxAtlas from "@/assets/fox-study-companion-6x8.png";
-import pandaAtlas from "@/assets/panda-study-companion-6x8.png";
-import bunnyAtlas from "@/assets/bunny-study-companion-6x8.png";
-import dragonAtlas from "@/assets/dragon-study-companion-6x8.png";
-import pupuAtlas from "@/assets/pupu-golden-cat-9x8.webp";
-import kittenMicroAtlas from "@/assets/gray-study-kitten-micro-5x4.png";
+import ghostAtlas from "@/assets/ghost-9x8.webp";
+import kabiAtlas from "@/assets/kabi-9x8.webp";
+import blauAtlas from "@/assets/blau-9x8.webp";
+import dragoniteAtlas from "@/assets/dragonite-9x8.webp";
+import burumaruAtlas from "@/assets/burumaru-british-shorthair-9x8.webp";
 
 export type PetAction =
   | "IDLE"
@@ -32,94 +30,35 @@ type AnimationConfig = {
   frames?: number;
 };
 
-type MicroAction =
-  | "BLINK"
-  | "EAR_TWITCH"
-  | "TAIL_WAG"
-  | "HEAD_TILT"
-  | "LOOK_AROUND"
-  | "NOD"
-  | "TURN_FLASHCARD"
-  | "STRETCH"
-  | "YAWN"
-  | "DOZE_OFF";
-
-type AnimationKey = PetAction | MicroAction;
-
-type MicroClip = { action: MicroAction; delay: number };
+type DirectionalWalkAction = "WALK_RIGHT" | "WALK_LEFT";
+type AnimationKey = PetAction | DirectionalWalkAction;
 
 const VARIANT_ATLASES: Record<PetVariant, string> = {
-  CAT: kittenAtlas,
-  FOX: foxAtlas,
-  PANDA: pandaAtlas,
-  BUNNY: bunnyAtlas,
-  DRAGON: dragonAtlas,
-  PUPU: pupuAtlas,
+  CAT: burumaruAtlas,
+  FOX: ghostAtlas,
+  PANDA: blauAtlas,
+  BUNNY: kabiAtlas,
+  DRAGON: dragoniteAtlas,
 };
 
-export const PET_ANIMATIONS: Record<PetAction, AnimationConfig> = {
-  IDLE: { source: kittenAtlas, columns: 8, rows: 6, row: 0, fps: 4 },
-  WALK: { source: kittenAtlas, columns: 8, rows: 6, row: 1, fps: 4 },
-  RUN: { source: kittenAtlas, columns: 8, rows: 6, row: 1, fps: 10 },
-  JUMP: { source: kittenAtlas, columns: 8, rows: 6, row: 3, fps: 7 },
-  STUDY: { source: kittenAtlas, columns: 8, rows: 6, row: 2, fps: 4 },
-  WRITE: { source: kittenAtlas, columns: 8, rows: 6, row: 2, fps: 5 },
-  // The sheet has no separate thinking row. Idle is the correct neutral pose;
-  // micro head/ear motions add expression without showing a study card.
-  THINK: { source: kittenAtlas, columns: 8, rows: 6, row: 0, fps: 4 },
-  CONFUSED: { source: kittenAtlas, columns: 8, rows: 6, row: 4, fps: 4 },
-  SAD: { source: kittenAtlas, columns: 8, rows: 6, row: 4, fps: 4 },
-  SLEEP: { source: kittenAtlas, columns: 8, rows: 6, row: 5, fps: 3 },
-  HAPPY: { source: kittenAtlas, columns: 8, rows: 6, row: 3, fps: 7 },
-  CELEBRATE: { source: kittenAtlas, columns: 8, rows: 6, row: 3, fps: 7 },
+const PREMIUM_PET_ANIMATIONS: Record<PetAction, AnimationConfig> = {
+  IDLE: { source: burumaruAtlas, columns: 8, rows: 9, row: 0, frames: 6, fps: 4 },
+  WALK: { source: burumaruAtlas, columns: 8, rows: 9, row: 1, frames: 8, fps: 7 },
+  RUN: { source: burumaruAtlas, columns: 8, rows: 9, row: 7, frames: 6, fps: 10 },
+  JUMP: { source: burumaruAtlas, columns: 8, rows: 9, row: 4, frames: 5, fps: 7 },
+  STUDY: { source: burumaruAtlas, columns: 8, rows: 9, row: 8, frames: 6, fps: 4 },
+  WRITE: { source: burumaruAtlas, columns: 8, rows: 9, row: 8, frames: 6, fps: 4 },
+  THINK: { source: burumaruAtlas, columns: 8, rows: 9, row: 6, frames: 6, fps: 4 },
+  CONFUSED: { source: burumaruAtlas, columns: 8, rows: 9, row: 3, frames: 4, fps: 4 },
+  SAD: { source: burumaruAtlas, columns: 8, rows: 9, row: 5, frames: 8, fps: 5 },
+  SLEEP: { source: burumaruAtlas, columns: 8, rows: 9, row: 6, frames: 6, fps: 3 },
+  HAPPY: { source: burumaruAtlas, columns: 8, rows: 9, row: 3, frames: 4, fps: 5 },
+  CELEBRATE: { source: burumaruAtlas, columns: 8, rows: 9, row: 4, frames: 5, fps: 7 },
 };
 
-// PUPU's downloaded Petdex sheet is a fixed 8-column x 9-row atlas. Some
-// rows intentionally use fewer than eight cells, so `frames` avoids pulling
-// empty cells or a neighbour animation into an AnimatedSprite.
-const PUPU_ANIMATIONS: Record<PetAction, AnimationConfig> = {
-  IDLE: { source: pupuAtlas, columns: 8, rows: 9, row: 0, frames: 6, fps: 4 },
-  WALK: { source: pupuAtlas, columns: 8, rows: 9, row: 1, frames: 8, fps: 7 },
-  RUN: { source: pupuAtlas, columns: 8, rows: 9, row: 7, frames: 6, fps: 10 },
-  JUMP: { source: pupuAtlas, columns: 8, rows: 9, row: 4, frames: 5, fps: 7 },
-  STUDY: { source: pupuAtlas, columns: 8, rows: 9, row: 8, frames: 6, fps: 4 },
-  WRITE: { source: pupuAtlas, columns: 8, rows: 9, row: 8, frames: 6, fps: 4 },
-  THINK: { source: pupuAtlas, columns: 8, rows: 9, row: 6, frames: 6, fps: 4 },
-  CONFUSED: { source: pupuAtlas, columns: 8, rows: 9, row: 3, frames: 4, fps: 4 },
-  SAD: { source: pupuAtlas, columns: 8, rows: 9, row: 5, frames: 8, fps: 5 },
-  SLEEP: { source: pupuAtlas, columns: 8, rows: 9, row: 6, frames: 6, fps: 3 },
-  HAPPY: { source: pupuAtlas, columns: 8, rows: 9, row: 3, frames: 4, fps: 5 },
-  CELEBRATE: { source: pupuAtlas, columns: 8, rows: 9, row: 3, frames: 4, fps: 5 },
-};
-
-const CAT_MICRO_ANIMATIONS: Record<MicroAction, AnimationConfig> = {
-  BLINK: { source: kittenMicroAtlas, columns: 4, rows: 5, row: 0, fps: 5 },
-  EAR_TWITCH: { source: kittenMicroAtlas, columns: 4, rows: 5, row: 1, fps: 5 },
-  TAIL_WAG: { source: kittenMicroAtlas, columns: 4, rows: 5, row: 2, fps: 5 },
-  NOD: { source: kittenMicroAtlas, columns: 4, rows: 5, row: 3, fps: 4 },
-  TURN_FLASHCARD: { source: kittenMicroAtlas, columns: 4, rows: 5, row: 4, fps: 4 },
-  HEAD_TILT: { source: kittenMicroAtlas, columns: 4, rows: 5, row: 0, fps: 4 },
-  LOOK_AROUND: { source: kittenMicroAtlas, columns: 4, rows: 5, row: 0, fps: 4 },
-  STRETCH: { source: kittenMicroAtlas, columns: 4, rows: 5, row: 0, fps: 4 },
-  YAWN: { source: kittenMicroAtlas, columns: 4, rows: 5, row: 0, fps: 4 },
-  DOZE_OFF: { source: kittenMicroAtlas, columns: 4, rows: 5, row: 3, fps: 4 },
-};
-
-const MICRO_TIMELINES: Partial<Record<PetAction, MicroClip[]>> = {
-  IDLE: [
-    { action: "BLINK", delay: 5500 },
-    { action: "EAR_TWITCH", delay: 8200 },
-    { action: "TAIL_WAG", delay: 9200 },
-  ],
-  STUDY: [
-    { action: "NOD", delay: 5000 },
-    { action: "TURN_FLASHCARD", delay: 8500 },
-    { action: "BLINK", delay: 6200 },
-  ],
-  THINK: [
-    { action: "BLINK", delay: 4200 },
-    { action: "EAR_TWITCH", delay: 7200 },
-  ],
+const PREMIUM_DIRECTIONAL_WALK: Record<DirectionalWalkAction, AnimationConfig> = {
+  WALK_RIGHT: { source: burumaruAtlas, columns: 8, rows: 9, row: 1, frames: 8, fps: 7 },
+  WALK_LEFT: { source: burumaruAtlas, columns: 8, rows: 9, row: 2, frames: 8, fps: 7 },
 };
 
 export default class AnimationController {
@@ -131,11 +70,9 @@ export default class AnimationController {
 
   private configs = new Map<AnimationKey, AnimationConfig>();
 
-  private baseAction: PetAction = "IDLE";
-
-  private microTimer?: number;
-  private microTimelineIndex = 0;
   private keyedTextures = new Map<string, PIXI.Texture>();
+
+  private facing: "left" | "right" = "left";
 
   constructor(private readonly variant: PetVariant = "CAT") {}
 
@@ -146,18 +83,19 @@ export default class AnimationController {
   async load() {
     const source = VARIANT_ATLASES[this.variant];
     const atlas = this.removeGreenBackground(await PIXI.Assets.load(source), source);
-    const actionConfigs = this.variant === "PUPU" ? PUPU_ANIMATIONS : PET_ANIMATIONS;
+    const usesDirectionalWalk = true;
+    const actionConfigs = PREMIUM_PET_ANIMATIONS;
     (Object.entries(actionConfigs) as [PetAction, AnimationConfig][]).forEach(([action, config]) => {
       const variantConfig = { ...config, source };
       this.configs.set(action, variantConfig);
       this.animations.set(action, this.buildFrames(atlas, variantConfig));
     });
 
-    if (this.variant === "CAT") {
-      const microAtlas = await PIXI.Assets.load(kittenMicroAtlas);
-      (Object.entries(CAT_MICRO_ANIMATIONS) as [MicroAction, AnimationConfig][]).forEach(([action, config]) => {
-        this.configs.set(action, config);
-        this.animations.set(action, this.buildFrames(microAtlas, config));
+    if (usesDirectionalWalk) {
+      (Object.entries(PREMIUM_DIRECTIONAL_WALK) as [DirectionalWalkAction, AnimationConfig][]).forEach(([action, config]) => {
+        const variantConfig = { ...config, source };
+        this.configs.set(action, variantConfig);
+        this.animations.set(action, this.buildFrames(atlas, variantConfig));
       });
     }
 
@@ -176,22 +114,30 @@ export default class AnimationController {
     return this.sprite;
   }
 
+  setFacing(direction: "left" | "right") {
+    this.facing = direction;
+    if (this.currentAction === "WALK_LEFT" || this.currentAction === "WALK_RIGHT") {
+      this.setAnimation(direction === "left" ? "WALK_LEFT" : "WALK_RIGHT", true);
+    }
+  }
+
   //----------------------------------------
 
   play(action: PetAction) {
-    const normalizedAction = this.animations.has(action) ? action : "IDLE";
+    const normalizedAction: AnimationKey = action === "WALK" && this.isDirectionalVariant()
+      ? (this.facing === "left" ? "WALK_LEFT" : "WALK_RIGHT")
+      : this.animations.has(action) ? action : "IDLE";
 
     if (normalizedAction === this.currentAction) return;
 
-    this.baseAction = normalizedAction;
-    this.clearMicroTimer();
-    this.microTimelineIndex = 0;
     this.setAnimation(normalizedAction, true);
-    this.scheduleMicroAction();
+  }
+
+  private isDirectionalVariant() {
+    return true;
   }
 
   destroy() {
-    this.clearMicroTimer();
     this.sprite.onComplete = undefined;
   }
 
@@ -210,27 +156,6 @@ export default class AnimationController {
     // frame index from another action made walks begin mid-stride and look as
     // though the pet was sliding or walking backwards.
     this.sprite.gotoAndPlay(0);
-  }
-
-  private scheduleMicroAction() {
-    if (this.variant !== "CAT" || typeof window === "undefined") return;
-    const timeline = MICRO_TIMELINES[this.baseAction];
-    if (!timeline?.length) return;
-
-    const clip = timeline[this.microTimelineIndex % timeline.length];
-    this.microTimelineIndex += 1;
-    this.microTimer = window.setTimeout(() => {
-      this.setAnimation(clip.action, false);
-      this.sprite.onComplete = () => {
-        this.setAnimation(this.baseAction, true);
-        this.scheduleMicroAction();
-      };
-    }, clip.delay);
-  }
-
-  private clearMicroTimer() {
-    if (this.microTimer) window.clearTimeout(this.microTimer);
-    this.microTimer = undefined;
   }
 
   //----------------------------------------
@@ -286,9 +211,11 @@ export default class AnimationController {
       const red = pixels.data[index];
       const green = pixels.data[index + 1];
       const blue = pixels.data[index + 2];
-      // Sprite exports use a vivid green backdrop. Key only clearly-green
-      // pixels so the cat's grey fur and gold bell keep their original colour.
-      if (green > 150 && green > red * 1.7 && green > blue * 1.7) {
+      // The older sprites use vivid green; Dragonite's export uses vivid
+      // magenta. Both are empty backdrop colours, not part of the character.
+      const isGreenBackdrop = green > 150 && green > red * 1.7 && green > blue * 1.7;
+      const isMagentaBackdrop = red > 150 && blue > 120 && green < red * 0.7;
+      if (isGreenBackdrop || isMagentaBackdrop) {
         pixels.data[index + 3] = 0;
       }
     }

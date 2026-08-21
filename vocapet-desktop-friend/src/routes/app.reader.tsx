@@ -149,7 +149,7 @@ function ReadingParagraph({
                 onClick={() => onReview(token)}
                 className="pointer-events-auto mt-2 w-full rounded-lg bg-primary px-2 py-1.5 font-bold text-primary-foreground hover:brightness-95"
               >
-                🐱 Review with Pip
+                🐱 Review with Burumaru
               </button>
             </span>
           </span>
@@ -574,7 +574,7 @@ export function ReaderPage() {
             📖
           </div>
           <div>
-            <h1 className="text-2xl font-extrabold">Reader with Pip</h1>
+            <h1 className="text-2xl font-extrabold">Reader with Burumaru</h1>
             <p className="text-sm text-muted-foreground font-semibold">
               Highlight words as you read — collect them in the basket, then generate all flashcards
               at once.
@@ -626,7 +626,7 @@ export function ReaderPage() {
           ) : (
             <Sparkles className="w-4 h-4 mr-2" />
           )}
-          Ask Pip for suggestions
+          Ask Burumaru for suggestions
         </Button>
         <input ref={fileRef} type="file" accept=".txt,.md,text/plain" hidden onChange={onFile} />
         <PdfReaderLoader onLoaded={({ title, text, file, importedHighlights }) => {
@@ -723,7 +723,7 @@ export function ReaderPage() {
             <section className="mt-6 rounded-2xl border-2 border-primary/30 bg-primary/5 p-4">
               <div className="flex items-center gap-2">
                 <span className="text-lg">🐾</span>
-                <p className="font-extrabold">Pip’s vocabulary picks</p>
+                <p className="font-extrabold">Burumaru’s vocabulary picks</p>
               </div>
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
                 {suggestions.map((suggestion) => (
@@ -953,7 +953,7 @@ export function ReaderPage() {
           <DialogHeader>
             <DialogTitle className="font-extrabold">Import previous highlights</DialogTitle>
             <DialogDescription>
-              Pip found {importedHighlightTerms?.length ?? 0} highlights embedded in this PDF. Remove anything you do not want, then add the rest to your basket.
+              Burumaru found {importedHighlightTerms?.length ?? 0} highlights embedded in this PDF. Remove anything you do not want, then add the rest to your basket.
             </DialogDescription>
           </DialogHeader>
           <div className="max-h-72 space-y-2 overflow-auto pr-1">

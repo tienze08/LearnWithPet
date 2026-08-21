@@ -7,11 +7,10 @@ import { useSelectPetMutation, useUnlockedPetsQuery } from "@/hooks/queries/pet.
 
 const SPECIES_STYLE: Record<PetVariant, { emoji: string; tint: string }> = {
   CAT: { emoji: "🐱", tint: "from-slate-100 to-slate-200" },
-  FOX: { emoji: "🦊", tint: "from-orange-100 to-amber-100" },
-  BUNNY: { emoji: "🐰", tint: "from-pink-100 to-rose-100" },
-  PANDA: { emoji: "🐼", tint: "from-zinc-100 to-slate-100" },
+  FOX: { emoji: "👻", tint: "from-slate-100 to-indigo-100" },
+  BUNNY: { emoji: "🍎", tint: "from-cyan-100 to-sky-100" },
+  PANDA: { emoji: "⚽", tint: "from-rose-100 to-violet-100" },
   DRAGON: { emoji: "🐲", tint: "from-violet-100 to-purple-100" },
-  PUPU: { emoji: "🐱", tint: "from-amber-100 to-yellow-100" },
 };
 
 export type PetSpeciesUnlock = {
@@ -30,7 +29,6 @@ export const PET_UNLOCKS: PetSpeciesUnlock[] = [
     requirement: "Master 10 words",
     isUnlocked: (s) => Object.values(s.masteryByWord).filter((m) => m >= 4).length >= 10,
   },
-  { id: "PUPU", requirement: "Reach level 2", isUnlocked: (s) => s.level >= 2 },
 ];
 
 export function PetSpecies() {
