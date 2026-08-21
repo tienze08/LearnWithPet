@@ -9,6 +9,7 @@ import com.vocabpet.backend.entity.CompanionMemory;
 import com.vocabpet.backend.entity.CompanionProfile;
 import com.vocabpet.backend.entity.CompanionWordMemory;
 import com.vocabpet.backend.entity.Pet;
+import com.vocabpet.backend.entity.StudySession;
 import com.vocabpet.backend.entity.User;
 import com.vocabpet.backend.entity.Vocabulary;
 import com.vocabpet.backend.entity.enums.CompanionEventType;
@@ -122,10 +123,10 @@ public class CompanionServiceImpl implements CompanionService {
     private Pet requiredPet(User user) {
         return petRepository.findByUserId(user.getId()).orElseGet(() -> {
             // A companion should never make a learning action fail. Users who
-            // have not chosen a species yet receive the default Pip cat.
+            // have not chosen a species yet receive the default Burumaru cat.
             Pet pet = Pet.builder()
                     .user(user)
-                    .name("Pip")
+                    .name("Burumaru")
                     .species(PetSpecies.CAT)
                     .mood(PetMood.HAPPY)
                     .level(1)
@@ -185,13 +186,14 @@ public class CompanionServiceImpl implements CompanionService {
         }
         wordMemoryRepository.save(wordMemory);
 
+        // A review is a learning event, but it is not automatically a full
+        // study session. Session relationship memory is updated only when the
+        // user explicitly completes a start/end session.
         if (memory.getFirstStudyDate() == null)
             memory.setFirstStudyDate(now.toLocalDate());
         if (memory.getLastStudyAt() == null || !memory.getLastStudyAt().toLocalDate().equals(now.toLocalDate()))
             memory.setStudyDays(memory.getStudyDays() + 1);
         memory.setLastStudyAt(now);
-        memory.setTotalSessionsTogether(memory.getTotalSessionsTogether() + 1);
-        memory.setUsualStudyHour(rollingHour(memory.getUsualStudyHour(), memory.getTotalSessionsTogether(), now.getHour()));
         memoryRepository.save(memory);
 
         if (!correct) {
@@ -210,6 +212,25 @@ public class CompanionServiceImpl implements CompanionService {
     @Transactional
     public PetBehaviorResponse recordReviewOutcome(User user, Vocabulary vocabulary, boolean correct) {
         return recordQuizOutcome(user, vocabulary, correct);
+    }
+
+    @Override
+    @Transactional
+    public void recordSessionCompleted(User user, StudySession session) {
+        LocalDateTime finishedAt = session.getFinishedAt() == null ? LocalDateTime.now() : session.getFinishedAt();
+        Pet pet = requiredPet(user);
+        CompanionMemory memory = memoryFor(profileFor(pet, user), finishedAt);
+        long completedSessions = memory.getTotalSessionsTogether() + 1;
+        int durationMinutes = (int) Math.max(0, session.getDurationSeconds() / 60);
+
+        memory.setTotalSessionsTogether(completedSessions);
+        memory.setUsualStudyHour(rollingHour(memory.getUsualStudyHour(), completedSessions,
+                session.getStartedAt() == null ? finishedAt.getHour() : session.getStartedAt().getHour()));
+        memory.setAverageSessionMinutes((int) Math.round(
+                ((memory.getAverageSessionMinutes() * (completedSessions - 1)) + durationMinutes)
+                        / (double) completedSessions));
+        memory.setLastStudyAt(finishedAt);
+        memoryRepository.save(memory);
     }
 
     private int rollingHour(int previousHour, long totalSessions, int currentHour) {
@@ -325,7 +346,7 @@ public class CompanionServiceImpl implements CompanionService {
                         line(profile.getPersonality(), "Great job! Let's take a short break."), 2, 6);
             }
             case ANSWER_CORRECT ->
-                reaction(PetMood.HAPPY, PetAction.HAPPY, line(profile.getPersonality(), "You got it!"), 2, 3);
+                reaction(PetMood.HAPPY, PetAction.CELEBRATE, line(profile.getPersonality(), "You got it!"), 2, 3);
             case ANSWER_WRONG -> reaction(PetMood.SAD, PetAction.SAD,
                     line(profile.getPersonality(), "No worries. We'll learn this one together."), 1, 4);
             case DAILY_GOAL_COMPLETED -> reaction(PetMood.HAPPY, PetAction.CELEBRATE,

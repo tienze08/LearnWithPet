@@ -22,6 +22,7 @@ import {
   User,
   PawPrintIcon,
   Target,
+  CalendarClock,
   PawPrint,
   LogOut,
   Trophy,
@@ -160,6 +161,7 @@ function DesktopSidebar() {
         <nav className="space-y-1">
           <NavLink to="/app" icon={<LayoutDashboard className="w-4 h-4" />} label="Home" />
           <NavLink to="/app/decks" icon={<Library className="w-4 h-4" />} label="Study & decks" />
+          <NavLink to="/app/plan" icon={<CalendarClock className="w-4 h-4" />} label="Today’s plan" />
           <NavLink to="/app/reader" icon={<BookOpen className="w-4 h-4" />} label="Reader" />
           <NavLink to="/app/tasks" icon={<Target className="w-4 h-4" />} label="Missions" />
         </nav>

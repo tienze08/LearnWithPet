@@ -39,6 +39,11 @@ public class StudySessionController {
         return ResponseEntity.ok(studySessionService.getDashboardStats());
     }
 
+    @GetMapping("/plan")
+    public ResponseEntity<?> todayPlan() {
+        return ResponseEntity.ok(studySessionService.getTodayPlan());
+    }
+
     @GetMapping("/{sessionId}/next-card")
     public ResponseEntity<?> nextCard(@PathVariable Long sessionId) {
 

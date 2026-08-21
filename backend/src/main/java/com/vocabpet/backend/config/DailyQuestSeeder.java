@@ -20,7 +20,7 @@ public class DailyQuestSeeder implements ApplicationRunner {
         seed(MissionType.LEARN_WORDS, "Fresh words", "Learn 3 new vocabulary words.", 3, 20, 4);
         seed(MissionType.REVIEW_COUNT, "Daily review", "Review 5 vocabulary words.", 5, 25, 5);
         seed(MissionType.FINISH_SESSION, "Study sprint", "Finish one study session.", 1, 30, 5);
-        seed(MissionType.DESKTOP_QUIZ, "Quiz buddy", "Complete 3 quick quizzes with Pip.", 3, 15, 3);
+        seed(MissionType.DESKTOP_QUIZ, "Quiz buddy", "Complete 3 quick quizzes with Burumaru.", 3, 15, 3);
 
         // Existing users get today's mission rows as soon as a new deployment starts.
         missionService.generateAllUsersMissions();

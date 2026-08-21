@@ -230,7 +230,7 @@ function DecksPage() {
           <div className="col-span-full rounded-2xl border border-dashed border-border bg-card/55 px-6 py-14 text-center">
             <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary"><BookOpen className="h-5 w-5" /></div>
             <h2 className="font-bold">Your learning journey starts here.</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Create a deck and give Pip something new to learn with you.</p>
+            <p className="mt-1 text-sm text-muted-foreground">Create a deck and give Burumaru something new to learn with you.</p>
           </div>
         )}
       </div>

@@ -12,7 +12,7 @@ export type PetReaction = {
 const reactions: Record<PetEvent["type"], PetReaction> = {
   SESSION_STARTED: { action: "STUDY", emotion: "waiting", message: "Let's learn together!", priority: 1 },
   SESSION_FINISHED: { action: "HAPPY", emotion: "happy", message: "Nice work today!", priority: 2 },
-  QUIZ_STARTED: { action: "THINK", emotion: "waiting", message: "I'm thinking with you.", priority: 1 },
+  QUIZ_STARTED: { action: "STUDY", emotion: "waiting", message: "I'm reviewing this with you.", priority: 1 },
   QUIZ_COMPLETED: { action: "IDLE", emotion: "waiting", priority: 0 },
   CARD_REVIEWED: { action: "STUDY", emotion: "waiting", priority: 0 },
   ANSWER_CORRECT: { action: "CELEBRATE", emotion: "happy", message: "Great job!", priority: 2 },

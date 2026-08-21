@@ -91,7 +91,7 @@ const initialState: GameState = {
   masteryByWord: {},
   favorites: [],
   petMood: "happy",
-  petName: "Pip",
+  petName: "Burumaru",
   petVariant: "CAT",
   petLevel: 1,
   petExp: 0,
