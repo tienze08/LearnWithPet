@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Bell, Trophy, BookOpen, Zap, Heart } from "lucide-react";
 import Pet from "@/components/PixiPet/Pet";
@@ -24,6 +25,40 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
+  const [challengeOpen, setChallengeOpen] = useState(false);
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [challengeResult, setChallengeResult] = useState<boolean | null>(null);
+  const [timeLeft, setTimeLeft] = useState(10);
+
+  const startChallenge = () => {
+    setSelectedOption(null);
+    setChallengeResult(null);
+    setTimeLeft(10);
+    setChallengeOpen(true);
+  };
+
+  useEffect(() => {
+    if (!challengeOpen || challengeResult !== null) return;
+
+    const timer = window.setInterval(() => {
+      setTimeLeft((remaining) => {
+        if (remaining <= 1) {
+          window.clearInterval(timer);
+          setChallengeResult(false);
+          return 0;
+        }
+        return remaining - 1;
+      });
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [challengeOpen, challengeResult]);
+
+  const submitChallenge = () => {
+    if (!selectedOption || challengeResult !== null) return;
+    setChallengeResult(selectedOption === "Never giving up");
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <header className="max-w-6xl mx-auto px-4 py-5 flex items-center justify-between">
@@ -60,10 +95,11 @@ function Landing() {
                 <Sparkles className="w-5 h-5 mr-2" /> Meet your pet
               </Link>
             </Button>
-            <Button asChild variant="secondary" size="lg" className="h-12 px-6">
-              <Link to="/app/decks">Browse decks</Link>
+            <Button variant="secondary" size="lg" className="h-12 px-6" onClick={startChallenge}>
+              <Zap className="w-5 h-5 mr-2" /> Try a 10-sec Challenge
             </Button>
           </div>
+          <p className="mt-3 text-xs text-muted-foreground">Try the challenge first — no account required.</p>
           <div className="mt-8 flex items-center gap-6 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <Heart className="w-4 h-4 text-streak" /> 500+ curated words
@@ -75,13 +111,69 @@ function Landing() {
         </div>
         <div className="relative">
           <div className="aspect-square rounded-[3rem] from-primary/20 via-accent to-secondary border-2 border-border card-pop flex items-center justify-center relative overflow-hidden">
-            <div className="absolute top-6 left-6 bg-card border-2 border-border rounded-2xl px-4 py-2 card-pop text-sm font-bold flex items-center gap-2 animate-bob">
-              <Bell className="w-4 h-4 text-warning" /> Surprise quiz!
-            </div>
-            <div className="absolute bottom-6 right-6 bg-card border-2 border-border rounded-2xl px-4 py-2 card-pop text-sm font-bold flex items-center gap-2">
-              <Zap className="w-4 h-4 text-xp" /> +10 XP
-            </div>
-            <Pet size={300} mood="excited" />
+            {challengeOpen ? (
+              <div className="w-[min(100%-2rem,26rem)] rounded-3xl border-2 border-border bg-card p-5 shadow-lg">
+                <div className="flex items-center gap-3">
+                  <Pet size={62} mood={challengeResult === true ? "excited" : challengeResult === false ? "sad" : "waiting"} />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-extrabold uppercase tracking-wide text-primary">10-sec challenge · preview</p>
+                    <p className="text-sm font-bold">Burumaru wants to test you!</p>
+                  </div>
+                  <span className={`text-xl font-extrabold tabular-nums ${timeLeft <= 3 ? "text-destructive" : "text-primary"}`}>
+                    {timeLeft}
+                  </span>
+                </div>
+                <div className="my-4 text-center">
+                  <p className="text-xs text-muted-foreground">What does</p>
+                  <p className="text-2xl font-extrabold">persistent</p>
+                  <p className="text-xs text-muted-foreground">mean?</p>
+                </div>
+                <div className="grid gap-2">
+                  {["Giving up easily", "Never giving up", "Moving quickly"].map((option, index) => (
+                    <button
+                      key={option}
+                      type="button"
+                      disabled={challengeResult !== null}
+                      onClick={() => setSelectedOption(option)}
+                      className={`rounded-xl border-2 px-3 py-2 text-left text-sm font-semibold transition-colors ${
+                        selectedOption === option ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"
+                      }`}
+                    >
+                      {String.fromCharCode(65 + index)}. {option}
+                    </button>
+                  ))}
+                </div>
+                {challengeResult === null ? (
+                  <Button className="mt-3 w-full btn-pop" disabled={!selectedOption} onClick={submitChallenge}>
+                    Answer
+                  </Button>
+                ) : challengeResult ? (
+                  <div className="mt-3 rounded-xl bg-success/10 p-3 text-center">
+                    <p className="font-extrabold text-success">Yay! You got it! 🎉</p>
+                    <p className="mt-1 text-xs font-semibold text-muted-foreground">Preview reward: +10 XP · 🔥 Streak +1 · ❤️ Happiness +5</p>
+                    <p className="mt-1 text-xs text-muted-foreground">Create an account to save real progress with Burumaru.</p>
+                    <Button asChild size="sm" className="mt-3 h-8 text-xs">
+                      <Link to="/register">Save my progress</Link>
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="mt-3 rounded-xl bg-muted p-3 text-center">
+                    <p className="font-bold">Almost — persistent means “never giving up.”</p>
+                    <Button variant="link" className="mt-1 h-auto p-0 text-primary" onClick={startChallenge}>Try again</Button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <>
+                <div className="absolute top-6 left-6 bg-card border-2 border-border rounded-2xl px-4 py-2 card-pop text-sm font-bold flex items-center gap-2 animate-bob">
+                  <Bell className="w-4 h-4 text-warning" /> Surprise quiz!
+                </div>
+                <div className="absolute bottom-6 right-6 bg-card border-2 border-border rounded-2xl px-4 py-2 card-pop text-sm font-bold flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-xp" /> +10 XP
+                </div>
+                <Pet size={300} mood="excited" />
+              </>
+            )}
           </div>
         </div>
       </section>

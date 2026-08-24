@@ -39,6 +39,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class StudySessionServiceImpl implements StudySessionService {
 
+        private static final int REVIEW_XP = 5;
+        private static final int REVIEW_COIN = 1;
+
         private final StudySessionRepository sessionRepository;
         private final UserVocabularyProgressRepository progressRepository;
         private final StudyReviewRepository reviewRepository;
@@ -47,6 +50,7 @@ public class StudySessionServiceImpl implements StudySessionService {
         private final FsrsService fsrsService;
         private final StreakService streakService;
         private final MissionService missionService;
+        private final RewardService rewardService;
         private final CompanionService companionService;
 
         private final DeckRepository deckRepository;
@@ -115,6 +119,19 @@ public class StudySessionServiceImpl implements StudySessionService {
                                         .difficulty(v.getDifficulty())
                                         .partOfSpeech(v.getPartOfSpeech())
                                         .build();
+                }
+
+                // Finish the session only after the learner has met every
+                // card marked Again once more. FSRS still schedules the next
+                // long-term review in 10 minutes; this is the short in-session
+                // relearning pass promised by the study UI.
+                List<Vocabulary> relearning = reviewRepository.findCardsToRelearnInSession(session.getId());
+                if (!relearning.isEmpty()) {
+                        Vocabulary v = relearning.getFirst();
+                        UserVocabularyProgress progress = progressRepository
+                                        .findByUserIdAndVocabularyId(userId, v.getId())
+                                        .orElse(null);
+                        return progress == null ? mapNewCard(v) : map(progress, v);
                 }
 
                 throw new NoMoreCardsException("No more cards in this session");
@@ -193,12 +210,19 @@ public class StudySessionServiceImpl implements StudySessionService {
                 achievementService.checkForUser(session.getUser());
 
                 boolean correct = request.getRating() != com.vocabpet.backend.entity.enums.Rating.AGAIN;
+                int xp = correct ? REVIEW_XP : 0;
+                int coin = correct ? REVIEW_COIN : 0;
+                if (correct) {
+                        rewardService.grantReward(userId, xp, coin);
+                }
 
                 return ReviewResponse.builder()
                                 .nextReviewTime(progress.getNextReviewTime())
                                 .streakUpdated(streakResult.isUpdated())
                                 .currentStreak(streakResult.getCurrentStreak())
                                 .longestStreak(streakResult.getLongestStreak())
+                                .xp(xp)
+                                .coin(coin)
                                 .companionReaction(companionService.recordReviewOutcome(session.getUser(), vocabulary, correct))
                                 .build();
         }
@@ -337,6 +361,18 @@ public class StudySessionServiceImpl implements StudySessionService {
 
                 return StudyCardResponse.builder()
                                 .progressId(p.getId())
+                                .vocabularyId(v.getId())
+                                .word(v.getWord())
+                                .meaning(v.getMeaning())
+                                .example(v.getExample())
+                                .difficulty(v.getDifficulty())
+                                .partOfSpeech(v.getPartOfSpeech())
+                                .build();
+        }
+
+        private StudyCardResponse mapNewCard(Vocabulary v) {
+                return StudyCardResponse.builder()
+                                .progressId(null)
                                 .vocabularyId(v.getId())
                                 .word(v.getWord())
                                 .meaning(v.getMeaning())

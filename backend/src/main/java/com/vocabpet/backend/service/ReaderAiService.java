@@ -59,7 +59,7 @@ public class ReaderAiService {
             String prompt = """
                     You are VocaPet, a friendly vocabulary companion. Analyze this reading passage and return JSON only:
                     {"suggestions":[{"word":"single word or short phrase","contextSentence":"exact sentence from passage","reason":"why this word is useful to learn"}]}
-                    Choose at most 5 useful, non-obvious English vocabulary terms. Do not choose names or basic words.
+                    Choose 5 to 10 useful, non-obvious English vocabulary terms when the passage has enough material; otherwise return only the genuinely useful terms. Do not choose names, basic words, or terms the learner is likely to know.
                     Title: %s
                     Passage: %s
                     """.formatted(request.sourceTitle(), request.context());

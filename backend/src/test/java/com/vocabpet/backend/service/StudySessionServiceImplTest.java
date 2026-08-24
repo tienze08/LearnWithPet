@@ -58,4 +58,5 @@ class StudySessionServiceImplTest {
 
         assertEquals(404, error.getStatusCode().value());
     }
+
 }

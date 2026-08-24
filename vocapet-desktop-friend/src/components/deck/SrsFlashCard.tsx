@@ -61,6 +61,7 @@ export default function StudySessionFlashcards({ deckId }: Props) {
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [reviewed, setReviewed] = useState(0);
   const [correct, setCorrect] = useState(0);
+  const [earnedXp, setEarnedXp] = useState(0);
   const [againWords, setAgainWords] = useState<string[]>([]);
 
   const startMutation = useStartStudySessionMutation();
@@ -117,9 +118,10 @@ export default function StudySessionFlashcards({ deckId }: Props) {
 
           <h2 className="mt-4 text-3xl font-extrabold">Session complete</h2>
 
-          <div className="mt-5 grid grid-cols-2 gap-3 text-left sm:grid-cols-4">
+          <div className="mt-5 grid grid-cols-2 gap-3 text-left sm:grid-cols-5">
             <SessionStat label="Reviewed" value={String(reviewed)} />
             <SessionStat label="Accuracy" value={`${accuracy}%`} />
+            <SessionStat label="XP earned" value={`+${earnedXp}`} />
             <SessionStat label="Time" value={`${minutes} min`} />
             <SessionStat label="Streak" value={`${streak || "✓"}`} />
           </div>
@@ -163,6 +165,7 @@ export default function StudySessionFlashcards({ deckId }: Props) {
     setStartedAt(Date.now());
     setReviewed(0);
     setCorrect(0);
+    setEarnedXp(0);
     setAgainWords([]);
     setStarted(true);
     petEvents.emit({ type: "SESSION_STARTED" });
@@ -178,6 +181,7 @@ export default function StudySessionFlashcards({ deckId }: Props) {
 
     setScheduleNotice(scheduleMessage(rating, result.nextReviewTime));
     setReviewed((count) => count + 1);
+    setEarnedXp((xp) => xp + result.xp);
     if (rating === "AGAIN") {
       setAgainWords((words) => words.includes(data.word) ? words : [...words, data.word]);
     } else {

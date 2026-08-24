@@ -73,6 +73,7 @@ export function PetCompanion() {
   const [isApproachingQuiz, setIsApproachingQuiz] = useState(false);
   const [petX, setPetX] = useState(24);
   const [viewportWidth, setViewportWidth] = useState(0);
+  const [walkCycle, setWalkCycle] = useState(0);
   const lastActivityAt = useRef(Date.now());
   const interruptionInProgress = useRef(false);
   const quizArrivalInProgress = useRef(false);
@@ -196,6 +197,8 @@ export function PetCompanion() {
     if (open || reminder || showSettings || interrupting || typeof window === "undefined") return;
 
     let finishWalkTimer: number | undefined;
+    // After reaching an edge, only pause long enough for the turn to read.
+    // walkCycle schedules the opposite trip instead of leaving the pet idle.
     const walkTimer = window.setTimeout(() => {
       if (walkInProgress.current) return;
 
@@ -217,15 +220,16 @@ export function PetCompanion() {
         // row is the opposite row, never a backwards slide.
         petRef.current?.setFacing(nextDirection);
         walkInProgress.current = false;
+        setWalkCycle((cycle) => cycle + 1);
       }, 6200);
-    }, 6000);
+    }, walkCycle === 0 ? 6000 : 700);
 
     return () => {
       window.clearTimeout(walkTimer);
       if (finishWalkTimer) window.clearTimeout(finishWalkTimer);
       walkInProgress.current = false;
     };
-  }, [open, reminder, showSettings, interrupting]);
+  }, [open, reminder, showSettings, interrupting, walkCycle]);
 
   useEffect(() => {
     const markActivity = () => {

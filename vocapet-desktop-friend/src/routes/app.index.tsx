@@ -2,10 +2,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { stageForLevel, useGame, type PetMood, type PetVariant } from "@/lib/store";
 import { Pet } from "@/components/PixiPet/Pet";
 import { Button } from "@/components/ui/button";
-import { Flame, Target, BookOpen, Trophy, TrendingUp } from "lucide-react";
+import { Flame, BookOpen, Trophy, TrendingUp, CalendarClock, Clock3 } from "lucide-react";
 import { useMeQuery } from "@/hooks/queries/user.queries";
 import { useDecksQuery } from "@/hooks/queries/deck.queries";
-import { useRecentReviewsQuery, useStudyDashboardStatsQuery } from "@/hooks/queries/study-session.queries";
+import { useRecentReviewsQuery, useStudyDashboardStatsQuery, useTodayStudyPlanQuery } from "@/hooks/queries/study-session.queries";
 
 export const Route = createFileRoute("/app/")({
   component: Dashboard,
@@ -17,6 +17,7 @@ function Dashboard() {
   const { data: decks = [], isLoading: decksLoading } = useDecksQuery();
   const { data: recentReviews = [], isLoading: recentReviewsLoading } = useRecentReviewsQuery();
   const { data: studyStats } = useStudyDashboardStatsQuery();
+  const { data: todayPlan } = useTodayStudyPlanQuery();
 
   const companion = me?.pet;
   const petName = companion?.name?.trim() || state.petName;
@@ -26,11 +27,12 @@ function Dashboard() {
   const userName = me?.name?.trim() || state.user.displayName || "there";
   const userLevel = me?.level ?? state.level;
   const userStreak = me?.streak ?? state.streak;
-  const goalPct = Math.min(100, (state.dailyProgress / state.dailyGoal) * 100);
   const mastered = studyStats?.masteredWords ?? 0;
   const learning = studyStats?.learningWords ?? 0;
   const recentCorrect = studyStats?.recentCorrect ?? 0;
   const recentTotal = studyStats?.recentReviews ?? 0;
+  const dueCards = todayPlan?.dueCards ?? 0;
+  const planWords = todayPlan?.dueReasons.flatMap((reason) => reason.words).slice(0, 3) ?? [];
 
   return (
     <div className="space-y-6">
@@ -39,18 +41,29 @@ function Dashboard() {
         <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
         <Pet variant={petVariant} stage={petStage} mood={petMood} size={140} />
         <div className="flex-1 text-center md:text-left">
-          <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">Your study space</p>
+          <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">Today with {petName}</p>
           <h1 className="text-3xl font-extrabold mt-2 tracking-tight md:text-4xl">
-            {petName} is feeling <span className="capitalize">{petMood}</span>
+            {dueCards ? `${dueCards} words are ready for review.` : "Your review queue is all clear."}
           </h1>
           <p className="text-muted-foreground mt-3 text-sm leading-relaxed max-w-md">
-            Your desktop companion reacts to your learning momentum. It will pop up every{" "}
-            {state.popupIntervalMin} min with a quick review or mini quiz.
+            {dueCards
+              ? `${petName} prepared a focused ${todayPlan?.estimatedMinutes ?? 1}-minute session using your shared FSRS schedule.`
+              : `${petName} will keep an eye on your schedule and bring back words when they are due.`}
           </p>
+          {planWords.length > 0 && (
+            <p className="mt-3 text-xs font-semibold text-muted-foreground">
+              Revisit first: <span className="text-foreground">{planWords.join(", ")}</span>
+            </p>
+          )}
           <div className="mt-4 flex flex-wrap gap-2 justify-center md:justify-start">
             <Button asChild className="btn-pop">
+              <Link to="/app/plan">
+                <CalendarClock className="w-4 h-4 mr-1" /> {dueCards ? "Start today’s plan" : "View today’s plan"}
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
               <Link to="/app/decks">
-                <BookOpen className="w-4 h-4 mr-1" /> Start studying
+                <BookOpen className="w-4 h-4 mr-1" /> Browse decks
               </Link>
             </Button>
           </div>
@@ -60,10 +73,16 @@ function Dashboard() {
       {/* Stat grid */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          icon={<Target className="w-5 h-5 text-primary" />}
-          label="Daily goal"
-          value={`${state.dailyProgress} / ${state.dailyGoal}`}
-          progress={goalPct}
+          icon={<CalendarClock className="w-5 h-5 text-primary" />}
+          label="Due now"
+          value={String(dueCards)}
+          sub={dueCards ? "ready for recall" : "nothing overdue"}
+        />
+        <StatCard
+          icon={<Clock3 className="w-5 h-5 text-info" />}
+          label="Plan time"
+          value={dueCards ? `~${todayPlan?.estimatedMinutes ?? 1} min` : "All clear"}
+          sub={`${todayPlan?.reviewsToday ?? state.dailyProgress}/${todayPlan?.dailyGoal ?? state.dailyGoal} reviews today`}
         />
         <StatCard
           icon={<Flame className="w-5 h-5 text-streak" />}

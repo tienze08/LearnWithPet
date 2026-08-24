@@ -17,7 +17,7 @@ export const Route = createFileRoute("/app/plan")({
 function TodayStudyPlan() {
   const { data: plan, isLoading, isError, refetch, isFetching } = useTodayStudyPlanQuery();
 
-  if (isLoading) return <p className="py-20 text-center text-sm text-muted-foreground">Pip is preparing your plan…</p>;
+  if (isLoading) return <p className="py-20 text-center text-sm text-muted-foreground">Burumaru is preparing your plan…</p>;
   if (isError || !plan) return <p className="py-20 text-center text-sm text-destructive">Your plan could not be loaded. Please refresh and try again.</p>;
 
   return (
@@ -26,7 +26,7 @@ function TodayStudyPlan() {
         <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">Your focused queue</p>
         <h1 className="mt-1 text-3xl font-extrabold tracking-tight">Today&apos;s study plan</h1>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-          One shared FSRS schedule: flashcards and quizzes update the same progress, so Pip never asks you to learn the same word twice.
+          One shared FSRS schedule: flashcards and quizzes update the same progress, so Burumaru never asks you to learn the same word twice.
         </p>
       </header>
 
@@ -56,7 +56,7 @@ function TodayStudyPlan() {
       <div className="grid gap-4 md:grid-cols-2">
         <section className="rounded-[2rem] border border-border bg-card/85 p-5">
           <h2 className="flex items-center gap-2 font-extrabold"><CheckCircle2 className="h-4 w-4 text-primary" /> Why these words are due</h2>
-          {plan.dueReasons.length === 0 ? <p className="mt-3 text-sm text-muted-foreground">Nothing is due. Take a break, or return when Pip calls you.</p> : (
+          {plan.dueReasons.length === 0 ? <p className="mt-3 text-sm text-muted-foreground">Nothing is due. Take a break, or return when Burumaru calls you.</p> : (
             <ul className="mt-4 space-y-3">
               {plan.dueReasons.map((group) => (
                 <li key={`${group.code}-${group.deckId}`} className="rounded-2xl border border-border/80 bg-background/60 p-3">

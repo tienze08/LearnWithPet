@@ -11,6 +11,8 @@ export type ReviewResponse = {
   longestStreak: number;
   nextReviewTime: string;
   streakUpdated: boolean;
+  xp: number;
+  coin: number;
 };
 
 export type RecentReview = {
