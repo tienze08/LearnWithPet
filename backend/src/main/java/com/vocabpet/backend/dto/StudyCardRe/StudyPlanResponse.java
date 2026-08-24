@@ -18,6 +18,7 @@ public class StudyPlanResponse {
     private String suggestedDeckName;
     private List<DueReason> dueReasons;
     private List<UpcomingCard> upcomingCards;
+    private TomorrowPreview tomorrowPreview;
 
     @Data
     @Builder
@@ -38,5 +39,13 @@ public class StudyPlanResponse {
         private String word;
         private String deckName;
         private LocalDateTime dueAt;
+    }
+
+    @Data
+    @Builder
+    public static class TomorrowPreview {
+        private long cardCount;
+        private int estimatedMinutes;
+        private List<String> words;
     }
 }

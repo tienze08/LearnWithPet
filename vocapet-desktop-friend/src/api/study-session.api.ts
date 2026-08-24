@@ -1,5 +1,6 @@
 import { StartStudySessionRequest, StartStudySessionResponse, StudyCardResponse } from "@/types/study-session";
 import { apiFetch } from "./client";
+import type { PetBehaviorResponse } from "@/types/pet";
 
 export type ReviewRequest = {
   vocabularyId: number;
@@ -13,6 +14,7 @@ export type ReviewResponse = {
   streakUpdated: boolean;
   xp: number;
   coin: number;
+  companionReaction: PetBehaviorResponse;
 };
 
 export type RecentReview = {
@@ -53,6 +55,11 @@ export type StudyPlan = {
     deckName: string;
     dueAt: string;
   }>;
+  tomorrowPreview: {
+    cardCount: number;
+    estimatedMinutes: number;
+    words: string[];
+  };
 };
 
 export type ActiveStudySession = {

@@ -28,6 +28,8 @@ public class CompanionMemory {
     private int energy = 80;
 
     private LocalDateTime lastSeenAt;
+    /** Updated only by APP_OPENED, unlike lastSeenAt which is also refreshed by polling. */
+    private LocalDateTime lastAppOpenedAt;
     private LocalDateTime lastStudyAt;
     private LocalDateTime lastReminderAt;
     private LocalDateTime lastBreakSuggestionAt;

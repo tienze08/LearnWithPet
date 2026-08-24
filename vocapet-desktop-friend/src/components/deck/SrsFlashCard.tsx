@@ -15,9 +15,13 @@ import {
 } from "@/hooks/queries/study-session.queries";
 import StreakPopup from "./StreakPopup";
 import { petEvents } from "@/lib/pet/events";
+import { useAnswerQuizMutation, useRandomQuizMutation } from "@/hooks/queries/quiz.queries";
+import type { QuizAnswerResponse, QuizQuestionResponse } from "@/types/quiz";
+import { speakPet } from "@/hooks/stores/petSpeech";
 
 interface Props {
   deckId: number;
+  journeyRequested?: boolean;
 }
 
 function scheduleMessage(rating: "AGAIN" | "HARD" | "GOOD" | "EASY", nextReviewTime: string) {
@@ -49,7 +53,7 @@ const RATINGS = [
   },
 ];
 
-export default function StudySessionFlashcards({ deckId }: Props) {
+export default function StudySessionFlashcards({ deckId, journeyRequested = false }: Props) {
   console.log("SrsFlashCard render");
   const [started, setStarted] = useState(false);
 
@@ -64,10 +68,15 @@ export default function StudySessionFlashcards({ deckId }: Props) {
   const [correct, setCorrect] = useState(0);
   const [earnedXp, setEarnedXp] = useState(0);
   const [againWords, setAgainWords] = useState<string[]>([]);
+  const [journeyComplete, setJourneyComplete] = useState(false);
+  const [quickQuiz, setQuickQuiz] = useState<QuizQuestionResponse | null>(null);
+  const [quickQuizResult, setQuickQuizResult] = useState<QuizAnswerResponse | null>(null);
 
   const startMutation = useStartStudySessionMutation();
   const { data: activeSession } = useActiveStudySessionQuery();
   const finishMutation = useFinishStudySessionMutation();
+  const { mutateAsync: getQuickQuiz, isPending: isPreparingQuickQuiz } = useRandomQuizMutation();
+  const { mutateAsync: answerQuickQuiz, isPending: isAnsweringQuickQuiz } = useAnswerQuizMutation();
   const [finished, setFinished] = useState(false);
   const recoveryRequested = typeof window !== "undefined"
     && new URLSearchParams(window.location.search).get("recovery") === "1";
@@ -78,9 +87,7 @@ export default function StudySessionFlashcards({ deckId }: Props) {
 
   useEffect(() => {
     if (started && sessionId && !isLoading && data === null && !finished) {
-      finishMutation.mutate(sessionId);
       setFinished(true);
-      petEvents.emit({ type: "SESSION_FINISHED" });
     }
   }, [started, sessionId, isLoading, data, finished, finishMutation]);
 
@@ -100,7 +107,7 @@ export default function StudySessionFlashcards({ deckId }: Props) {
         <h2 className="mt-2 text-3xl font-bold tracking-tight">Ready to study?</h2>
 
         <p className="mt-3 text-muted-foreground">
-          {recoveryRequested ? "A gentle five-minute reset: up to 10 FSRS review attempts." : "Review today's due cards with FSRS."}
+          {recoveryRequested ? "A gentle five-minute reset: up to 10 FSRS review attempts." : journeyRequested ? "Your daily journey: up to 10 focused FSRS cards, then one quick quiz." : "Review today's due cards with FSRS."}
         </p>
 
         {activeSession?.deckId === deckId && (
@@ -139,7 +146,10 @@ export default function StudySessionFlashcards({ deckId }: Props) {
         <div className="max-w-xl mx-auto rounded-[2rem] border border-border bg-card/85 p-8 text-center card-pop">
           <div className="text-6xl">🎉</div>
 
-          <h2 className="mt-4 text-3xl font-extrabold">Session complete</h2>
+          <p className="mt-3 text-xs font-bold uppercase tracking-[0.14em] text-primary">
+            {journeyComplete ? "Daily journey complete" : "Review complete"}
+          </p>
+          <h2 className="mt-1 text-3xl font-extrabold">{journeyComplete ? "Wonderful work today" : "One small step left"}</h2>
 
           <div className="mt-5 grid grid-cols-2 gap-3 text-left sm:grid-cols-5">
             <SessionStat label="Reviewed" value={String(reviewed)} />
@@ -153,14 +163,38 @@ export default function StudySessionFlashcards({ deckId }: Props) {
               ? <>Words to meet again soon: <strong>{againWords.join(", ")}</strong>.</>
               : "Nothing marked Again — great recall!"}
           </p>
-
-          <Button variant="outline" className="mt-8 w-full h-12" onClick={() => {
+          {!journeyComplete && !quickQuiz && (
+            <div className="mt-7 grid gap-2 sm:grid-cols-2">
+              <Button className="h-12" onClick={startQuickQuiz} disabled={isPreparingQuickQuiz}>
+                {isPreparingQuickQuiz ? "Burumaru is choosing…" : "Quick quiz · 10 seconds"}
+              </Button>
+              <Button variant="outline" className="h-12" onClick={completeJourney} disabled={finishMutation.isPending}>
+                Finish for today
+              </Button>
+            </div>
+          )}
+          {quickQuiz && !journeyComplete && (
+            <div className="mt-7 rounded-2xl border border-primary/20 bg-primary/5 p-4 text-left">
+              <p className="text-xs font-bold uppercase tracking-[0.12em] text-primary">Burumaru&apos;s quick quiz</p>
+              <p className="mt-2 text-center text-2xl font-extrabold">{quickQuiz.word}</p>
+              <p className="mt-1 text-center text-xs italic text-muted-foreground">{quickQuiz.partOfSpeech}</p>
+              <div className="mt-4 grid gap-2">
+                {quickQuiz.options.map((option) => (
+                  <Button key={option} variant="outline" className="h-auto min-h-10 whitespace-normal py-2 text-left" disabled={isAnsweringQuickQuiz || !!quickQuizResult} onClick={() => answerJourneyQuiz(option)}>{option}</Button>
+                ))}
+              </div>
+              {quickQuizResult && <p className={`mt-3 text-center text-sm font-bold ${quickQuizResult.correct ? "text-primary" : "text-destructive"}`}>{quickQuizResult.correct ? `✨ Correct! +${quickQuizResult.xp} XP` : "We’ll meet this word again soon."}</p>}
+              {quickQuizResult && <Button className="mt-4 h-11 w-full" onClick={completeJourney} disabled={finishMutation.isPending}>Complete today&apos;s journey</Button>}
+            </div>
+          )}
+          {journeyComplete && <Button variant="outline" className="mt-8 w-full h-12" onClick={() => {
             setStarted(false);
             setFinished(false);
+            setJourneyComplete(false);
+            setQuickQuiz(null);
+            setQuickQuizResult(null);
             setSessionId(null);
-          }}>
-            Start another session
-          </Button>
+          }}>Back to decks</Button>}
         </div>
       </>
     );
@@ -182,7 +216,7 @@ export default function StudySessionFlashcards({ deckId }: Props) {
   async function startSession() {
     const session = await startMutation.mutateAsync({
       deckId,
-      reviewLimit: recoveryRequested ? 10 : undefined,
+      reviewLimit: recoveryRequested || journeyRequested ? 10 : undefined,
     });
 
     setSessionId(session.sessionId);
@@ -191,6 +225,9 @@ export default function StudySessionFlashcards({ deckId }: Props) {
     setCorrect(0);
     setEarnedXp(0);
     setAgainWords([]);
+    setJourneyComplete(false);
+    setQuickQuiz(null);
+    setQuickQuizResult(null);
     setStarted(true);
     petEvents.emit({ type: "SESSION_STARTED" });
   }
@@ -227,7 +264,42 @@ export default function StudySessionFlashcards({ deckId }: Props) {
       setShowStreak(true);
       petEvents.emit({ type: "STREAK_UPDATED", detail: { streak: result.currentStreak } });
     }
+    if (result.companionReaction?.message) {
+      speakPet(result.companionReaction.message, result.companionReaction.priority, result.companionReaction.duration);
+    }
     petEvents.emit({ type: "CARD_REVIEWED" });
+  }
+
+  async function startQuickQuiz() {
+    try {
+      setQuickQuizResult(null);
+      setQuickQuiz(await getQuickQuiz(undefined));
+    } catch {
+      // A user may have no additional eligible card. The review session is
+      // still valid, so let them complete the journey without a fake quiz.
+      await completeJourney();
+    }
+  }
+
+  async function answerJourneyQuiz(answer: string) {
+    if (!quickQuiz || quickQuizResult) return;
+    const result = await answerQuickQuiz({ vocabularyId: quickQuiz.vocabularyId, answer });
+    setQuickQuizResult(result);
+    setEarnedXp((current) => current + result.xp);
+    setReviewed((current) => current + 1);
+    if (result.correct) setCorrect((current) => current + 1);
+    else setAgainWords((words) => words.includes(quickQuiz.word) ? words : [...words, quickQuiz.word]);
+  }
+
+  async function completeJourney() {
+    if (!sessionId || journeyComplete) return;
+    await finishMutation.mutateAsync(sessionId);
+    setJourneyComplete(true);
+    const tomorrowLine = againWords.length
+      ? `Tomorrow, we'll revisit ${againWords[0]}${againWords.length > 1 ? ` and ${againWords.length - 1} other word${againWords.length === 2 ? "" : "s"}` : ""}.`
+      : "I'll have something new for you tomorrow.";
+    speakPet(tomorrowLine, 3, 7);
+    petEvents.emit({ type: "SESSION_FINISHED" });
   }
 
   return (

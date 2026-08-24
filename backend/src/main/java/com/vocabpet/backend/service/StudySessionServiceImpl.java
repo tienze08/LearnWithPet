@@ -347,6 +347,9 @@ public class StudySessionServiceImpl implements StudySessionService {
                 LocalDateTime now = LocalDateTime.now();
                 List<UserVocabularyProgress> due = progressRepository.findDueCardsForQuiz(user.getId(), now);
                 List<UserVocabularyProgress> upcoming = progressRepository.findUpcomingCards(user.getId(), now);
+                LocalDateTime tomorrowStart = LocalDate.now().plusDays(1).atStartOfDay();
+                List<UserVocabularyProgress> tomorrow = progressRepository.findUpcomingCardsBetween(
+                                user.getId(), tomorrowStart, tomorrowStart.plusDays(1));
 
                 Map<String, List<UserVocabularyProgress>> groups = new LinkedHashMap<>();
                 for (UserVocabularyProgress progress : due) {
@@ -375,6 +378,12 @@ public class StudySessionServiceImpl implements StudySessionService {
                                                 .word(progress.getVocabulary().getWord())
                                                 .deckName(progress.getVocabulary().getDeck().getName())
                                                 .dueAt(progress.getNextReviewTime()).build()).toList())
+                                .tomorrowPreview(StudyPlanResponse.TomorrowPreview.builder()
+                                                .cardCount(tomorrow.size())
+                                                .estimatedMinutes(estimateMinutes(tomorrow.size()))
+                                                .words(tomorrow.stream().limit(4)
+                                                                .map(progress -> progress.getVocabulary().getWord()).toList())
+                                                .build())
                                 .build();
         }
 

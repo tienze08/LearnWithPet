@@ -32,6 +32,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
+import java.util.LinkedHashSet;
 
 @Service
 @RequiredArgsConstructor
@@ -89,11 +91,13 @@ public class CompanionServiceImpl implements CompanionService {
         Pet pet = requiredPet(user);
         CompanionProfile profile = profileFor(pet, user);
         CompanionMemory memory = memoryFor(profile, now);
+        int hoursSinceLastOpen = hoursSince(memory.getLastAppOpenedAt(), now);
         refreshMemory(memory, now, user);
         PetIntent intent = event == null ? ambientIntent(user, profile, memory, now) : intentFor(event);
         PetBehaviorResponse reaction = event == null
                 ? ambientReaction(user, profile, memory, now)
-                : eventReaction(user, profile, memory, event, now);
+                : eventReaction(user, profile, memory, event, now, hoursSinceLastOpen);
+        if (event == CompanionEventType.APP_OPENED) memory.setLastAppOpenedAt(now);
         memory.setLastIntent(intent);
         memory.setLastIntentAt(now);
         memoryRepository.save(memory);
@@ -117,6 +121,8 @@ public class CompanionServiceImpl implements CompanionService {
                 .totalSessionsTogether(memory.getTotalSessionsTogether())
                 .usualStudyHour(memory.getUsualStudyHour())
                 .yesterdayWords(yesterdayWords)
+                .hoursSinceLastOpen(hoursSinceLastOpen)
+                .lastAppOpenedAt(memory.getLastAppOpenedAt())
                 .closeToUsualStudyTime(memory.getUsualStudyHour() >= 0
                         && Math.abs(now.getHour() - memory.getUsualStudyHour()) <= 1)
                 .relationshipMilestone(relationshipMilestone(daysTogether))
@@ -124,6 +130,11 @@ public class CompanionServiceImpl implements CompanionService {
                 .frequentlyWrongWord(mostDifficultWord(profile))
                 .intent(intent)
                 .reaction(reaction).build();
+    }
+
+    private int hoursSince(LocalDateTime then, LocalDateTime now) {
+        if (then == null) return 0;
+        return (int) Math.max(0, ChronoUnit.HOURS.between(then, now));
     }
 
     private String relationshipMilestone(long daysTogether) {
@@ -257,6 +268,20 @@ public class CompanionServiceImpl implements CompanionService {
                 .orElse(null);
     }
 
+    @Override
+    @Transactional
+    public Optional<Vocabulary> suggestedQuizVocabulary(User user, Long deckId) {
+        Pet pet = requiredPet(user);
+        CompanionProfile profile = profileFor(pet, user);
+        return wordMemoryRepository
+                .findTopByProfileIdAndWrongCountGreaterThanOrderByWrongCountDescLastReviewedAtDesc(profile.getId(), 0)
+                .map(CompanionWordMemory::getVocabulary)
+                .filter(vocabulary -> vocabulary.getDeck() != null
+                        && vocabulary.getDeck().getUser() != null
+                        && vocabulary.getDeck().getUser().getId().equals(user.getId())
+                        && (deckId == null || vocabulary.getDeck().getId().equals(deckId)));
+    }
+
     private PetBehaviorResponse ambientReaction(User user, CompanionProfile profile, CompanionMemory memory,
             LocalDateTime now) {
         if (isQuiet(profile, now))
@@ -337,11 +362,11 @@ public class CompanionServiceImpl implements CompanionService {
     }
 
     private PetBehaviorResponse eventReaction(User user, CompanionProfile profile, CompanionMemory memory,
-            CompanionEventType event, LocalDateTime now) {
+            CompanionEventType event, LocalDateTime now, int hoursSinceLastOpen) {
         memory.setLastEvent(event);
         memory.setTotalInteractions(memory.getTotalInteractions() + 1);
         return switch (event) {
-            case APP_OPENED -> appOpened(user, profile, memory, now);
+            case APP_OPENED -> appOpened(user, profile, memory, now, hoursSinceLastOpen);
             case STUDY_STARTED -> reaction(PetMood.WAITING, PetAction.STUDY,
                     studyStartLine(profile, memory), 1, 5);
             case REVIEW_COMPLETED -> {
@@ -369,7 +394,17 @@ public class CompanionServiceImpl implements CompanionService {
     }
 
     private PetBehaviorResponse appOpened(User user, CompanionProfile profile, CompanionMemory memory,
-            LocalDateTime now) {
+            LocalDateTime now, int hoursSinceLastOpen) {
+        if (!isQuiet(profile, now) && hoursSinceLastOpen >= 72) {
+            long days = Math.max(1, hoursSinceLastOpen / 24);
+            return reaction(PetMood.WAITING, PetAction.THINK,
+                    "Welcome back, " + user.getName() + ". You were away for " + days
+                            + " days. I kept a gentle review ready for us.", 2, 8);
+        }
+        if (!isQuiet(profile, now) && hoursSinceLastOpen >= 24) {
+            return reaction(PetMood.WAITING, PetAction.IDLE,
+                    "Welcome back, " + user.getName() + "! I saved a few words for us.", 2, 6);
+        }
         PetBehaviorResponse yesterdayRecall = yesterdayRecall(user, profile, memory, now);
         if (yesterdayRecall != null) return yesterdayRecall;
         if (!isQuiet(profile, now) && now.getHour() >= 5 && now.getHour() < 11
@@ -398,11 +433,16 @@ public class CompanionServiceImpl implements CompanionService {
 
         memory.setLastYesterdayRecallDate(today);
         String message;
-        if (reviews.size() == 1) {
-            message = "Do you still remember " + reviews.getFirst().getVocabulary().getWord() + "?";
+        List<String> words = reviews.stream()
+                .map(review -> review.getVocabulary().getWord())
+                .collect(java.util.stream.Collectors.collectingAndThen(
+                        java.util.stream.Collectors.toCollection(LinkedHashSet::new), List::copyOf));
+        if (words.size() == 1) {
+            message = "Yesterday we studied " + words.getFirst() + ". Do you still remember it?";
         } else {
-            String word = reviews.getFirst().getVocabulary().getWord();
-            message = "We studied " + reviews.size() + " words yesterday. Do you still remember " + word + "?";
+            String preview = String.join(", ", words.stream().limit(3).toList());
+            message = "Yesterday we studied " + words.size() + " words: " + preview
+                    + ". Do you still remember " + words.getFirst() + "?";
         }
         return reaction(PetMood.WAITING, PetAction.THINK, line(profile.getPersonality(), message), 2, 6);
     }

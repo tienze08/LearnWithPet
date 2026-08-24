@@ -43,6 +43,7 @@ function Dashboard() {
   const weakTopic = companionState?.learningProfile?.weakestTopic ?? null;
   const recoveryDeckId = relearning?.deckId ?? overdue?.deckId ?? weakDeckId;
   const hasNeedsAttention = Boolean(relearning || overdue || weakTopic);
+  const tomorrow = todayPlan?.tomorrowPreview;
 
   async function startRecoverySession() {
     if (!recoveryDeckId || activeSession) return;
@@ -130,6 +131,24 @@ function Dashboard() {
           sub={`${recentTotal} reviews`}
         />
       </div>
+
+      <section className="rounded-[2rem] border border-primary/20 bg-card/80 p-6 card-pop">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">Tomorrow with {petName}</p>
+            <h2 className="mt-2 text-2xl font-extrabold tracking-tight">
+              {tomorrow?.cardCount ? `${petName} prepared ${tomorrow.cardCount} card${tomorrow.cardCount === 1 ? "" : "s"} for tomorrow.` : `${petName} will have something new for you tomorrow.`}
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {tomorrow?.cardCount
+                ? `A calm ${tomorrow.estimatedMinutes}-minute recall session is waiting when you return.`
+                : "Today’s answers will shape the next words you see."}
+            </p>
+          </div>
+          {tomorrow?.cardCount ? <div className="rounded-2xl bg-primary/10 px-4 py-3 text-right"><p className="text-xs font-bold text-primary">~{tomorrow.estimatedMinutes} min</p><p className="mt-1 text-xs text-muted-foreground">ready tomorrow</p></div> : null}
+        </div>
+        {tomorrow?.words?.length ? <p className="mt-4 text-sm text-muted-foreground">Burumaru saved: <span className="font-semibold text-foreground">{tomorrow.words.join(", ")}</span></p> : null}
+      </section>
 
       {hasNeedsAttention && (
         <section className="rounded-[2rem] border border-amber-500/25 bg-card/80 p-6 card-pop">

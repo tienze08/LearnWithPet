@@ -60,13 +60,13 @@ public class QuizServiceImpl implements QuizService {
     public QuizQuestionResponse randomQuestion(Long deckId) {
         User user = currentUserService.getCurrentUser();
 
-        // Companion quizzes reinforce real FSRS work. The oldest due card is
-        // selected first, then an unseen card. Practice remains available even
-        // when every card is scheduled for the future.
+        // Companion quizzes first revisit the learner's most troublesome word,
+        // then fall back to the oldest due card and finally an unseen card.
         List<UserVocabularyProgress> dueCards = deckId == null
                 ? progressRepository.findDueCardsForQuiz(user.getId(), LocalDateTime.now())
                 : progressRepository.findDueCardsForQuizAndDeck(user.getId(), deckId, LocalDateTime.now());
-        Vocabulary vocabulary = dueCards
+        Vocabulary vocabulary = companionService.suggestedQuizVocabulary(user, deckId)
+                .or(() -> dueCards
                 .stream()
                 // This second ownership check protects users from legacy progress
                 // rows that may have been created before quizzes were user-scoped.
@@ -75,7 +75,7 @@ public class QuizServiceImpl implements QuizService {
                         && progress.getVocabulary().getDeck().getUser() != null
                         && user.getId().equals(progress.getVocabulary().getDeck().getUser().getId()))
                 .map(UserVocabularyProgress::getVocabulary)
-                .findFirst()
+                .findFirst())
                 .orElseGet(() -> (deckId == null
                         ? progressRepository.findNewCardsForQuiz(user.getId())
                         : progressRepository.findNewCards(user.getId(), deckId))

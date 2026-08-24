@@ -6,6 +6,7 @@ import com.vocabpet.backend.entity.enums.PetSpecies;
 import com.vocabpet.backend.entity.enums.PetIntent;
 import lombok.Builder;
 import lombok.Data;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -26,6 +27,8 @@ public class CompanionStateResponse {
     private long totalSessionsTogether;
     private int usualStudyHour;
     private long yesterdayWords;
+    private int hoursSinceLastOpen;
+    private LocalDateTime lastAppOpenedAt;
     private boolean closeToUsualStudyTime;
     private String relationshipMilestone;
     private LearningProfileResponse learningProfile;

@@ -8,6 +8,7 @@ import com.vocabpet.backend.dto.PetRe.PetBehaviorResponse;
 import com.vocabpet.backend.entity.User;
 import com.vocabpet.backend.entity.Vocabulary;
 import com.vocabpet.backend.entity.StudySession;
+import java.util.Optional;
 
 public interface CompanionService {
     CompanionStateResponse getState();
@@ -17,4 +18,5 @@ public interface CompanionService {
     PetBehaviorResponse recordQuizOutcome(User user, Vocabulary vocabulary, boolean correct);
     PetBehaviorResponse recordReviewOutcome(User user, Vocabulary vocabulary, boolean correct);
     void recordSessionCompleted(User user, StudySession session);
+    Optional<Vocabulary> suggestedQuizVocabulary(User user, Long deckId);
 }

@@ -37,6 +37,8 @@ export interface CompanionStateResponse {
   totalSessionsTogether: number;
   usualStudyHour: number;
   yesterdayWords: number;
+  hoursSinceLastOpen: number;
+  lastAppOpenedAt: string | null;
   closeToUsualStudyTime: boolean;
   relationshipMilestone: string | null;
   learningProfile: LearningProfile;

@@ -40,8 +40,8 @@ function TodayStudyPlan() {
         <div className="mt-5 flex flex-wrap gap-2">
           {plan.suggestedDeckId ? (
             <Button asChild className="h-11 px-5">
-              <Link to="/app/decks/$deckId" params={{ deckId: String(plan.suggestedDeckId) }} search={{ mode: "srs" }}>
-                Start review · {plan.suggestedDeckName}
+              <Link to="/app/decks/$deckId" params={{ deckId: String(plan.suggestedDeckId) }} search={{ mode: "srs", journey: "1" }}>
+                Start today&apos;s journey · {plan.suggestedDeckName}
               </Link>
             </Button>
           ) : (

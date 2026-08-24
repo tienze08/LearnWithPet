@@ -461,17 +461,11 @@ export function PetCompanion() {
     // message afterwards, but it must not make a correct answer look like an
     // idle/wave action instead of the authored jump.
     setQuizAnimationPhase("result");
+    // QuizService already recorded the exact word outcome in companion memory.
+    // Do not send a second generic ANSWER_* event: it used to overwrite a
+    // useful line such as “abandon is tricky” with a random fallback.
     applyServerReaction(result.petBehavior);
     triggerPetAnimation(result.correct ? "CELEBRATE" : "SAD");
-    recordCompanionEvent(result.correct ? "ANSWER_CORRECT" : "ANSWER_WRONG", {
-      onSuccess: (snapshot) => {
-        applyServerReaction(snapshot.reaction);
-        triggerPetAnimation(result.correct ? "CELEBRATE" : "SAD");
-      },
-      onError: () => {
-        // The companion event is optional: quiz feedback must not be blocked by it.
-      },
-    });
 
     // Đợi người dùng xem kết quả
     setTimeout(() => {
@@ -498,6 +492,9 @@ export function PetCompanion() {
     ? Math.max(16, viewportWidth - 344)
     : petX;
   const isOverlayOpen = open || reminder || showSettings;
+  // At the left edge, a right-aligned bubble would extend beyond the screen.
+  // Open it toward the centre instead; overlays already sit against the right.
+  const speechAlign = !isOverlayOpen && overlayX < viewportWidth / 2 ? "left" : "right";
 
   return (
     <motion.div
@@ -763,7 +760,7 @@ export function PetCompanion() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.2 }}
       >
-        <PetSpeechBubble />
+        <PetSpeechBubble align={speechAlign} />
 
         <div
           role="button"

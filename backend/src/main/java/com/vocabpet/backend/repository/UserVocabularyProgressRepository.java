@@ -78,6 +78,15 @@ public interface UserVocabularyProgressRepository
         List<UserVocabularyProgress> findUpcomingCards(Long userId, LocalDateTime now);
 
         @Query("""
+                        SELECT p FROM UserVocabularyProgress p
+                        WHERE p.user.id = :userId
+                        AND p.vocabulary.deck.user.id = :userId
+                        AND p.nextReviewTime >= :from AND p.nextReviewTime < :to
+                        ORDER BY p.nextReviewTime ASC
+                        """)
+        List<UserVocabularyProgress> findUpcomingCardsBetween(Long userId, LocalDateTime from, LocalDateTime to);
+
+        @Query("""
                         SELECT COUNT(p)
                         FROM UserVocabularyProgress p
                         WHERE p.user.id = :userId

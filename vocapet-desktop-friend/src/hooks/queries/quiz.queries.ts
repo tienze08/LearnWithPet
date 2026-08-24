@@ -16,6 +16,7 @@ export function useAnswerQuizMutation() {
       queryClient.invalidateQueries({ queryKey: ["me"] });
       queryClient.invalidateQueries({ queryKey: ["study-reviews", "recent"] });
       queryClient.invalidateQueries({ queryKey: ["study-dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["decks"] });
     },
   });
 }

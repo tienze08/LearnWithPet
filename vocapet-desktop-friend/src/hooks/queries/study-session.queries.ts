@@ -55,6 +55,7 @@ export function useReviewStudyCardMutation(
       queryClient.invalidateQueries({ queryKey: ["study-dashboard"] });
       queryClient.invalidateQueries({ queryKey: ["study-plan", "today"] });
       queryClient.invalidateQueries({ queryKey: ["study-session", "active"] });
+      queryClient.invalidateQueries({ queryKey: ["decks"] });
     },
   });
 }

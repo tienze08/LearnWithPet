@@ -39,6 +39,7 @@ import { useGame } from "@/lib/store";
 export const Route = createFileRoute("/app/decks/$deckId")({
   validateSearch: (search: Record<string, unknown>) => ({
     mode: search.mode === "srs" ? "srs" : undefined,
+    journey: search.journey === "1" ? "1" : undefined,
   }),
   component: DeckDetail,
 });
@@ -48,7 +49,7 @@ type Mode = "browse" | "srs" | "flashcards" | "quiz" | "type";
 export default function DeckDetail() {
   const { recordAnswer: recordStudyAnswer } = useGame();
   const { deckId } = Route.useParams();
-  const { mode: requestedMode } = Route.useSearch();
+  const { mode: requestedMode, journey } = Route.useSearch();
 
   const navigate = useNavigate();
 
@@ -257,7 +258,7 @@ export default function DeckDetail() {
         />
       )}
 
-      {mode === "srs" && <SrsFlashCard deckId={deck.id} />}
+      {mode === "srs" && <SrsFlashCard deckId={deck.id} journeyRequested={journey === "1"} />}
 
       {mode === "flashcards" && <Flashcards words={words} onAnswer={recordAnswer} />}
 
