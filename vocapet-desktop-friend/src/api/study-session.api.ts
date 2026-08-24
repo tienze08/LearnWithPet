@@ -11,6 +11,8 @@ export type ReviewResponse = {
   longestStreak: number;
   nextReviewTime: string;
   streakUpdated: boolean;
+  xp: number;
+  coin: number;
 };
 
 export type RecentReview = {
@@ -51,6 +53,26 @@ export type StudyPlan = {
     deckName: string;
     dueAt: string;
   }>;
+};
+
+export type ActiveStudySession = {
+  sessionId: number;
+  deckId: number;
+  deckName: string;
+  startedAt: string;
+  lastActiveAt: string | null;
+  currentVocabularyId: number | null;
+  currentWord: string | null;
+  reviewed: number;
+  uniqueCards: number;
+  correct: number;
+};
+
+export type StudyAnalytics = {
+  learningWords: number; learnedWords: number; masteredWords: number; weekMinutes: number;
+  accuracy: Array<{ date: string; reviewed: number; correct: number }>;
+  decks: Array<{ deckId: number; deckName: string; reviewed: number; correct: number }>;
+  activeDays: string[];
 };
 
 export function startStudySessionApi(
@@ -107,4 +129,12 @@ export function getStudyDashboardStatsApi() {
 
 export function getTodayStudyPlanApi() {
   return apiFetch<StudyPlan>("/api/study-sessions/plan");
+}
+
+export function getActiveStudySessionApi() {
+  return apiFetch<ActiveStudySession | null>("/api/study-sessions/active");
+}
+
+export function getStudyAnalyticsApi(days = 7) {
+  return apiFetch<StudyAnalytics>(`/api/study-sessions/analytics?days=${days}`);
 }

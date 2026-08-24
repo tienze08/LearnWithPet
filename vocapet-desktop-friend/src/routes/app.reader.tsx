@@ -35,7 +35,14 @@ import {
   Trash2,
 } from "lucide-react";
 import type { GeneratedCard } from "@/lib/reader-ai.functions";
-import { generateReaderFlashcardsApi, suggestReaderVocabularyApi } from "@/api/reader.api";
+import {
+  generateReaderFlashcardsApi,
+  getLatestReaderPdfApi,
+  getLatestReaderPdfFileApi,
+  suggestReaderVocabularyApi,
+  updateReaderPdfStateApi,
+  uploadReaderPdfApi,
+} from "@/api/reader.api";
 import { Pet } from "@/components/PixiPet/Pet";
 import { stageForLevel } from "@/lib/store";
 import { speakPet } from "@/hooks/stores/petSpeech";
@@ -211,11 +218,13 @@ export function ReaderPage() {
   const [generating, setGenerating] = useState(false);
   const [aiStatus, setAiStatus] = useState("Ready to help you discover useful words.");
   const [suggestions, setSuggestions] = useState<VocabularySuggestion[]>([]);
+  const [hasAskedSuggestions, setHasAskedSuggestions] = useState(false);
   const [suggesting, setSuggesting] = useState(false);
   const [preview, setPreview] = useState<GeneratedCard[] | null>(null);
   const [savedThisSession, setSavedThisSession] = useState<string[]>([]);
   const [highlights, setHighlights] = useState<Record<string, HighlightDetail>>({});
   const [pdfStorageReady, setPdfStorageReady] = useState(false);
+  const [serverPdfReady, setServerPdfReady] = useState(false);
   const [showLearnedWords, setShowLearnedWords] = useState(false);
   const [importedHighlightTerms, setImportedHighlightTerms] = useState<string[] | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -262,6 +271,13 @@ export function ReaderPage() {
     const userWords = new Set(myVocabularies.map((word) => word.word.toLocaleLowerCase()));
     return [...pdfWordFrequencies.keys()].filter((word) => userWords.has(word));
   }, [myVocabularies, pdfWordFrequencies]);
+  const newPdfWords = useMemo(() => {
+    const learned = new Set(learnedPdfWords);
+    return [...pdfWordFrequencies.keys()].filter((word) => !learned.has(word) && !basketWords.has(word));
+  }, [pdfWordFrequencies, learnedPdfWords, basketWords]);
+  // Keep every AI suggestion visible. Hiding already-learned or basket words
+  // made Burumaru announce useful picks while the section looked empty.
+  const visibleSuggestions = suggestions;
 
   const selected = basket.filter((b) => b.checked);
 
@@ -273,16 +289,37 @@ export function ReaderPage() {
     if (!me?.id) return;
     let active = true;
 
-    void getLatestPdf(me.id).then((stored) => {
-      if (!active || !stored) return;
-      setPdfFile(stored.file);
-      setCustomTitle(stored.title);
-      setCustomText(stored.text);
-      setBasket((stored.basket as BasketItem[] | undefined) ?? []);
-      setHighlights((stored.highlights as Record<string, HighlightDetail> | undefined) ?? {});
-      setSourceId("pdf");
-      setPdfStorageReady(true);
-    });
+    void (async () => {
+      try {
+        const document = await getLatestReaderPdfApi();
+        if (!document) throw new Error("No cloud PDF saved yet");
+        const pdfBlob = await getLatestReaderPdfFileApi();
+        if (!active) return;
+        setPdfFile(new File([pdfBlob], document.title, { type: document.contentType }));
+        setCustomTitle(document.title);
+        setCustomText(document.extractedText);
+        setBasket(JSON.parse(document.basketJson || "[]") as BasketItem[]);
+        setHighlights(JSON.parse(document.highlightsJson || "{}") as Record<string, HighlightDetail>);
+        setSourceId("pdf");
+        setPdfStorageReady(true);
+        setServerPdfReady(true);
+        setAiStatus("I restored your PDF, highlights, and vocabulary basket.");
+        return;
+      } catch (error) {
+        // A first-time user has no server document; retain the local fallback during R2 setup.
+        if (!active) return;
+        void getLatestPdf(me.id).then((stored) => {
+          if (!active || !stored) return;
+          setPdfFile(stored.file);
+          setCustomTitle(stored.title);
+          setCustomText(stored.text);
+          setBasket((stored.basket as BasketItem[] | undefined) ?? []);
+          setHighlights((stored.highlights as Record<string, HighlightDetail> | undefined) ?? {});
+          setSourceId("pdf");
+          setPdfStorageReady(true);
+        });
+      }
+    })();
 
     return () => { active = false; };
   }, [me?.id]);
@@ -295,6 +332,7 @@ export function ReaderPage() {
     setHighlights({});
     setSourceId("pdf");
     setPdfStorageReady(true);
+    setServerPdfReady(false);
     setAiStatus("Your PDF is open. I can analyse its text while you read the original pages.");
     if (importedHighlights.length) {
       setImportedHighlightTerms(importedHighlights);
@@ -304,9 +342,17 @@ export function ReaderPage() {
 
     if (me?.id) {
       try {
+        await uploadReaderPdfApi(file, text);
+        setServerPdfReady(true);
         await saveLatestPdf({ userId: me.id, title, text, file, savedAt: Date.now(), basket: [], highlights: {} });
+        setAiStatus("Your PDF is safely saved to your account. I’ll remember its highlights too.");
       } catch {
-        toast.error("Your PDF could not be saved locally. Check browser storage permissions.");
+        toast.error("Cloud PDF storage is not ready yet, so this PDF is only saved in this browser.");
+        try {
+          await saveLatestPdf({ userId: me.id, title, text, file, savedAt: Date.now(), basket: [], highlights: {} });
+        } catch {
+          toast.error("Your PDF could not be saved in browser storage either.");
+        }
       }
     }
   }
@@ -348,7 +394,13 @@ export function ReaderPage() {
       highlights,
       savedAt: Date.now(),
     });
-  }, [me?.id, pdfFile, sourceId, pdfStorageReady, customTitle, customText, basket, highlights]);
+    if (!serverPdfReady) return;
+    const saveTimer = window.setTimeout(() => {
+      void updateReaderPdfStateApi({ basketJson: JSON.stringify(basket), highlightsJson: JSON.stringify(highlights) })
+        .catch(() => undefined);
+    }, 600);
+    return () => window.clearTimeout(saveTimer);
+  }, [me?.id, pdfFile, sourceId, pdfStorageReady, serverPdfReady, customTitle, customText, basket, highlights]);
 
   function handleSelection(event?: { clientX?: number; clientY?: number; fromPdf?: boolean }) {
     const sel = typeof window !== "undefined" ? window.getSelection() : null;
@@ -444,6 +496,7 @@ export function ReaderPage() {
   async function askForSuggestions() {
     if (!doc.text.trim()) return;
     setSuggesting(true);
+    setHasAskedSuggestions(true);
     setAiStatus("I’m reading this passage to find useful words for you…");
     try {
       const result = await suggestReaderVocabularyApi({
@@ -681,9 +734,10 @@ export function ReaderPage() {
           <p className="text-xs font-bold text-muted-foreground mb-4">{doc.author}</p>
 
           {sourceId === "pdf" && (
-            <div className="mb-4 grid grid-cols-3 gap-2 rounded-2xl border border-primary/20 bg-primary/5 p-3 text-center text-xs">
+            <div className="mb-4 grid grid-cols-2 gap-2 rounded-2xl border border-primary/20 bg-primary/5 p-3 text-center text-xs sm:grid-cols-4">
               <div><p className="text-lg font-extrabold">{pdfWordFrequencies.size}</p><p className="text-muted-foreground">unique words</p></div>
               <div><p className="text-lg font-extrabold text-primary">{learnedPdfWords.length}</p><p className="text-muted-foreground">already learned</p></div>
+              <div><p className="text-lg font-extrabold text-violet-600">{newPdfWords.length}</p><p className="text-muted-foreground">new candidates</p></div>
               <div><p className="text-lg font-extrabold text-amber-600">{basketWords.size}</p><p className="text-muted-foreground">in basket</p></div>
             </div>
           )}
@@ -719,27 +773,38 @@ export function ReaderPage() {
               Paste some text above to start reading.
             </p>
           )}
-          {suggestions.length > 0 && (
+          {hasAskedSuggestions && (
             <section className="mt-6 rounded-2xl border-2 border-primary/30 bg-primary/5 p-4">
               <div className="flex items-center gap-2">
                 <span className="text-lg">🐾</span>
-                <p className="font-extrabold">Burumaru’s vocabulary picks</p>
+                <p className="font-extrabold">Burumaru’s useful vocabulary picks</p>
+                <span className="ml-auto text-xs font-bold text-muted-foreground">{visibleSuggestions.length} found</span>
               </div>
-              <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                {suggestions.map((suggestion) => (
+              {visibleSuggestions.length === 0 ? (
+                <p className="mt-3 text-sm text-muted-foreground">No new useful words this time. Try a longer passage or another document.</p>
+              ) : (
+                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                  {visibleSuggestions.map((suggestion) => {
+                    const normalized = suggestion.word.toLowerCase();
+                    const inBasket = basketWords.has(normalized);
+                    const learned = learnedPdfWords.includes(normalized);
+                    return (
                   <button
                     key={suggestion.word}
-                    onClick={() => addSuggestion(suggestion)}
+                    onClick={() => !inBasket && addSuggestion(suggestion)}
+                    disabled={inBasket}
                     className="rounded-xl border border-border bg-card p-3 text-left hover:border-primary transition-colors"
                   >
-                    <span className="font-extrabold text-primary">{suggestion.word}</span>
+                    <div className="flex items-center gap-2"><span className="font-extrabold text-primary">{suggestion.word}</span>{inBasket ? <span className="text-[10px] font-bold text-amber-600">In basket</span> : learned ? <span className="text-[10px] font-bold text-info">Already learned</span> : <span className="text-[10px] font-bold text-success">Add to basket</span>}</div>
                     <p className="mt-1 text-xs text-muted-foreground">{suggestion.reason}</p>
                     <p className="mt-1 text-[11px] italic text-muted-foreground line-clamp-2">
                       “{suggestion.contextSentence}”
                     </p>
                   </button>
-                ))}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
             </section>
           )}
         </article>

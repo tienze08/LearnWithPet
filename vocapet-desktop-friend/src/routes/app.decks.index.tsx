@@ -173,9 +173,8 @@ function DecksPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {filteredDecks.map((d) => {
           const wordCount = d.wordCount ?? 0;
-          // The API currently exposes the number of words, not per-word mastery.
-          // Keep progress honest at 0 until study progress is available from the API.
-          const studiedCount = 0;
+          const studiedCount = d.studiedCount ?? 0;
+          const masteredCount = d.masteredCount ?? 0;
           const progress = wordCount > 0 ? Math.round((studiedCount / wordCount) * 100) : 0;
           return (
             <Link
@@ -204,7 +203,7 @@ function DecksPage() {
                     <BookOpen className="h-3.5 w-3.5 text-primary" />
                     {wordCount} {wordCount === 1 ? "word" : "words"}
                   </span>
-                  <span className="text-primary">{progress}% mastered</span>
+                  <span className={progress > 0 ? "text-primary" : "text-muted-foreground"}>{progress}% studied</span>
                 </div>
                 <div
                   className="mt-2.5 h-2.5 overflow-hidden rounded-full bg-background ring-1 ring-border/70"
@@ -220,7 +219,7 @@ function DecksPage() {
                   />
                 </div>
                 <p className="mt-2 text-[11px] font-medium text-muted-foreground">
-                  {wordCount === 0 ? "Add words to begin studying." : `${studiedCount} of ${wordCount} words mastered`}
+                  {wordCount === 0 ? "Add words to begin studying." : progress === 0 ? "Start your first review to build progress." : `${studiedCount} of ${wordCount} words reviewed${masteredCount > 0 ? ` · ${masteredCount} mastered` : ""}`}
                 </p>
               </div>
             </Link>

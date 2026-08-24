@@ -2,10 +2,11 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { stageForLevel, useGame, type PetMood, type PetVariant } from "@/lib/store";
 import { Pet } from "@/components/PixiPet/Pet";
 import { Button } from "@/components/ui/button";
-import { Flame, Target, BookOpen, Trophy, TrendingUp } from "lucide-react";
+import { Flame, BookOpen, Trophy, TrendingUp, CalendarClock, Clock3, Brain, CircleAlert, HeartHandshake, History } from "lucide-react";
 import { useMeQuery } from "@/hooks/queries/user.queries";
 import { useDecksQuery } from "@/hooks/queries/deck.queries";
-import { useRecentReviewsQuery, useStudyDashboardStatsQuery } from "@/hooks/queries/study-session.queries";
+import { useActiveStudySessionQuery, useRecentReviewsQuery, useStartStudySessionMutation, useStudyDashboardStatsQuery, useTodayStudyPlanQuery } from "@/hooks/queries/study-session.queries";
+import { useCompanionStateQuery } from "@/hooks/queries/companion.queries";
 
 export const Route = createFileRoute("/app/")({
   component: Dashboard,
@@ -17,6 +18,10 @@ function Dashboard() {
   const { data: decks = [], isLoading: decksLoading } = useDecksQuery();
   const { data: recentReviews = [], isLoading: recentReviewsLoading } = useRecentReviewsQuery();
   const { data: studyStats } = useStudyDashboardStatsQuery();
+  const { data: todayPlan } = useTodayStudyPlanQuery();
+  const { data: activeSession } = useActiveStudySessionQuery();
+  const { data: companionState } = useCompanionStateQuery(Boolean(me?.pet));
+  const recoveryMutation = useStartStudySessionMutation();
 
   const companion = me?.pet;
   const petName = companion?.name?.trim() || state.petName;
@@ -26,11 +31,28 @@ function Dashboard() {
   const userName = me?.name?.trim() || state.user.displayName || "there";
   const userLevel = me?.level ?? state.level;
   const userStreak = me?.streak ?? state.streak;
-  const goalPct = Math.min(100, (state.dailyProgress / state.dailyGoal) * 100);
   const mastered = studyStats?.masteredWords ?? 0;
   const learning = studyStats?.learningWords ?? 0;
   const recentCorrect = studyStats?.recentCorrect ?? 0;
   const recentTotal = studyStats?.recentReviews ?? 0;
+  const dueCards = todayPlan?.dueCards ?? 0;
+  const planWords = todayPlan?.dueReasons.flatMap((reason) => reason.words).slice(0, 3) ?? [];
+  const relearning = todayPlan?.dueReasons.find((reason) => reason.code === "RELEARNING");
+  const overdue = todayPlan?.dueReasons.find((reason) => reason.code === "OVERDUE");
+  const weakDeckId = companionState?.learningProfile?.weakestDeckId ?? null;
+  const weakTopic = companionState?.learningProfile?.weakestTopic ?? null;
+  const recoveryDeckId = relearning?.deckId ?? overdue?.deckId ?? weakDeckId;
+  const hasNeedsAttention = Boolean(relearning || overdue || weakTopic);
+
+  async function startRecoverySession() {
+    if (!recoveryDeckId || activeSession) return;
+    try {
+      await recoveryMutation.mutateAsync({ deckId: recoveryDeckId, reviewLimit: 10 });
+      window.location.assign(`/app/decks/${recoveryDeckId}?recovery=1`);
+    } catch (error) {
+      console.error("Could not start recovery session", error);
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -39,18 +61,36 @@ function Dashboard() {
         <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
         <Pet variant={petVariant} stage={petStage} mood={petMood} size={140} />
         <div className="flex-1 text-center md:text-left">
-          <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">Your study space</p>
+          <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">Today with {petName}</p>
           <h1 className="text-3xl font-extrabold mt-2 tracking-tight md:text-4xl">
-            {petName} is feeling <span className="capitalize">{petMood}</span>
+            {dueCards ? `${dueCards} words are ready for review.` : "Your review queue is all clear."}
           </h1>
           <p className="text-muted-foreground mt-3 text-sm leading-relaxed max-w-md">
-            Your desktop companion reacts to your learning momentum. It will pop up every{" "}
-            {state.popupIntervalMin} min with a quick review or mini quiz.
+            {dueCards
+              ? `${petName} prepared a focused ${todayPlan?.estimatedMinutes ?? 1}-minute session using your shared FSRS schedule.`
+              : `${petName} will keep an eye on your schedule and bring back words when they are due.`}
           </p>
+          {planWords.length > 0 && (
+            <p className="mt-3 text-xs font-semibold text-muted-foreground">
+              Revisit first: <span className="text-foreground">{planWords.join(", ")}</span>
+            </p>
+          )}
           <div className="mt-4 flex flex-wrap gap-2 justify-center md:justify-start">
+            {activeSession && (
+              <Button asChild variant="outline" className="border-primary/40 text-primary">
+                <Link to="/app/decks/$deckId" params={{ deckId: String(activeSession.deckId) }}>
+                  <Clock3 className="w-4 h-4 mr-1" /> Resume session
+                </Link>
+              </Button>
+            )}
             <Button asChild className="btn-pop">
+              <Link to="/app/plan">
+                <CalendarClock className="w-4 h-4 mr-1" /> {dueCards ? "Start today’s plan" : "View today’s plan"}
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
               <Link to="/app/decks">
-                <BookOpen className="w-4 h-4 mr-1" /> Start studying
+                <BookOpen className="w-4 h-4 mr-1" /> Browse decks
               </Link>
             </Button>
           </div>
@@ -60,10 +100,16 @@ function Dashboard() {
       {/* Stat grid */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          icon={<Target className="w-5 h-5 text-primary" />}
-          label="Daily goal"
-          value={`${state.dailyProgress} / ${state.dailyGoal}`}
-          progress={goalPct}
+          icon={<CalendarClock className="w-5 h-5 text-primary" />}
+          label="Due now"
+          value={String(dueCards)}
+          sub={dueCards ? "ready for recall" : "nothing overdue"}
+        />
+        <StatCard
+          icon={<Clock3 className="w-5 h-5 text-info" />}
+          label="Plan time"
+          value={dueCards ? `~${todayPlan?.estimatedMinutes ?? 1} min` : "All clear"}
+          sub={`${todayPlan?.reviewsToday ?? state.dailyProgress}/${todayPlan?.dailyGoal ?? state.dailyGoal} reviews today`}
         />
         <StatCard
           icon={<Flame className="w-5 h-5 text-streak" />}
@@ -84,6 +130,111 @@ function Dashboard() {
           sub={`${recentTotal} reviews`}
         />
       </div>
+
+      {hasNeedsAttention && (
+        <section className="rounded-[2rem] border border-amber-500/25 bg-card/80 p-6 card-pop">
+          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <div>
+              <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
+                <Brain className="h-5 w-5" />
+                <p className="text-xs font-bold uppercase tracking-[0.14em]">Needs attention</p>
+              </div>
+              <h2 className="mt-2 text-2xl font-extrabold tracking-tight">A small reset can make these words stick.</h2>
+              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+                Burumaru picked the cards that need the most care from your real review history.
+              </p>
+            </div>
+            {activeSession ? (
+              <Button asChild variant="outline" className="shrink-0 border-primary/40 text-primary">
+                <Link to="/app/decks/$deckId" params={{ deckId: String(activeSession.deckId) }}>
+                  <Clock3 className="mr-1 h-4 w-4" /> Resume session
+                </Link>
+              </Button>
+            ) : recoveryDeckId ? (
+              <Button className="btn-pop shrink-0" onClick={startRecoverySession} disabled={recoveryMutation.isPending}>
+                <Clock3 className="mr-1 h-4 w-4" />
+                {recoveryMutation.isPending ? "Preparing…" : "Start 5-minute recovery"}
+              </Button>
+            ) : null}
+          </div>
+
+          <div className="mt-5 grid gap-3 md:grid-cols-3">
+            {relearning && (
+              <AttentionItem
+                icon={<CircleAlert className="h-4 w-4 text-rose-500" />}
+                title={`${relearning.count} word${relearning.count === 1 ? "" : "s"} to meet again`}
+                detail={`Marked Again before: ${relearning.words.slice(0, 3).join(", ")}.`}
+              />
+            )}
+            {overdue && (
+              <AttentionItem
+                icon={<CalendarClock className="h-4 w-4 text-amber-500" />}
+                title={`${overdue.count} overdue review${overdue.count === 1 ? "" : "s"}`}
+                detail={`${overdue.deckName} is waiting for a quick catch-up.`}
+              />
+            )}
+            {weakTopic && (
+              <AttentionItem
+                icon={<TrendingUp className="h-4 w-4 text-violet-500" />}
+                title={`${weakTopic} needs more practice`}
+                detail={companionState?.learningProfile?.averageQuizScore
+                  ? `${companionState.learningProfile.averageQuizScore}% recent accuracy in this topic.`
+                  : "Your recent answers suggest a gentle review here."}
+              />
+            )}
+          </div>
+        </section>
+      )}
+
+      {companionState && (
+        <section className="rounded-[2rem] border border-primary/20 bg-primary/[0.035] p-6 card-pop">
+          <div className="flex items-center gap-2 text-primary">
+            <HeartHandshake className="h-5 w-5" />
+            <p className="text-xs font-bold uppercase tracking-[0.14em]">Your story together</p>
+          </div>
+          <h2 className="mt-2 text-2xl font-extrabold tracking-tight">{petName} remembers how you learn.</h2>
+          <div className="mt-5 grid gap-3 md:grid-cols-3">
+            {companionState.yesterdayWords > 0 && (
+              <MemoryItem
+                icon={<History className="h-4 w-4 text-primary" />}
+                title={`Yesterday we studied ${companionState.yesterdayWords} word${companionState.yesterdayWords === 1 ? "" : "s"} together.`}
+                detail="A quick recall today will help them stay familiar."
+              />
+            )}
+            {companionState.learningProfile?.weakestTopic && (
+              <MemoryItem
+                icon={<Brain className="h-4 w-4 text-violet-500" />}
+                title={`${companionState.learningProfile.weakestTopic} words need a little more care.`}
+                detail={companionState.frequentlyWrongWord
+                  ? `We can revisit ${companionState.frequentlyWrongWord} together.`
+                  : "Burumaru will include them in your next focused session."}
+              />
+            )}
+            {companionState.closeToUsualStudyTime && (
+              <MemoryItem
+                icon={<Clock3 className="h-4 w-4 text-amber-500" />}
+                title="It’s close to your usual study time."
+                detail="A small session now is enough to keep the routine going."
+              />
+            )}
+            {companionState.relationshipMilestone && (
+              <MemoryItem
+                icon={<HeartHandshake className="h-4 w-4 text-rose-500" />}
+                title={`Milestone: ${companionState.relationshipMilestone}.`}
+                detail={`${petName} has been here for ${companionState.totalSessionsTogether} focused study session${companionState.totalSessionsTogether === 1 ? "" : "s"}.`}
+              />
+            )}
+            {!companionState.yesterdayWords && !companionState.learningProfile?.weakestTopic
+              && !companionState.closeToUsualStudyTime && !companionState.relationshipMilestone && (
+              <MemoryItem
+                icon={<HeartHandshake className="h-4 w-4 text-primary" />}
+                title={`You and ${petName} are building your study rhythm.`}
+                detail="Complete a focused session and your companion will begin noticing your habits."
+              />
+            )}
+          </div>
+        </section>
+      )}
 
       {/* Decks shortcut */}
       <div>
@@ -148,6 +299,24 @@ function Dashboard() {
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+function AttentionItem({ icon, title, detail }: { icon: React.ReactNode; title: string; detail: string }) {
+  return (
+    <div className="rounded-2xl border border-border/80 bg-background/50 p-4">
+      <div className="flex items-center gap-2 font-bold text-sm">{icon}{title}</div>
+      <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{detail}</p>
+    </div>
+  );
+}
+
+function MemoryItem({ icon, title, detail }: { icon: React.ReactNode; title: string; detail: string }) {
+  return (
+    <div className="rounded-2xl border border-primary/15 bg-card/70 p-4">
+      <div className="flex items-start gap-2 text-sm font-bold leading-snug">{icon}<span>{title}</span></div>
+      <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{detail}</p>
     </div>
   );
 }

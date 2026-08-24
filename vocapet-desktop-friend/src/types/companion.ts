@@ -36,6 +36,9 @@ export interface CompanionStateResponse {
   daysTogether: number;
   totalSessionsTogether: number;
   usualStudyHour: number;
+  yesterdayWords: number;
+  closeToUsualStudyTime: boolean;
+  relationshipMilestone: string | null;
   learningProfile: LearningProfile;
   frequentlyWrongWord: string | null;
   intent: PetIntent;

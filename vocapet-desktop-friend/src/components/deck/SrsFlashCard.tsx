@@ -8,6 +8,7 @@ import { speak } from "./speak";
 
 import {
   useFinishStudySessionMutation,
+  useActiveStudySessionQuery,
   useNextStudyCardQuery,
   useReviewStudyCardMutation,
   useStartStudySessionMutation,
@@ -61,11 +62,15 @@ export default function StudySessionFlashcards({ deckId }: Props) {
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [reviewed, setReviewed] = useState(0);
   const [correct, setCorrect] = useState(0);
+  const [earnedXp, setEarnedXp] = useState(0);
   const [againWords, setAgainWords] = useState<string[]>([]);
 
   const startMutation = useStartStudySessionMutation();
+  const { data: activeSession } = useActiveStudySessionQuery();
   const finishMutation = useFinishStudySessionMutation();
   const [finished, setFinished] = useState(false);
+  const recoveryRequested = typeof window !== "undefined"
+    && new URLSearchParams(window.location.search).get("recovery") === "1";
 
   const { data, isLoading } = useNextStudyCardQuery(sessionId);
 
@@ -83,16 +88,35 @@ export default function StudySessionFlashcards({ deckId }: Props) {
     setFlipped(false);
   }, [data]);
 
+  useEffect(() => {
+    if (!recoveryRequested || started || !activeSession || activeSession.deckId !== deckId) return;
+    resumeSession();
+  }, [recoveryRequested, started, activeSession, deckId]);
+
   if (!started) {
     return (
       <div className="max-w-xl mx-auto rounded-[2rem] border border-border bg-card/85 p-8 md:p-10 text-center card-pop">
         <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">Focused session</p>
         <h2 className="mt-2 text-3xl font-bold tracking-tight">Ready to study?</h2>
 
-        <p className="mt-3 text-muted-foreground">Review today's due cards with FSRS.</p>
+        <p className="mt-3 text-muted-foreground">
+          {recoveryRequested ? "A gentle five-minute reset: up to 10 FSRS review attempts." : "Review today's due cards with FSRS."}
+        </p>
+
+        {activeSession?.deckId === deckId && (
+          <div className="mt-5 rounded-2xl border border-primary/20 bg-primary/5 p-4 text-left">
+            <p className="text-sm font-bold">Your previous session is waiting</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {activeSession.reviewed} reviews completed{activeSession.currentWord ? ` · next: ${activeSession.currentWord}` : ""}
+            </p>
+            <Button className="mt-3 w-full" variant="outline" onClick={resumeSession}>
+              Resume session
+            </Button>
+          </div>
+        )}
 
         <Button
-          className="mt-8 w-full h-12"
+          className="mt-5 w-full h-12"
           onClick={startSession}
           disabled={startMutation.isPending}
         >
@@ -117,9 +141,10 @@ export default function StudySessionFlashcards({ deckId }: Props) {
 
           <h2 className="mt-4 text-3xl font-extrabold">Session complete</h2>
 
-          <div className="mt-5 grid grid-cols-2 gap-3 text-left sm:grid-cols-4">
+          <div className="mt-5 grid grid-cols-2 gap-3 text-left sm:grid-cols-5">
             <SessionStat label="Reviewed" value={String(reviewed)} />
             <SessionStat label="Accuracy" value={`${accuracy}%`} />
+            <SessionStat label="XP earned" value={`+${earnedXp}`} />
             <SessionStat label="Time" value={`${minutes} min`} />
             <SessionStat label="Streak" value={`${streak || "✓"}`} />
           </div>
@@ -157,13 +182,25 @@ export default function StudySessionFlashcards({ deckId }: Props) {
   async function startSession() {
     const session = await startMutation.mutateAsync({
       deckId,
+      reviewLimit: recoveryRequested ? 10 : undefined,
     });
 
     setSessionId(session.sessionId);
     setStartedAt(Date.now());
     setReviewed(0);
     setCorrect(0);
+    setEarnedXp(0);
     setAgainWords([]);
+    setStarted(true);
+    petEvents.emit({ type: "SESSION_STARTED" });
+  }
+
+  function resumeSession() {
+    if (!activeSession || activeSession.deckId !== deckId) return;
+    setSessionId(activeSession.sessionId);
+    setStartedAt(new Date(activeSession.startedAt).getTime());
+    setReviewed(activeSession.reviewed);
+    setCorrect(activeSession.correct);
     setStarted(true);
     petEvents.emit({ type: "SESSION_STARTED" });
   }
@@ -178,6 +215,7 @@ export default function StudySessionFlashcards({ deckId }: Props) {
 
     setScheduleNotice(scheduleMessage(rating, result.nextReviewTime));
     setReviewed((count) => count + 1);
+    setEarnedXp((xp) => xp + result.xp);
     if (rating === "AGAIN") {
       setAgainWords((words) => words.includes(data.word) ? words : [...words, data.word]);
     } else {

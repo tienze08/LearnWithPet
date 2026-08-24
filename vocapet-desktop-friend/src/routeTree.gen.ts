@@ -16,6 +16,7 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppAchievementsRouteImport } from './routes/app.achievements'
+import { Route as AppAnalyticsRouteImport } from './routes/app.analytics'
 import { Route as AppPetsRouteImport } from './routes/app.pets'
 import { Route as AppPlanRouteImport } from './routes/app.plan'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
@@ -58,6 +59,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
 const AppAchievementsRoute = AppAchievementsRouteImport.update({
   id: '/achievements',
   path: '/achievements',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAnalyticsRoute = AppAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
   getParentRoute: () => AppRoute,
 } as any)
 const AppPetsRoute = AppPetsRouteImport.update({
@@ -108,6 +114,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/welcome': typeof WelcomeRoute
   '/app/achievements': typeof AppAchievementsRoute
+  '/app/analytics': typeof AppAnalyticsRoute
   '/app/pets': typeof AppPetsRoute
   '/app/plan': typeof AppPlanRoute
   '/app/profile': typeof AppProfileRoute
@@ -124,6 +131,7 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/welcome': typeof WelcomeRoute
   '/app/achievements': typeof AppAchievementsRoute
+  '/app/analytics': typeof AppAnalyticsRoute
   '/app/pets': typeof AppPetsRoute
   '/app/plan': typeof AppPlanRoute
   '/app/profile': typeof AppProfileRoute
@@ -142,6 +150,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/welcome': typeof WelcomeRoute
   '/app/achievements': typeof AppAchievementsRoute
+  '/app/analytics': typeof AppAnalyticsRoute
   '/app/pets': typeof AppPetsRoute
   '/app/plan': typeof AppPlanRoute
   '/app/profile': typeof AppProfileRoute
@@ -161,6 +170,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/welcome'
     | '/app/achievements'
+    | '/app/analytics'
     | '/app/pets'
     | '/app/plan'
     | '/app/profile'
@@ -177,6 +187,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/welcome'
     | '/app/achievements'
+    | '/app/analytics'
     | '/app/pets'
     | '/app/plan'
     | '/app/profile'
@@ -194,6 +205,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/welcome'
     | '/app/achievements'
+    | '/app/analytics'
     | '/app/pets'
     | '/app/plan'
     | '/app/profile'
@@ -264,6 +276,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAchievementsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/analytics': {
+      id: '/app/analytics'
+      path: '/analytics'
+      fullPath: '/app/analytics'
+      preLoaderRoute: typeof AppAnalyticsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/pets': {
       id: '/app/pets'
       path: '/pets'
@@ -325,6 +344,7 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppAchievementsRoute: typeof AppAchievementsRoute
+  AppAnalyticsRoute: typeof AppAnalyticsRoute
   AppPetsRoute: typeof AppPetsRoute
   AppPlanRoute: typeof AppPlanRoute
   AppProfileRoute: typeof AppProfileRoute
@@ -338,6 +358,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppAchievementsRoute: AppAchievementsRoute,
+  AppAnalyticsRoute: AppAnalyticsRoute,
   AppPetsRoute: AppPetsRoute,
   AppPlanRoute: AppPlanRoute,
   AppProfileRoute: AppProfileRoute,

@@ -36,8 +36,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class CompanionServiceImpl implements CompanionService {
-    private static final int DAILY_GOAL = 10;
-
     private final CurrentUserService currentUserService;
     private final PetRepository petRepository;
     private final CompanionProfileRepository profileRepository;
@@ -103,21 +101,35 @@ public class CompanionServiceImpl implements CompanionService {
         LocalDateTime start = LocalDate.now().atStartOfDay();
         long reviewsToday = studyReviewRepository.countByUserIdAndReviewedAtBetween(user.getId(), start,
                 start.plusDays(1));
+        LocalDateTime yesterdayStart = start.minusDays(1);
+        long yesterdayWords = studyReviewRepository.countDistinctVocabularyByUserIdAndReviewedAtBetween(
+                user.getId(), yesterdayStart, start);
         long dueReviews = progressRepository.countDueCards(user.getId(), now);
+        long daysTogether = memory.getFirstStudyDate() == null ? 0
+                : ChronoUnit.DAYS.between(memory.getFirstStudyDate(), LocalDate.now()) + 1;
         return CompanionStateResponse.builder()
                 .petName(pet.getName()).species(pet.getSpecies()).petLevel(pet.getLevel())
                 .personality(profile.getPersonality()).energy(memory.getEnergy())
                 .remindersEnabled(profile.isRemindersEnabled())
                 .quietHoursStart(profile.getQuietHoursStart()).quietHoursEnd(profile.getQuietHoursEnd())
-                .streak(user.getStreak()).reviewsToday(reviewsToday).dueReviews(dueReviews).dailyGoal(DAILY_GOAL)
-                .daysTogether(memory.getFirstStudyDate() == null ? 0
-                        : ChronoUnit.DAYS.between(memory.getFirstStudyDate(), LocalDate.now()) + 1)
+                .streak(user.getStreak()).reviewsToday(reviewsToday).dueReviews(dueReviews).dailyGoal(user.getDailyGoal())
+                .daysTogether(daysTogether)
                 .totalSessionsTogether(memory.getTotalSessionsTogether())
                 .usualStudyHour(memory.getUsualStudyHour())
+                .yesterdayWords(yesterdayWords)
+                .closeToUsualStudyTime(memory.getUsualStudyHour() >= 0
+                        && Math.abs(now.getHour() - memory.getUsualStudyHour()) <= 1)
+                .relationshipMilestone(relationshipMilestone(daysTogether))
                 .learningProfile(learningProfile)
                 .frequentlyWrongWord(mostDifficultWord(profile))
                 .intent(intent)
                 .reaction(reaction).build();
+    }
+
+    private String relationshipMilestone(long daysTogether) {
+        if (daysTogether == 7) return "7 days together";
+        if (daysTogether > 0 && daysTogether % 30 == 0) return daysTogether + " days together";
+        return null;
     }
 
     private Pet requiredPet(User user) {

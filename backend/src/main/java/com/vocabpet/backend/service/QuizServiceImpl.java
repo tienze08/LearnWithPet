@@ -105,8 +105,10 @@ public class QuizServiceImpl implements QuizService {
     public QuizAnswerResponse answer(QuizAnswerRequest request) {
 
         User user = currentUserService.getCurrentUser();
-        if (request == null || request.getVocabularyId() == null || request.getAnswer() == null
-                || request.getAnswer().isBlank()) {
+        // An empty answer represents a timed-out quiz. It is still a real
+        // attempt: FSRS should schedule the card again instead of returning
+        // a 400 and leaving the quiz UI stuck in a "checking" state.
+        if (request == null || request.getVocabularyId() == null || request.getAnswer() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A quiz card and answer are required");
         }
 

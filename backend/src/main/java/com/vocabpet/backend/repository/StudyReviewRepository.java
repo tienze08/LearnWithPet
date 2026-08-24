@@ -9,49 +9,74 @@ import org.springframework.data.jpa.repository.Query;
 import com.vocabpet.backend.entity.StudyReview;
 
 public interface StudyReviewRepository
-        extends JpaRepository<StudyReview, Long> {
+                extends JpaRepository<StudyReview, Long> {
 
-    List<StudyReview> findBySessionId(Long sessionId);
+        List<StudyReview> findBySessionId(Long sessionId);
 
-    long countBySessionId(Long sessionId);
+        long countBySessionId(Long sessionId);
 
-    boolean existsBySessionIdAndVocabularyId(Long sessionId, Long vocabularyId);
+        boolean existsBySessionIdAndVocabularyId(Long sessionId, Long vocabularyId);
 
-    long countByUserId(Long userId);
+        /**
+         * A card marked Again must be seen once more before a focused session can
+         * finish. Only consider its most recent rating in this session; otherwise
+         * an old Again would keep returning after the learner later chose Good.
+         */
+        @Query("""
+                        SELECT r.vocabulary FROM StudyReview r
+                        WHERE r.session.id = :sessionId
+                        AND r.rating = com.vocabpet.backend.entity.enums.Rating.AGAIN
+                        AND r.reviewedAt = (
+                            SELECT MAX(latest.reviewedAt) FROM StudyReview latest
+                            WHERE latest.session.id = :sessionId
+                            AND latest.vocabulary.id = r.vocabulary.id
+                        )
+                        ORDER BY r.reviewedAt ASC
+                        """)
+        List<com.vocabpet.backend.entity.Vocabulary> findCardsToRelearnInSession(Long sessionId);
 
-    long countByUserIdAndReviewedAtBetween(Long userId, LocalDateTime from, LocalDateTime to);
+        long countByUserId(Long userId);
 
-    List<StudyReview> findTop6ByUserIdOrderByReviewedAtDesc(Long userId);
+        long countByUserIdAndReviewedAtBetween(Long userId, LocalDateTime from, LocalDateTime to);
 
-    List<StudyReview> findTop20ByUserIdOrderByReviewedAtDesc(Long userId);
+        @Query("""
+                        SELECT COUNT(DISTINCT r.vocabulary.id) FROM StudyReview r
+                        WHERE r.user.id = :userId
+                        AND r.reviewedAt >= :from AND r.reviewedAt < :to
+                        """)
+        long countDistinctVocabularyByUserIdAndReviewedAtBetween(Long userId, LocalDateTime from, LocalDateTime to);
 
-    @Query("""
-            SELECT r FROM StudyReview r
-            WHERE r.user.id = :userId
-            AND r.vocabulary.deck.user.id = :userId
-            AND r.reviewedAt >= :from AND r.reviewedAt < :to
-            ORDER BY r.reviewedAt DESC
-            """)
-    List<StudyReview> findOwnedReviewsBetween(Long userId, LocalDateTime from, LocalDateTime to);
+        List<StudyReview> findTop6ByUserIdOrderByReviewedAtDesc(Long userId);
 
-    @Query("""
-            SELECT r.vocabulary.deck.id,
-                   r.vocabulary.deck.name,
-                   SUM(CASE WHEN r.rating IN (com.vocabpet.backend.entity.enums.Rating.GOOD,
-                                              com.vocabpet.backend.entity.enums.Rating.EASY) THEN 1 ELSE 0 END),
-                   COUNT(r)
-            FROM StudyReview r
-            WHERE r.user.id = :userId
-            GROUP BY r.vocabulary.deck.id, r.vocabulary.deck.name
-            """)
-    List<Object[]> findTopicPerformanceByUserId(Long userId);
+        List<StudyReview> findTop20ByUserIdOrderByReviewedAtDesc(Long userId);
 
-    @Query("""
-            SELECT COUNT(r) FROM StudyReview r
-            WHERE r.user.id = :userId
-            AND r.rating IN (com.vocabpet.backend.entity.enums.Rating.GOOD,
-                             com.vocabpet.backend.entity.enums.Rating.EASY)
-            """)
-    long countSuccessfulByUserId(Long userId);
+        @Query("""
+                        SELECT r FROM StudyReview r
+                        WHERE r.user.id = :userId
+                        AND r.vocabulary.deck.user.id = :userId
+                        AND r.reviewedAt >= :from AND r.reviewedAt < :to
+                        ORDER BY r.reviewedAt DESC
+                        """)
+        List<StudyReview> findOwnedReviewsBetween(Long userId, LocalDateTime from, LocalDateTime to);
+
+        @Query("""
+                        SELECT r.vocabulary.deck.id,
+                               r.vocabulary.deck.name,
+                               SUM(CASE WHEN r.rating IN (com.vocabpet.backend.entity.enums.Rating.GOOD,
+                                                          com.vocabpet.backend.entity.enums.Rating.EASY) THEN 1 ELSE 0 END),
+                               COUNT(r)
+                        FROM StudyReview r
+                        WHERE r.user.id = :userId
+                        GROUP BY r.vocabulary.deck.id, r.vocabulary.deck.name
+                        """)
+        List<Object[]> findTopicPerformanceByUserId(Long userId);
+
+        @Query("""
+                        SELECT COUNT(r) FROM StudyReview r
+                        WHERE r.user.id = :userId
+                        AND r.rating IN (com.vocabpet.backend.entity.enums.Rating.GOOD,
+                                         com.vocabpet.backend.entity.enums.Rating.EASY)
+                        """)
+        long countSuccessfulByUserId(Long userId);
 
 }

@@ -61,6 +61,10 @@ function Welcome() {
         avatarType: avatar,
         petName,
         petSpecies: variant,
+        displayName: me?.name ?? "Learner",
+        dailyGoal: 10,
+        studyLevel: "INTERMEDIATE",
+        studyGoal: "GENERAL",
       });
 
       nav({

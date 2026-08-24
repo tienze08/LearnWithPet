@@ -6,6 +6,8 @@ import com.vocabpet.backend.entity.Deck;
 import com.vocabpet.backend.entity.User;
 import com.vocabpet.backend.mapper.DeckMapper;
 import com.vocabpet.backend.repository.DeckRepository;
+import com.vocabpet.backend.repository.UserVocabularyProgressRepository;
+import com.vocabpet.backend.entity.enums.Status;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ public class DeckService {
     private final DeckRepository deckRepository;
     private final DeckMapper deckMapper;
     private final CurrentUserService currentUserService;
+    private final UserVocabularyProgressRepository progressRepository;
 
     @Transactional
     public DeckResponse createDeck(DeckRequest request) {
@@ -47,7 +50,11 @@ public class DeckService {
 
         return deckRepository.findByUser(user)
                 .stream()
-                .map(deckMapper::toResponse)
+                .map(deck -> deckMapper.toResponse(
+                        deck,
+                        progressRepository.countByUserIdAndVocabularyDeckId(user.getId(), deck.getId()),
+                        progressRepository.countByUserIdAndVocabularyDeckIdAndStatus(
+                                user.getId(), deck.getId(), Status.MASTERED)))
                 .toList();
     }
 
