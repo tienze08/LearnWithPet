@@ -23,6 +23,9 @@ export interface UserResponse {
   coin: number;
 
   onboarded: boolean;
+  dailyGoal: number;
+  studyLevel: string | null;
+  studyGoal: string | null;
 
   pet?: PetResponse | null;
 }

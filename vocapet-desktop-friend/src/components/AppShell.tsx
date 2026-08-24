@@ -27,6 +27,7 @@ import {
   LogOut,
   Trophy,
   BookOpen,
+  BarChart3,
 } from "lucide-react";
 
 function TopBar() {
@@ -171,6 +172,7 @@ function DesktopSidebar() {
         <nav className="space-y-1">
           <NavLink to="/app/pets" icon={<PawPrintIcon className="w-4 h-4" />} label="Pets" />
           <NavLink to="/app/achievements" icon={<Trophy className="w-4 h-4" />} label="Progress & awards" />
+          <NavLink to="/app/analytics" icon={<BarChart3 className="w-4 h-4" />} label="Analytics" />
           <NavLink to="/app/profile" icon={<User className="w-4 h-4" />} label="Settings" />
         </nav>
       </div>

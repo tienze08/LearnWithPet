@@ -21,7 +21,7 @@ public class StudySessionController {
     public ResponseEntity<StartStudySessionResponse> startSession(
             @RequestBody StartStudySessionRequest request) {
 
-        StudySession session = studySessionService.startSession(request.getDeckId());
+        StudySession session = studySessionService.startSession(request.getDeckId(), request.getReviewLimit());
 
         return ResponseEntity.ok(
                 StartStudySessionResponse.builder()
@@ -39,9 +39,19 @@ public class StudySessionController {
         return ResponseEntity.ok(studySessionService.getDashboardStats());
     }
 
+    @GetMapping("/analytics")
+    public ResponseEntity<?> analytics(@RequestParam(defaultValue = "7") int days) {
+        return ResponseEntity.ok(studySessionService.getAnalytics(days));
+    }
+
     @GetMapping("/plan")
     public ResponseEntity<?> todayPlan() {
         return ResponseEntity.ok(studySessionService.getTodayPlan());
+    }
+
+    @GetMapping("/active")
+    public ResponseEntity<?> activeSession() {
+        return ResponseEntity.of(studySessionService.getActiveSession());
     }
 
     @GetMapping("/{sessionId}/next-card")

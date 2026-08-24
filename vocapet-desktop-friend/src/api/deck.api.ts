@@ -29,6 +29,10 @@ export interface DeckResponse {
 
   wordCount:number;
 
+  studiedCount:number;
+
+  masteredCount:number;
+
 }
 
 

@@ -48,11 +48,14 @@ const AVATARS = Object.keys(avatarMap) as Array<keyof typeof avatarMap>;
 function Welcome() {
   const { data: me } = useMeQuery();
   const nav = useNavigate();
-  const [step, setStep] = useState<0 | 1>(0);
+  const [step, setStep] = useState<0 | 1 | 2 | 3>(0);
   const [name, setName] = useState("");
   const [avatar, setAvatar] = useState<keyof typeof avatarMap>("FOX");
   const [variant, setVariant] = useState<PetVariant>("CAT");
   const [petName, setPetName] = useState("Burumaru");
+  const [dailyGoal, setDailyGoal] = useState(10);
+  const [studyLevel, setStudyLevel] = useState("INTERMEDIATE");
+  const [studyGoal, setStudyGoal] = useState("IELTS");
 
   const onboardingMutation = useOnboardingMutation();
   async function finish() {
@@ -60,10 +63,19 @@ function Welcome() {
       avatarType: avatar,
       petName,
       petSpecies: variant,
+      displayName: name.trim(),
+      dailyGoal,
+      studyLevel,
+      studyGoal,
     });
 
+    sessionStorage.setItem(
+      "vocapet_onboarding_greeting",
+      `${petName}: Welcome, ${name.trim()}! I made a ${dailyGoal}-word daily plan for your ${studyGoal} journey. Let’s take our first small step together.`,
+    );
+
     nav({
-      to: "/app",
+      to: "/app/plan",
     });
   }
 
@@ -92,7 +104,7 @@ function Welcome() {
             <span className="text-2xl">🌱</span> VocaPet
           </div>
           <div className="flex gap-1.5">
-            {[0, 1].map((i) => (
+            {[0, 1, 2, 3].map((i) => (
               <div
                 key={i}
                 className={`h-2 w-10 rounded-full ${i <= step ? "bg-primary" : "bg-muted"}`}
@@ -104,7 +116,7 @@ function Welcome() {
         {step === 0 ? (
           <div className="grid md:grid-cols-[1fr_auto] gap-8 items-center">
             <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-primary">Step 1 of 2</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-primary">Step 1 of 4</p>
               <h1 className="text-3xl md:text-4xl font-extrabold mt-2">
                 Welcome! What should we call you?
               </h1>
@@ -157,9 +169,9 @@ function Welcome() {
               <p className="font-extrabold text-lg">{name.trim() || "Your name"}</p>
             </div>
           </div>
-        ) : (
+        ) : step === 1 ? (
           <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-primary">Step 2 of 2</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-primary">Step 2 of 4</p>
             <h1 className="text-3xl md:text-4xl font-extrabold mt-2">Pick your study buddy</h1>
             <p className="text-muted-foreground mt-2">
               This little friend will quiz you, grow with you, and keep your streak alive.
@@ -239,15 +251,41 @@ function Welcome() {
                 Back
               </Button>
               <Button
-                onClick={() => {
-                  finish();
-                }}
+                onClick={() => setStep(2)}
                 size="lg"
                 className="btn-pop h-12 px-6"
               >
-                <Sparkles className="w-5 h-5 mr-1" /> Start learning
+                Next <ArrowRight className="w-5 h-5 ml-1" />
               </Button>
             </div>
+          </div>
+        ) : step === 2 ? (
+          <div className="max-w-2xl mx-auto">
+            <p className="text-xs font-bold uppercase tracking-wider text-primary">Step 3 of 4</p>
+            <h1 className="text-3xl md:text-4xl font-extrabold mt-2">How much time feels good today?</h1>
+            <p className="text-muted-foreground mt-2">Your companion will shape gentle reminders around this goal.</p>
+            <div className="mt-7 grid grid-cols-3 gap-3">
+              {[5, 10, 20].map((goal) => (
+                <button key={goal} onClick={() => setDailyGoal(goal)} className={`rounded-2xl border-2 p-5 text-left transition ${dailyGoal === goal ? "border-primary bg-primary/10" : "border-border bg-background hover:border-primary/40"}`}>
+                  <p className="text-2xl font-extrabold">{goal}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">words a day</p>
+                </button>
+              ))}
+            </div>
+            <div className="mt-8 flex justify-between gap-3"><Button variant="ghost" onClick={() => setStep(1)}>Back</Button><Button className="btn-pop h-12 px-6" onClick={() => setStep(3)}>Next <ArrowRight className="w-5 h-5 ml-1" /></Button></div>
+          </div>
+        ) : (
+          <div className="max-w-2xl mx-auto">
+            <p className="text-xs font-bold uppercase tracking-wider text-primary">Step 4 of 4</p>
+            <h1 className="text-3xl md:text-4xl font-extrabold mt-2">What are we learning for?</h1>
+            <p className="text-muted-foreground mt-2">This helps {petName || "Burumaru"} suggest the right vocabulary first.</p>
+            <div className="mt-6 grid sm:grid-cols-3 gap-3">
+              {["BEGINNER", "INTERMEDIATE", "ADVANCED"].map((level) => <button key={level} onClick={() => setStudyLevel(level)} className={`rounded-2xl border-2 p-4 text-sm font-bold ${studyLevel === level ? "border-primary bg-primary/10" : "border-border bg-background"}`}>{level[0] + level.slice(1).toLowerCase()}</button>)}
+            </div>
+            <div className="mt-4 grid sm:grid-cols-3 gap-3">
+              {["IELTS", "TOEIC", "GENERAL"].map((goal) => <button key={goal} onClick={() => setStudyGoal(goal)} className={`rounded-2xl border-2 p-4 text-sm font-bold ${studyGoal === goal ? "border-primary bg-primary/10" : "border-border bg-background"}`}>{goal === "GENERAL" ? "General English" : goal}</button>)}
+            </div>
+            <div className="mt-8 flex flex-col-reverse sm:flex-row justify-between gap-3"><Button variant="ghost" onClick={() => setStep(2)}>Back</Button><Button onClick={finish} disabled={onboardingMutation.isPending} size="lg" className="btn-pop h-12 px-6"><Sparkles className="w-5 h-5 mr-1" />{onboardingMutation.isPending ? "Preparing your plan…" : "Meet my companion"}</Button></div>
           </div>
         )}
       </motion.div>

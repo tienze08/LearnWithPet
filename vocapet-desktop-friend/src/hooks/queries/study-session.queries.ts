@@ -8,6 +8,8 @@ import {
   finishStudySessionApi,
   getRecentReviewsApi,
   getStudyDashboardStatsApi,
+  getActiveStudySessionApi,
+  getStudyAnalyticsApi,
   getTodayStudyPlanApi,
   getNextStudyCardApi,
   reviewStudyCardApi,
@@ -17,9 +19,11 @@ import {
 import { StartStudySessionRequest } from "@/types/study-session";
 
 export function useStartStudySessionMutation() {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload: StartStudySessionRequest) =>
       startStudySessionApi(payload),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["study-session", "active"] }),
   });
 }
 
@@ -50,6 +54,7 @@ export function useReviewStudyCardMutation(
       queryClient.invalidateQueries({ queryKey: ["study-reviews", "recent"] });
       queryClient.invalidateQueries({ queryKey: ["study-dashboard"] });
       queryClient.invalidateQueries({ queryKey: ["study-plan", "today"] });
+      queryClient.invalidateQueries({ queryKey: ["study-session", "active"] });
     },
   });
 }
@@ -62,6 +67,7 @@ export function useFinishStudySessionMutation() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["study-plan", "today"] });
       queryClient.invalidateQueries({ queryKey: ["companion", "state"] });
+      queryClient.invalidateQueries({ queryKey: ["study-session", "active"] });
     },
   });
 }
@@ -85,4 +91,15 @@ export function useTodayStudyPlanQuery() {
     queryKey: ["study-plan", "today"],
     queryFn: getTodayStudyPlanApi,
   });
+}
+
+export function useActiveStudySessionQuery() {
+  return useQuery({
+    queryKey: ["study-session", "active"],
+    queryFn: getActiveStudySessionApi,
+  });
+}
+
+export function useStudyAnalyticsQuery(days = 7) {
+  return useQuery({ queryKey: ["study-analytics", days], queryFn: () => getStudyAnalyticsApi(days) });
 }

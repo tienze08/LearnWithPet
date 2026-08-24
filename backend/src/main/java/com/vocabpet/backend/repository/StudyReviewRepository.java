@@ -39,6 +39,13 @@ public interface StudyReviewRepository
 
         long countByUserIdAndReviewedAtBetween(Long userId, LocalDateTime from, LocalDateTime to);
 
+        @Query("""
+                        SELECT COUNT(DISTINCT r.vocabulary.id) FROM StudyReview r
+                        WHERE r.user.id = :userId
+                        AND r.reviewedAt >= :from AND r.reviewedAt < :to
+                        """)
+        long countDistinctVocabularyByUserIdAndReviewedAtBetween(Long userId, LocalDateTime from, LocalDateTime to);
+
         List<StudyReview> findTop6ByUserIdOrderByReviewedAtDesc(Long userId);
 
         List<StudyReview> findTop20ByUserIdOrderByReviewedAtDesc(Long userId);

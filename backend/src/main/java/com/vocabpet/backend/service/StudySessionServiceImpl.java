@@ -18,6 +18,8 @@ import com.vocabpet.backend.dto.StudyCardRe.StreakUpdateResult;
 import com.vocabpet.backend.dto.StudyCardRe.StudyCardResponse;
 import com.vocabpet.backend.dto.StudyCardRe.StudyDashboardResponse;
 import com.vocabpet.backend.dto.StudyCardRe.StudyPlanResponse;
+import com.vocabpet.backend.dto.StudyCardRe.ActiveStudySessionResponse;
+import com.vocabpet.backend.dto.StudyCardRe.StudyAnalyticsResponse;
 import com.vocabpet.backend.dto.companion.CompanionEventRequest;
 import com.vocabpet.backend.entity.StudyReview;
 import com.vocabpet.backend.entity.StudySession;
@@ -56,14 +58,23 @@ public class StudySessionServiceImpl implements StudySessionService {
         private final DeckRepository deckRepository;
         private final CurrentUserService currentUserService;
 
-        @Override
+        /** Standard full session retained for existing callers and tests. */
         public StudySession startSession(Long deckId) {
+                return startSession(deckId, null);
+        }
+
+        @Override
+        public StudySession startSession(Long deckId, Integer reviewLimit) {
 
                 User user = currentUserService.getCurrentUser();
 
                 if (deckId == null) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                                         "A deck is required to start a study session");
+                }
+                if (reviewLimit != null && (reviewLimit < 1 || reviewLimit > 50)) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                        "A recovery session must contain between 1 and 50 review attempts");
                 }
                 var deck = deckRepository.findByIdAndUser(deckId, user)
                                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -73,6 +84,8 @@ public class StudySessionServiceImpl implements StudySessionService {
                                 .user(user)
                                 .deck(deck)
                                 .startedAt(LocalDateTime.now())
+                                .lastActiveAt(LocalDateTime.now())
+                                .reviewLimit(reviewLimit)
                                 .build();
 
                 return sessionRepository.save(session);
@@ -80,6 +93,7 @@ public class StudySessionServiceImpl implements StudySessionService {
         }
 
         @Override
+        @Transactional
         public StudyCardResponse getNextCard(Long sessionId) {
 
                 User user = currentUserService.getCurrentUser();
@@ -92,6 +106,13 @@ public class StudySessionServiceImpl implements StudySessionService {
                 Long userId = session.getUser().getId();
                 Long deckId = session.getDeck().getId();
 
+                // Recovery sessions intentionally stop after their planned
+                // number of attempts. The ratings are still persisted via the
+                // same FSRS review path as every full study session.
+                if (session.getReviewLimit() != null && session.getTotalReviews() >= session.getReviewLimit()) {
+                        throw new NoMoreCardsException("This focused recovery session is complete");
+                }
+
                 // 1. DUE CARDS
                 List<UserVocabularyProgress> due = progressRepository.findDueCards(
                                 userId,
@@ -101,7 +122,7 @@ public class StudySessionServiceImpl implements StudySessionService {
                 if (!due.isEmpty()) {
                         UserVocabularyProgress p = due.get(0);
                         Vocabulary v = p.getVocabulary();
-                        return map(p, v);
+                        return present(session, map(p, v));
                 }
 
                 // 2. NEW CARDS
@@ -110,7 +131,7 @@ public class StudySessionServiceImpl implements StudySessionService {
                 if (!news.isEmpty()) {
                         Vocabulary v = news.get(0);
 
-                        return StudyCardResponse.builder()
+                        return present(session, StudyCardResponse.builder()
                                         .progressId(null)
                                         .vocabularyId(v.getId())
                                         .word(v.getWord())
@@ -118,7 +139,7 @@ public class StudySessionServiceImpl implements StudySessionService {
                                         .example(v.getExample())
                                         .difficulty(v.getDifficulty())
                                         .partOfSpeech(v.getPartOfSpeech())
-                                        .build();
+                                        .build());
                 }
 
                 // Finish the session only after the learner has met every
@@ -131,7 +152,7 @@ public class StudySessionServiceImpl implements StudySessionService {
                         UserVocabularyProgress progress = progressRepository
                                         .findByUserIdAndVocabularyId(userId, v.getId())
                                         .orElse(null);
-                        return progress == null ? mapNewCard(v) : map(progress, v);
+                        return present(session, progress == null ? mapNewCard(v) : map(progress, v));
                 }
 
                 throw new NoMoreCardsException("No more cards in this session");
@@ -196,6 +217,8 @@ public class StudySessionServiceImpl implements StudySessionService {
                 if (firstReviewOfCardInSession) {
                         session.setUniqueCards(session.getUniqueCards() + 1);
                 }
+                session.setCurrentVocabularyId(null);
+                session.setLastActiveAt(LocalDateTime.now());
                 sessionRepository.save(session);
 
                 session.getUser().setLastStudyAt(LocalDateTime.now());
@@ -242,6 +265,8 @@ public class StudySessionServiceImpl implements StudySessionService {
                 }
 
                 session.setFinishedAt(LocalDateTime.now());
+                session.setCurrentVocabularyId(null);
+                session.setLastActiveAt(LocalDateTime.now());
 
                 missionService.trackSessionCompleted(session.getUser().getId());
                 CompanionEventRequest companionEvent = new CompanionEventRequest();
@@ -287,6 +312,36 @@ public class StudySessionServiceImpl implements StudySessionService {
 
         @Override
         @Transactional
+        public StudyAnalyticsResponse getAnalytics(int days) {
+                int range = Math.max(7, Math.min(30, days));
+                User user = currentUserService.getCurrentUser();
+                LocalDate today = LocalDate.now();
+                LocalDateTime from = today.minusDays(range - 1L).atStartOfDay();
+                List<StudyReview> reviews = reviewRepository.findOwnedReviewsBetween(user.getId(), from, today.plusDays(1).atStartOfDay());
+                Map<LocalDate, List<StudyReview>> byDay = new java.util.HashMap<>();
+                for (StudyReview review : reviews) byDay.computeIfAbsent(review.getReviewedAt().toLocalDate(), key -> new ArrayList<>()).add(review);
+                List<StudyAnalyticsResponse.DailyAccuracy> accuracy = new ArrayList<>();
+                for (int offset = range - 1; offset >= 0; offset--) {
+                        LocalDate date = today.minusDays(offset);
+                        List<StudyReview> day = byDay.getOrDefault(date, List.of());
+                        long correct = day.stream().filter(r -> r.getRating() != com.vocabpet.backend.entity.enums.Rating.AGAIN).count();
+                        accuracy.add(StudyAnalyticsResponse.DailyAccuracy.builder().date(date).reviewed(day.size()).correct(correct).build());
+                }
+                List<StudyAnalyticsResponse.DeckAccuracy> decks = reviewRepository.findTopicPerformanceByUserId(user.getId()).stream()
+                        .map(row -> StudyAnalyticsResponse.DeckAccuracy.builder().deckId(((Number) row[0]).longValue()).deckName((String) row[1])
+                                .correct(((Number) row[2]).longValue()).reviewed(((Number) row[3]).longValue()).build()).toList();
+                long weekMinutes = sessionRepository.findByUserId(user.getId()).stream()
+                        .filter(s -> s.getFinishedAt() != null && !s.getFinishedAt().isBefore(today.minusDays(6).atStartOfDay()))
+                        .mapToLong(s -> s.getDurationSeconds() / 60).sum();
+                return StudyAnalyticsResponse.builder()
+                        .learningWords(progressRepository.countByUserIdAndRepetitionsBetween(user.getId(), 1, 3))
+                        .learnedWords(progressRepository.countOwnedByUserId(user.getId()))
+                        .masteredWords(progressRepository.countByUserIdAndRepetitionsGreaterThanEqual(user.getId(), 4))
+                        .weekMinutes(weekMinutes).accuracy(accuracy).decks(decks).activeDays(new ArrayList<>(byDay.keySet())).build();
+        }
+
+        @Override
+        @Transactional
         public StudyPlanResponse getTodayPlan() {
                 User user = currentUserService.getCurrentUser();
                 LocalDateTime now = LocalDateTime.now();
@@ -310,7 +365,7 @@ public class StudySessionServiceImpl implements StudySessionService {
                                 .estimatedMinutes(estimateMinutes(due.size()))
                                 .reviewsToday(reviewRepository.countByUserIdAndReviewedAtBetween(user.getId(), start,
                                                 start.plusDays(1)))
-                                .dailyGoal(10)
+                                .dailyGoal(user.getDailyGoal())
                                 .streak(user.getStreak())
                                 .suggestedDeckId(suggested == null ? null : suggested.getVocabulary().getDeck().getId())
                                 .suggestedDeckName(suggested == null ? null : suggested.getVocabulary().getDeck().getName())
@@ -321,6 +376,33 @@ public class StudySessionServiceImpl implements StudySessionService {
                                                 .deckName(progress.getVocabulary().getDeck().getName())
                                                 .dueAt(progress.getNextReviewTime()).build()).toList())
                                 .build();
+        }
+
+        @Override
+        @Transactional
+        public java.util.Optional<ActiveStudySessionResponse> getActiveSession() {
+                Long userId = currentUserService.getCurrentUser().getId();
+                return sessionRepository.findFirstByUserIdAndFinishedAtIsNullOrderByLastActiveAtDesc(userId)
+                                .map(session -> {
+                                        List<StudyReview> reviews = reviewRepository.findBySessionId(session.getId());
+                                        long correct = reviews.stream()
+                                                        .filter(review -> review.getRating() != com.vocabpet.backend.entity.enums.Rating.AGAIN)
+                                                        .count();
+                                        Vocabulary current = session.getCurrentVocabularyId() == null ? null
+                                                        : vocabularyRepository.findById(session.getCurrentVocabularyId()).orElse(null);
+                                        return ActiveStudySessionResponse.builder()
+                                                        .sessionId(session.getId())
+                                                        .deckId(session.getDeck().getId())
+                                                        .deckName(session.getDeck().getName())
+                                                        .startedAt(session.getStartedAt())
+                                                        .lastActiveAt(session.getLastActiveAt())
+                                                        .currentVocabularyId(session.getCurrentVocabularyId())
+                                                        .currentWord(current == null ? null : current.getWord())
+                                                        .reviewed(session.getTotalReviews())
+                                                        .uniqueCards(session.getUniqueCards())
+                                                        .correct((int) correct)
+                                                        .build();
+                                });
         }
 
         private String reasonCode(UserVocabularyProgress progress, LocalDateTime now) {
@@ -368,6 +450,13 @@ public class StudySessionServiceImpl implements StudySessionService {
                                 .difficulty(v.getDifficulty())
                                 .partOfSpeech(v.getPartOfSpeech())
                                 .build();
+        }
+
+        private StudyCardResponse present(StudySession session, StudyCardResponse card) {
+                session.setCurrentVocabularyId(card.getVocabularyId());
+                session.setLastActiveAt(LocalDateTime.now());
+                sessionRepository.save(session);
+                return card;
         }
 
         private StudyCardResponse mapNewCard(Vocabulary v) {

@@ -12,4 +12,12 @@ public class OnboardingRequest {
     private String petName;
 
     private PetSpecies petSpecies;
+
+    private String displayName;
+
+    private Integer dailyGoal;
+
+    private String studyLevel;
+
+    private String studyGoal;
 }

@@ -27,6 +27,12 @@ public class DeckMapper {
 
     public DeckResponse toResponse(Deck deck) {
 
+        return toResponse(deck, 0, 0);
+
+    }
+
+    public DeckResponse toResponse(Deck deck, long studiedCount, long masteredCount) {
+
         return DeckResponse.builder()
 
                 .id(deck.getId())
@@ -48,6 +54,10 @@ public class DeckMapper {
                                 : deck.getVocabularies().size()
 
                 )
+
+                .studiedCount(studiedCount)
+
+                .masteredCount(masteredCount)
 
                 .build();
 

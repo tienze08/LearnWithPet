@@ -218,6 +218,7 @@ export function ReaderPage() {
   const [generating, setGenerating] = useState(false);
   const [aiStatus, setAiStatus] = useState("Ready to help you discover useful words.");
   const [suggestions, setSuggestions] = useState<VocabularySuggestion[]>([]);
+  const [hasAskedSuggestions, setHasAskedSuggestions] = useState(false);
   const [suggesting, setSuggesting] = useState(false);
   const [preview, setPreview] = useState<GeneratedCard[] | null>(null);
   const [savedThisSession, setSavedThisSession] = useState<string[]>([]);
@@ -274,10 +275,9 @@ export function ReaderPage() {
     const learned = new Set(learnedPdfWords);
     return [...pdfWordFrequencies.keys()].filter((word) => !learned.has(word) && !basketWords.has(word));
   }, [pdfWordFrequencies, learnedPdfWords, basketWords]);
-  const visibleSuggestions = useMemo(() => suggestions.filter((suggestion) => {
-    const word = suggestion.word.toLowerCase();
-    return !basketWords.has(word) && !learnedPdfWords.includes(word);
-  }), [suggestions, basketWords, learnedPdfWords]);
+  // Keep every AI suggestion visible. Hiding already-learned or basket words
+  // made Burumaru announce useful picks while the section looked empty.
+  const visibleSuggestions = suggestions;
 
   const selected = basket.filter((b) => b.checked);
 
@@ -496,6 +496,7 @@ export function ReaderPage() {
   async function askForSuggestions() {
     if (!doc.text.trim()) return;
     setSuggesting(true);
+    setHasAskedSuggestions(true);
     setAiStatus("I’m reading this passage to find useful words for you…");
     try {
       const result = await suggestReaderVocabularyApi({
@@ -772,27 +773,38 @@ export function ReaderPage() {
               Paste some text above to start reading.
             </p>
           )}
-          {visibleSuggestions.length > 0 && (
+          {hasAskedSuggestions && (
             <section className="mt-6 rounded-2xl border-2 border-primary/30 bg-primary/5 p-4">
               <div className="flex items-center gap-2">
                 <span className="text-lg">🐾</span>
-                <p className="font-extrabold">Burumaru’s vocabulary picks</p>
+                <p className="font-extrabold">Burumaru’s useful vocabulary picks</p>
+                <span className="ml-auto text-xs font-bold text-muted-foreground">{visibleSuggestions.length} found</span>
               </div>
-              <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                {visibleSuggestions.map((suggestion) => (
+              {visibleSuggestions.length === 0 ? (
+                <p className="mt-3 text-sm text-muted-foreground">No new useful words this time. Try a longer passage or another document.</p>
+              ) : (
+                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                  {visibleSuggestions.map((suggestion) => {
+                    const normalized = suggestion.word.toLowerCase();
+                    const inBasket = basketWords.has(normalized);
+                    const learned = learnedPdfWords.includes(normalized);
+                    return (
                   <button
                     key={suggestion.word}
-                    onClick={() => addSuggestion(suggestion)}
+                    onClick={() => !inBasket && addSuggestion(suggestion)}
+                    disabled={inBasket}
                     className="rounded-xl border border-border bg-card p-3 text-left hover:border-primary transition-colors"
                   >
-                    <span className="font-extrabold text-primary">{suggestion.word}</span>
+                    <div className="flex items-center gap-2"><span className="font-extrabold text-primary">{suggestion.word}</span>{inBasket ? <span className="text-[10px] font-bold text-amber-600">In basket</span> : learned ? <span className="text-[10px] font-bold text-info">Already learned</span> : <span className="text-[10px] font-bold text-success">Add to basket</span>}</div>
                     <p className="mt-1 text-xs text-muted-foreground">{suggestion.reason}</p>
                     <p className="mt-1 text-[11px] italic text-muted-foreground line-clamp-2">
                       “{suggestion.contextSentence}”
                     </p>
                   </button>
-                ))}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
             </section>
           )}
         </article>
