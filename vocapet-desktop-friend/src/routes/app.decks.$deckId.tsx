@@ -1,7 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Brain, Layers, ListChecks, Sparkles, Type } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 
@@ -35,6 +34,7 @@ import {
 } from "@/hooks/queries/bookmark.queries";
 import SrsFlashCard from "@/components/deck/SrsFlashCard";
 import { useGame } from "@/lib/store";
+import { speakPet } from "@/hooks/stores/petSpeech";
 
 export const Route = createFileRoute("/app/decks/$deckId")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -137,7 +137,7 @@ export default function DeckDetail() {
               },
             });
 
-            toast.success("Deck updated");
+            speakPet("Your deck is updated!", 1, 3);
           }}
         />
 
@@ -146,11 +146,11 @@ export default function DeckDetail() {
           onConfirm={() => {
             deleteDeck.mutate(deck.id, {
               onSuccess: () => {
-                toast.success("Deck deleted");
+                speakPet("That deck has been removed.", 1, 3);
                 navigate({ to: "/app/decks" });
               },
               onError: (err) => {
-                toast.error("Delete failed");
+                speakPet("I couldn't remove that deck. Please try again.", 2, 4);
               },
             });
 

@@ -161,11 +161,11 @@ function PetsPage() {
               </div>
 
               <div className="mt-4">
-                <div className="flex items-center justify-between text-xs font-bold">
-                  <span className={unlocked ? "text-primary" : "text-muted-foreground"}>
+                <div className="flex items-start justify-between gap-3 text-xs font-bold">
+                  <span className={`min-w-0 leading-snug ${unlocked ? "text-primary" : "text-muted-foreground"}`}>
                     {u.requirement}
                   </span>
-                  <span className="text-muted-foreground">
+                  <span className="shrink-0 text-muted-foreground">
                     {progress}/{u.goal}
                   </span>
                 </div>
@@ -180,7 +180,7 @@ function PetsPage() {
               <div className="mt-4">
                 {unlocked ? (
                   <Button
-                    className="w-full"
+                    className="h-auto min-h-10 w-full whitespace-normal px-3 py-2 text-center leading-snug"
                     variant={active ? "secondary" : "default"}
                     onClick={() => selectPetMutation.mutate(u.id, {
                       onSuccess: () => setState((s) => ({ ...s, petVariant: u.id })),
@@ -191,7 +191,7 @@ function PetsPage() {
                   </Button>
                 ) : (
                   <Button
-                    className="w-full"
+                    className="h-auto min-h-11 w-full whitespace-normal px-3 py-2.5 text-center leading-snug"
                     variant="outline"
                     onClick={() => unlockMutation.mutate(u.id)}
                     disabled={unlockMutation.isPending || !canUnlock}
@@ -199,7 +199,12 @@ function PetsPage() {
                     {unlockMutation.isPending
                       ? "Unlocking..."
                       : !canUnlock
-                        ? `${u.requirement} + 50 coins required`
+                        ? (
+                          <span className="block whitespace-normal">
+                            <span className="block">{u.requirement}</span>
+                            <span className="block text-xs font-medium opacity-75">+ 50 coins required</span>
+                          </span>
+                        )
                         : "Unlock with 50 coins"}
                   </Button>
                 )}

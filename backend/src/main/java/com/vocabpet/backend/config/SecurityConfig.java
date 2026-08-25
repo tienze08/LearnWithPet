@@ -31,6 +31,9 @@ public class SecurityConfig {
     @Value("${app.cors.allowed-origins}")
     private String allowedOrigins;
 
+    @Value("${app.cors.allowed-extension-origins:}")
+    private String allowedExtensionOrigins;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
@@ -67,7 +70,10 @@ public class SecurityConfig {
 
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOriginPatterns(Arrays.stream(allowedOrigins.split(","))
+        configuration.setAllowedOriginPatterns(
+                java.util.stream.Stream.concat(
+                        Arrays.stream(allowedOrigins.split(",")),
+                        Arrays.stream(allowedExtensionOrigins.split(",")))
                 .map(String::trim)
                 .filter(origin -> !origin.isBlank())
                 .toList());

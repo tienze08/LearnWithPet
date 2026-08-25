@@ -10,9 +10,8 @@ import {
   Brain,
   GraduationCap,
 } from "lucide-react";
-import { toast } from "sonner";
-
 import { useClaimMissionMutation, useDailyMissionsQuery } from "@/hooks/queries/mission.query";
+import { petEvents } from "@/lib/pet/events";
 
 export const Route = createFileRoute("/app/tasks")({
   component: TasksPage,
@@ -139,8 +138,13 @@ function TasksPage() {
                         onSuccess: async () => {
                           await refetch();
 
-                          toast.success(`+${t.rewardXp} XP claimed!`, {
-                            description: `${t.title} complete 🎉`,
+                          petEvents.emit({
+                            type: "MISSION_CLAIMED",
+                            detail: {
+                              missionTitle: t.title,
+                              rewardXp: t.rewardXp,
+                              rewardCoin: t.rewardCoin,
+                            },
                           });
                         },
                       })

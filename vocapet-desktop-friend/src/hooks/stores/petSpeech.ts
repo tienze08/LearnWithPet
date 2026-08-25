@@ -60,3 +60,8 @@ export function speakPet(
         duration,
     });
 }
+
+/** Clear a previous ambient line before opening a dedicated pet panel. */
+export function clearPetSpeech() {
+  usePetSpeech.getState().clearSpeech();
+}

@@ -20,12 +20,25 @@ const reactions: Record<PetEvent["type"], PetReaction> = {
   LEVEL_UP: { action: "CELEBRATE", emotion: "excited", message: "You leveled up!", priority: 3 },
   STREAK_UPDATED: { action: "CELEBRATE", emotion: "excited", message: "Your streak is growing!", priority: 2 },
   REMINDER_TRIGGERED: { action: "IDLE", emotion: "waiting", message: "Ready for today's review?", priority: 1 },
+  MISSION_CLAIMED: { action: "JUMP", emotion: "excited", priority: 3 },
 };
 
 export function reactionFor(event: PetEvent): PetReaction {
   const reaction = reactions[event.type];
   if (event.detail?.dailyGoalComplete) {
     return { action: "CELEBRATE", emotion: "excited", message: "You completed today's goal!", priority: 3 };
+  }
+  if (event.type === "MISSION_CLAIMED") {
+    const { missionTitle = "mission", rewardXp = 0, rewardCoin = 0 } = event.detail ?? {};
+    const rewards = [`+${rewardXp} XP`, rewardCoin > 0 ? `+${rewardCoin} coins` : null]
+      .filter(Boolean)
+      .join(" · ");
+    return {
+      action: "JUMP",
+      emotion: "excited",
+      message: `${missionTitle} complete! ${rewards}`,
+      priority: 3,
+    };
   }
   return reaction;
 }

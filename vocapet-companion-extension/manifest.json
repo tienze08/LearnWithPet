@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "VocaPet Companion",
+  "description": "A gentle vocabulary companion that brings your next review back to you.",
+  "version": "0.1.0",
+  "action": {
+    "default_title": "VocaPet Companion",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "permissions": ["alarms", "notifications", "storage", "tabs"],
+  "host_permissions": [
+    "http://localhost:8080/*",
+    "https://learnwithpet.onrender.com/*",
+    "https://learn-with-pet.vercel.app/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "exclude_matches": ["https://learn-with-pet.vercel.app/*"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["assets/burumaru-9x8.webp"],
+      "matches": ["http://*/*", "https://*/*"]
+    }
+  ]
+}

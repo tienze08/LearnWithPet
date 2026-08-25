@@ -1,9 +1,8 @@
-import { toast } from "sonner";
-
 import VocabularyCard from "./VocabularyCard";
 import Empty from "./EmptyState";
 
 import type { Vocabulary } from "@/types/vocabulary";
+import { speakPet } from "@/hooks/stores/petSpeech";
 
 interface BrowseModeProps {
   words: Vocabulary[];
@@ -49,12 +48,12 @@ export default function BrowseMode({
           updateWord={(id, patch) => {
             updateWord(id, patch);
 
-            toast.success("Word updated");
+            speakPet("Word updated — nice and tidy!", 1, 3);
           }}
           deleteWord={(id) => {
             deleteWord(id);
 
-            toast.success("Word deleted");
+            speakPet("That word has been removed.", 1, 3);
           }}
         />
       ))}

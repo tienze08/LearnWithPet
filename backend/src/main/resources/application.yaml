@@ -32,6 +32,10 @@ app:
             bucket: ${SUPABASE_STORAGE_BUCKET:vocapet-pdfs}
     cors:
         allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:*,http://127.0.0.1:*}
+        # The extension still authenticates every request with its own JWT.
+        # Set a single chrome-extension://<extension-id> value in production
+        # once the Chrome Web Store ID is known.
+        allowed-extension-origins: ${APP_CORS_ALLOWED_EXTENSION_ORIGINS:chrome-extension://*}
 
 server:
     port: ${PORT:8080}

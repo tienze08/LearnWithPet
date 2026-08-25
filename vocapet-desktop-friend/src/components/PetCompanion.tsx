@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useGame, stageForLevel, computePetMood, type PetMood } from "@/lib/store";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,8 @@ import { QuizAnswerResponse, QuizQuestionResponse } from "@/types/quiz";
 import Pet, { PetHandle } from "./PixiPet/Pet";
 import { PetAction } from "./PixiPet/AnimationController";
 import { PetSpeechBubble } from "./PetSpeech";
-import { speakPet } from "@/hooks/stores/petSpeech";
+import { clearPetSpeech, speakPet, usePetSpeech } from "@/hooks/stores/petSpeech";
+import { useCompanionActivity } from "@/hooks/stores/companionActivity";
 import { reactionFor } from "@/lib/pet/behavior";
 import { petEvents } from "@/lib/pet/events";
 import type { UserResponse } from "@/types/user";
@@ -68,6 +69,9 @@ export function PetCompanion() {
   const { data: me } = useMeQuery();
   const { data: companionState, refetch: refreshCompanionState } = useCompanionStateQuery(Boolean(me?.pet));
   const { data: activeStudySession } = useActiveStudySessionQuery();
+  const pathname = useRouterState({ select: (router) => router.location.pathname });
+  const companionActivity = useCompanionActivity((store) => store.activity);
+  const petIsSpeaking = usePetSpeech((store) => store.speech !== null);
   const [reminder, setReminder] = useState(false);
   const [open, setOpen] = useState(false);
   const [timeLeft, setTimeLeft] = useState(15);
@@ -79,7 +83,11 @@ export function PetCompanion() {
   const [petX, setPetX] = useState(24);
   const [viewportWidth, setViewportWidth] = useState(0);
   const [walkCycle, setWalkCycle] = useState(0);
+  const [invitationMessage, setInvitationMessage] = useState<string | null>(null);
+  const [motionClock, setMotionClock] = useState(() => Date.now());
   const lastActivityAt = useRef(Date.now());
+  const lastIdleInvitationAt = useRef(0);
+  const hoverTimer = useRef<number | null>(null);
   const interruptionInProgress = useRef(false);
   const quizArrivalInProgress = useRef(false);
   const walkInProgress = useRef(false);
@@ -89,6 +97,22 @@ export function PetCompanion() {
   const { mutateAsync: getQuiz } = useRandomQuizMutation();
   const { mutate: recordCompanionEvent } = useCompanionEventMutation();
   const { mutate: updateCompanionPreferences } = useCompanionPreferencesMutation();
+
+  // An unfinished session can be resumed later, but it should not freeze the
+  // companion forever. For the first five minutes after a real study action
+  // Burumaru stays in the study state; after that it returns to its ambient
+  // idle/walk loop while the session remains available from Resume.
+  const focusedStudySession = Boolean(
+    activeStudySession &&
+    pathname.startsWith("/app/decks/") &&
+    new Date(activeStudySession.lastActiveAt ?? activeStudySession.startedAt).getTime() > motionClock - 5 * 60 * 1000,
+  );
+  const readingInProgress = companionActivity === "READING";
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setMotionClock(Date.now()), 30_000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   const setQuizAnimationPhase = (phase: QuizAnimationPhase) => {
     quizPhaseRef.current = phase;
@@ -100,7 +124,7 @@ export function PetCompanion() {
     const phase = quizPhaseRef.current;
     if (phase === "approaching" && action !== "WALK" && action !== "THINK") return;
     if (phase === "question" && action !== "STUDY") return;
-    if (phase === "result" && action !== "CELEBRATE" && action !== "SAD") return;
+    if (phase === "result" && action !== "CELEBRATE" && action !== "JUMP" && action !== "SAD") return;
     window.requestAnimationFrame(() => {
       petRef.current?.play(action);
     });
@@ -146,7 +170,7 @@ export function PetCompanion() {
   };
 
   const openPetQuiz = async () => {
-    if (activeStudySession || open || reminder || interrupting || quizArrivalInProgress.current) return;
+    if (focusedStudySession || readingInProgress || open || reminder || interrupting || quizArrivalInProgress.current) return;
     try {
       const nextQuiz = await getQuiz(undefined);
       showQuizAtRight(nextQuiz);
@@ -187,6 +211,7 @@ export function PetCompanion() {
   }, []);
 
   useEffect(() => {
+    const timers = new Set<number>();
     const unsubscribe = petEvents.subscribe((event) => {
       const reaction = reactionFor(event);
       setEventMood(reaction.emotion);
@@ -198,12 +223,26 @@ export function PetCompanion() {
       ) {
         speakPet(`${state.petName}: ${reaction.message}`, reaction.priority, 3);
       }
-      window.setTimeout(() => setEventMood(null), 1800);
+      const moodTimer = window.setTimeout(() => {
+        timers.delete(moodTimer);
+        setEventMood(null);
+      }, 1800);
+      timers.add(moodTimer);
+      // Jumps and celebration rows are expressive one-shot reactions. They
+      // must always hand control back to the normal state machine, otherwise
+      // Pixi loops the final reward animation forever.
+      const recoverTimer = ["JUMP", "CELEBRATE", "HAPPY", "SAD"].includes(reaction.action)
+        ? window.setTimeout(() => {
+          triggerPetAnimation(focusedStudySession ? "STUDY" : "IDLE");
+        }, 1150)
+        : undefined;
+      if (recoverTimer) timers.add(recoverTimer);
     });
     return () => {
       unsubscribe();
+      timers.forEach((timer) => window.clearTimeout(timer));
     };
-  }, [state.petName]);
+  }, [state.petName, focusedStudySession]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -219,7 +258,7 @@ export function PetCompanion() {
   }, []);
 
   useEffect(() => {
-    if (activeStudySession || open || reminder || showSettings || interrupting || typeof window === "undefined") return;
+    if (focusedStudySession || readingInProgress || petIsSpeaking || open || reminder || showSettings || interrupting || typeof window === "undefined") return;
 
     let finishWalkTimer: number | undefined;
     // After reaching an edge, only pause long enough for the turn to read.
@@ -246,15 +285,17 @@ export function PetCompanion() {
         petRef.current?.setFacing(nextDirection);
         walkInProgress.current = false;
         setWalkCycle((cycle) => cycle + 1);
-      }, 6200);
-    }, walkCycle === 0 ? 6000 : 700);
+      }, 4700);
+    // A short idle pause at each edge keeps the companion from feeling like a
+    // screensaver that immediately reverses direction.
+    }, walkCycle === 0 ? 2200 : 1200);
 
     return () => {
       window.clearTimeout(walkTimer);
       if (finishWalkTimer) window.clearTimeout(finishWalkTimer);
       walkInProgress.current = false;
     };
-  }, [activeStudySession, open, reminder, showSettings, interrupting, walkCycle]);
+  }, [focusedStudySession, readingInProgress, petIsSpeaking, open, reminder, showSettings, interrupting, walkCycle]);
 
   useEffect(() => {
     const markActivity = () => {
@@ -266,10 +307,30 @@ export function PetCompanion() {
   }, []);
 
   useEffect(() => {
+    if (focusedStudySession || readingInProgress || petIsSpeaking || open || reminder || showSettings || interrupting) return;
+
+    const interval = window.setInterval(() => {
+      const inactiveFor = Date.now() - lastActivityAt.current;
+      const onCooldown = Date.now() - lastIdleInvitationAt.current < 25 * 60 * 1000;
+      if (inactiveFor < 4 * 60 * 1000 || onCooldown) return;
+
+      lastIdleInvitationAt.current = Date.now();
+      setEventMood("waiting");
+      triggerPetAnimation("THINK");
+      setInvitationMessage("You've been focused for a while. Want one gentle question before you continue?");
+      clearPetSpeech();
+      setReminder(true);
+      window.setTimeout(() => setEventMood(null), 1800);
+    }, 30_000);
+
+    return () => window.clearInterval(interval);
+  }, [focusedStudySession, readingInProgress, petIsSpeaking, open, reminder, showSettings, interrupting, state.petName]);
+
+  useEffect(() => {
     // A focused FSRS session takes priority over ambient companion quizzes.
     // Pip stays in the authored STUDY state and only returns to reminders
     // after the session is finished or paused.
-    if (activeStudySession || reminder || open || typeof window === "undefined") return;
+    if (focusedStudySession || readingInProgress || petIsSpeaking || reminder || open || typeof window === "undefined") return;
 
     let approachTimer: number | undefined;
     let invitationTimer: number | undefined;
@@ -289,52 +350,27 @@ export function PetCompanion() {
         speakPet(`${state.petName}: Hmm...`, 1, 2);
 
         approachTimer = window.setTimeout(() => {
-          triggerPetAnimation("THINK");
+          // Make the reminder feel authored: Burumaru walks to the safe quiz
+          // side first, then asks. It prevents the invitation from popping up
+          // on top of a pet that is mid-route on the opposite edge.
+          setIsApproachingQuiz(true);
+          movePetTo(maxPetX(), "right");
+          triggerPetAnimation("WALK");
           speakPet(`${state.petName}: Hey! Quick question?`, 2, 3);
         }, 850);
 
-        invitationTimer = window.setTimeout(async () => {
-          try {
-            const nextQuiz = await getQuiz(undefined);
-            showQuizAtRight(nextQuiz);
-          } catch (error) {
-            console.error("Pet reminder quiz failed", error);
-            speakPet(`${state.petName}: Let's review a word when you're ready.`, 1, 4);
-          } finally {
-            setInterrupting(false);
-            interruptionInProgress.current = false;
-          }
-        }, 2100);
-        return;
-
-        const remindersEnabled = companionState?.remindersEnabled ?? true;
-        if (!remindersEnabled || interruptionInProgress.current) return;
-
-        interruptionInProgress.current = true;
-        setInterrupting(true);
-        setEventMood("waiting");
-        triggerPetAnimation("THINK");
-        speakPet(`${state.petName}: Hmm…`, 1, 2);
-
-        approachTimer = window.setTimeout(() => {
-          triggerPetAnimation("WALK");
-          speakPet(`${state.petName}: I have a quick question for you.`, 1, 3);
-        }, 900);
-
         invitationTimer = window.setTimeout(() => {
-          triggerPetAnimation("IDLE");
+          // The quiz invitation is the result of the approach. The learner
+          // explicitly chooses Quiz me or Review; no card appears abruptly.
+          setInvitationMessage("I kept a quick question ready. Would you like to try it?");
+          clearPetSpeech();
           setReminder(true);
           setInterrupting(false);
+          setIsApproachingQuiz(false);
           interruptionInProgress.current = false;
-          speakPet(`${state.petName}: Hey! Quick question?`, 2, 5);
-        }, 2300);
-        return;
-        try {
-          petEvents.emit({ type: "REMINDER_TRIGGERED" });
-          setReminder(true);
-        } catch (e) {
-          // Không có quiz hoặc lỗi
-        }
+          triggerPetAnimation("THINK");
+          speakPet(`${state.petName}: Hey! Quick question?`, 2, 6);
+        }, 2100);
       },
       state.popupIntervalMin * 60 * 1000,
     );
@@ -344,7 +380,7 @@ export function PetCompanion() {
       if (approachTimer) window.clearTimeout(approachTimer);
       if (invitationTimer) window.clearTimeout(invitationTimer);
     };
-  }, [activeStudySession, open, reminder, state.popupIntervalMin, companionState?.remindersEnabled, state.petName]);
+  }, [focusedStudySession, readingInProgress, petIsSpeaking, open, reminder, state.popupIntervalMin, companionState?.remindersEnabled, state.petName]);
 
   const [quiz, setQuiz] = useState<QuizQuestionResponse | null>(null);
   const studiedToday = state.lastStudyDate === todayISO();
@@ -357,16 +393,21 @@ export function PetCompanion() {
   const moodMeta = MOOD_META[state.petMood] ?? MOOD_META.waiting;
 
   useEffect(() => {
-    if (activeStudySession) {
+    if (focusedStudySession || readingInProgress) {
       setReminder(false);
+      setInvitationMessage(null);
       setInterrupting(false);
       triggerPetAnimation("STUDY");
+      return;
+    }
+    if (petIsSpeaking) {
+      triggerPetAnimation("THINK");
       return;
     }
     if (!open && !reminder && !showSettings && !interrupting) {
       triggerPetAnimation("IDLE");
     }
-  }, [activeStudySession, open, reminder, showSettings, interrupting]);
+  }, [focusedStudySession, readingInProgress, petIsSpeaking, open, reminder, showSettings, interrupting]);
 
   useEffect(() => {
     const notes = [
@@ -465,7 +506,9 @@ export function PetCompanion() {
     // Do not send a second generic ANSWER_* event: it used to overwrite a
     // useful line such as “abandon is tricky” with a random fallback.
     applyServerReaction(result.petBehavior);
-    triggerPetAnimation(result.correct ? "CELEBRATE" : "SAD");
+    // A correct answer gets a readable hop; a wrong answer remains a calm
+    // supportive reaction instead of an unrelated random animation.
+    triggerPetAnimation(result.correct ? "JUMP" : "SAD");
 
     // Đợi người dùng xem kết quả
     setTimeout(() => {
@@ -500,7 +543,7 @@ export function PetCompanion() {
     <motion.div
       className="fixed bottom-6 left-0 z-40 flex flex-col items-end gap-2 pointer-events-none"
       animate={{ x: overlayX }}
-      transition={{ type: "tween", ease: "easeInOut", duration: isApproachingQuiz ? 0.8 : isOverlayOpen ? 0.25 : 6 }}
+        transition={{ type: "tween", ease: "easeInOut", duration: isApproachingQuiz ? 0.8 : isOverlayOpen ? 0.25 : 4.5 }}
     >
       {/* Reminder speech bubble */}
       <AnimatePresence>
@@ -509,17 +552,21 @@ export function PetCompanion() {
             initial={{ opacity: 0, y: 10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            className="pointer-events-auto bg-card border-2 border-border rounded-2xl rounded-br-sm p-3 card-pop relative"
+            className="pointer-events-auto w-72 max-w-[calc(100vw-2rem)] bg-card border-2 border-border rounded-2xl rounded-br-sm p-3 card-pop relative"
           >
             <button
-              onClick={() => setReminder(false)}
+              onClick={() => {
+                setReminder(false);
+                setInvitationMessage(null);
+                clearPetSpeech();
+              }}
               className="absolute -top-1 -right-1 bg-card border-2 border-border rounded-full p-0.5 text-muted-foreground"
               aria-label="Dismiss"
             >
               <X className="w-3 h-3" />
             </button>
             <p className="text-sm font-semibold leading-snug">
-              {reminderFor(liveMood, state.petName, state.dailyGoal, state.dailyProgress)}
+              {invitationMessage ?? reminderFor(liveMood, state.petName, state.dailyGoal, state.dailyProgress)}
             </p>
             <div className="mt-2 flex gap-1.5">
               <Button
@@ -528,6 +575,7 @@ export function PetCompanion() {
                 onClick={async () => {
                   try {
                     const quiz = await getQuiz(undefined);
+                    setInvitationMessage(null);
                     showQuizAtRight(quiz);
                   } catch (error) {
                     console.error("Reminder quiz failed", error);
@@ -537,7 +585,10 @@ export function PetCompanion() {
                 <Sparkles className="w-3 h-3 mr-1" /> Quiz me
               </Button>
               <Button size="sm" variant="outline" className="h-7 text-xs border-2" asChild>
-                <Link to="/app/decks" onClick={() => setReminder(false)}>
+                <Link to="/app/decks" onClick={() => {
+                  setReminder(false);
+                  setInvitationMessage(null);
+                }}>
                   Review
                 </Link>
               </Button>
@@ -760,13 +811,35 @@ export function PetCompanion() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.2 }}
       >
-        <PetSpeechBubble align={speechAlign} />
+        {!isOverlayOpen && <PetSpeechBubble align={speechAlign} />}
 
         <div
           role="button"
           tabIndex={0}
           aria-label="Open companion overview"
           onClick={openCompanionOverview}
+          onPointerEnter={() => {
+            if (open || reminder || showSettings || interrupting || quizArrivalInProgress.current) return;
+            if (hoverTimer.current) window.clearTimeout(hoverTimer.current);
+            hoverTimer.current = window.setTimeout(() => {
+              const dueWords = companionState?.dueReviews ?? 0;
+              triggerPetAnimation("HAPPY");
+              speakPet(
+                dueWords > 0
+                  ? `${state.petName}: Hi! I'm keeping ${dueWords} review${dueWords === 1 ? "" : "s"} ready for us.`
+                  : `${state.petName}: Hi! I'm here whenever you want a small study moment.`,
+                1,
+                5,
+              );
+              window.setTimeout(() => triggerPetAnimation("IDLE"), 1200);
+            }, 450);
+          }}
+          onPointerLeave={() => {
+            if (hoverTimer.current) {
+              window.clearTimeout(hoverTimer.current);
+              hoverTimer.current = null;
+            }
+          }}
           onKeyDown={(event) => {
             if (event.key === "Enter" || event.key === " ") {
               event.preventDefault();

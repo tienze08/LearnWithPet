@@ -1,0 +1,22 @@
+:root { color: #24352c; background: #faf9f4; font: 14px/1.45 Inter, ui-sans-serif, system-ui, sans-serif; }
+* { box-sizing: border-box; }
+body { width: 340px; margin: 0; }
+.shell { padding: 20px; }
+header { display: flex; align-items: center; gap: 12px; }
+.pet { display: grid; width: 46px; height: 46px; place-items: center; border-radius: 16px; background: #e4f5e8; font-size: 27px; }
+h1, h2, p { margin: 0; } h1 { font-size: 22px; } h2 { margin-top: 5px; font-size: 18px; }
+.eyebrow { color: #278f55; font-size: 10px; font-weight: 800; letter-spacing: .13em; }
+.status { min-height: 20px; margin: 16px 0; color: #637168; font-size: 12px; }
+.status.error { color: #b33c3c; }
+.copy { color: #637168; font-size: 13px; }
+form, #companion-view { display: grid; gap: 11px; }
+label { display: grid; gap: 5px; color: #425147; font-size: 12px; font-weight: 700; }
+input, select { width: 100%; border: 1px solid #d6ddd4; border-radius: 10px; background: #fff; padding: 9px 10px; color: #24352c; }
+button { cursor: pointer; border: 0; border-radius: 12px; background: #289859; color: #fff; padding: 10px 12px; font-weight: 800; }
+button:hover { background: #207b49; }
+.plan-card { border: 1px solid #dce8df; border-radius: 16px; background: #fff; padding: 14px; }
+.toggle { display: flex; grid-template-columns: auto 1fr; align-items: center; gap: 8px; padding-top: 2px; }
+.toggle input { width: auto; }
+.footer { display: flex; justify-content: space-between; align-items: center; padding-top: 4px; color: #637168; font-size: 12px; }
+.link-button { background: transparent; color: #278f55; padding: 0; }
+.link-button:hover { background: transparent; color: #176639; }

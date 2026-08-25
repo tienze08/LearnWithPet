@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useGame } from "@/lib/store";
+import { markCompanionReading, useCompanionActivity } from "@/hooks/stores/companionActivity";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +21,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from "sonner";
 import {
   BookOpen,
   Highlighter,
@@ -204,6 +204,7 @@ Looking ahead, we intend to outsource routine maintenance so that in-house engin
 
 export function ReaderPage() {
   const { state } = useGame();
+  const clearCompanionActivity = useCompanionActivity((store) => store.clear);
   const { data: me } = useMeQuery();
   const { data: decks = [] } = useDecksQuery();
   const { data: myVocabularies = [] } = useMyVocabulariesQuery();
@@ -241,6 +242,22 @@ export function ReaderPage() {
     }
     return LIBRARY.find((l) => l.id === sourceId) ?? LIBRARY[0];
   }, [sourceId, customText, customTitle]);
+
+  useEffect(() => {
+    if (sourceId !== "pdf" || !pdfFile) return;
+
+    const markReading = () => markCompanionReading();
+    markReading();
+    window.addEventListener("pointerdown", markReading, { passive: true });
+    window.addEventListener("keydown", markReading);
+    window.addEventListener("scroll", markReading, { capture: true, passive: true });
+    return () => {
+      window.removeEventListener("pointerdown", markReading);
+      window.removeEventListener("keydown", markReading);
+      window.removeEventListener("scroll", markReading, true);
+      clearCompanionActivity();
+    };
+  }, [sourceId, pdfFile, clearCompanionActivity]);
 
   const savedWords = useMemo(
     () => new Set([...state.words.map((w) => w.word.toLowerCase()), ...Object.keys(highlights)]),
@@ -347,11 +364,11 @@ export function ReaderPage() {
         await saveLatestPdf({ userId: me.id, title, text, file, savedAt: Date.now(), basket: [], highlights: {} });
         setAiStatus("Your PDF is safely saved to your account. I’ll remember its highlights too.");
       } catch {
-        toast.error("Cloud PDF storage is not ready yet, so this PDF is only saved in this browser.");
+        speakPet("I couldn't save this PDF to your account yet, so I kept it safely in this browser.", 2, 5);
         try {
           await saveLatestPdf({ userId: me.id, title, text, file, savedAt: Date.now(), basket: [], highlights: {} });
         } catch {
-          toast.error("Your PDF could not be saved in browser storage either.");
+          speakPet("I couldn't save this PDF. Please try uploading it again.", 3, 5);
         }
       }
     }
@@ -469,7 +486,7 @@ export function ReaderPage() {
 
   async function generate() {
     if (!selected.length) {
-      toast.error("Highlight some words first");
+      speakPet("Highlight a few words first, then I can make flashcards for us.", 1, 4);
       return;
     }
     setGenerating(true);
@@ -487,7 +504,7 @@ export function ReaderPage() {
       );
       speakPet(`I found ${res.cards.length} useful words. Let’s check them together!`, 1, 5);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not generate flashcards");
+      speakPet(err instanceof Error ? err.message : "I couldn't generate those flashcards. Please try again.", 2, 5);
     } finally {
       setGenerating(false);
     }
@@ -507,7 +524,7 @@ export function ReaderPage() {
       setAiStatus(result.companionMessage);
       speakPet(result.companionMessage, 1, 5);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not analyze this passage");
+      speakPet(error instanceof Error ? error.message : "I couldn't analyse this passage yet. Please try again.", 2, 5);
     } finally {
       setSuggesting(false);
     }
@@ -539,7 +556,7 @@ export function ReaderPage() {
   async function saveAll() {
     if (!preview) return;
     if (!deckId) {
-      toast.error("Create a deck first");
+      speakPet("Create a deck first, then I'll save these cards there.", 1, 4);
       return;
     }
     const parsedDeckId = Number(deckId);
@@ -571,11 +588,11 @@ export function ReaderPage() {
         ),
       );
     } catch (error) {
-      toast.error("Could not save every flashcard. Please try again.");
+      speakPet("I couldn't save every flashcard. Please try again.", 2, 5);
       return;
     }
     const deck = decks.find((d) => d.id === parsedDeckId);
-    toast.success(`Saved ${preview.length} flashcards to ${deck?.name ?? "deck"}`);
+    speakPet(`I saved ${preview.length} flashcards to ${deck?.name ?? "your deck"}!`, 2, 5);
     setAiStatus(
       `Great work — ${preview.length} cards are scheduled for review. I’ll remind you when they are due.`,
     );

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VocaPet Companion</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header><span class="pet">🐱</span><div><p class="eyebrow">VOCAPET COMPANION</p><h1>Study, gently.</h1></div></header>
+      <p id="status" class="status" role="status">Checking your companion…</p>
+
+      <section id="login-view" hidden>
+        <p class="copy">Sign in once. Burumaru will check your plan in the background.</p>
+        <form id="login-form">
+          <label>Email <input id="email" type="email" autocomplete="email" required /></label>
+          <label>Password <input id="password" type="password" autocomplete="current-password" required /></label>
+          <label>API URL <input id="api-url" type="url" required /></label>
+          <label>Website URL <input id="web-url" type="url" required /></label>
+          <button type="submit">Connect companion</button>
+        </form>
+      </section>
+
+      <section id="companion-view" hidden>
+        <div class="plan-card"><p class="eyebrow">TODAY WITH BURUMARU</p><h2 id="plan-title">Your plan is loading…</h2><p id="plan-detail" class="copy"></p></div>
+        <button id="start-plan">Start today's plan</button>
+        <label class="toggle"><input id="reminders-enabled" type="checkbox" /> <span>Gentle reminders</span></label>
+        <label>Remind me every <select id="reminder-minutes"><option value="15">15 minutes</option><option value="30">30 minutes</option><option value="60">1 hour</option><option value="120">2 hours</option></select></label>
+        <div class="footer"><span id="user-name"></span><button id="logout" class="link-button">Sign out</button></div>
+      </section>
+    </main>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

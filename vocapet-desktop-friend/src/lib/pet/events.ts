@@ -8,11 +8,18 @@ export type PetEventType =
   | "ANSWER_WRONG"
   | "LEVEL_UP"
   | "STREAK_UPDATED"
-  | "REMINDER_TRIGGERED";
+  | "REMINDER_TRIGGERED"
+  | "MISSION_CLAIMED";
 
 export type PetEvent = {
   type: PetEventType;
-  detail?: { streak?: number; dailyGoalComplete?: boolean };
+  detail?: {
+    streak?: number;
+    dailyGoalComplete?: boolean;
+    missionTitle?: string;
+    rewardXp?: number;
+    rewardCoin?: number;
+  };
 };
 
 type Listener = (event: PetEvent) => void;
