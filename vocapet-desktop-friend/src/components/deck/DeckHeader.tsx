@@ -1,5 +1,6 @@
 import { DeckResponse } from "@/api/deck.api";
 import { ReactNode } from "react";
+import { useTranslation } from "@/lib/i18n";
 
 interface DeckHeaderProps {
   deck: DeckResponse;
@@ -8,6 +9,7 @@ interface DeckHeaderProps {
 }
 
 export default function DeckHeader({ deck, wordCount, children }: DeckHeaderProps) {
+  const { t: tr } = useTranslation();
   return (
     <div className="flex flex-wrap items-center gap-4">
       <div
@@ -20,7 +22,7 @@ export default function DeckHeader({ deck, wordCount, children }: DeckHeaderProp
         <h1 className="text-3xl font-extrabold">{deck.name}</h1>
 
         <p className="text-sm text-muted-foreground">
-          {deck.description} · {wordCount} words
+          {deck.description} · {tr("deck.words", { count: wordCount })}
         </p>
       </div>
 

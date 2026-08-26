@@ -35,6 +35,7 @@ import {
 import SrsFlashCard from "@/components/deck/SrsFlashCard";
 import { useGame } from "@/lib/store";
 import { speakPet } from "@/hooks/stores/petSpeech";
+import { useTranslation } from "@/lib/i18n";
 
 export const Route = createFileRoute("/app/decks/$deckId")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -47,6 +48,7 @@ export const Route = createFileRoute("/app/decks/$deckId")({
 type Mode = "browse" | "srs" | "flashcards" | "quiz" | "type";
 
 export default function DeckDetail() {
+  const { t: tr } = useTranslation();
   const { recordAnswer: recordStudyAnswer } = useGame();
   const { deckId } = Route.useParams();
   const { mode: requestedMode, journey } = Route.useSearch();
@@ -86,7 +88,7 @@ export default function DeckDetail() {
   if (!deck) {
     return (
       <div className="py-20 text-center">
-        <p>Deck not found.</p>
+        <p>{tr("deck.notFound")}</p>
 
         <Button
           className="mt-3"
@@ -96,7 +98,7 @@ export default function DeckDetail() {
             })
           }
         >
-          Back to decks
+          {tr("deck.back")}
         </Button>
       </div>
     );
@@ -116,7 +118,7 @@ export default function DeckDetail() {
         hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
-        All decks
+        {tr("deck.all")}
       </Link>
 
       <DeckHeader deck={deck} wordCount={words.length}>
@@ -137,7 +139,7 @@ export default function DeckDetail() {
               },
             });
 
-            speakPet("Your deck is updated!", 1, 3);
+            speakPet(tr("deck.updated"), 1, 3);
           }}
         />
 
@@ -146,11 +148,11 @@ export default function DeckDetail() {
           onConfirm={() => {
             deleteDeck.mutate(deck.id, {
               onSuccess: () => {
-                speakPet("That deck has been removed.", 1, 3);
+                speakPet(tr("deck.removed"), 1, 3);
                 navigate({ to: "/app/decks" });
               },
               onError: (err) => {
-                speakPet("I couldn't remove that deck. Please try again.", 2, 4);
+                speakPet(tr("deck.removeFailed"), 2, 4);
               },
             });
 
@@ -188,7 +190,7 @@ export default function DeckDetail() {
           onClick={() => setMode("browse")}
           icon={<Layers className="h-4 w-4" />}
         >
-          Browse
+          {tr("deck.browse")}
         </ModeButton>
 
         <ModeButton
@@ -196,7 +198,7 @@ export default function DeckDetail() {
           onClick={() => setMode("srs")}
           icon={<Brain className="h-4 w-4" />}
         >
-          SRS Review
+          {tr("deck.srs")}
         </ModeButton>
 
         <ModeButton
@@ -204,7 +206,7 @@ export default function DeckDetail() {
           onClick={() => setMode("flashcards")}
           icon={<Sparkles className="h-4 w-4" />}
         >
-          Flashcards
+          {tr("deck.flashcards")}
         </ModeButton>
 
         <ModeButton
@@ -212,7 +214,7 @@ export default function DeckDetail() {
           onClick={() => setMode("quiz")}
           icon={<ListChecks className="h-4 w-4" />}
         >
-          Multiple Choice
+          {tr("deck.multipleChoice")}
         </ModeButton>
 
         <ModeButton
@@ -220,7 +222,7 @@ export default function DeckDetail() {
           onClick={() => setMode("type")}
           icon={<Type className="h-4 w-4" />}
         >
-          Type
+          {tr("deck.type")}
         </ModeButton>
       </div>
 

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, FileText, Loader2, Maximize2, Minimize2, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/lib/i18n";
 
 type PdfDocument = { title: string; text: string; file: File; importedHighlights: string[] };
 type Props = { onLoaded: (document: PdfDocument) => void };
@@ -15,6 +16,7 @@ async function loadPdfJs() {
 }
 
 export function PdfReaderLoader({ onLoaded }: Props) {
+  const { t: tr } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
 
@@ -60,7 +62,7 @@ export function PdfReaderLoader({ onLoaded }: Props) {
         ) : (
           <FileText className="w-4 h-4 mr-2" />
         )}
-        {loading ? "Opening PDF…" : "Upload PDF"}
+        {loading ? tr("reader.openingPdf") : tr("reader.uploadPdf")}
       </Button>
       <input
         ref={inputRef}
@@ -131,6 +133,7 @@ export function PdfDocumentViewer({
   basketWords: string[];
   learnedWords: string[];
 }) {
+  const { t: tr } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLElement>(null);
   const pageSurfaceRef = useRef<HTMLDivElement>(null);
@@ -225,7 +228,7 @@ export function PdfDocumentViewer({
         await layer.render();
         applyHighlights(textLayer, basketWordsKey, learnedWordsKey);
       } catch {
-        if (!cancelled) setError("This PDF could not be displayed. Please try another file.");
+        if (!cancelled) setError(tr("reader.pdfError"));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -235,7 +238,7 @@ export function PdfDocumentViewer({
     return () => {
       cancelled = true;
     };
-  }, [file, pageNumber, viewerWidth, pageWidthPercent]);
+  }, [file, pageNumber, viewerWidth, pageWidthPercent, tr]);
 
   useEffect(() => {
     if (textLayerRef.current)
@@ -252,7 +255,7 @@ export function PdfDocumentViewer({
             size="icon"
             disabled={pageWidthPercent <= 60 || loading}
             onClick={() => setPageWidthPercent((size) => Math.max(60, size - 10))}
-            aria-label="Decrease PDF size"
+            aria-label={tr("reader.decreasePdf")}
           >
             <Minus className="h-4 w-4" />
           </Button>
@@ -262,11 +265,11 @@ export function PdfDocumentViewer({
             size="icon"
             disabled={pageWidthPercent >= 100 || loading}
             onClick={() => setPageWidthPercent((size) => Math.min(100, size + 10))}
-            aria-label="Increase PDF size"
+            aria-label={tr("reader.increasePdf")}
           >
             <Plus className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => isFocusMode ? void document.exitFullscreen() : void enterFocusMode()} aria-label={isFocusMode ? "Exit focus mode" : "Open focus mode"}>
+          <Button variant="ghost" size="icon" onClick={() => isFocusMode ? void document.exitFullscreen() : void enterFocusMode()} aria-label={isFocusMode ? tr("reader.exitFocus") : tr("reader.openFocus")}>
             {isFocusMode ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
           </Button>
           <Button
@@ -274,19 +277,19 @@ export function PdfDocumentViewer({
             size="icon"
             disabled={pageNumber <= 1 || loading}
             onClick={() => setPageNumber((page) => page - 1)}
-            aria-label="Previous PDF page"
+            aria-label={tr("reader.previousPage")}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <span className="text-xs font-bold">
-            {pageCount ? `${pageNumber} / ${pageCount}` : "Loading"}
+            {pageCount ? `${pageNumber} / ${pageCount}` : tr("reader.loading")}
           </span>
           <Button
             variant="ghost"
             size="icon"
             disabled={loading || !pageCount || pageNumber >= pageCount}
             onClick={() => setPageNumber((page) => page + 1)}
-            aria-label="Next PDF page"
+            aria-label={tr("reader.nextPage")}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>

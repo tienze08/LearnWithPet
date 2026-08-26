@@ -18,6 +18,7 @@ import com.vocabpet.backend.entity.enums.PetAction;
 import com.vocabpet.backend.entity.enums.PetMood;
 import com.vocabpet.backend.entity.enums.PetSpecies;
 import com.vocabpet.backend.entity.enums.PetIntent;
+import com.vocabpet.backend.entity.enums.Rating;
 import com.vocabpet.backend.repository.CompanionMemoryRepository;
 import com.vocabpet.backend.repository.CompanionProfileRepository;
 import com.vocabpet.backend.repository.CompanionWordMemoryRepository;
@@ -220,8 +221,13 @@ public class CompanionServiceImpl implements CompanionService {
         memoryRepository.save(memory);
 
         if (!correct) {
-            String message = wordMemory.getWrongCount() >= 2
-                    ? "You struggled with " + vocabulary.getWord() + " before. We'll see it again later."
+            long wrongThisWeek = studyReviewRepository
+                    .countByUserIdAndVocabularyIdAndRatingAndReviewedAtGreaterThanEqual(
+                            user.getId(), vocabulary.getId(), Rating.AGAIN, now.minusDays(7));
+            String message = wrongThisWeek >= 2
+                    ? "You missed " + vocabulary.getWord() + " "
+                            + (wrongThisWeek == 2 ? "twice" : wrongThisWeek + " times")
+                            + " this week. We'll keep it ready for a gentle review."
                     : "Hmm, " + vocabulary.getWord() + " is tricky. We'll learn it together.";
             return reaction(PetMood.SAD, PetAction.SAD, line(profile.getPersonality(), message), 2, 4);
         }

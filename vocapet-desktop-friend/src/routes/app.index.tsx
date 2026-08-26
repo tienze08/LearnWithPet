@@ -7,12 +7,14 @@ import { useMeQuery } from "@/hooks/queries/user.queries";
 import { useDecksQuery } from "@/hooks/queries/deck.queries";
 import { useActiveStudySessionQuery, useRecentReviewsQuery, useStartStudySessionMutation, useStudyDashboardStatsQuery, useTodayStudyPlanQuery } from "@/hooks/queries/study-session.queries";
 import { useCompanionStateQuery } from "@/hooks/queries/companion.queries";
+import { useTranslation } from "@/lib/i18n";
 
 export const Route = createFileRoute("/app/")({
   component: Dashboard,
 });
 
 function Dashboard() {
+  const { t: tr } = useTranslation();
   const { state } = useGame();
   const { data: me } = useMeQuery();
   const { data: decks = [], isLoading: decksLoading } = useDecksQuery();
@@ -62,36 +64,36 @@ function Dashboard() {
         <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
         <Pet variant={petVariant} stage={petStage} mood={petMood} size={140} />
         <div className="flex-1 text-center md:text-left">
-          <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">Today with {petName}</p>
+          <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">{tr("home.todayWith", { name: petName })}</p>
           <h1 className="text-3xl font-extrabold mt-2 tracking-tight md:text-4xl">
-            {dueCards ? `${dueCards} words are ready for review.` : "Your review queue is all clear."}
+            {dueCards ? tr("home.wordsReady", { count: dueCards }) : tr("home.queueClear")}
           </h1>
           <p className="text-muted-foreground mt-3 text-sm leading-relaxed max-w-md">
             {dueCards
-              ? `${petName} prepared a focused ${todayPlan?.estimatedMinutes ?? 1}-minute session using your shared FSRS schedule.`
-              : `${petName} will keep an eye on your schedule and bring back words when they are due.`}
+              ? tr("home.sessionReady", { name: petName, minutes: todayPlan?.estimatedMinutes ?? 1 })
+              : tr("home.queueClearDetail", { name: petName })}
           </p>
           {planWords.length > 0 && (
             <p className="mt-3 text-xs font-semibold text-muted-foreground">
-              Revisit first: <span className="text-foreground">{planWords.join(", ")}</span>
+              {tr("home.revisitFirst")} <span className="text-foreground">{planWords.join(", ")}</span>
             </p>
           )}
           <div className="mt-4 flex flex-wrap gap-2 justify-center md:justify-start">
             {activeSession && (
               <Button asChild variant="outline" className="border-primary/40 text-primary">
                 <Link to="/app/decks/$deckId" params={{ deckId: String(activeSession.deckId) }}>
-                  <Clock3 className="w-4 h-4 mr-1" /> Resume session
+                  <Clock3 className="w-4 h-4 mr-1" /> {tr("home.resume")}
                 </Link>
               </Button>
             )}
             <Button asChild className="btn-pop">
               <Link to="/app/plan">
-                <CalendarClock className="w-4 h-4 mr-1" /> {dueCards ? "Start today’s plan" : "View today’s plan"}
+                <CalendarClock className="w-4 h-4 mr-1" /> {dueCards ? tr("home.startPlan") : tr("home.viewPlan")}
               </Link>
             </Button>
             <Button asChild variant="outline">
               <Link to="/app/decks">
-                <BookOpen className="w-4 h-4 mr-1" /> Browse decks
+                <BookOpen className="w-4 h-4 mr-1" /> {tr("home.browse")}
               </Link>
             </Button>
           </div>
@@ -102,52 +104,54 @@ function Dashboard() {
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           icon={<CalendarClock className="w-5 h-5 text-primary" />}
-          label="Due now"
+          label={tr("home.dueNow")}
           value={String(dueCards)}
-          sub={dueCards ? "ready for recall" : "nothing overdue"}
+          sub={dueCards ? tr("home.readyRecall") : tr("home.nothingOverdue")}
         />
         <StatCard
           icon={<Clock3 className="w-5 h-5 text-info" />}
-          label="Plan time"
-          value={dueCards ? `~${todayPlan?.estimatedMinutes ?? 1} min` : "All clear"}
-          sub={`${todayPlan?.reviewsToday ?? state.dailyProgress}/${todayPlan?.dailyGoal ?? state.dailyGoal} reviews today`}
+          label={tr("home.planTime")}
+          value={dueCards ? `~${todayPlan?.estimatedMinutes ?? 1} min` : tr("home.allClear")}
+          sub={tr("home.reviewsToday", { done: todayPlan?.reviewsToday ?? state.dailyProgress, goal: todayPlan?.dailyGoal ?? state.dailyGoal })}
         />
         <StatCard
           icon={<Flame className="w-5 h-5 text-streak" />}
-          label="Day streak"
+          label={tr("home.dayStreak")}
           value={`${userStreak}`}
-          sub="keep it alive!"
+          sub={tr("home.keepAlive")}
         />
         <StatCard
           icon={<TrendingUp className="w-5 h-5 text-info" />}
-          label="Words learning"
+          label={tr("home.wordsLearning")}
           value={`${learning}`}
-          sub={`${mastered} mastered`}
+          sub={tr("home.mastered", { count: mastered })}
         />
         <StatCard
           icon={<Trophy className="w-5 h-5 text-coin" />}
-          label="Recent accuracy"
+          label={tr("home.recentAccuracy")}
           value={recentTotal ? `${Math.round((recentCorrect / recentTotal) * 100)}%` : "—"}
-          sub={`${recentTotal} reviews`}
+          sub={tr("home.reviews", { count: recentTotal })}
         />
       </div>
 
       <section className="rounded-[2rem] border border-primary/20 bg-card/80 p-6 card-pop">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">Tomorrow with {petName}</p>
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">{tr("home.tomorrowWith", { name: petName })}</p>
             <h2 className="mt-2 text-2xl font-extrabold tracking-tight">
-              {tomorrow?.cardCount ? `${petName} prepared ${tomorrow.cardCount} card${tomorrow.cardCount === 1 ? "" : "s"} for tomorrow.` : `${petName} will have something new for you tomorrow.`}
+              {tomorrow?.cardCount
+                ? tr("home.tomorrowPrepared", { name: petName, count: tomorrow.cardCount, cards: tr("plan.words", { count: tomorrow.cardCount }) })
+                : tr("home.tomorrowNew", { name: petName })}
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
               {tomorrow?.cardCount
-                ? `A calm ${tomorrow.estimatedMinutes}-minute recall session is waiting when you return.`
-                : "Today’s answers will shape the next words you see."}
+                ? tr("home.tomorrowSession", { minutes: tomorrow.estimatedMinutes })
+                : tr("home.tomorrowAnswers")}
             </p>
           </div>
-          {tomorrow?.cardCount ? <div className="rounded-2xl bg-primary/10 px-4 py-3 text-right"><p className="text-xs font-bold text-primary">~{tomorrow.estimatedMinutes} min</p><p className="mt-1 text-xs text-muted-foreground">ready tomorrow</p></div> : null}
+          {tomorrow?.cardCount ? <div className="rounded-2xl bg-primary/10 px-4 py-3 text-right"><p className="text-xs font-bold text-primary">~{tomorrow.estimatedMinutes} min</p><p className="mt-1 text-xs text-muted-foreground">{tr("home.readyTomorrow")}</p></div> : null}
         </div>
-        {tomorrow?.words?.length ? <p className="mt-4 text-sm text-muted-foreground">Burumaru saved: <span className="font-semibold text-foreground">{tomorrow.words.join(", ")}</span></p> : null}
+        {tomorrow?.words?.length ? <p className="mt-4 text-sm text-muted-foreground">{tr("home.saved", { name: petName })} <span className="font-semibold text-foreground">{tomorrow.words.join(", ")}</span></p> : null}
       </section>
 
       {hasNeedsAttention && (
@@ -156,23 +160,23 @@ function Dashboard() {
             <div>
               <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
                 <Brain className="h-5 w-5" />
-                <p className="text-xs font-bold uppercase tracking-[0.14em]">Needs attention</p>
+                <p className="text-xs font-bold uppercase tracking-[0.14em]">{tr("home.needsAttention")}</p>
               </div>
-              <h2 className="mt-2 text-2xl font-extrabold tracking-tight">A small reset can make these words stick.</h2>
+              <h2 className="mt-2 text-2xl font-extrabold tracking-tight">{tr("home.resetHeading")}</h2>
               <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-                Burumaru picked the cards that need the most care from your real review history.
+                {tr("home.resetDetail", { name: petName })}
               </p>
             </div>
             {activeSession ? (
               <Button asChild variant="outline" className="shrink-0 border-primary/40 text-primary">
                 <Link to="/app/decks/$deckId" params={{ deckId: String(activeSession.deckId) }}>
-                  <Clock3 className="mr-1 h-4 w-4" /> Resume session
+                  <Clock3 className="mr-1 h-4 w-4" /> {tr("home.resume")}
                 </Link>
               </Button>
             ) : recoveryDeckId ? (
               <Button className="btn-pop shrink-0" onClick={startRecoverySession} disabled={recoveryMutation.isPending}>
                 <Clock3 className="mr-1 h-4 w-4" />
-                {recoveryMutation.isPending ? "Preparing…" : "Start 5-minute recovery"}
+                {recoveryMutation.isPending ? tr("home.preparing") : tr("home.startRecovery")}
               </Button>
             ) : null}
           </div>
@@ -181,24 +185,24 @@ function Dashboard() {
             {relearning && (
               <AttentionItem
                 icon={<CircleAlert className="h-4 w-4 text-rose-500" />}
-                title={`${relearning.count} word${relearning.count === 1 ? "" : "s"} to meet again`}
-                detail={`Marked Again before: ${relearning.words.slice(0, 3).join(", ")}.`}
+                title={tr("home.meetAgain", { count: relearning.count, words: tr("plan.words", { count: relearning.count }) })}
+                detail={tr("home.markedAgain", { words: relearning.words.slice(0, 3).join(", ") })}
               />
             )}
             {overdue && (
               <AttentionItem
                 icon={<CalendarClock className="h-4 w-4 text-amber-500" />}
-                title={`${overdue.count} overdue review${overdue.count === 1 ? "" : "s"}`}
-                detail={`${overdue.deckName} is waiting for a quick catch-up.`}
+                title={tr("home.overdue", { count: overdue.count, reviews: tr("home.reviews", { count: overdue.count }) })}
+                detail={tr("home.waitingCatchup", { deck: overdue.deckName })}
               />
             )}
             {weakTopic && (
               <AttentionItem
                 icon={<TrendingUp className="h-4 w-4 text-violet-500" />}
-                title={`${weakTopic} needs more practice`}
+                title={tr("home.needsPractice", { topic: weakTopic })}
                 detail={companionState?.learningProfile?.averageQuizScore
-                  ? `${companionState.learningProfile.averageQuizScore}% recent accuracy in this topic.`
-                  : "Your recent answers suggest a gentle review here."}
+                  ? tr("home.accuracyTopic", { score: companionState.learningProfile.averageQuizScore })
+                  : tr("home.gentleReview")}
               />
             )}
           </div>
@@ -209,46 +213,46 @@ function Dashboard() {
         <section className="rounded-[2rem] border border-primary/20 bg-primary/[0.035] p-6 card-pop">
           <div className="flex items-center gap-2 text-primary">
             <HeartHandshake className="h-5 w-5" />
-            <p className="text-xs font-bold uppercase tracking-[0.14em]">Your story together</p>
+            <p className="text-xs font-bold uppercase tracking-[0.14em]">{tr("home.story")}</p>
           </div>
-          <h2 className="mt-2 text-2xl font-extrabold tracking-tight">{petName} remembers how you learn.</h2>
+          <h2 className="mt-2 text-2xl font-extrabold tracking-tight">{tr("home.remembers", { name: petName })}</h2>
           <div className="mt-5 grid gap-3 md:grid-cols-3">
             {companionState.yesterdayWords > 0 && (
               <MemoryItem
                 icon={<History className="h-4 w-4 text-primary" />}
-                title={`Yesterday we studied ${companionState.yesterdayWords} word${companionState.yesterdayWords === 1 ? "" : "s"} together.`}
-                detail="A quick recall today will help them stay familiar."
+                title={tr("home.yesterdayStudied", { count: companionState.yesterdayWords, words: tr("plan.words", { count: companionState.yesterdayWords }) })}
+                detail={tr("home.quickRecall")}
               />
             )}
             {companionState.learningProfile?.weakestTopic && (
               <MemoryItem
                 icon={<Brain className="h-4 w-4 text-violet-500" />}
-                title={`${companionState.learningProfile.weakestTopic} words need a little more care.`}
+                title={tr("home.wordsCare", { topic: companionState.learningProfile.weakestTopic })}
                 detail={companionState.frequentlyWrongWord
-                  ? `We can revisit ${companionState.frequentlyWrongWord} together.`
-                  : "Burumaru will include them in your next focused session."}
+                  ? tr("home.revisitTogether", { word: companionState.frequentlyWrongWord })
+                  : tr("home.includeSession", { name: petName })}
               />
             )}
             {companionState.closeToUsualStudyTime && (
               <MemoryItem
                 icon={<Clock3 className="h-4 w-4 text-amber-500" />}
-                title="It’s close to your usual study time."
-                detail="A small session now is enough to keep the routine going."
+                title={tr("home.usualTime")}
+                detail={tr("home.smallSession")}
               />
             )}
             {companionState.relationshipMilestone && (
               <MemoryItem
                 icon={<HeartHandshake className="h-4 w-4 text-rose-500" />}
-                title={`Milestone: ${companionState.relationshipMilestone}.`}
-                detail={`${petName} has been here for ${companionState.totalSessionsTogether} focused study session${companionState.totalSessionsTogether === 1 ? "" : "s"}.`}
+                title={tr("home.milestone", { milestone: companionState.relationshipMilestone })}
+                detail={tr("home.focusedSessions", { name: petName, count: companionState.totalSessionsTogether, sessions: tr("home.reviews", { count: companionState.totalSessionsTogether }) })}
               />
             )}
             {!companionState.yesterdayWords && !companionState.learningProfile?.weakestTopic
               && !companionState.closeToUsualStudyTime && !companionState.relationshipMilestone && (
               <MemoryItem
                 icon={<HeartHandshake className="h-4 w-4 text-primary" />}
-                title={`You and ${petName} are building your study rhythm.`}
-                detail="Complete a focused session and your companion will begin noticing your habits."
+                title={tr("home.buildingRhythm", { name: petName })}
+                detail={tr("home.completeFocused")}
               />
             )}
           </div>
@@ -258,9 +262,9 @@ function Dashboard() {
       {/* Decks shortcut */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-xl font-extrabold">Your decks</h2>
+          <h2 className="text-xl font-extrabold">{tr("home.yourDecks")}</h2>
           <Link to="/app/decks" className="text-sm font-bold text-primary hover:underline">
-            See all →
+            {tr("home.seeAll")}
           </Link>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -278,13 +282,13 @@ function Dashboard() {
                   {d.emoji}
                 </div>
                 <p className="font-extrabold mt-3">{d.name}</p>
-                <p className="text-xs text-muted-foreground">{d.wordCount} words</p>
+                <p className="text-xs text-muted-foreground">{tr("home.words", { count: d.wordCount })}</p>
               </Link>
             );
           })}
           {!decksLoading && decks.length === 0 && (
             <div className="sm:col-span-2 lg:col-span-4 rounded-2xl border-2 border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-              No decks yet. Create a deck to start collecting words.
+              {tr("home.noDecks")}
             </div>
           )}
         </div>
@@ -292,7 +296,7 @@ function Dashboard() {
 
       {/* Recent activity */}
       <div>
-        <h2 className="text-xl font-extrabold mb-3">Recently studied words</h2>
+        <h2 className="text-xl font-extrabold mb-3">{tr("home.recentWords")}</h2>
         <div className="overflow-hidden rounded-2xl border border-border bg-card/80 card-pop divide-y">
           {recentReviews.map((review, i) => {
             const w = { word: review.word, meaning: review.meaning };
@@ -313,7 +317,7 @@ function Dashboard() {
           })}
           {!recentReviewsLoading && recentReviews.length === 0 && (
             <div className="p-6 text-sm text-muted-foreground text-center">
-              No reviews yet — your pet will quiz you soon!
+              {tr("home.noReviews")}
             </div>
           )}
         </div>

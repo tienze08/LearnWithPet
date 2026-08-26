@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useClaimMissionMutation, useDailyMissionsQuery } from "@/hooks/queries/mission.query";
 import { petEvents } from "@/lib/pet/events";
+import { useTranslation } from "@/lib/i18n";
 
 export const Route = createFileRoute("/app/tasks")({
   component: TasksPage,
@@ -25,12 +26,13 @@ const missionIcons = {
 };
 
 function TasksPage() {
+  const { t: tr } = useTranslation();
   const { data: tasks = [], isLoading, refetch } = useDailyMissionsQuery();
 
   const claimMissionMutation = useClaimMissionMutation();
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div>{tr("mission.progress")}…</div>;
   }
 
   const completed = tasks.filter((t) => t.rewardClaimed).length;
@@ -48,20 +50,20 @@ function TasksPage() {
           </div>
 
           <div className="flex-1">
-            <p className="text-xs font-bold uppercase text-primary">Daily Quests</p>
+            <p className="text-xs font-bold uppercase text-primary">{tr("mission.title")}</p>
 
-            <h1 className="text-2xl font-extrabold">Earn XP by completing tasks</h1>
+            <h1 className="text-2xl font-extrabold">{tr("mission.heading")}</h1>
 
             <p className="text-sm text-muted-foreground">
-              XP is only awarded when you complete daily tasks.
+              {tr("mission.description")}
             </p>
           </div>
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-3 text-center">
-          <Mini label="Completed" value={`${completed}/${tasks.length}`} />
+          <Mini label={tr("mission.completed")} value={`${completed}/${tasks.length}`} />
 
-          <Mini label="XP earned" value={`${totalXp}`} sub={`of ${possibleXp}`} />
+          <Mini label={tr("mission.xpEarned")} value={`${totalXp}`} sub={`${tr("mission.of")} ${possibleXp}`} />
         </div>
       </div>
 
@@ -108,7 +110,7 @@ function TasksPage() {
 
               <div className="mt-3">
                 <div className="flex justify-between text-xs font-bold mb-1">
-                  <span className="text-muted-foreground">Progress</span>
+                  <span className="text-muted-foreground">{tr("mission.progress")}</span>
 
                   <span>
                     {t.currentValue}/{t.targetValue}
@@ -127,7 +129,7 @@ function TasksPage() {
                 {t.rewardClaimed ? (
                   <Button disabled variant="secondary" className="w-full">
                     <CheckCircle2 className="w-4 h-4 mr-1" />
-                    Claimed
+                    {tr("mission.claimed")}
                   </Button>
                 ) : t.completed ? (
                   <Button
@@ -151,13 +153,13 @@ function TasksPage() {
                     }
                   >
                     <Sparkles className="w-4 h-4 mr-1" />
-                    Claim reward
+                    {tr("mission.claim")}
                   </Button>
                 ) : (
                   <Button asChild variant="outline" className="w-full">
                     <Link to="/app/decks">
                       <BookOpen className="w-4 h-4 mr-1" />
-                      Study to progress
+                      {tr("mission.study")}
                     </Link>
                   </Button>
                 )}

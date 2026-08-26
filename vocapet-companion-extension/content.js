@@ -39,6 +39,8 @@
   let afterArrival = null;
   let lastActivityAt = Date.now();
   let hoverTimer;
+  let quizTimer;
+  let quizCountdownTimer;
 
   const send = (message) => new Promise((resolve) => chrome.runtime.sendMessage(message, resolve));
   const setCompanionVisible = (visible) => {
@@ -55,7 +57,12 @@
     bubble.classList.toggle("to-left", !nearLeft);
   };
   const clearCloseTimer = () => { if (closeTimer) window.clearTimeout(closeTimer); };
-  const closeBubble = () => { bubble.classList.remove("open"); paused = false; clearCloseTimer(); };
+  const clearQuizTimers = () => {
+    if (quizTimer) window.clearTimeout(quizTimer);
+    if (quizCountdownTimer) window.clearInterval(quizCountdownTimer);
+    quizTimer = undefined; quizCountdownTimer = undefined;
+  };
+  const closeBubble = () => { bubble.classList.remove("open"); paused = false; clearCloseTimer(); clearQuizTimers(); };
   const useEmote = (row, duration) => { emoteRow = row; emoteUntil = performance.now() + duration; };
   const pauseFor = (duration) => { paused = true; idleUntil = performance.now() + duration; };
   const showBubble = ({ heading, detail, buttons = [], sticky = false }) => {
@@ -78,6 +85,7 @@
 
   async function startQuiz() {
     clearCloseTimer();
+    clearQuizTimers();
     bubble.querySelector(".vocapet-options")?.remove();
     title.textContent = "Quick question!"; copy.textContent = "Burumaru is choosing a word…"; actions.replaceChildren(); bubble.classList.add("open");
     const result = await send({ type: "GET_QUIZ" });
@@ -86,23 +94,41 @@
     title.textContent = `What does “${quiz.word}” mean?`;
     copy.textContent = quiz.partOfSpeech ? quiz.partOfSpeech.toUpperCase() : "QUICK QUIZ";
     const options = document.createElement("div"); options.className = "vocapet-options";
+    const countdown = document.createElement("p"); countdown.className = "vocapet-countdown";
+    let answered = false;
+    const deadline = Date.now() + 10000;
+    const updateCountdown = () => {
+      const seconds = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+      countdown.textContent = `${seconds}s to answer`;
+    };
+    const submitAnswer = async (option, choice) => {
+      if (answered) return;
+      answered = true;
+      clearQuizTimers();
+      options.querySelectorAll("button").forEach((item) => { item.disabled = true; });
+      const response = await send({ type: "ANSWER_QUIZ", vocabularyId: quiz.vocabularyId, answer: option });
+      if (!response?.ok) { showBubble({ heading: "I couldn't check that yet.", detail: response?.error ?? "Please try again in VocaPet.", buttons: [{ label: "Open study plan", primary: true, onClick: openPlan }] }); return; }
+      const answer = response.answer;
+      if (choice) choice.classList.add(answer.correct ? "correct" : "wrong");
+      title.textContent = answer.correct ? "You got it!" : option ? `It means: ${answer.correctAnswer}` : `Time's up — it means: ${answer.correctAnswer}`;
+      copy.textContent = answer.petBehavior?.message
+        ?? (answer.correct
+          ? `+${answer.xp} XP — saved to your study progress.`
+          : "No worries. We'll meet this word again soon.");
+      if (answer.correct) { useEmote(4, 1200); pet.classList.add("is-happy"); window.setTimeout(() => pet.classList.remove("is-happy"), 1200); }
+      actions.replaceChildren(Object.assign(document.createElement("button"), { className: "vocapet-action primary", textContent: "Continue learning" }));
+      actions.firstChild.addEventListener("click", openPlan);
+    };
     quiz.options.forEach((option) => {
       const choice = document.createElement("button"); choice.className = "vocapet-option"; choice.textContent = option;
-      choice.addEventListener("click", async () => {
-        options.querySelectorAll("button").forEach((item) => { item.disabled = true; });
-        const response = await send({ type: "ANSWER_QUIZ", vocabularyId: quiz.vocabularyId, answer: option });
-        if (!response?.ok) { showBubble({ heading: "I couldn't check that yet.", detail: response?.error ?? "Please try again in VocaPet.", buttons: [{ label: "Open study plan", primary: true, onClick: openPlan }] }); return; }
-        const answer = response.answer;
-        choice.classList.add(answer.correct ? "correct" : "wrong");
-        title.textContent = answer.correct ? "You got it!" : `It means: ${answer.correctAnswer}`;
-        copy.textContent = answer.correct ? `+${answer.xp} XP — great recall!` : "No worries. We'll meet this word again soon.";
-        if (answer.correct) { useEmote(4, 1200); pet.classList.add("is-happy"); window.setTimeout(() => pet.classList.remove("is-happy"), 1200); }
-        actions.replaceChildren(Object.assign(document.createElement("button"), { className: "vocapet-action primary", textContent: "Continue learning" }));
-        actions.firstChild.addEventListener("click", openPlan);
-      });
+      choice.addEventListener("click", () => void submitAnswer(option, choice));
       options.append(choice);
     });
     bubble.append(options);
+    bubble.append(countdown);
+    updateCountdown();
+    quizCountdownTimer = window.setInterval(updateCountdown, 250);
+    quizTimer = window.setTimeout(() => void submitAnswer("", null), 10000);
   }
 
   function openOverview() {

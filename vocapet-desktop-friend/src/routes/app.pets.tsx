@@ -6,6 +6,7 @@ import { Lock, Check, Sparkles, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useMeQuery, useUnlockPetMutation } from "@/hooks/queries/user.queries";
 import { useSelectPetMutation, useUnlockedPetsQuery } from "@/hooks/queries/pet.queries";
+import { useTranslation } from "@/lib/i18n";
 
 type UnlockProgress = {
   level: number;
@@ -67,6 +68,7 @@ export const Route = createFileRoute("/app/pets")({
 });
 
 function PetsPage() {
+  const { t: tr } = useTranslation();
   const { state, setState } = useGame();
   const { data: me } = useMeQuery();
   const { data: unlockedPets = [] } = useUnlockedPetsQuery();
@@ -85,15 +87,15 @@ function PetsPage() {
       <header className="flex items-end justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-3xl font-extrabold flex items-center gap-2">
-            <Sparkles className="w-7 h-7 text-primary" /> Pet Collection
+            <Sparkles className="w-7 h-7 text-primary" /> {tr("pets.title")}
           </h1>
           <p className="text-muted-foreground">
-            Five companions to discover. Keep learning to unlock them all.
+            {tr("pets.subtitle")}
           </p>
         </div>
         <div className="flex items-center gap-2 rounded-full bg-primary/10 text-primary px-4 py-2 font-bold">
           <Trophy className="w-4 h-4" />
-          {unlockedIds.length} / {PET_UNLOCKS.length} unlocked
+          {tr("pets.unlockedCount", { unlocked: unlockedIds.length, total: PET_UNLOCKS.length })}
         </div>
       </header>
 
@@ -127,7 +129,7 @@ function PetsPage() {
             >
               {active && (
                 <span className="absolute top-3 right-3 inline-flex items-center gap-1 text-xs font-bold bg-primary text-primary-foreground rounded-full px-2 py-1">
-                  <Check className="w-3 h-3" /> Active
+                  <Check className="w-3 h-3" /> {tr("pets.active")}
                 </span>
               )}
 
@@ -151,7 +153,7 @@ function PetsPage() {
 
               <div className="mt-3 text-center">
                 <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                  {u.title}
+                    {petTitle(u.id, tr)}
                 </p>
                 <h2 className="text-xl font-extrabold flex items-center justify-center gap-2">
                   <span>{meta.emoji}</span>
@@ -163,7 +165,7 @@ function PetsPage() {
               <div className="mt-4">
                 <div className="flex items-start justify-between gap-3 text-xs font-bold">
                   <span className={`min-w-0 leading-snug ${unlocked ? "text-primary" : "text-muted-foreground"}`}>
-                    {u.requirement}
+                    {petRequirement(u.id, tr)}
                   </span>
                   <span className="shrink-0 text-muted-foreground">
                     {progress}/{u.goal}
@@ -187,7 +189,7 @@ function PetsPage() {
                     })}
                     disabled={active || selectPetMutation.isPending}
                   >
-                    {active ? "Currently Active" : "Set as Companion"}
+                    {active ? tr("pets.current") : tr("pets.setCompanion")}
                   </Button>
                 ) : (
                   <Button
@@ -197,15 +199,15 @@ function PetsPage() {
                     disabled={unlockMutation.isPending || !canUnlock}
                   >
                     {unlockMutation.isPending
-                      ? "Unlocking..."
+                      ? tr("pets.unlocking")
                       : !canUnlock
                         ? (
                           <span className="block whitespace-normal">
-                            <span className="block">{u.requirement}</span>
-                            <span className="block text-xs font-medium opacity-75">+ 50 coins required</span>
+                            <span className="block">{petRequirement(u.id, tr)}</span>
+                            <span className="block text-xs font-medium opacity-75">{tr("pets.coinRequired")}</span>
                           </span>
                         )
-                        : "Unlock with 50 coins"}
+                        : tr("pets.unlockCoins")}
                   </Button>
                 )}
               </div>
@@ -215,4 +217,12 @@ function PetsPage() {
       </div>
     </div>
   );
+}
+
+function petTitle(id: PetVariant, tr: (key: any) => string) {
+  return ({ CAT: tr("pets.starter"), FOX: tr("pets.sharp"), BUNNY: tr("pets.hopper"), PANDA: tr("pets.scholar"), DRAGON: tr("pets.master") })[id];
+}
+
+function petRequirement(id: PetVariant, tr: (key: any) => string) {
+  return ({ CAT: tr("pets.starter"), FOX: tr("pets.level3"), BUNNY: tr("pets.streak5"), PANDA: tr("pets.level5"), DRAGON: tr("pets.master10") })[id];
 }

@@ -18,43 +18,47 @@ import { petEvents } from "@/lib/pet/events";
 import { useAnswerQuizMutation, useRandomQuizMutation } from "@/hooks/queries/quiz.queries";
 import type { QuizAnswerResponse, QuizQuestionResponse } from "@/types/quiz";
 import { speakPet } from "@/hooks/stores/petSpeech";
+import { useTranslation, type TranslationKey } from "@/lib/i18n";
 
 interface Props {
   deckId: number;
   journeyRequested?: boolean;
 }
 
-function scheduleMessage(rating: "AGAIN" | "HARD" | "GOOD" | "EASY", nextReviewTime: string) {
-  if (rating === "AGAIN") return "Burumaru will bring this word back in about 10 minutes.";
+type Translator = (key: TranslationKey, values?: Record<string, string | number>) => string;
+
+function scheduleMessage(rating: "AGAIN" | "HARD" | "GOOD" | "EASY", nextReviewTime: string, locale: "en" | "vi", tr: Translator) {
+  if (rating === "AGAIN") return tr("review.againNotice");
   const next = new Date(nextReviewTime);
-  return `Next review: ${next.toLocaleDateString([], { month: "short", day: "numeric" })}.`;
+  const date = next.toLocaleDateString(locale === "vi" ? "vi-VN" : "en-US", { month: "short", day: "numeric" });
+  return tr("review.nextReview", { date });
 }
 
 const RATINGS = [
   {
-    label: "Again",
+    label: "review.again",
     value: "AGAIN" as const,
     className: "bg-red-500 hover:bg-red-600 text-white",
   },
   {
-    label: "Hard",
+    label: "review.hard",
     value: "HARD" as const,
     className: "bg-orange-500 hover:bg-orange-600 text-white",
   },
   {
-    label: "Good",
+    label: "review.good",
     value: "GOOD" as const,
     className: "bg-primary text-primary-foreground",
   },
   {
-    label: "Easy",
+    label: "review.easy",
     value: "EASY" as const,
     className: "bg-sky-500 hover:bg-sky-600 text-white",
   },
 ];
 
 export default function StudySessionFlashcards({ deckId, journeyRequested = false }: Props) {
-  console.log("SrsFlashCard render");
+  const { locale, t: tr } = useTranslation();
   const [started, setStarted] = useState(false);
 
   const [sessionId, setSessionId] = useState<number | null>(null);
@@ -103,21 +107,21 @@ export default function StudySessionFlashcards({ deckId, journeyRequested = fals
   if (!started) {
     return (
       <div className="max-w-xl mx-auto rounded-[2rem] border border-border bg-card/85 p-8 md:p-10 text-center card-pop">
-        <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">Focused session</p>
-        <h2 className="mt-2 text-3xl font-bold tracking-tight">Ready to study?</h2>
+        <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">{tr("review.focused")}</p>
+        <h2 className="mt-2 text-3xl font-bold tracking-tight">{tr("review.ready")}</h2>
 
         <p className="mt-3 text-muted-foreground">
-          {recoveryRequested ? "A gentle five-minute reset: up to 10 FSRS review attempts." : journeyRequested ? "Your daily journey: up to 10 focused FSRS cards, then one quick quiz." : "Review today's due cards with FSRS."}
+          {recoveryRequested ? tr("review.recoveryIntro") : journeyRequested ? tr("review.journeyIntro") : tr("review.defaultIntro")}
         </p>
 
         {activeSession?.deckId === deckId && (
           <div className="mt-5 rounded-2xl border border-primary/20 bg-primary/5 p-4 text-left">
-            <p className="text-sm font-bold">Your previous session is waiting</p>
+            <p className="text-sm font-bold">{tr("review.previous")}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              {activeSession.reviewed} reviews completed{activeSession.currentWord ? ` · next: ${activeSession.currentWord}` : ""}
+              {tr("review.completedReviews", { count: activeSession.reviewed })}{activeSession.currentWord ? ` · ${tr("review.next", { word: activeSession.currentWord })}` : ""}
             </p>
             <Button className="mt-3 w-full" variant="outline" onClick={resumeSession}>
-              Resume session
+              {tr("review.resume")}
             </Button>
           </div>
         )}
@@ -127,7 +131,7 @@ export default function StudySessionFlashcards({ deckId, journeyRequested = fals
           onClick={startSession}
           disabled={startMutation.isPending}
         >
-          {startMutation.isPending ? "Starting..." : "Start Study"}
+          {startMutation.isPending ? tr("review.starting") : tr("review.start")}
         </Button>
       </div>
     );
@@ -147,35 +151,35 @@ export default function StudySessionFlashcards({ deckId, journeyRequested = fals
           <div className="text-6xl">🎉</div>
 
           <p className="mt-3 text-xs font-bold uppercase tracking-[0.14em] text-primary">
-            {journeyComplete ? "Daily journey complete" : "Review complete"}
+            {journeyComplete ? tr("review.journeyComplete") : tr("review.complete")}
           </p>
-          <h2 className="mt-1 text-3xl font-extrabold">{journeyComplete ? "Wonderful work today" : "One small step left"}</h2>
+          <h2 className="mt-1 text-3xl font-extrabold">{journeyComplete ? tr("review.wonderful") : tr("review.smallStep")}</h2>
 
           <div className="mt-5 grid grid-cols-2 gap-3 text-left sm:grid-cols-5">
-            <SessionStat label="Reviewed" value={String(reviewed)} />
-            <SessionStat label="Accuracy" value={`${accuracy}%`} />
-            <SessionStat label="XP earned" value={`+${earnedXp}`} />
-            <SessionStat label="Time" value={`${minutes} min`} />
-            <SessionStat label="Streak" value={`${streak || "✓"}`} />
+            <SessionStat label={tr("review.reviewed")} value={String(reviewed)} />
+            <SessionStat label={tr("review.accuracy")} value={`${accuracy}%`} />
+            <SessionStat label={tr("review.xp")} value={`+${earnedXp}`} />
+            <SessionStat label={tr("review.time")} value={`${minutes} min`} />
+            <SessionStat label={tr("review.streak")} value={`${streak || "✓"}`} />
           </div>
           <p className="mt-5 text-sm text-muted-foreground">
             {againWords.length
-              ? <>Words to meet again soon: <strong>{againWords.join(", ")}</strong>.</>
-              : "Nothing marked Again — great recall!"}
+              ? <>{tr("review.meetAgain", { words: againWords.join(", ") })}</>
+              : tr("review.greatRecall")}
           </p>
           {!journeyComplete && !quickQuiz && (
             <div className="mt-7 grid gap-2 sm:grid-cols-2">
               <Button className="h-12" onClick={startQuickQuiz} disabled={isPreparingQuickQuiz}>
-                {isPreparingQuickQuiz ? "Burumaru is choosing…" : "Quick quiz · 10 seconds"}
+                {isPreparingQuickQuiz ? tr("review.quizChoosing") : tr("review.quickQuiz")}
               </Button>
               <Button variant="outline" className="h-12" onClick={completeJourney} disabled={finishMutation.isPending}>
-                Finish for today
+                {tr("review.finishToday")}
               </Button>
             </div>
           )}
           {quickQuiz && !journeyComplete && (
             <div className="mt-7 rounded-2xl border border-primary/20 bg-primary/5 p-4 text-left">
-              <p className="text-xs font-bold uppercase tracking-[0.12em] text-primary">Burumaru&apos;s quick quiz</p>
+              <p className="text-xs font-bold uppercase tracking-[0.12em] text-primary">{tr("review.quizTitle")}</p>
               <p className="mt-2 text-center text-2xl font-extrabold">{quickQuiz.word}</p>
               <p className="mt-1 text-center text-xs italic text-muted-foreground">{quickQuiz.partOfSpeech}</p>
               <div className="mt-4 grid gap-2">
@@ -183,8 +187,8 @@ export default function StudySessionFlashcards({ deckId, journeyRequested = fals
                   <Button key={option} variant="outline" className="h-auto min-h-10 whitespace-normal py-2 text-left" disabled={isAnsweringQuickQuiz || !!quickQuizResult} onClick={() => answerJourneyQuiz(option)}>{option}</Button>
                 ))}
               </div>
-              {quickQuizResult && <p className={`mt-3 text-center text-sm font-bold ${quickQuizResult.correct ? "text-primary" : "text-destructive"}`}>{quickQuizResult.correct ? `✨ Correct! +${quickQuizResult.xp} XP` : "We’ll meet this word again soon."}</p>}
-              {quickQuizResult && <Button className="mt-4 h-11 w-full" onClick={completeJourney} disabled={finishMutation.isPending}>Complete today&apos;s journey</Button>}
+              {quickQuizResult && <p className={`mt-3 text-center text-sm font-bold ${quickQuizResult.correct ? "text-primary" : "text-destructive"}`}>{quickQuizResult.correct ? tr("review.correct", { xp: quickQuizResult.xp }) : tr("review.incorrect")}</p>}
+              {quickQuizResult && <Button className="mt-4 h-11 w-full" onClick={completeJourney} disabled={finishMutation.isPending}>{tr("review.completeJourney")}</Button>}
             </div>
           )}
           {journeyComplete && <Button variant="outline" className="mt-8 w-full h-12" onClick={() => {
@@ -194,7 +198,7 @@ export default function StudySessionFlashcards({ deckId, journeyRequested = fals
             setQuickQuiz(null);
             setQuickQuizResult(null);
             setSessionId(null);
-          }}>Back to decks</Button>}
+          }}>{tr("deck.back")}</Button>}
         </div>
       </>
     );
@@ -204,7 +208,7 @@ export default function StudySessionFlashcards({ deckId, journeyRequested = fals
     return (
       <>
         {streakPopup}
-        <div className="text-center py-12">Loading...</div>
+        <div className="text-center py-12">{tr("review.loading")}</div>
       </>
     );
   }
@@ -250,7 +254,7 @@ export default function StudySessionFlashcards({ deckId, journeyRequested = fals
       rating,
     });
 
-    setScheduleNotice(scheduleMessage(rating, result.nextReviewTime));
+    setScheduleNotice(scheduleMessage(rating, result.nextReviewTime, locale, tr));
     setReviewed((count) => count + 1);
     setEarnedXp((xp) => xp + result.xp);
     if (rating === "AGAIN") {
@@ -296,9 +300,19 @@ export default function StudySessionFlashcards({ deckId, journeyRequested = fals
     await finishMutation.mutateAsync(sessionId);
     setJourneyComplete(true);
     const tomorrowLine = againWords.length
-      ? `Tomorrow, we'll revisit ${againWords[0]}${againWords.length > 1 ? ` and ${againWords.length - 1} other word${againWords.length === 2 ? "" : "s"}` : ""}.`
-      : "I'll have something new for you tomorrow.";
-    speakPet(tomorrowLine, 3, 7);
+      ? tr("review.tomorrowAgain", {
+        word: againWords[0],
+        others: againWords.length > 1 ? tr("review.tomorrowOther", { count: againWords.length - 1, words: tr("plan.words", { count: againWords.length - 1 }) }) : "",
+      })
+      : tr("review.tomorrowNew");
+    const accuracy = reviewed ? Math.round((correct / reviewed) * 100) : 0;
+    const cardLabel = locale === "vi"
+      ? `${reviewed} thẻ`
+      : `${reviewed} ${reviewed === 1 ? "card" : "cards"}`;
+    const summaryLine = locale === "vi"
+      ? `Bạn đã hoàn thành ${cardLabel} với độ chính xác ${accuracy}%.`
+      : `You finished ${cardLabel} with ${accuracy}% accuracy.`;
+    speakPet(`${summaryLine} ${tomorrowLine}`, 3, 8);
     petEvents.emit({ type: "SESSION_FINISHED" });
   }
 
@@ -308,8 +322,8 @@ export default function StudySessionFlashcards({ deckId, journeyRequested = fals
 
       <div className="max-w-xl mx-auto space-y-5">
         <div className="flex items-center justify-between px-1 text-xs font-semibold text-muted-foreground">
-          <span>Study session</span>
-          <span>Tap the card to reveal</span>
+          <span>{tr("review.studySession")}</span>
+          <span>{tr("review.tapReveal")}</span>
         </div>
         {scheduleNotice && (
           <motion.p
@@ -369,7 +383,7 @@ export default function StudySessionFlashcards({ deckId, journeyRequested = fals
                     <Volume2 className="h-6 w-6" />
                   </button>
 
-                  <p className="mt-5 text-xs text-muted-foreground">Click to reveal</p>
+                  <p className="mt-5 text-xs text-muted-foreground">{tr("review.clickReveal")}</p>
                 </>
               ) : (
                 <>
@@ -391,13 +405,13 @@ export default function StudySessionFlashcards({ deckId, journeyRequested = fals
                 disabled={reviewMutation.isPending}
                 className={rating.className}
               >
-                {rating.label}
+                {tr(rating.label as TranslationKey)}
               </Button>
             ))}
           </div>
         ) : (
           <Button className="w-full" onClick={() => setFlipped(true)}>
-            Show Answer
+            {tr("review.showAnswer")}
           </Button>
         )}
       </div>

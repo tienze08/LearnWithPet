@@ -12,6 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useTranslation } from "@/lib/i18n";
 
 interface CreateWordRequest {
   deckId: number;
@@ -33,6 +34,7 @@ interface AddWordDialogProps {
 }
 
 export default function AddWordDialog({ deckId, onAdd }: AddWordDialogProps) {
+  const { t: tr } = useTranslation();
   const [open, setOpen] = useState(false);
 
   const [word, setWord] = useState("");
@@ -106,25 +108,25 @@ export default function AddWordDialog({ deckId, onAdd }: AddWordDialogProps) {
       <DialogTrigger asChild>
         <Button className="btn-pop">
           <Plus className="mr-1 h-4 w-4" />
-          Add word
+          {tr("decks.addWord")}
         </Button>
       </DialogTrigger>
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add to deck</DialogTitle>
+          <DialogTitle>{tr("decks.addTo")}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-3">
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <Label>Word</Label>
+              <Label>{tr("decks.word")}</Label>
 
               <Input value={word} onChange={(e) => setWord(e.target.value)} />
             </div>
 
             <div>
-              <Label>Part of speech</Label>
+              <Label>{tr("decks.partOfSpeech")}</Label>
 
               <Input
                 value={partOfSpeech}
@@ -134,23 +136,23 @@ export default function AddWordDialog({ deckId, onAdd }: AddWordDialogProps) {
           </div>
 
           <div>
-            <Label>Meaning</Label>
+            <Label>{tr("decks.meaning")}</Label>
 
             <Input value={meaning} onChange={(e) => setMeaning(e.target.value)} />
           </div>
 
           <div>
-            <Label>Example</Label>
+            <Label>{tr("decks.example")}</Label>
 
             <Input value={example} onChange={(e) => setExample(e.target.value)} />
           </div>
 
           <Button className="btn-pop w-full" onClick={handleSubmit}>
-            Add
+            {tr("decks.add")}
           </Button>
 
           <div className="border-t-2 pt-2">
-            <Label className="text-xs">Or import CSV (word, meaning, example, pos)</Label>
+            <Label className="text-xs">{tr("decks.importCsv")}</Label>
 
             <Textarea
               rows={4}
@@ -165,7 +167,7 @@ export default function AddWordDialog({ deckId, onAdd }: AddWordDialogProps) {
               disabled={!csv.trim()}
               onClick={handleImportCsv}
             >
-              Import CSV
+              {tr("decks.import")}
             </Button>
           </div>
         </div>

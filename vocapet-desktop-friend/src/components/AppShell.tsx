@@ -5,6 +5,7 @@ import { PetCompanion } from "@/components/PetCompanion";
 import { useMeQuery } from "@/hooks/queries/user.queries";
 import { useAuthStore } from "@/hooks/stores/auth.store";
 import { avatarMap } from "@/types/avatar";
+import { initializeLocale, useTranslation } from "@/lib/i18n";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,6 +42,7 @@ function TopBar() {
   const pct = userXp % 100;
   const avatarEmoji = me?.avatar ? (avatarMap[me.avatar] ?? "🦊") : state.user.avatarEmoji;
   const displayName = me?.name || state.user.displayName || "You";
+  const { locale, setLocale, t } = useTranslation();
 
   useEffect(() => {
     const selectedSpecies = me?.pet?.species as PetVariant | undefined;
@@ -90,7 +92,16 @@ function TopBar() {
               <DropdownMenuSeparator />
               <DropdownMenuItem onSelect={() => navigate({ to: "/app/profile" })}>
                 <User className="mr-2 h-4 w-4" />
-                Profile
+                {t("account.profile")}
+              </DropdownMenuItem>
+              <DropdownMenuLabel className="pt-2 text-[10px] uppercase tracking-wide text-muted-foreground">
+                {t("account.language")}
+              </DropdownMenuLabel>
+              <DropdownMenuItem onSelect={() => setLocale("en")}>
+                <span className="mr-2">{locale === "en" ? "✓" : ""}</span>{t("language.english")}
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setLocale("vi")}>
+                <span className="mr-2">{locale === "vi" ? "✓" : ""}</span>{t("language.vietnamese")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -101,7 +112,7 @@ function TopBar() {
                 }}
               >
                 <LogOut className="mr-2 h-4 w-4" />
-                Log out
+                {t("account.logout")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -139,20 +150,22 @@ function NavLink({ to, icon, label }: { to: string; icon: React.ReactNode; label
 }
 
 function MobileNav() {
+  const { t } = useTranslation();
   return (
     <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 border-t border-border/70 bg-background/90 backdrop-blur-xl">
       <div className="flex justify-around py-2">
-        <NavLink to="/app" icon={<LayoutDashboard className="w-5 h-5" />} label="Home" />
-        <NavLink to="/app/decks" icon={<Library className="w-5 h-5" />} label="Decks" />
-        <NavLink to="/app/tasks" icon={<Target className="w-5 h-5" />} label="Tasks" />
-        <NavLink to="/app/pets" icon={<PawPrint className="w-5 h-5" />} label="Pets" />
-        <NavLink to="/app/profile" icon={<User className="w-5 h-5" />} label="Profile" />
+        <NavLink to="/app" icon={<LayoutDashboard className="w-5 h-5" />} label={t("nav.home")} />
+        <NavLink to="/app/decks" icon={<Library className="w-5 h-5" />} label={t("nav.decks")} />
+        <NavLink to="/app/tasks" icon={<Target className="w-5 h-5" />} label={t("nav.missions")} />
+        <NavLink to="/app/pets" icon={<PawPrint className="w-5 h-5" />} label={t("nav.pets")} />
+        <NavLink to="/app/profile" icon={<User className="w-5 h-5" />} label={t("nav.settings")} />
       </div>
     </nav>
   );
 }
 
 function DesktopSidebar() {
+  const { t } = useTranslation();
   return (
     <aside className="hidden w-56 shrink-0 md:block">
       <div className="sticky top-[4.25rem] py-8 pr-6">
@@ -160,20 +173,20 @@ function DesktopSidebar() {
           Learn
         </p>
         <nav className="space-y-1">
-          <NavLink to="/app" icon={<LayoutDashboard className="w-4 h-4" />} label="Home" />
-          <NavLink to="/app/decks" icon={<Library className="w-4 h-4" />} label="Study & decks" />
-          <NavLink to="/app/plan" icon={<CalendarClock className="w-4 h-4" />} label="Today’s plan" />
-          <NavLink to="/app/reader" icon={<BookOpen className="w-4 h-4" />} label="Reader" />
-          <NavLink to="/app/tasks" icon={<Target className="w-4 h-4" />} label="Missions" />
+          <NavLink to="/app" icon={<LayoutDashboard className="w-4 h-4" />} label={t("nav.home")} />
+          <NavLink to="/app/decks" icon={<Library className="w-4 h-4" />} label={t("nav.decks")} />
+          <NavLink to="/app/plan" icon={<CalendarClock className="w-4 h-4" />} label={t("nav.plan")} />
+          <NavLink to="/app/reader" icon={<BookOpen className="w-4 h-4" />} label={t("nav.reader")} />
+          <NavLink to="/app/tasks" icon={<Target className="w-4 h-4" />} label={t("nav.missions")} />
         </nav>
         <p className="mb-3 mt-8 px-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
           Your companion
         </p>
         <nav className="space-y-1">
-          <NavLink to="/app/pets" icon={<PawPrintIcon className="w-4 h-4" />} label="Pets" />
-          <NavLink to="/app/achievements" icon={<Trophy className="w-4 h-4" />} label="Progress & awards" />
-          <NavLink to="/app/analytics" icon={<BarChart3 className="w-4 h-4" />} label="Analytics" />
-          <NavLink to="/app/profile" icon={<User className="w-4 h-4" />} label="Settings" />
+          <NavLink to="/app/pets" icon={<PawPrintIcon className="w-4 h-4" />} label={t("nav.pets")} />
+          <NavLink to="/app/achievements" icon={<Trophy className="w-4 h-4" />} label={t("nav.awards")} />
+          <NavLink to="/app/analytics" icon={<BarChart3 className="w-4 h-4" />} label={t("nav.analytics")} />
+          <NavLink to="/app/profile" icon={<User className="w-4 h-4" />} label={t("nav.settings")} />
         </nav>
       </div>
     </aside>
@@ -184,6 +197,8 @@ function ShellInner() {
   const pathname = useRouterState({
     select: (s) => s.location.pathname,
   });
+
+  useEffect(() => initializeLocale(), []);
 
   return (
     <div className="min-h-screen flex flex-col pb-20 md:pb-0">

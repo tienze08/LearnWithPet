@@ -55,6 +55,7 @@ import { PdfDocumentViewer, PdfReaderLoader } from "@/components/reader/PdfReade
 import { getLatestPdf, saveLatestPdf } from "@/components/reader/pdf-storage";
 import type { Vocabulary } from "@/types/vocabulary";
 import { useMeQuery } from "@/hooks/queries/user.queries";
+import { useTranslation } from "@/lib/i18n";
 
 export const Route = createFileRoute("/app/reader")({
   component: ReaderPage,
@@ -105,6 +106,7 @@ function ReadingParagraph({
   highlights: Record<string, HighlightDetail>;
   onReview: (word: string) => void;
 }) {
+  const { t: tr } = useTranslation();
   return (
     <>
       {text.split(/(\b[\p{L}][\p{L}'-]*\b)/u).map((token, index) => {
@@ -126,18 +128,18 @@ function ReadingParagraph({
             </span>
             <span className="pointer-events-none absolute bottom-full left-1/2 z-30 mb-2 hidden w-60 -translate-x-1/2 rounded-2xl border-2 border-border bg-card p-3 text-left text-xs shadow-xl group-hover:block group-focus-within:block">
               <span className="mb-1 flex items-center gap-1 font-extrabold text-primary">
-                🐱 {inBasket ? "In your basket" : "Already in your deck"}
+                🐱 {inBasket ? tr("reader.inYourBasket") : tr("reader.alreadyDeck")}
               </span>
               <span className="block font-bold text-foreground">
-                Meaning:{" "}
+                {tr("reader.meaning")}{" "}
                 <span className="font-medium">
-                  {vocabulary?.meaning ?? highlight?.meaning ?? "Ready for AI analysis"}
+                  {vocabulary?.meaning ?? highlight?.meaning ?? tr("reader.readyAnalysis")}
                 </span>
               </span>
               {!inBasket && (
                 <>
                   <span className="mt-2 block text-muted-foreground">
-                    Learning progress · {highlight?.retention ?? retention}% retention
+                    {tr("reader.progress", { retention: highlight?.retention ?? retention })}
                   </span>
                   <span className="mt-1 block h-1.5 overflow-hidden rounded-full bg-muted">
                     <span
@@ -146,8 +148,8 @@ function ReadingParagraph({
                     />
                   </span>
                   <span className="mt-1 block text-muted-foreground">
-                    Last reviewed:{" "}
-                    {highlight?.lastReviewed ?? (mastery < 2 ? "Needs a first review" : "Recently")}
+                    {tr("reader.lastReviewed")}{" "}
+                    {highlight?.lastReviewed ?? (mastery < 2 ? tr("reader.firstReview") : tr("reader.recently"))}
                   </span>
                 </>
               )}
@@ -156,7 +158,7 @@ function ReadingParagraph({
                 onClick={() => onReview(token)}
                 className="pointer-events-auto mt-2 w-full rounded-lg bg-primary px-2 py-1.5 font-bold text-primary-foreground hover:brightness-95"
               >
-                🐱 Review with Burumaru
+                🐱 {tr("reader.reviewWith")}
               </button>
             </span>
           </span>
@@ -203,6 +205,7 @@ Looking ahead, we intend to outsource routine maintenance so that in-house engin
 ];
 
 export function ReaderPage() {
+  const { t: tr } = useTranslation();
   const { state } = useGame();
   const clearCompanionActivity = useCompanionActivity((store) => store.clear);
   const { data: me } = useMeQuery();
@@ -644,10 +647,9 @@ export function ReaderPage() {
             📖
           </div>
           <div>
-            <h1 className="text-2xl font-extrabold">Reader with Burumaru</h1>
+            <h1 className="text-2xl font-extrabold">{tr("reader.title")}</h1>
             <p className="text-sm text-muted-foreground font-semibold">
-              Highlight words as you read — collect them in the basket, then generate all flashcards
-              at once.
+              {tr("reader.subtitle")}
             </p>
           </div>
           <div className="ml-auto hidden sm:flex items-center gap-3 rounded-2xl border border-primary/25 bg-card/70 px-3 py-2">
@@ -665,16 +667,16 @@ export function ReaderPage() {
       <div className="flex flex-wrap items-center gap-2">
         <Select value={sourceId} onValueChange={setSourceId}>
           <SelectTrigger className="w-280px rounded-xl border-2 font-bold">
-            <SelectValue placeholder="Choose a text" />
+            <SelectValue placeholder={tr("reader.chooseText")} />
           </SelectTrigger>
           <SelectContent>
-            {pdfFile && <SelectItem value="pdf">Uploaded PDF: {customTitle || "Untitled"}</SelectItem>}
+            {pdfFile && <SelectItem value="pdf">{tr("reader.uploadedPdf", { title: customTitle || tr("reader.untitled") })}</SelectItem>}
             {LIBRARY.map((l) => (
               <SelectItem key={l.id} value={l.id}>
                 {l.emoji} {l.title}
               </SelectItem>
             ))}
-            <SelectItem value="custom">📄 My own text</SelectItem>
+            <SelectItem value="custom">📄 {tr("reader.ownText")}</SelectItem>
           </SelectContent>
         </Select>
 
@@ -683,7 +685,7 @@ export function ReaderPage() {
           className="rounded-xl border-2 font-bold"
           onClick={() => fileRef.current?.click()}
         >
-          <Upload className="w-4 h-4 mr-2" /> Upload .txt
+          <Upload className="w-4 h-4 mr-2" /> {tr("reader.uploadText")}
         </Button>
         <Button
           variant="outline"
@@ -696,7 +698,7 @@ export function ReaderPage() {
           ) : (
             <Sparkles className="w-4 h-4 mr-2" />
           )}
-          Ask Burumaru for suggestions
+          {tr("reader.suggestions")}
         </Button>
         <input ref={fileRef} type="file" accept=".txt,.md,text/plain" hidden onChange={onFile} />
         <PdfReaderLoader onLoaded={({ title, text, file, importedHighlights }) => {
@@ -712,13 +714,13 @@ export function ReaderPage() {
         {sourceId === "pdf" && (
           <label className="flex items-center gap-2 rounded-xl border-2 border-border bg-card px-3 py-2 text-xs font-bold">
             <input type="checkbox" checked={showLearnedWords} onChange={(event) => setShowLearnedWords(event.target.checked)} className="accent-primary" />
-            Show learned words ({learnedPdfWords.length})
+            {tr("reader.showLearned", { count: learnedPdfWords.length })}
           </label>
         )}
 
         {!panelOpen && (
           <Button className="rounded-xl font-bold ml-auto" onClick={() => setPanelOpen(true)}>
-            <ShoppingBasket className="w-4 h-4 mr-2" /> Basket ({basket.length})
+            <ShoppingBasket className="w-4 h-4 mr-2" /> {tr("reader.basket", { count: basket.length })}
           </Button>
         )}
       </div>
@@ -728,17 +730,17 @@ export function ReaderPage() {
         <article className="rounded-3xl border-2 border-border bg-card p-6 card-pop">
           {sourceId === "custom" && (
             <div className="space-y-2 mb-5">
-              <Label className="font-bold">Paste your book or document</Label>
+              <Label className="font-bold">{tr("reader.pasteLabel")}</Label>
               <Input
                 value={customTitle}
                 onChange={(e) => setCustomTitle(e.target.value)}
-                placeholder="Title"
+                placeholder={tr("reader.titlePlaceholder")}
                 className="rounded-xl border-2"
               />
               <Textarea
                 value={customText}
                 onChange={(e) => setCustomText(e.target.value)}
-                placeholder="Paste any English text here, then highlight words as you read…"
+                placeholder={tr("reader.pastePlaceholder")}
                 className="rounded-xl border-2 min-h-140px"
               />
             </div>
@@ -752,10 +754,10 @@ export function ReaderPage() {
 
           {sourceId === "pdf" && (
             <div className="mb-4 grid grid-cols-2 gap-2 rounded-2xl border border-primary/20 bg-primary/5 p-3 text-center text-xs sm:grid-cols-4">
-              <div><p className="text-lg font-extrabold">{pdfWordFrequencies.size}</p><p className="text-muted-foreground">unique words</p></div>
-              <div><p className="text-lg font-extrabold text-primary">{learnedPdfWords.length}</p><p className="text-muted-foreground">already learned</p></div>
-              <div><p className="text-lg font-extrabold text-violet-600">{newPdfWords.length}</p><p className="text-muted-foreground">new candidates</p></div>
-              <div><p className="text-lg font-extrabold text-amber-600">{basketWords.size}</p><p className="text-muted-foreground">in basket</p></div>
+              <div><p className="text-lg font-extrabold">{pdfWordFrequencies.size}</p><p className="text-muted-foreground">{tr("reader.uniqueWords")}</p></div>
+              <div><p className="text-lg font-extrabold text-primary">{learnedPdfWords.length}</p><p className="text-muted-foreground">{tr("reader.alreadyLearned")}</p></div>
+              <div><p className="text-lg font-extrabold text-violet-600">{newPdfWords.length}</p><p className="text-muted-foreground">{tr("reader.newCandidates")}</p></div>
+              <div><p className="text-lg font-extrabold text-amber-600">{basketWords.size}</p><p className="text-muted-foreground">{tr("reader.inBasket")}</p></div>
             </div>
           )}
 
@@ -787,18 +789,18 @@ export function ReaderPage() {
             </div>
           ) : (
             <p className="text-sm text-muted-foreground font-semibold">
-              Paste some text above to start reading.
+              {tr("reader.emptyText")}
             </p>
           )}
           {hasAskedSuggestions && (
             <section className="mt-6 rounded-2xl border-2 border-primary/30 bg-primary/5 p-4">
               <div className="flex items-center gap-2">
                 <span className="text-lg">🐾</span>
-                <p className="font-extrabold">Burumaru’s useful vocabulary picks</p>
-                <span className="ml-auto text-xs font-bold text-muted-foreground">{visibleSuggestions.length} found</span>
+                <p className="font-extrabold">{tr("reader.picks")}</p>
+                <span className="ml-auto text-xs font-bold text-muted-foreground">{tr("reader.found", { count: visibleSuggestions.length })}</span>
               </div>
               {visibleSuggestions.length === 0 ? (
-                <p className="mt-3 text-sm text-muted-foreground">No new useful words this time. Try a longer passage or another document.</p>
+                <p className="mt-3 text-sm text-muted-foreground">{tr("reader.noPicks")}</p>
               ) : (
                 <div className="mt-3 grid gap-2 sm:grid-cols-2">
                   {visibleSuggestions.map((suggestion) => {
@@ -812,7 +814,7 @@ export function ReaderPage() {
                     disabled={inBasket}
                     className="rounded-xl border border-border bg-card p-3 text-left hover:border-primary transition-colors"
                   >
-                    <div className="flex items-center gap-2"><span className="font-extrabold text-primary">{suggestion.word}</span>{inBasket ? <span className="text-[10px] font-bold text-amber-600">In basket</span> : learned ? <span className="text-[10px] font-bold text-info">Already learned</span> : <span className="text-[10px] font-bold text-success">Add to basket</span>}</div>
+                    <div className="flex items-center gap-2"><span className="font-extrabold text-primary">{suggestion.word}</span>{inBasket ? <span className="text-[10px] font-bold text-amber-600">{tr("reader.inBasket")}</span> : learned ? <span className="text-[10px] font-bold text-info">{tr("reader.alreadyLearned")}</span> : <span className="text-[10px] font-bold text-success">{tr("reader.addToBasket")}</span>}</div>
                     <p className="mt-1 text-xs text-muted-foreground">{suggestion.reason}</p>
                     <p className="mt-1 text-[11px] italic text-muted-foreground line-clamp-2">
                       “{suggestion.contextSentence}”
@@ -831,12 +833,12 @@ export function ReaderPage() {
           <aside className="lg:sticky lg:top-24 rounded-3xl border-2 border-border bg-card p-5 card-pop space-y-4">
             <div className="flex items-center gap-2">
               <span className="text-xl">🐱</span>
-              <h2 className="font-extrabold">Vocabulary Basket</h2>
+              <h2 className="font-extrabold">{tr("reader.vocabularyBasket")}</h2>
               <span className="text-xs font-bold text-muted-foreground">({basket.length})</span>
               <button
                 onClick={() => setPanelOpen(false)}
                 className="ml-auto text-muted-foreground hover:text-foreground"
-                aria-label="Hide side panel"
+                aria-label={tr("reader.hidePanel")}
               >
                 <PanelRightClose className="w-5 h-5" />
               </button>
@@ -845,10 +847,9 @@ export function ReaderPage() {
             {basket.length === 0 ? (
               <div className="rounded-2xl border-2 border-dashed border-border p-5 text-center space-y-2">
                 <BookOpen className="w-8 h-8 mx-auto text-muted-foreground" />
-                <p className="text-sm font-bold">Highlight words while you read</p>
+                <p className="text-sm font-bold">{tr("reader.highlightPrompt")}</p>
                 <p className="text-xs text-muted-foreground">
-                  Each word you select drops into the basket. When you finish the passage, generate
-                  every flashcard in one go.
+                  {tr("reader.highlightDetail")}
                 </p>
               </div>
             ) : (
@@ -864,7 +865,7 @@ export function ReaderPage() {
                           b.map((i) => (i.id === item.id ? { ...i, checked: !i.checked } : i)),
                         )
                       }
-                      aria-label={item.checked ? `Unselect ${item.word}` : `Select ${item.word}`}
+                      aria-label={item.checked ? tr("reader.unselect", { word: item.word }) : tr("reader.select", { word: item.word })}
                       className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 ${
                         item.checked
                           ? "bg-primary border-primary text-primary-foreground"
@@ -875,19 +876,19 @@ export function ReaderPage() {
                     </button>
                     <span className="font-bold text-sm truncate">{item.word}</span>
                     {savedWords.has(item.word.toLowerCase()) && (
-                      <span className="text-[10px] font-bold text-muted-foreground">saved</span>
+                      <span className="text-[10px] font-bold text-muted-foreground">{tr("reader.saved")}</span>
                     )}
                     <button
                       onClick={() => speakWord(item.word)}
                       className="ml-auto text-muted-foreground hover:text-primary"
-                      aria-label={`Pronounce ${item.word}`}
+                      aria-label={tr("reader.pronounce", { word: item.word })}
                     >
                       <Volume2 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => setBasket((b) => b.filter((i) => i.id !== item.id))}
                       className="text-muted-foreground hover:text-destructive"
-                      aria-label={`Remove ${item.word}`}
+                      aria-label={tr("reader.remove", { word: item.word })}
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -898,10 +899,10 @@ export function ReaderPage() {
 
             <div className="border-t-2 border-border pt-4 space-y-3">
               <div className="space-y-1">
-                <Label className="text-xs font-bold">Save into deck</Label>
+                <Label className="text-xs font-bold">{tr("reader.saveIntoDeck")}</Label>
                 <Select value={deckId} onValueChange={setDeckId}>
                   <SelectTrigger className="rounded-xl border-2">
-                    <SelectValue placeholder="Deck" />
+                    <SelectValue placeholder={tr("reader.deckPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
                     {decks.map((d) => (
@@ -920,12 +921,11 @@ export function ReaderPage() {
               >
                 {generating ? (
                   <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Generating…
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" /> {tr("reader.generating")}
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-4 h-4 mr-2" /> Generate {selected.length} Flashcard
-                    {selected.length === 1 ? "" : "s"}
+                    <Sparkles className="w-4 h-4 mr-2" /> {tr("reader.generate", { count: selected.length })}
                   </>
                 )}
               </Button>
@@ -934,19 +934,18 @@ export function ReaderPage() {
                   onClick={() => setBasket([])}
                   className="w-full text-xs font-bold text-muted-foreground hover:text-destructive flex items-center justify-center gap-1"
                 >
-                  <Trash2 className="w-3.5 h-3.5" /> Clear basket
+                  <Trash2 className="w-3.5 h-3.5" /> {tr("reader.clearBasket")}
                 </button>
               )}
               <p className="text-[11px] text-muted-foreground font-semibold text-center">
-                AI reads the whole passage once and writes meaning, example, IPA and CEFR for every
-                word.
+                {tr("reader.aiDetail")}
               </p>
             </div>
 
             {savedThisSession.length > 0 && (
               <div className="pt-2 border-t-2 border-border space-y-2">
                 <p className="text-xs font-extrabold text-muted-foreground uppercase">
-                  Saved while reading ({savedThisSession.length})
+                  {tr("reader.savedReading", { count: savedThisSession.length })}
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {savedThisSession.map((w, i) => (
@@ -969,10 +968,10 @@ export function ReaderPage() {
           <DialogHeader>
             <DialogTitle className="font-extrabold flex items-center gap-2">
               <Highlighter className="w-5 h-5 text-primary" />
-              Preview {preview?.length ?? 0} flashcards
+              {tr("reader.preview", { count: preview?.length ?? 0 })}
             </DialogTitle>
             <DialogDescription>
-              Tweak anything you like, then save them all into your deck.
+              {tr("reader.previewDetail")}
             </DialogDescription>
           </DialogHeader>
 
@@ -994,14 +993,14 @@ export function ReaderPage() {
                   <button
                     onClick={() => speakWord(c.word)}
                     className="ml-auto text-muted-foreground hover:text-primary"
-                    aria-label={`Pronounce ${c.word}`}
+                    aria-label={tr("reader.pronounce", { word: c.word })}
                   >
                     <Volume2 className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => setPreview((p) => (p ? p.filter((_, idx) => idx !== i) : p))}
                     className="text-muted-foreground hover:text-destructive"
-                    aria-label={`Remove ${c.word}`}
+                    aria-label={tr("reader.remove", { word: c.word })}
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -1025,7 +1024,7 @@ export function ReaderPage() {
             disabled={!preview?.length}
             className="w-full rounded-xl font-extrabold"
           >
-            <Check className="w-4 h-4 mr-2" /> Save All
+            <Check className="w-4 h-4 mr-2" /> {tr("reader.saveAll")}
           </Button>
         </DialogContent>
       </Dialog>
@@ -1033,23 +1032,23 @@ export function ReaderPage() {
       <Dialog open={!!importedHighlightTerms} onOpenChange={(open) => !open && setImportedHighlightTerms(null)}>
         <DialogContent className="max-w-lg rounded-3xl border-2">
           <DialogHeader>
-            <DialogTitle className="font-extrabold">Import previous highlights</DialogTitle>
+            <DialogTitle className="font-extrabold">{tr("reader.importHighlights")}</DialogTitle>
             <DialogDescription>
-              Burumaru found {importedHighlightTerms?.length ?? 0} highlights embedded in this PDF. Remove anything you do not want, then add the rest to your basket.
+              {tr("reader.importDetail", { count: importedHighlightTerms?.length ?? 0 })}
             </DialogDescription>
           </DialogHeader>
           <div className="max-h-72 space-y-2 overflow-auto pr-1">
             {importedHighlightTerms?.map((word) => (
               <div key={word} className="flex items-center justify-between rounded-xl border border-border bg-muted/30 px-3 py-2">
                 <span className="font-bold">{word}</span>
-                <button type="button" onClick={() => setImportedHighlightTerms((terms) => terms?.filter((term) => term !== word) ?? null)} className="text-muted-foreground hover:text-destructive" aria-label={`Remove ${word}`}>
+                <button type="button" onClick={() => setImportedHighlightTerms((terms) => terms?.filter((term) => term !== word) ?? null)} className="text-muted-foreground hover:text-destructive" aria-label={tr("reader.remove", { word })}>
                   <X className="h-4 w-4" />
                 </button>
               </div>
             ))}
           </div>
           <Button onClick={importExistingHighlights} disabled={!importedHighlightTerms?.length} className="rounded-xl font-extrabold">
-            <ShoppingBasket className="mr-2 h-4 w-4" /> Add to basket
+            <ShoppingBasket className="mr-2 h-4 w-4" /> {tr("reader.addBasket")}
           </Button>
         </DialogContent>
       </Dialog>

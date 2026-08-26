@@ -12,6 +12,7 @@ import { PetAction } from "./PixiPet/AnimationController";
 import { PetSpeechBubble } from "./PetSpeech";
 import { clearPetSpeech, speakPet, usePetSpeech } from "@/hooks/stores/petSpeech";
 import { useCompanionActivity } from "@/hooks/stores/companionActivity";
+import { useTranslation } from "@/lib/i18n";
 import { reactionFor } from "@/lib/pet/behavior";
 import { petEvents } from "@/lib/pet/events";
 import type { UserResponse } from "@/types/user";
@@ -62,6 +63,7 @@ function serverAction(action: ServerPetBehaviorResponse["action"]): PetAction {
 }
 
 export function PetCompanion() {
+  const { t } = useTranslation();
   const petRef = useRef<PetHandle>(null);
   const quizPhaseRef = useRef<QuizAnimationPhase>("none");
   const queryClient = useQueryClient();
@@ -176,7 +178,7 @@ export function PetCompanion() {
       showQuizAtRight(nextQuiz);
     } catch (error) {
       console.error("Pet click quiz failed", error);
-      speakPet(`${state.petName}: Add a word to one of your decks, then we can practise together.`, 1, 4);
+      speakPet(`${state.petName}: ${t("pet.noCards")}`, 1, 4);
     }
   };
 
@@ -214,14 +216,23 @@ export function PetCompanion() {
     const timers = new Set<number>();
     const unsubscribe = petEvents.subscribe((event) => {
       const reaction = reactionFor(event);
+      const message = event.type === "MISSION_CLAIMED"
+        ? t("pet.reward", {
+          mission: event.detail?.missionTitle ?? "mission",
+          xp: event.detail?.rewardXp ?? 0,
+          coinReward: event.detail?.rewardCoin
+            ? t("pet.coinReward", { coin: event.detail.rewardCoin })
+            : "",
+        })
+        : reaction.message;
       setEventMood(reaction.emotion);
       triggerPetAnimation(reaction.action);
       if (
-        reaction.message &&
+        message &&
         event.type !== "ANSWER_CORRECT" &&
         event.type !== "ANSWER_WRONG"
       ) {
-        speakPet(`${state.petName}: ${reaction.message}`, reaction.priority, 3);
+        speakPet(`${state.petName}: ${message}`, reaction.priority, 3);
       }
       const moodTimer = window.setTimeout(() => {
         timers.delete(moodTimer);
@@ -242,7 +253,7 @@ export function PetCompanion() {
       unsubscribe();
       timers.forEach((timer) => window.clearTimeout(timer));
     };
-  }, [state.petName, focusedStudySession]);
+  }, [state.petName, focusedStudySession, t]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -317,14 +328,14 @@ export function PetCompanion() {
       lastIdleInvitationAt.current = Date.now();
       setEventMood("waiting");
       triggerPetAnimation("THINK");
-      setInvitationMessage("You've been focused for a while. Want one gentle question before you continue?");
+      setInvitationMessage(t("pet.focused"));
       clearPetSpeech();
       setReminder(true);
       window.setTimeout(() => setEventMood(null), 1800);
     }, 30_000);
 
     return () => window.clearInterval(interval);
-  }, [focusedStudySession, readingInProgress, petIsSpeaking, open, reminder, showSettings, interrupting, state.petName]);
+  }, [focusedStudySession, readingInProgress, petIsSpeaking, open, reminder, showSettings, interrupting, state.petName, t]);
 
   useEffect(() => {
     // A focused FSRS session takes priority over ambient companion quizzes.
@@ -347,7 +358,7 @@ export function PetCompanion() {
         setInterrupting(true);
         setEventMood("waiting");
         triggerPetAnimation("THINK");
-        speakPet(`${state.petName}: Hmm...`, 1, 2);
+        speakPet(`${state.petName}: ${t("pet.thinking")}`, 1, 2);
 
         approachTimer = window.setTimeout(() => {
           // Make the reminder feel authored: Burumaru walks to the safe quiz
@@ -356,20 +367,20 @@ export function PetCompanion() {
           setIsApproachingQuiz(true);
           movePetTo(maxPetX(), "right");
           triggerPetAnimation("WALK");
-          speakPet(`${state.petName}: Hey! Quick question?`, 2, 3);
+          speakPet(`${state.petName}: ${t("pet.askQuiz")}`, 2, 3);
         }, 850);
 
         invitationTimer = window.setTimeout(() => {
           // The quiz invitation is the result of the approach. The learner
           // explicitly chooses Quiz me or Review; no card appears abruptly.
-          setInvitationMessage("I kept a quick question ready. Would you like to try it?");
+          setInvitationMessage(t("pet.quickQuestion"));
           clearPetSpeech();
           setReminder(true);
           setInterrupting(false);
           setIsApproachingQuiz(false);
           interruptionInProgress.current = false;
           triggerPetAnimation("THINK");
-          speakPet(`${state.petName}: Hey! Quick question?`, 2, 6);
+          speakPet(`${state.petName}: ${t("pet.askQuiz")}`, 2, 6);
         }, 2100);
       },
       state.popupIntervalMin * 60 * 1000,
@@ -380,7 +391,7 @@ export function PetCompanion() {
       if (approachTimer) window.clearTimeout(approachTimer);
       if (invitationTimer) window.clearTimeout(invitationTimer);
     };
-  }, [focusedStudySession, readingInProgress, petIsSpeaking, open, reminder, state.popupIntervalMin, companionState?.remindersEnabled, state.petName]);
+  }, [focusedStudySession, readingInProgress, petIsSpeaking, open, reminder, state.popupIntervalMin, companionState?.remindersEnabled, state.petName, t]);
 
   const [quiz, setQuiz] = useState<QuizQuestionResponse | null>(null);
   const studiedToday = state.lastStudyDate === todayISO();
@@ -582,14 +593,14 @@ export function PetCompanion() {
                   }
                 }}
               >
-                <Sparkles className="w-3 h-3 mr-1" /> Quiz me
+                <Sparkles className="w-3 h-3 mr-1" /> {t("pet.quizMe")}
               </Button>
               <Button size="sm" variant="outline" className="h-7 text-xs border-2" asChild>
                 <Link to="/app/decks" onClick={() => {
                   setReminder(false);
                   setInvitationMessage(null);
                 }}>
-                  Review
+                  {t("pet.review")}
                 </Link>
               </Button>
             </div>
@@ -628,10 +639,10 @@ export function PetCompanion() {
               />
               <div className="flex-1 min-w-0">
                 <p className="text-[10px] font-bold uppercase text-primary leading-tight">
-                  Mini quiz!
+                  {t("pet.quizTitle")}
                 </p>
                 <p className="text-xs text-muted-foreground leading-tight truncate">
-                  What does it mean?
+                  {t("pet.quizPrompt")}
                 </p>
               </div>
               <div
@@ -660,9 +671,9 @@ export function PetCompanion() {
                 {answerResult === null ? (
                   <span className="text-muted-foreground">Checking your answer…</span>
                 ) : answerResult.correct ? (
-                  <span className="text-success">✨ Amazing! +{answerResult.xp} XP · +{answerResult.coin} 🪙</span>
+                  <span className="text-success">✨ {t("pet.correct", { xp: answerResult.xp, coin: answerResult.coin })}</span>
                 ) : (
-                  <span className="text-destructive">😅 Don't worry — we'll learn together.</span>
+                  <span className="text-destructive">😅 {t("pet.wrong")}</span>
                 )}
               </p>
             )}

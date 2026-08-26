@@ -1,6 +1,6 @@
 # VocaPet Companion extension
 
-This Manifest V3 Chrome extension runs a background alarm, checks the signed-in user's FSRS study plan, and places Burumaru directly on normal websites. The pet walks along the bottom of the current tab, can open a quick quiz, and opens the existing daily plan when the user wants a full review.
+This Manifest V3 Chrome extension runs a background alarm, checks the signed-in user's FSRS study plan, and places Burumaru directly on normal websites. The pet walks along the bottom of the current tab, gently approaches before a due reminder, opens a timed 10-second quiz, and sends the answer through the same API used by the web app. XP, FSRS scheduling, streaks and the next plan therefore remain user-scoped and in sync with VocaPet.
 
 ## Load it locally
 
@@ -18,5 +18,7 @@ For local development, enter `http://localhost:8080` as the API URL and the loca
 
 - The extension signs in through the existing API and stores its JWT only in `chrome.storage.local`.
 - It never reads the website's local storage or cookies.
-- Every plan request uses the existing bearer-token authentication and user-scoped study-plan endpoint.
+- Every plan request and quiz answer uses the existing bearer-token authentication and user-scoped endpoints.
+- The background worker refreshes an expired access token once with the stored refresh token before asking the user to sign in again.
+- The content script never receives the JWT. It receives only whether a companion is signed in.
 - Before publishing, set `APP_CORS_ALLOWED_EXTENSION_ORIGINS` to the exact `chrome-extension://<Chrome Web Store ID>` origin instead of the development wildcard.

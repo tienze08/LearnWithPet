@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DeckResponse } from "@/api/deck.api";
+import { useTranslation } from "@/lib/i18n";
 
 interface EditDeckDialogProps {
   deck: DeckResponse;
@@ -31,6 +32,7 @@ const COLORS = [
 ];
 
 export default function EditDeckDialog({ deck, onSave }: EditDeckDialogProps) {
+  const { t: tr } = useTranslation();
   const [open, setOpen] = useState(false);
 
   const [name, setName] = useState(deck.name);
@@ -72,24 +74,24 @@ export default function EditDeckDialog({ deck, onSave }: EditDeckDialogProps) {
       <DialogTrigger asChild>
         <Button variant="outline">
           <Pencil className="mr-1 h-4 w-4" />
-          Edit deck
+          {tr("decks.edit")}
         </Button>
       </DialogTrigger>
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit deck</DialogTitle>
+          <DialogTitle>{tr("decks.edit")}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-3">
           <div>
-            <Label>Name</Label>
+            <Label>{tr("decks.name")}</Label>
 
             <Input value={name} onChange={(e) => setName(e.target.value)} maxLength={60} />
           </div>
 
           <div>
-            <Label>Description</Label>
+            <Label>{tr("decks.description")}</Label>
 
             <Input
               value={description}
@@ -99,7 +101,7 @@ export default function EditDeckDialog({ deck, onSave }: EditDeckDialogProps) {
           </div>
 
           <div>
-            <Label>Emoji</Label>
+            <Label>{tr("decks.emoji")}</Label>
 
             <div className="mt-2 flex flex-wrap gap-2">
               {EMOJIS.map((item) => (
@@ -118,7 +120,7 @@ export default function EditDeckDialog({ deck, onSave }: EditDeckDialogProps) {
           </div>
 
           <div>
-            <Label>Color</Label>
+            <Label>{tr("decks.color")}</Label>
 
             <div className="mt-2 flex flex-wrap gap-2">
               {COLORS.map((item) => (
@@ -135,7 +137,7 @@ export default function EditDeckDialog({ deck, onSave }: EditDeckDialogProps) {
           </div>
 
           <Button className="btn-pop w-full" onClick={handleSave}>
-            Save changes
+            {tr("decks.save")}
           </Button>
         </div>
       </DialogContent>

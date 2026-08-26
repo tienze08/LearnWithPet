@@ -32,8 +32,25 @@ async function scheduleReminder(settings) {
   });
 }
 
-async function api(path, options = {}) {
-  const { token, settings } = await readState();
+async function refreshAccessToken(settings, refreshToken) {
+  if (!refreshToken) return null;
+  const response = await fetch(`${settings.apiUrl.replace(/\/$/, "")}/api/auth/refresh`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ refreshToken }),
+  });
+  if (!response.ok) return null;
+  const auth = await response.json();
+  await chrome.storage.local.set({
+    token: auth.token,
+    refreshToken: auth.refreshToken ?? refreshToken,
+    user: { name: auth.name, email: auth.email },
+  });
+  return auth.token;
+}
+
+async function api(path, options = {}, retried = false) {
+  const { token, refreshToken, settings } = await readState();
   if (!token) throw new Error("Please sign in to VocaPet first.");
 
   const response = await fetch(`${settings.apiUrl.replace(/\/$/, "")}${path}`, {
@@ -45,8 +62,11 @@ async function api(path, options = {}) {
     },
   });
 
-  if (response.status === 401) {
+  if (response.status === 401 && !retried) {
+    const refreshedToken = await refreshAccessToken(settings, refreshToken);
+    if (refreshedToken) return api(path, options, true);
     await chrome.storage.local.remove(["token", "refreshToken", "user"]);
+    await broadcastPetAuthState(false);
     throw new Error("Your VocaPet session expired. Please sign in again.");
   }
   if (!response.ok) throw new Error(`VocaPet could not check your plan (${response.status}).`);
@@ -186,7 +206,13 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
         method: "POST",
         body: JSON.stringify({ vocabularyId: message.vocabularyId, answer: message.answer }),
       });
-      sendResponse({ ok: true, answer });
+      // The result is already persisted by the shared quiz endpoint. Refresh
+      // the user-scoped plan here so the next popup and web dashboard reflect
+      // the same FSRS schedule immediately.
+      let plan = null;
+      try { plan = await checkStudyPlan(); } catch { /* the answer remains valid */ }
+      await chrome.storage.local.set({ lastQuizResult: { answer, at: Date.now() } });
+      sendResponse({ ok: true, answer, plan });
       return;
     }
     if (message.type === "OPEN_PLAN") {

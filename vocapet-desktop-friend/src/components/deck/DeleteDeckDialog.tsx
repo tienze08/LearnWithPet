@@ -12,6 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useTranslation } from "@/lib/i18n";
 
 interface DeleteDeckDialogProps {
   deckName: string;
@@ -19,6 +20,7 @@ interface DeleteDeckDialogProps {
 }
 
 export default function DeleteDeckDialog({ deckName, onConfirm }: DeleteDeckDialogProps) {
+  const { t: tr } = useTranslation();
   const [open, setOpen] = useState(false);
 
   return (
@@ -26,22 +28,22 @@ export default function DeleteDeckDialog({ deckName, onConfirm }: DeleteDeckDial
       <DialogTrigger asChild>
         <Button variant="outline" className="text-destructive hover:text-destructive">
           <Trash2 className="mr-1 h-4 w-4" />
-          Delete
+          {tr("decks.delete")}
         </Button>
       </DialogTrigger>
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete "{deckName}"?</DialogTitle>
+          <DialogTitle>{tr("decks.deleteTitle", { name: deckName })}</DialogTitle>
         </DialogHeader>
 
         <p className="text-sm text-muted-foreground">
-          This will permanently remove the deck and all of its words. This action cannot be undone.
+          {tr("decks.deleteDetail")}
         </p>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>
-            Cancel
+            {tr("decks.cancel")}
           </Button>
 
           <Button
@@ -51,7 +53,7 @@ export default function DeleteDeckDialog({ deckName, onConfirm }: DeleteDeckDial
               setOpen(false);
             }}
           >
-            Delete deck
+            {tr("decks.deleteAction")}
           </Button>
         </DialogFooter>
       </DialogContent>

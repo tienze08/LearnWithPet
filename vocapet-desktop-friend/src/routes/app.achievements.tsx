@@ -11,6 +11,7 @@ import {
   AchievementTier,
   TIER_LABEL,
 } from "@/lib/achievements";
+import { useTranslation } from "@/lib/i18n";
 
 export const Route = createFileRoute("/app/achievements")({
   component: AchievementsPage,
@@ -26,6 +27,7 @@ const TIER_CLASSES: Record<AchievementTier, string> = {
 const FILTERS = ["All", "Unlocked", "In progress"] as const;
 
 function AchievementsPage() {
+  const { t: tr } = useTranslation();
   const { state } = useGame();
   const { data: serverAchievements = [] } = useMyAchievementsQuery();
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("All");
@@ -60,15 +62,15 @@ function AchievementsPage() {
             <Trophy className="w-8 h-8 text-primary" />
           </div>
           <div className="flex-1">
-            <h1 className="text-3xl font-extrabold">Achievements</h1>
+            <h1 className="text-3xl font-extrabold">{tr("achievement.title")}</h1>
             <p className="text-sm text-muted-foreground">
-              {unlocked} of {rows.length} unlocked — keep studying to collect them all.
+              {tr("achievement.summary", { unlocked, total: rows.length })}
             </p>
             <div className="mt-3 flex items-center gap-3">
               <div
                 className="h-3.5 flex-1 overflow-hidden rounded-full border border-border bg-muted p-0.5 shadow-inner"
                 role="progressbar"
-                aria-label="Overall achievement progress"
+                aria-label={tr("achievement.overall")}
                 aria-valuemin={0}
                 aria-valuemax={100}
                 aria-valuenow={overall}
@@ -96,14 +98,14 @@ function AchievementsPage() {
                 : "border-border bg-card hover:border-primary"
             }`}
           >
-            {f}
+            {f === "All" ? tr("achievement.all") : f === "Unlocked" ? tr("achievement.unlocked") : tr("achievement.progress")}
           </button>
         ))}
       </div>
 
       {visible.length === 0 && (
         <p className="text-center text-muted-foreground py-12 font-bold">
-          Nothing here yet — go review some words!
+          {tr("achievement.empty")}
         </p>
       )}
 
@@ -134,6 +136,7 @@ function Card({
   pct: number;
   unlocked: boolean;
 }) {
+  const { t: tr } = useTranslation();
   return (
     <div
       className={`rounded-2xl border-2 p-4 transition-all ${
@@ -170,14 +173,14 @@ function Card({
       <div className="mt-4 rounded-xl border border-border bg-muted/45 p-2.5">
         <div className="mb-2 flex items-center justify-between text-[11px] font-extrabold">
           <span className={unlocked ? "text-primary" : "text-muted-foreground"}>
-            {unlocked ? "Completed" : "In progress"}
+            {unlocked ? tr("achievement.completed") : tr("achievement.progress")}
           </span>
           <span className="text-muted-foreground">{pct}%</span>
         </div>
         <div
           className="h-2.5 overflow-hidden rounded-full bg-background ring-1 ring-border/70"
           role="progressbar"
-          aria-label={`${a.title} progress`}
+          aria-label={tr("achievement.cardProgress", { title: a.title })}
           aria-valuemin={0}
           aria-valuemax={a.target}
           aria-valuenow={value}

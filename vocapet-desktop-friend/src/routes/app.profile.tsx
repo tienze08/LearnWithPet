@@ -8,6 +8,7 @@ import { avatarMap } from "@/types/avatar";
 import { useMyAchievementsQuery } from "@/hooks/queries/achievement.queries";
 import { useUnlockedPetsQuery } from "@/hooks/queries/pet.queries";
 import { ACHIEVEMENTS as AWARD_DEFINITIONS, achievementStatus } from "@/lib/achievements";
+import { useTranslation } from "@/lib/i18n";
 
 const PET_EMOJI = { CAT: "🐱", FOX: "👻", BUNNY: "🍎", PANDA: "⚽", DRAGON: "🐲" } as const;
 const ACHIEVEMENT_CODES: Record<string, string> = {
@@ -49,6 +50,7 @@ const ACHIEVEMENTS = [
 ];
 
 function Profile() {
+  const { t: tr } = useTranslation();
   const { state, setState } = useGame();
   const { data: me } = useMeQuery();
   const { data: unlockedPets = [] } = useUnlockedPetsQuery();
@@ -97,29 +99,29 @@ function Profile() {
             <div className="grid grid-cols-2 gap-3">
               <Tile
                 icon={<Zap className="w-4 h-4 text-xp" />}
-                label="Level"
+                label={tr("profile.level")}
                 value={me?.level ?? state.level}
               />
               <Tile
                 icon={<Flame className="w-4 h-4 text-streak" />}
-                label="Streak"
+                label={tr("profile.streak")}
                 value={me?.streak ?? state.streak}
               />
               <Tile
                 icon={<Coins className="w-4 h-4 text-coin" />}
-                label="Coins"
+                label={tr("profile.coins")}
                 value={me?.coin ?? state.coins}
               />
               <Tile
                 icon={<Trophy className="w-4 h-4 text-primary" />}
-                label="Accuracy"
+                label={tr("profile.accuracy")}
                 value={`${accuracy}%`}
               />
             </div>
           </div>
 
           <div className="mt-5">
-            <p className="text-xs font-bold uppercase text-muted-foreground mb-2">Avatar</p>
+            <p className="text-xs font-bold uppercase text-muted-foreground mb-2">{tr("profile.avatar")}</p>
             <div className="flex flex-wrap gap-2">
               {AVATARS.map((avatar) => (
                 <button
@@ -143,12 +145,12 @@ function Profile() {
       <PetCard />
 
       <div>
-        <h2 className="text-xl font-extrabold mb-3">Unlocked pets</h2>
+        <h2 className="text-xl font-extrabold mb-3">{tr("profile.unlockedPets")}</h2>
         <div className="flex flex-wrap gap-3">
           {unlockedPets.map((pet) => (
             <div key={pet.species} className="rounded-2xl border-2 border-primary bg-primary/5 px-4 py-3 flex items-center gap-2">
               <span className="text-2xl">{PET_EMOJI[pet.species]}</span>
-              <div><p className="font-bold capitalize">{pet.species.toLowerCase()}</p><p className="text-xs text-primary">Unlocked</p></div>
+              <div><p className="font-bold capitalize">{pet.species.toLowerCase()}</p><p className="text-xs text-primary">{tr("profile.unlocked")}</p></div>
             </div>
           ))}
         </div>
@@ -157,7 +159,7 @@ function Profile() {
       <PetSpecies />
 
       <div>
-        <h2 className="text-xl font-extrabold mb-3">Daily goal</h2>
+        <h2 className="text-xl font-extrabold mb-3">{tr("profile.dailyGoal")}</h2>
         <div className="flex flex-wrap gap-2">
           {[5, 10, 20, 30].map((g) => (
             <button
@@ -165,14 +167,14 @@ function Profile() {
               onClick={() => setState((s) => ({ ...s, dailyGoal: g }))}
               className={`px-4 py-2 rounded-xl border-2 text-sm font-bold ${state.dailyGoal === g ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card"}`}
             >
-              {g} words / day
+              {tr("profile.wordsDay", { count: g })}
             </button>
           ))}
         </div>
       </div>
 
       <div>
-        <h2 className="text-xl font-extrabold mb-3">Awarded achievements</h2>
+        <h2 className="text-xl font-extrabold mb-3">{tr("profile.awarded")}</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {awardedAchievements.map((award) => {
             return (
@@ -183,13 +185,13 @@ function Profile() {
                 <div className="w-10 h-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center text-xl">{award.icon}</div>
                 <div>
                   <p className="font-bold text-sm">{award.title}</p>
-                  <p className="text-xs text-primary">Awarded</p>
+                  <p className="text-xs text-primary">{tr("profile.unlocked")}</p>
                 </div>
               </div>
             );
           })}
           {awardedAchievements.length === 0 && (
-            <p className="text-sm text-muted-foreground sm:col-span-2 lg:col-span-3">No awards yet — keep learning to unlock your first achievement.</p>
+            <p className="text-sm text-muted-foreground sm:col-span-2 lg:col-span-3">{tr("profile.noAwards")}</p>
           )}
         </div>
       </div>

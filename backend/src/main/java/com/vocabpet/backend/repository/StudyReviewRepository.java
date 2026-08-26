@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import com.vocabpet.backend.entity.StudyReview;
+import com.vocabpet.backend.entity.enums.Rating;
 
 public interface StudyReviewRepository
                 extends JpaRepository<StudyReview, Long> {
@@ -38,6 +39,9 @@ public interface StudyReviewRepository
         long countByUserId(Long userId);
 
         long countByUserIdAndReviewedAtBetween(Long userId, LocalDateTime from, LocalDateTime to);
+
+        long countByUserIdAndVocabularyIdAndRatingAndReviewedAtGreaterThanEqual(
+                        Long userId, Long vocabularyId, Rating rating, LocalDateTime from);
 
         @Query("""
                         SELECT COUNT(DISTINCT r.vocabulary.id) FROM StudyReview r
