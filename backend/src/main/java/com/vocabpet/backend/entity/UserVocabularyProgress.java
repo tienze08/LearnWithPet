@@ -1,5 +1,6 @@
 package com.vocabpet.backend.entity;
 
+import com.vocabpet.backend.entity.enums.LearningSource;
 import com.vocabpet.backend.entity.enums.Status;
 import jakarta.persistence.*;
 import lombok.*;
@@ -29,6 +30,11 @@ public class UserVocabularyProgress {
     @JoinColumn(name = "vocabulary_id")
     private Vocabulary vocabulary;
 
+    /** Canonical word shared by Tango lessons and flashcard decks. Null for legacy rows. */
+    @ManyToOne
+    @JoinColumn(name = "tango_vocabulary_id")
+    private TangoVocabulary tangoVocabulary;
+
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private Status status = Status.NEW;
@@ -49,4 +55,16 @@ public class UserVocabularyProgress {
 
     @Builder.Default
     private LocalDateTime nextReviewTime = LocalDateTime.now();
+
+    @Builder.Default
+    private int timesSeen = 0;
+
+    @Builder.Default
+    private int correctCount = 0;
+
+    @Builder.Default
+    private int incorrectCount = 0;
+
+    @Enumerated(EnumType.STRING)
+    private LearningSource lastSource;
 }

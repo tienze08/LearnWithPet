@@ -36,6 +36,11 @@ public class Vocabulary {
     @Enumerated(EnumType.STRING)
     private PartOfSpeech partOfSpeech;
 
+    /** Optional link to the canonical Tango word; null when the deck word has no unambiguous match. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tango_vocabulary_id")
+    private TangoVocabulary tangoVocabulary;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "deck_id", nullable = false)
     private Deck deck;

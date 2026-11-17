@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { GameProvider, useGame, type PetVariant } from "@/lib/store";
-import { PetCompanion } from "@/components/PetCompanion";
 import { useMeQuery } from "@/hooks/queries/user.queries";
 import { useAuthStore } from "@/hooks/stores/auth.store";
 import { avatarMap } from "@/types/avatar";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,10 +22,17 @@ import {
   User,
   PawPrintIcon,
   Target,
-  PawPrint,
   LogOut,
   Trophy,
   BookOpen,
+  Languages,
+  Mic,
+  ScrollText,
+  Sparkles,
+  Layers,
+  Search,
+  Repeat,
+  GraduationCap,
 } from "lucide-react";
 
 function TopBar() {
@@ -48,62 +55,57 @@ function TopBar() {
   }, [me?.pet?.species, setState, state.petVariant]);
 
   return (
-    <header className="sticky top-0 z-30 border-b border-border/70 bg-background/75 backdrop-blur-xl">
-      <div className="max-w-6xl mx-auto px-4 h-[4.25rem] flex items-center gap-4">
-        <Link to="/app" className="flex items-center gap-2 font-extrabold tracking-tight text-lg">
-          <span className="text-2xl">🌱</span>
-          <span>VocaPet</span>
-        </Link>
-        <div className="ml-auto flex items-center gap-3 text-sm font-bold">
-          <Stat
-            icon={<Flame className="w-4 h-4 text-streak" />}
-            value={me?.streak ?? state.streak}
-          />
-          <Stat icon={<Coins className="w-4 h-4 text-coin" />} value={userCoins} />
-          <div className="hidden sm:flex items-center gap-2">
-            <Zap className="w-4 h-4 text-xp" />
-            <span>Lv {userLevel}</span>
-            <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
-              <div className="h-full bg-xp" style={{ width: `${pct}%` }} />
-            </div>
+    <header className="flex h-14 shrink-0 items-center gap-3 border-b border-border/70 px-4 md:px-6">
+      <Link to="/app" className="flex items-center gap-2 font-bold tracking-tight md:hidden">
+        <span className="text-xl">🌱</span>
+        <span>VocaPet</span>
+      </Link>
+      <div className="ml-auto flex items-center gap-2 text-sm font-semibold">
+        <Stat icon={<Flame className="h-4 w-4 text-streak" />} value={me?.streak ?? state.streak} />
+        <Stat icon={<Coins className="h-4 w-4 text-coin" />} value={userCoins} />
+        <div className="hidden items-center gap-2 rounded-full bg-muted/70 px-3 py-1 sm:flex">
+          <Zap className="h-4 w-4 text-xp" />
+          <span>Lv {userLevel}</span>
+          <div className="h-1.5 w-20 overflow-hidden rounded-full bg-background">
+            <div className="h-full bg-xp" style={{ width: `${pct}%` }} />
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                type="button"
-                className="ml-1 flex items-center gap-2 pl-1.5 pr-3 py-1 rounded-full border border-border bg-card/70 shadow-sm transition-colors hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                aria-label="Open account menu"
-              >
-                <span className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-lg">
-                  {avatarEmoji}
-                </span>
-                <span className="hidden sm:inline max-w-28 text-sm font-bold truncate">{displayName}</span>
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-52 rounded-xl border-2">
-              <DropdownMenuLabel>
-                <p className="truncate font-bold">{displayName}</p>
-                {me?.email && <p className="mt-0.5 truncate text-xs font-normal text-muted-foreground">{me.email}</p>}
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={() => navigate({ to: "/app/profile" })}>
-                <User className="mr-2 h-4 w-4" />
-                Profile
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="text-destructive focus:text-destructive"
-                onSelect={() => {
-                  logout();
-                  navigate({ to: "/login" });
-                }}
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                Log out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className="ml-1 flex items-center gap-2 rounded-full border border-border bg-card py-1 pl-1 pr-3 transition-colors hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              aria-label="Open account menu"
+            >
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-base">
+                {avatarEmoji}
+              </span>
+              <span className="hidden max-w-28 truncate sm:inline">{displayName}</span>
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-52 rounded-xl">
+            <DropdownMenuLabel>
+              <p className="truncate font-bold">{displayName}</p>
+              {me?.email && <p className="mt-0.5 truncate text-xs font-normal text-muted-foreground">{me.email}</p>}
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={() => navigate({ to: "/app/profile" })}>
+              <User className="mr-2 h-4 w-4" />
+              Profile
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive"
+              onSelect={() => {
+                logout();
+                navigate({ to: "/login" });
+              }}
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Log out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );
@@ -111,23 +113,30 @@ function TopBar() {
 
 function Stat({ icon, value }: { icon: React.ReactNode; value: number }) {
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-1.5 rounded-full bg-muted/70 px-3 py-1">
       {icon}
       <span>{value}</span>
     </div>
   );
 }
 
-function NavLink({ to, icon, label }: { to: string; icon: React.ReactNode; label: string }) {
+function NavLink({ to, icon, label, soon }: { to: string; icon: React.ReactNode; label: string; soon?: boolean }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const active = path === to || (to !== "/app" && path.startsWith(to));
+  if (soon) {
+    return (
+      <span className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-semibold text-muted-foreground/60" aria-disabled="true">
+        {icon}
+        {label}
+        <span className="ml-auto rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide">Soon</span>
+      </span>
+    );
+  }
   return (
     <Link
       to={to}
-      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-bold transition-colors ${
-        active
-          ? "bg-primary/10 text-primary shadow-sm"
-          : "text-muted-foreground hover:text-foreground hover:bg-card/80"
+      className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
+        active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"
       }`}
     >
       {icon}
@@ -136,15 +145,24 @@ function NavLink({ to, icon, label }: { to: string; icon: React.ReactNode; label
   );
 }
 
+function NavGroup({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">{label}</p>
+      <div className="space-y-0.5">{children}</div>
+    </div>
+  );
+}
+
 function MobileNav() {
   return (
     <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 border-t border-border/70 bg-background/90 backdrop-blur-xl">
       <div className="flex justify-around py-2">
         <NavLink to="/app" icon={<LayoutDashboard className="w-5 h-5" />} label="Home" />
-        <NavLink to="/app/decks" icon={<Library className="w-5 h-5" />} label="Decks" />
-        <NavLink to="/app/tasks" icon={<Target className="w-5 h-5" />} label="Tasks" />
-        <NavLink to="/app/pets" icon={<PawPrint className="w-5 h-5" />} label="Pets" />
-        <NavLink to="/app/profile" icon={<User className="w-5 h-5" />} label="Profile" />
+        <NavLink to="/app/japanese/alphabet" icon={<Languages className="w-5 h-5" />} label="Alphabet" />
+        <NavLink to="/app/japanese/tango" icon={<BookOpen className="w-5 h-5" />} label="Vocab" />
+        <NavLink to="/app/decks" icon={<Library className="w-5 h-5" />} label="Flashcards" />
+        <NavLink to="/app/profile" icon={<User className="w-5 h-5" />} label="Settings" />
       </div>
     </nav>
   );
@@ -152,48 +170,65 @@ function MobileNav() {
 
 function DesktopSidebar() {
   return (
-    <aside className="hidden w-56 shrink-0 md:block">
-      <div className="sticky top-[4.25rem] py-8 pr-6">
-        <p className="mb-3 px-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
-          Learn
-        </p>
-        <nav className="space-y-1">
-          <NavLink to="/app" icon={<LayoutDashboard className="w-4 h-4" />} label="Home" />
-          <NavLink to="/app/decks" icon={<Library className="w-4 h-4" />} label="Study & decks" />
+    <aside className="hidden w-60 shrink-0 flex-col p-3 md:sticky md:top-0 md:flex md:h-screen">
+      <Link to="/app" className="flex items-center gap-3 rounded-xl px-2 py-2">
+        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-xl">🌱</span>
+        <span className="grid leading-tight">
+          <span className="text-base font-bold tracking-tight">VocaPet</span>
+          <span className="text-[11px] text-muted-foreground">Study companion</span>
+        </span>
+      </Link>
+
+      <Button asChild className="btn-pop mt-4 w-full justify-start">
+        <Link to="/app/decks">
+          <BookOpen className="mr-2 h-4 w-4" />
+          Start studying
+        </Link>
+      </Button>
+
+      <nav className="mt-6 flex-1 space-y-6 overflow-y-auto">
+        <NavGroup label="Main">
+          <NavLink to="/app" icon={<LayoutDashboard className="w-4 h-4" />} label="Dashboard" />
+        </NavGroup>
+        <NavGroup label="Learning">
+          <NavLink to="/app/japanese/alphabet" icon={<Languages className="w-4 h-4" />} label="Alphabet" />
+          <NavLink to="/app/japanese/tango" icon={<BookOpen className="w-4 h-4" />} label="Vocabulary" />
+          <NavLink to="/app/japanese/kanji" icon={<Sparkles className="w-4 h-4" />} label="Kanji" soon />
+          <NavLink to="/app/japanese/grammar" icon={<ScrollText className="w-4 h-4" />} label="Grammar" soon />
+          <NavLink to="/app/japanese/listening" icon={<Mic className="w-4 h-4" />} label="Listening" soon />
+          <NavLink to="/app/japanese/jlpt" icon={<GraduationCap className="w-4 h-4" />} label="JLPT Practice" soon />
+        </NavGroup>
+        <NavGroup label="Practice">
+          <NavLink to="/app/decks" icon={<Layers className="w-4 h-4" />} label="Flashcards" />
+          <NavLink to="/app/review" icon={<Repeat className="w-4 h-4" />} label="Review Center" />
+          <NavLink to="/app/vocabulary" icon={<Search className="w-4 h-4" />} label="My Vocabulary" soon />
           <NavLink to="/app/reader" icon={<BookOpen className="w-4 h-4" />} label="Reader" />
+        </NavGroup>
+        <NavGroup label="Personal">
+          <NavLink to="/app/achievements" icon={<Trophy className="w-4 h-4" />} label="My Progress" />
           <NavLink to="/app/tasks" icon={<Target className="w-4 h-4" />} label="Missions" />
-        </nav>
-        <p className="mb-3 mt-8 px-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
-          Your companion
-        </p>
-        <nav className="space-y-1">
-          <NavLink to="/app/pets" icon={<PawPrintIcon className="w-4 h-4" />} label="Pets" />
-          <NavLink to="/app/achievements" icon={<Trophy className="w-4 h-4" />} label="Progress & awards" />
           <NavLink to="/app/profile" icon={<User className="w-4 h-4" />} label="Settings" />
-        </nav>
-      </div>
+        </NavGroup>
+      </nav>
     </aside>
   );
 }
 
 function ShellInner() {
-  const pathname = useRouterState({
-    select: (s) => s.location.pathname,
-  });
-
   return (
-    <div className="min-h-screen flex flex-col pb-20 md:pb-0">
-      <TopBar />
+    <div className="min-h-screen pb-20 md:flex md:pb-0">
+      <DesktopSidebar />
 
-      <div className="mx-auto flex w-full max-w-7xl px-4">
-        <DesktopSidebar />
-        <main className="min-w-0 flex-1 py-8 md:py-10 md:pl-2">
-          <Outlet />
-        </main>
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col md:h-screen md:py-3 md:pr-3">
+        <div className="flex min-h-0 flex-1 flex-col md:overflow-hidden md:rounded-2xl md:border md:border-border/70 md:bg-card/80 md:shadow-sm md:backdrop-blur-xl">
+          <TopBar />
+          <main className="min-h-0 flex-1 overflow-y-auto px-4 py-6 md:px-8 md:py-8">
+            <Outlet />
+          </main>
+        </div>
       </div>
 
       <MobileNav />
-      <PetCompanion />
     </div>
   );
 }

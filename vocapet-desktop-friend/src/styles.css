@@ -39,7 +39,7 @@
   --color-coin: var(--coin);
   --color-streak: var(--streak);
   --color-xp: var(--xp);
-  --font-display: "Nunito", "ui-rounded", system-ui, sans-serif;
+  --font-display: "Geist", system-ui, sans-serif;
 
   --shadow-pop: 0 4px 0 0 var(--shadow-pop-color);
   --shadow-pop-sm: 0 2px 0 0 var(--shadow-pop-color);

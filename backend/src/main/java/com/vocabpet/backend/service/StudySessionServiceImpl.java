@@ -18,6 +18,7 @@ import com.vocabpet.backend.entity.User;
 import com.vocabpet.backend.entity.UserVocabularyProgress;
 import com.vocabpet.backend.entity.Vocabulary;
 import com.vocabpet.backend.entity.enums.CompanionEventType;
+import com.vocabpet.backend.entity.enums.LearningSource;
 import com.vocabpet.backend.exception.NoMoreCardsException;
 import com.vocabpet.backend.repository.DeckRepository;
 import com.vocabpet.backend.repository.StudyReviewRepository;
@@ -37,7 +38,7 @@ public class StudySessionServiceImpl implements StudySessionService {
         private final StudyReviewRepository reviewRepository;
         private final AchievementService achievementService;
         private final VocabularyRepository vocabularyRepository;
-        private final FsrsService fsrsService;
+        private final LearningEngineService learningEngine;
         private final StreakService streakService;
         private final MissionService missionService;
         private final CompanionService companionService;
@@ -122,21 +123,11 @@ public class StudySessionServiceImpl implements StudySessionService {
                                 request.getVocabularyId(), session.getDeck().getId())
                                 .orElseThrow(() -> new RuntimeException("Vocabulary is not in this study deck"));
 
-                var progressOptional = progressRepository.findByUserIdAndVocabularyId(
-                                userId,
-                                request.getVocabularyId());
+                boolean isNewCard = progressRepository.findByUserIdAndVocabularyId(userId, vocabulary.getId()).isEmpty();
 
-                boolean isNewCard = progressOptional.isEmpty();
-
-                UserVocabularyProgress progress = progressOptional.orElseGet(() -> UserVocabularyProgress.builder()
-                                .user(session.getUser())
-                                .vocabulary(vocabulary)
-                                .build());
-
-                // FSRS UPDATE
-                fsrsService.review(progress, request.getRating());
-
-                progressRepository.save(progress);
+                // Unified progress + FSRS update (shared with Tango and quizzes)
+                UserVocabularyProgress progress = learningEngine.record(
+                                session.getUser(), vocabulary, null, LearningSource.FLASHCARD, request.getRating());
 
                 // SAVE HISTORY
                 reviewRepository.save(

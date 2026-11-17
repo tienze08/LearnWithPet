@@ -19,10 +19,19 @@ import { Route as AppAchievementsRouteImport } from './routes/app.achievements'
 import { Route as AppPetsRouteImport } from './routes/app.pets'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
 import { Route as AppReaderRouteImport } from './routes/app.reader'
+import { Route as AppReviewRouteImport } from './routes/app.review'
 import { Route as AppTasksRouteImport } from './routes/app.tasks'
 import { Route as AppWelcomeRouteImport } from './routes/app.welcome'
 import { Route as AppDecksIndexRouteImport } from './routes/app.decks.index'
 import { Route as AppDecksDeckIdRouteImport } from './routes/app.decks.$deckId'
+import { Route as AppJapaneseAlphabetRouteImport } from './routes/app.japanese.alphabet'
+import { Route as AppJapaneseKanaRouteImport } from './routes/app.japanese.kana'
+import { Route as AppJapaneseTangoIndexRouteImport } from './routes/app.japanese.tango.index'
+import { Route as AppJapaneseTangoMistakesRouteImport } from './routes/app.japanese.tango.mistakes'
+import { Route as AppJapaneseTangoLearnLessonIdRouteImport } from './routes/app.japanese.tango.learn.$lessonId'
+import { Route as AppJapaneseTangoLessonsLessonIdRouteImport } from './routes/app.japanese.tango.lessons.$lessonId'
+import { Route as AppJapaneseTangoPracticeLessonIdRouteImport } from './routes/app.japanese.tango.practice.$lessonId'
+import { Route as AppJapaneseTangoVocabulariesVocabularyIdRouteImport } from './routes/app.japanese.tango.vocabularies.$vocabularyId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -74,6 +83,11 @@ const AppReaderRoute = AppReaderRouteImport.update({
   path: '/reader',
   getParentRoute: () => AppRoute,
 } as any)
+const AppReviewRoute = AppReviewRouteImport.update({
+  id: '/review',
+  path: '/review',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppTasksRoute = AppTasksRouteImport.update({
   id: '/tasks',
   path: '/tasks',
@@ -94,6 +108,51 @@ const AppDecksDeckIdRoute = AppDecksDeckIdRouteImport.update({
   path: '/decks/$deckId',
   getParentRoute: () => AppRoute,
 } as any)
+const AppJapaneseAlphabetRoute = AppJapaneseAlphabetRouteImport.update({
+  id: '/japanese/alphabet',
+  path: '/japanese/alphabet',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppJapaneseKanaRoute = AppJapaneseKanaRouteImport.update({
+  id: '/japanese/kana',
+  path: '/japanese/kana',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppJapaneseTangoIndexRoute = AppJapaneseTangoIndexRouteImport.update({
+  id: '/japanese/tango/',
+  path: '/japanese/tango/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppJapaneseTangoMistakesRoute =
+  AppJapaneseTangoMistakesRouteImport.update({
+    id: '/japanese/tango/mistakes',
+    path: '/japanese/tango/mistakes',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppJapaneseTangoLearnLessonIdRoute =
+  AppJapaneseTangoLearnLessonIdRouteImport.update({
+    id: '/japanese/tango/learn/$lessonId',
+    path: '/japanese/tango/learn/$lessonId',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppJapaneseTangoLessonsLessonIdRoute =
+  AppJapaneseTangoLessonsLessonIdRouteImport.update({
+    id: '/japanese/tango/lessons/$lessonId',
+    path: '/japanese/tango/lessons/$lessonId',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppJapaneseTangoPracticeLessonIdRoute =
+  AppJapaneseTangoPracticeLessonIdRouteImport.update({
+    id: '/japanese/tango/practice/$lessonId',
+    path: '/japanese/tango/practice/$lessonId',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppJapaneseTangoVocabulariesVocabularyIdRoute =
+  AppJapaneseTangoVocabulariesVocabularyIdRouteImport.update({
+    id: '/japanese/tango/vocabularies/$vocabularyId',
+    path: '/japanese/tango/vocabularies/$vocabularyId',
+    getParentRoute: () => AppRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -105,11 +164,20 @@ export interface FileRoutesByFullPath {
   '/app/pets': typeof AppPetsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/reader': typeof AppReaderRoute
+  '/app/review': typeof AppReviewRoute
   '/app/tasks': typeof AppTasksRoute
   '/app/welcome': typeof AppWelcomeRoute
   '/app/': typeof AppIndexRoute
   '/app/decks/$deckId': typeof AppDecksDeckIdRoute
+  '/app/japanese/alphabet': typeof AppJapaneseAlphabetRoute
+  '/app/japanese/kana': typeof AppJapaneseKanaRoute
   '/app/decks/': typeof AppDecksIndexRoute
+  '/app/japanese/tango/mistakes': typeof AppJapaneseTangoMistakesRoute
+  '/app/japanese/tango/': typeof AppJapaneseTangoIndexRoute
+  '/app/japanese/tango/learn/$lessonId': typeof AppJapaneseTangoLearnLessonIdRoute
+  '/app/japanese/tango/lessons/$lessonId': typeof AppJapaneseTangoLessonsLessonIdRoute
+  '/app/japanese/tango/practice/$lessonId': typeof AppJapaneseTangoPracticeLessonIdRoute
+  '/app/japanese/tango/vocabularies/$vocabularyId': typeof AppJapaneseTangoVocabulariesVocabularyIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -120,11 +188,20 @@ export interface FileRoutesByTo {
   '/app/pets': typeof AppPetsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/reader': typeof AppReaderRoute
+  '/app/review': typeof AppReviewRoute
   '/app/tasks': typeof AppTasksRoute
   '/app/welcome': typeof AppWelcomeRoute
   '/app': typeof AppIndexRoute
   '/app/decks/$deckId': typeof AppDecksDeckIdRoute
+  '/app/japanese/alphabet': typeof AppJapaneseAlphabetRoute
+  '/app/japanese/kana': typeof AppJapaneseKanaRoute
   '/app/decks': typeof AppDecksIndexRoute
+  '/app/japanese/tango/mistakes': typeof AppJapaneseTangoMistakesRoute
+  '/app/japanese/tango': typeof AppJapaneseTangoIndexRoute
+  '/app/japanese/tango/learn/$lessonId': typeof AppJapaneseTangoLearnLessonIdRoute
+  '/app/japanese/tango/lessons/$lessonId': typeof AppJapaneseTangoLessonsLessonIdRoute
+  '/app/japanese/tango/practice/$lessonId': typeof AppJapaneseTangoPracticeLessonIdRoute
+  '/app/japanese/tango/vocabularies/$vocabularyId': typeof AppJapaneseTangoVocabulariesVocabularyIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -137,11 +214,20 @@ export interface FileRoutesById {
   '/app/pets': typeof AppPetsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/reader': typeof AppReaderRoute
+  '/app/review': typeof AppReviewRoute
   '/app/tasks': typeof AppTasksRoute
   '/app/welcome': typeof AppWelcomeRoute
   '/app/': typeof AppIndexRoute
   '/app/decks/$deckId': typeof AppDecksDeckIdRoute
+  '/app/japanese/alphabet': typeof AppJapaneseAlphabetRoute
+  '/app/japanese/kana': typeof AppJapaneseKanaRoute
   '/app/decks/': typeof AppDecksIndexRoute
+  '/app/japanese/tango/mistakes': typeof AppJapaneseTangoMistakesRoute
+  '/app/japanese/tango/': typeof AppJapaneseTangoIndexRoute
+  '/app/japanese/tango/learn/$lessonId': typeof AppJapaneseTangoLearnLessonIdRoute
+  '/app/japanese/tango/lessons/$lessonId': typeof AppJapaneseTangoLessonsLessonIdRoute
+  '/app/japanese/tango/practice/$lessonId': typeof AppJapaneseTangoPracticeLessonIdRoute
+  '/app/japanese/tango/vocabularies/$vocabularyId': typeof AppJapaneseTangoVocabulariesVocabularyIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -155,11 +241,20 @@ export interface FileRouteTypes {
     | '/app/pets'
     | '/app/profile'
     | '/app/reader'
+    | '/app/review'
     | '/app/tasks'
     | '/app/welcome'
     | '/app/'
     | '/app/decks/$deckId'
+    | '/app/japanese/alphabet'
+    | '/app/japanese/kana'
     | '/app/decks/'
+    | '/app/japanese/tango/mistakes'
+    | '/app/japanese/tango/'
+    | '/app/japanese/tango/learn/$lessonId'
+    | '/app/japanese/tango/lessons/$lessonId'
+    | '/app/japanese/tango/practice/$lessonId'
+    | '/app/japanese/tango/vocabularies/$vocabularyId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -170,11 +265,20 @@ export interface FileRouteTypes {
     | '/app/pets'
     | '/app/profile'
     | '/app/reader'
+    | '/app/review'
     | '/app/tasks'
     | '/app/welcome'
     | '/app'
     | '/app/decks/$deckId'
+    | '/app/japanese/alphabet'
+    | '/app/japanese/kana'
     | '/app/decks'
+    | '/app/japanese/tango/mistakes'
+    | '/app/japanese/tango'
+    | '/app/japanese/tango/learn/$lessonId'
+    | '/app/japanese/tango/lessons/$lessonId'
+    | '/app/japanese/tango/practice/$lessonId'
+    | '/app/japanese/tango/vocabularies/$vocabularyId'
   id:
     | '__root__'
     | '/'
@@ -186,11 +290,20 @@ export interface FileRouteTypes {
     | '/app/pets'
     | '/app/profile'
     | '/app/reader'
+    | '/app/review'
     | '/app/tasks'
     | '/app/welcome'
     | '/app/'
     | '/app/decks/$deckId'
+    | '/app/japanese/alphabet'
+    | '/app/japanese/kana'
     | '/app/decks/'
+    | '/app/japanese/tango/mistakes'
+    | '/app/japanese/tango/'
+    | '/app/japanese/tango/learn/$lessonId'
+    | '/app/japanese/tango/lessons/$lessonId'
+    | '/app/japanese/tango/practice/$lessonId'
+    | '/app/japanese/tango/vocabularies/$vocabularyId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -273,6 +386,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppReaderRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/review': {
+      id: '/app/review'
+      path: '/review'
+      fullPath: '/app/review'
+      preLoaderRoute: typeof AppReviewRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/tasks': {
       id: '/app/tasks'
       path: '/tasks'
@@ -301,6 +421,62 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDecksDeckIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/japanese/alphabet': {
+      id: '/app/japanese/alphabet'
+      path: '/japanese/alphabet'
+      fullPath: '/app/japanese/alphabet'
+      preLoaderRoute: typeof AppJapaneseAlphabetRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/japanese/kana': {
+      id: '/app/japanese/kana'
+      path: '/japanese/kana'
+      fullPath: '/app/japanese/kana'
+      preLoaderRoute: typeof AppJapaneseKanaRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/japanese/tango/': {
+      id: '/app/japanese/tango/'
+      path: '/japanese/tango'
+      fullPath: '/app/japanese/tango/'
+      preLoaderRoute: typeof AppJapaneseTangoIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/japanese/tango/mistakes': {
+      id: '/app/japanese/tango/mistakes'
+      path: '/japanese/tango/mistakes'
+      fullPath: '/app/japanese/tango/mistakes'
+      preLoaderRoute: typeof AppJapaneseTangoMistakesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/japanese/tango/learn/$lessonId': {
+      id: '/app/japanese/tango/learn/$lessonId'
+      path: '/japanese/tango/learn/$lessonId'
+      fullPath: '/app/japanese/tango/learn/$lessonId'
+      preLoaderRoute: typeof AppJapaneseTangoLearnLessonIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/japanese/tango/lessons/$lessonId': {
+      id: '/app/japanese/tango/lessons/$lessonId'
+      path: '/japanese/tango/lessons/$lessonId'
+      fullPath: '/app/japanese/tango/lessons/$lessonId'
+      preLoaderRoute: typeof AppJapaneseTangoLessonsLessonIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/japanese/tango/practice/$lessonId': {
+      id: '/app/japanese/tango/practice/$lessonId'
+      path: '/japanese/tango/practice/$lessonId'
+      fullPath: '/app/japanese/tango/practice/$lessonId'
+      preLoaderRoute: typeof AppJapaneseTangoPracticeLessonIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/japanese/tango/vocabularies/$vocabularyId': {
+      id: '/app/japanese/tango/vocabularies/$vocabularyId'
+      path: '/japanese/tango/vocabularies/$vocabularyId'
+      fullPath: '/app/japanese/tango/vocabularies/$vocabularyId'
+      preLoaderRoute: typeof AppJapaneseTangoVocabulariesVocabularyIdRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
@@ -309,11 +485,20 @@ interface AppRouteChildren {
   AppPetsRoute: typeof AppPetsRoute
   AppProfileRoute: typeof AppProfileRoute
   AppReaderRoute: typeof AppReaderRoute
+  AppReviewRoute: typeof AppReviewRoute
   AppTasksRoute: typeof AppTasksRoute
   AppWelcomeRoute: typeof AppWelcomeRoute
   AppIndexRoute: typeof AppIndexRoute
   AppDecksDeckIdRoute: typeof AppDecksDeckIdRoute
+  AppJapaneseAlphabetRoute: typeof AppJapaneseAlphabetRoute
+  AppJapaneseKanaRoute: typeof AppJapaneseKanaRoute
   AppDecksIndexRoute: typeof AppDecksIndexRoute
+  AppJapaneseTangoMistakesRoute: typeof AppJapaneseTangoMistakesRoute
+  AppJapaneseTangoIndexRoute: typeof AppJapaneseTangoIndexRoute
+  AppJapaneseTangoLearnLessonIdRoute: typeof AppJapaneseTangoLearnLessonIdRoute
+  AppJapaneseTangoLessonsLessonIdRoute: typeof AppJapaneseTangoLessonsLessonIdRoute
+  AppJapaneseTangoPracticeLessonIdRoute: typeof AppJapaneseTangoPracticeLessonIdRoute
+  AppJapaneseTangoVocabulariesVocabularyIdRoute: typeof AppJapaneseTangoVocabulariesVocabularyIdRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -321,11 +506,21 @@ const AppRouteChildren: AppRouteChildren = {
   AppPetsRoute: AppPetsRoute,
   AppProfileRoute: AppProfileRoute,
   AppReaderRoute: AppReaderRoute,
+  AppReviewRoute: AppReviewRoute,
   AppTasksRoute: AppTasksRoute,
   AppWelcomeRoute: AppWelcomeRoute,
   AppIndexRoute: AppIndexRoute,
   AppDecksDeckIdRoute: AppDecksDeckIdRoute,
+  AppJapaneseAlphabetRoute: AppJapaneseAlphabetRoute,
+  AppJapaneseKanaRoute: AppJapaneseKanaRoute,
   AppDecksIndexRoute: AppDecksIndexRoute,
+  AppJapaneseTangoMistakesRoute: AppJapaneseTangoMistakesRoute,
+  AppJapaneseTangoIndexRoute: AppJapaneseTangoIndexRoute,
+  AppJapaneseTangoLearnLessonIdRoute: AppJapaneseTangoLearnLessonIdRoute,
+  AppJapaneseTangoLessonsLessonIdRoute: AppJapaneseTangoLessonsLessonIdRoute,
+  AppJapaneseTangoPracticeLessonIdRoute: AppJapaneseTangoPracticeLessonIdRoute,
+  AppJapaneseTangoVocabulariesVocabularyIdRoute:
+    AppJapaneseTangoVocabulariesVocabularyIdRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
