@@ -1,4 +1,5 @@
 import { getMeApi } from "@/api/user.api";
+import { getPathStatus } from "@/api/learning-path.api";
 import { AuthInput } from "@/components/AuthInput";
 import { AuthShell } from "@/components/AuthShell";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -75,8 +76,10 @@ function LoginPage() {
         });
       } else {
         toast.success("Login successful");
+        // Learning Path on and set up: Today is the start page. Any error here just falls back to the dashboard.
+        const path = await getPathStatus().catch(() => null);
         navigate({
-          to: "/app",
+          to: path?.enabled && path.onboarded ? "/app/path" : "/app",
         });
       }
     } catch (err) {

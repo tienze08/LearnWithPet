@@ -16,12 +16,14 @@ import com.vocabpet.backend.entity.StudyReview;
 import com.vocabpet.backend.entity.StudySession;
 import com.vocabpet.backend.entity.User;
 import com.vocabpet.backend.entity.UserVocabularyProgress;
+import com.vocabpet.backend.entity.TangoVocabulary;
 import com.vocabpet.backend.entity.Vocabulary;
 import com.vocabpet.backend.entity.enums.CompanionEventType;
 import com.vocabpet.backend.entity.enums.LearningSource;
 import com.vocabpet.backend.exception.NoMoreCardsException;
 import com.vocabpet.backend.repository.DeckRepository;
 import com.vocabpet.backend.repository.StudyReviewRepository;
+import com.vocabpet.backend.repository.TangoLessonVocabularyRepository;
 import com.vocabpet.backend.repository.StudySessionRepository;
 import com.vocabpet.backend.repository.UserVocabularyProgressRepository;
 import com.vocabpet.backend.repository.VocabularyRepository;
@@ -44,6 +46,7 @@ public class StudySessionServiceImpl implements StudySessionService {
         private final CompanionService companionService;
 
         private final DeckRepository deckRepository;
+        private final TangoLessonVocabularyRepository tangoLessonVocabularyRepository;
         private final CurrentUserService currentUserService;
 
         @Override
@@ -91,15 +94,7 @@ public class StudySessionServiceImpl implements StudySessionService {
                 if (!news.isEmpty()) {
                         Vocabulary v = news.get(0);
 
-                        return StudyCardResponse.builder()
-                                        .progressId(null)
-                                        .vocabularyId(v.getId())
-                                        .word(v.getWord())
-                                        .meaning(v.getMeaning())
-                                        .example(v.getExample())
-                                        .difficulty(v.getDifficulty())
-                                        .partOfSpeech(v.getPartOfSpeech())
-                                        .build();
+                        return card(StudyCardResponse.builder().progressId(null), v);
                 }
 
                 throw new NoMoreCardsException("No more cards in this session");
@@ -214,14 +209,26 @@ public class StudySessionServiceImpl implements StudySessionService {
 
         private StudyCardResponse map(UserVocabularyProgress p, Vocabulary v) {
 
-                return StudyCardResponse.builder()
-                                .progressId(p.getId())
-                                .vocabularyId(v.getId())
+                return card(StudyCardResponse.builder().progressId(p.getId()), v);
+        }
+
+        /** Builds the card and, for Tango-linked words, adds kana, romaji and the source lesson. */
+        private StudyCardResponse card(StudyCardResponse.StudyCardResponseBuilder b, Vocabulary v) {
+                b.vocabularyId(v.getId())
                                 .word(v.getWord())
                                 .meaning(v.getMeaning())
                                 .example(v.getExample())
                                 .difficulty(v.getDifficulty())
-                                .partOfSpeech(v.getPartOfSpeech())
-                                .build();
+                                .partOfSpeech(v.getPartOfSpeech());
+                TangoVocabulary t = v.getTangoVocabulary();
+                if (t != null) {
+                        b.kana(t.getKana()).romaji(t.getRomaji());
+                        tangoLessonVocabularyRepository.findPublishedByVocabularyIds(List.of(t.getId())).stream()
+                                        .findFirst()
+                                        .ifPresent(lv -> b.lessonId(lv.getLesson().getId())
+                                                        .lessonNumber(lv.getLesson().getLessonNumber())
+                                                        .jlptLevel(lv.getLesson().getJlptLevel().name()));
+                }
+                return b.build();
         }
 }

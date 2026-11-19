@@ -30,6 +30,10 @@ app:
             ignore-vietnamese-diacritics: false
         seed:
             enabled: true
+    learning-path:
+        enabled: ${LEARNING_PATH_ENABLED:false}
+        # Comma-separated emails that get the feature while enabled=false, e.g. for trying it on production.
+        allowlist: ${LEARNING_PATH_ALLOWLIST:}
 
 server:
     port: ${PORT:8080}

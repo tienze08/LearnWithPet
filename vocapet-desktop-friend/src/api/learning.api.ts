@@ -34,6 +34,7 @@ export const postLearningAttempt = (body: {
   tangoVocabularyId?: number;
   vocabularyId?: number;
   rating: LearningRating;
+  source?: "TANGO" | "FLASHCARD" | "REVIEW" | "QUIZ";
 }) =>
   apiFetch<LearningAttemptResponse>(`${base}/attempts`, {
     method: "POST",

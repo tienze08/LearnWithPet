@@ -38,6 +38,17 @@ public class GlobalExceptionHandler {
                                                                 .build());
         }
 
+        /** Keeps the reason (e.g. Learning Path validation messages) in the body the frontend reads. */
+        @ExceptionHandler(org.springframework.web.server.ResponseStatusException.class)
+        public ResponseEntity<ErrorResponse> handleStatus(org.springframework.web.server.ResponseStatusException ex) {
+                return ResponseEntity.status(ex.getStatusCode())
+                                .body(ErrorResponse.builder()
+                                                .status(ex.getStatusCode().value())
+                                                .message(ex.getReason())
+                                                .timestamp(LocalDateTime.now())
+                                                .build());
+        }
+
         @ExceptionHandler(NoMoreCardsException.class)
         public ResponseEntity<Void> handle(NoMoreCardsException ex) {
                 return ResponseEntity.noContent().build();

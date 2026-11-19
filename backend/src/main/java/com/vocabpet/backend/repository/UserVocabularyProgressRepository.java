@@ -119,6 +119,8 @@ public interface UserVocabularyProgressRepository
                         """)
         List<Vocabulary> findNewCardsForQuiz(Long userId);
 
+        List<UserVocabularyProgress> findByUserIdAndTangoVocabularyIdIn(Long userId, java.util.Collection<Long> tangoVocabularyIds);
+
         long countByUserIdAndRepetitionsGreaterThanEqual(Long userId, int repetitions);
 
         long countByUserIdAndRepetitionsBetween(Long userId, int minimumRepetitions, int maximumRepetitions);

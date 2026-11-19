@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { GameProvider, useGame, type PetVariant } from "@/lib/store";
 import { useMeQuery } from "@/hooks/queries/user.queries";
+import { usePathStatusQuery } from "@/hooks/queries/learning-path.queries";
 import { useAuthStore } from "@/hooks/stores/auth.store";
 import { avatarMap } from "@/types/avatar";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  CalendarCheck,
   Coins,
   Flame,
   Zap,
@@ -155,10 +157,16 @@ function NavGroup({ label, children }: { label: string; children: React.ReactNod
 }
 
 function MobileNav() {
+  const path = usePathStatusQuery();
   return (
     <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 border-t border-border/70 bg-background/90 backdrop-blur-xl">
       <div className="flex justify-around py-2">
-        <NavLink to="/app" icon={<LayoutDashboard className="w-5 h-5" />} label="Home" />
+        {/* Learning Path on: Today takes the Home slot so the bar keeps 5 items. */}
+        {path.data?.enabled ? (
+          <NavLink to="/app/path" icon={<CalendarCheck className="w-5 h-5" />} label="Hôm nay" />
+        ) : (
+          <NavLink to="/app" icon={<LayoutDashboard className="w-5 h-5" />} label="Home" />
+        )}
         <NavLink to="/app/japanese/alphabet" icon={<Languages className="w-5 h-5" />} label="Alphabet" />
         <NavLink to="/app/japanese/tango" icon={<BookOpen className="w-5 h-5" />} label="Vocab" />
         <NavLink to="/app/decks" icon={<Library className="w-5 h-5" />} label="Flashcards" />
@@ -169,6 +177,7 @@ function MobileNav() {
 }
 
 function DesktopSidebar() {
+  const path = usePathStatusQuery();
   return (
     <aside className="hidden w-60 shrink-0 flex-col p-3 md:sticky md:top-0 md:flex md:h-screen">
       <Link to="/app" className="flex items-center gap-3 rounded-xl px-2 py-2">
@@ -188,13 +197,14 @@ function DesktopSidebar() {
 
       <nav className="mt-6 flex-1 space-y-6 overflow-y-auto">
         <NavGroup label="Main">
+          {path.data?.enabled && <NavLink to="/app/path" icon={<CalendarCheck className="w-4 h-4" />} label="Hôm nay" />}
           <NavLink to="/app" icon={<LayoutDashboard className="w-4 h-4" />} label="Dashboard" />
         </NavGroup>
         <NavGroup label="Learning">
           <NavLink to="/app/japanese/alphabet" icon={<Languages className="w-4 h-4" />} label="Alphabet" />
           <NavLink to="/app/japanese/tango" icon={<BookOpen className="w-4 h-4" />} label="Vocabulary" />
-          <NavLink to="/app/japanese/kanji" icon={<Sparkles className="w-4 h-4" />} label="Kanji" soon />
-          <NavLink to="/app/japanese/grammar" icon={<ScrollText className="w-4 h-4" />} label="Grammar" soon />
+          <NavLink to="/app/japanese/kanji" icon={<Sparkles className="w-4 h-4" />} label="Kanji" />
+          <NavLink to="/app/japanese/grammar" icon={<ScrollText className="w-4 h-4" />} label="Grammar" />
           <NavLink to="/app/japanese/listening" icon={<Mic className="w-4 h-4" />} label="Listening" soon />
           <NavLink to="/app/japanese/jlpt" icon={<GraduationCap className="w-4 h-4" />} label="JLPT Practice" soon />
         </NavGroup>

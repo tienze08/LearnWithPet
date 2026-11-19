@@ -14,6 +14,10 @@ public interface TangoLessonVocabularyRepository extends JpaRepository<TangoLess
 
     List<TangoLessonVocabulary> findByVocabularyId(Long vocabularyId);
 
+    @Query("SELECT lv FROM TangoLessonVocabulary lv JOIN FETCH lv.lesson l "
+            + "WHERE lv.vocabulary.id IN :ids AND l.published = true ORDER BY l.sortOrder ASC")
+    List<TangoLessonVocabulary> findPublishedByVocabularyIds(@Param("ids") java.util.Collection<Long> ids);
+
     @Query("SELECT lv FROM TangoLessonVocabulary lv JOIN FETCH lv.lesson l JOIN FETCH lv.vocabulary "
             + "WHERE l.jlptLevel = :level AND l.published = true")
     List<TangoLessonVocabulary> findPublishedByLevel(@Param("level") JlptLevel level);

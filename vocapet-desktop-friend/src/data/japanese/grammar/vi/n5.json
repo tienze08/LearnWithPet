@@ -1,0 +1,1110 @@
+{
+ "wa": {
+  "meaningVi": "thì, là, về (nêu chủ đề của câu)",
+  "explanationVi": "Đặt sau danh từ để nêu chủ đề đang nói tới; thông tin chính của câu nằm phía sau は.",
+  "notesVi": "Viết là は nhưng đọc là “wa”. は đặt ra chủ đề của câu, còn thông tin quan trọng nằm ở phần sau.",
+  "examples": [
+   "Tôi là học sinh.",
+   "Hôm nay thời tiết đẹp.",
+   "Cuốn sách này thú vị."
+  ],
+  "status": "draft",
+  "related": [
+   "ga-subject"
+  ]
+ },
+ "ga-subject": {
+  "meaningVi": "đánh dấu chủ ngữ; nêu thông tin mới hoặc được nhấn mạnh",
+  "explanationVi": "Đặt sau danh từ làm chủ ngữ khi đó là thông tin mới, hoặc khi muốn chỉ rõ “ai/cái gì”.",
+  "notesVi": "Từ để hỏi như だれ và 何 khi làm chủ ngữ thì dùng が, không dùng は. が cũng dùng với 好き, ほしい, 上手, わかる để chỉ thứ được thích, được muốn hay được hiểu.",
+  "examples": [
+   "Trời đang mưa.",
+   "Ai đã mở cửa sổ vậy?",
+   "Tôi sẽ là người đi."
+  ],
+  "status": "draft",
+  "qualifierVi": "chủ ngữ",
+  "related": [
+   "wa"
+  ]
+ },
+ "o": {
+  "meaningVi": "đánh dấu tân ngữ trực tiếp; đánh dấu nơi đi qua hoặc rời khỏi",
+  "explanationVi": "Đặt sau danh từ chịu tác động của động từ; với động từ chuyển động thì chỉ con đường hoặc nơi rời đi.",
+  "notesVi": "Viết là を nhưng đọc là “o”. Với động từ chuyển động như 歩く, 散歩する, 出る thì を chỉ lộ trình hoặc nơi rời khỏi.",
+  "examples": [
+   "Sáng nào tôi cũng ăn bánh mì.",
+   "Chị gái tôi đã mua một chiếc túi mới.",
+   "Tôi đã đi dạo trong công viên."
+  ],
+  "status": "draft"
+ },
+ "ni-time": {
+  "meaningVi": "vào, lúc (thời điểm cụ thể)",
+  "explanationVi": "Đặt sau từ chỉ giờ, ngày, thứ, tháng để chỉ thời điểm xảy ra hành động.",
+  "notesVi": "Dùng với giờ, ngày tháng, thứ trong tuần và tháng. Các từ chỉ thời gian tương đối như 今日, 明日, 毎日, 来週 không dùng に.",
+  "examples": [
+   "Sáng nào tôi cũng dậy lúc 7 giờ.",
+   "Chủ nhật tôi sẽ gặp bạn.",
+   "Tháng 8 tôi sẽ về nước."
+  ],
+  "status": "draft",
+  "qualifierVi": "thời gian"
+ },
+ "ni-destination": {
+  "meaningVi": "đến, vào (đích đến của sự di chuyển)",
+  "explanationVi": "Đặt sau địa điểm đến, đi với các động từ chuyển động như 行く, 来る, 帰る.",
+  "notesVi": "Nghĩa gần giống へ. に nhấn vào điểm đến, còn へ nhấn vào hướng đi.",
+  "examples": [
+   "Hằng ngày tôi đi học bằng xe buýt.",
+   "Tôi đã về đến nhà lúc 10 giờ đêm.",
+   "Tháng sau chị gái tôi sẽ đến Nhật."
+  ],
+  "status": "draft",
+  "qualifierVi": "điểm đến",
+  "related": [
+   "e",
+   "ni-location"
+  ]
+ },
+ "ni-location": {
+  "meaningVi": "ở, tại, trên (nơi có người hoặc vật tồn tại)",
+  "explanationVi": "Đặt sau địa điểm khi nói về sự tồn tại hoặc nơi sinh sống, đi với ある, いる, 住む.",
+  "notesVi": "Dùng với ある, いる và 住む. Với nơi diễn ra hành động (ăn, học, chơi) thì dùng で.",
+  "examples": [
+   "Có một cuốn từ điển ở trên bàn.",
+   "Chị gái tôi sống ở Tokyo.",
+   "Bây giờ con mèo đang ở đâu?"
+  ],
+  "status": "draft",
+  "qualifierVi": "nơi tồn tại",
+  "related": [
+   "de-place",
+   "ga-aru-ga-iru"
+  ]
+ },
+ "ni-indirect-object": {
+  "meaningVi": "cho, với (người nhận hoặc đối tượng của hành động)",
+  "explanationVi": "Đặt sau người nhận hoặc đối tượng của hành động như cho, mượn, dạy, gọi điện.",
+  "notesVi": "Thường gặp với あげる, 貸す, 教える, 見せる, 電話をかける và 会う. Với もらう và 借りる thì に chỉ người mình nhận từ họ.",
+  "examples": [
+   "Tôi sẽ viết thư cho mẹ.",
+   "Tôi đã cho em gái mượn một quyển sách.",
+   "Tôi đã gọi điện cho bạn."
+  ],
+  "status": "draft",
+  "qualifierVi": "đối tượng nhận"
+ },
+ "ni-frequency": {
+  "meaningVi": "mỗi (số lần trong một khoảng thời gian)",
+  "explanationVi": "Nói tần suất theo công thức: khoảng thời gian + に + số lần.",
+  "notesVi": "Khoảng thời gian đứng trước, rồi đến に, rồi số lần: 月に一回 (một lần mỗi tháng).",
+  "examples": [
+   "Mỗi tuần tôi bơi ở hồ bơi hai lần.",
+   "Mẹ tôi dắt chó đi dạo hai lần mỗi ngày.",
+   "Mỗi năm một lần, cả nhà tôi đi du lịch."
+  ],
+  "status": "draft",
+  "qualifierVi": "tần suất"
+ },
+ "e": {
+  "meaningVi": "đến, hướng về (hướng di chuyển)",
+  "explanationVi": "Đặt sau địa điểm để chỉ hướng di chuyển, đi với 行く, 来る, 帰る.",
+  "notesVi": "Viết là へ nhưng đọc là “e”. Thường dùng thay cho に khi chỉ điểm đến; へ nhấn mạnh hướng đi hơn một chút.",
+  "examples": [
+   "Kỳ nghỉ hè tôi sẽ đi Hokkaido.",
+   "Tuần sau tôi sẽ về nước.",
+   "Bạn đi đâu vậy?"
+  ],
+  "status": "draft",
+  "related": [
+   "ni-destination"
+  ]
+ },
+ "de-place": {
+  "meaningVi": "ở, tại (nơi diễn ra hành động)",
+  "explanationVi": "Đặt sau địa điểm nơi hành động diễn ra, đi với động từ hành động như đọc, mua, đợi.",
+  "notesVi": "So sánh 教室にいます (ở đâu đó: に) với 教室で勉強します (làm gì đó ở đó: で).",
+  "examples": [
+   "Tôi đọc sách ở thư viện.",
+   "Hôm qua tôi đã mua giày ở cửa hàng bách hóa.",
+   "Tôi đã đợi bạn trước nhà ga."
+  ],
+  "status": "draft",
+  "qualifierVi": "nơi diễn ra hành động",
+  "related": [
+   "ni-location"
+  ]
+ },
+ "de-means": {
+  "meaningVi": "bằng, với (phương tiện, dụng cụ, cách thức, ngôn ngữ)",
+  "explanationVi": "Đặt sau danh từ chỉ phương tiện, dụng cụ hay ngôn ngữ dùng để làm việc gì.",
+  "notesVi": "Để nói “đi bộ” thì dùng 歩いて行きます chứ không dùng で.",
+  "examples": [
+   "Hằng ngày tôi đi làm bằng tàu điện.",
+   "Tôi ăn cơm bằng đũa.",
+   "Tôi đã viết thư bằng tiếng Nhật."
+  ],
+  "status": "draft",
+  "qualifierVi": "phương tiện"
+ },
+ "to-and": {
+  "meaningVi": "và (nối danh từ, liệt kê đầy đủ)",
+  "explanationVi": "Nối hai danh từ để liệt kê đủ các thứ được nói đến.",
+  "notesVi": "と liệt kê đầy đủ mọi thứ; muốn nêu ví dụ vài thứ thì dùng や. Chỉ nối danh từ, không nối động từ hay tính từ.",
+  "examples": [
+   "Trong cặp có một cây bút và một quyển vở.",
+   "Bữa sáng tôi đã ăn bánh mì và trứng.",
+   "Bố và mẹ tôi làm việc ở ngân hàng."
+  ],
+  "status": "draft",
+  "qualifierVi": "và",
+  "related": [
+   "ya",
+   "ka-or",
+   "to-with"
+  ]
+ },
+ "to-with": {
+  "meaningVi": "cùng với (người cùng làm hành động)",
+  "explanationVi": "Đặt sau người cùng thực hiện hành động với mình.",
+  "notesVi": "Thường đi kèm いっしょに. Với các động từ như 話す, 会う, 結婚する thì と chỉ người đối phương.",
+  "examples": [
+   "Cuối tuần tôi đã xem phim với bạn.",
+   "Tôi sẽ đi mua sắm cùng em gái.",
+   "Bạn đã ăn trưa với ai vậy?"
+  ],
+  "status": "draft",
+  "qualifierVi": "cùng với"
+ },
+ "ya": {
+  "meaningVi": "và (nêu vài ví dụ trong nhiều thứ); ... v.v.",
+  "explanationVi": "Nối danh từ để nêu một vài ví dụ tiêu biểu, ngụ ý còn những thứ khác.",
+  "notesVi": "Gợi ý rằng danh sách chưa đầy đủ. Thường kết thúc bằng など: 本や雑誌など.",
+  "examples": [
+   "Trên bàn có sách, tạp chí và những thứ khác.",
+   "Tôi đã mua thịt, rau và vài thứ khác ở siêu thị."
+  ],
+  "status": "draft",
+  "related": [
+   "to-and"
+  ]
+ },
+ "ka-or": {
+  "meaningVi": "hoặc (chọn một trong các danh từ)",
+  "explanationVi": "Nối các danh từ để chọn một trong số đó.",
+  "notesVi": "Nghĩa là chọn một trong các thứ. Muốn liệt kê cùng lúc thì dùng と hoặc や.",
+  "examples": [
+   "Đồ uống thì cà phê hoặc trà là được.",
+   "Thứ Bảy hoặc Chủ nhật tôi sẽ đi mua sắm.",
+   "Tôi sẽ đến nhà ga bằng xe buýt hoặc taxi."
+  ],
+  "status": "draft",
+  "qualifierVi": "hoặc",
+  "related": [
+   "to-and",
+   "ya"
+  ]
+ },
+ "mo": {
+  "meaningVi": "cũng; (với phủ định) cũng không; không ... cũng không ...",
+  "explanationVi": "Thay cho は, が, を để nói “cũng”; kết hợp với dạng phủ định thì thành “cũng không”.",
+  "notesVi": "も thay は, が, を nhưng đứng sau các trợ từ khác: 京都にも行きました.",
+  "examples": [
+   "Tôi cũng là học sinh.",
+   "Anh trai tôi cũng thích bóng đá.",
+   "Tôi không ăn thịt cũng không ăn cá."
+  ],
+  "status": "draft"
+ },
+ "no": {
+  "meaningVi": "của (sở hữu, thuộc về, miêu tả)",
+  "explanationVi": "Nối hai danh từ, danh từ đứng trước bổ nghĩa cho danh từ đứng sau.",
+  "notesVi": "Danh từ trước mô tả danh từ sau: 日本の車 (xe của Nhật). Danh từ sau có thể bỏ nếu đã rõ: それは私のです.",
+  "examples": [
+   "Đây là chiếc ô của tôi.",
+   "Thầy dạy tiếng Nhật rất hiền.",
+   "Gần nhà ga có một cửa hàng mới."
+  ],
+  "status": "draft",
+  "qualifierVi": "sở hữu"
+ },
+ "kara-from": {
+  "meaningVi": "từ (điểm bắt đầu về thời gian hoặc nơi chốn)",
+  "explanationVi": "Đặt sau danh từ chỉ điểm xuất phát về thời gian hoặc địa điểm.",
+  "notesVi": "Thường đi cặp với まで: 月曜日から金曜日まで (từ thứ Hai đến thứ Sáu).",
+  "examples": [
+   "Giờ học bắt đầu từ 9 giờ.",
+   "Tôi đi bộ từ trường đến nhà ga.",
+   "Tôi đến từ Brazil."
+  ],
+  "status": "draft",
+  "qualifierVi": "từ"
+ },
+ "made": {
+  "meaningVi": "đến, cho đến khi, tới tận",
+  "explanationVi": "Đặt sau danh từ chỉ điểm kết thúc của việc kéo dài liên tục.",
+  "notesVi": "Chỉ điểm kết thúc của việc đang diễn ra liên tục. Muốn nói hạn chót (“trước”) thì dùng までに (N4).",
+  "examples": [
+   "Giờ nghỉ trưa kéo dài đến 1 giờ.",
+   "Chúng ta cùng đi đến tận nhà ga nhé.",
+   "Hôm qua tôi đã học đến 11 giờ đêm."
+  ],
+  "status": "draft",
+  "qualifierVi": "cho đến"
+ },
+ "ka-question": {
+  "meaningVi": "trợ từ nghi vấn cuối câu (biến câu thành câu hỏi)",
+  "explanationVi": "Thêm か vào cuối câu để tạo câu hỏi lịch sự.",
+  "notesVi": "Câu hỏi lịch sự kết thúc bằng か, thường viết kèm 。. Trong văn nói thân mật thường bỏ か và lên giọng.",
+  "examples": [
+   "Đây là cái túi của bạn phải không?",
+   "Bạn đã ăn sáng chưa?",
+   "Nhà vệ sinh ở đâu vậy?"
+  ],
+  "status": "draft",
+  "qualifierVi": "câu hỏi"
+ },
+ "ne": {
+  "meaningVi": "nhỉ, đúng không (tìm sự đồng tình hoặc chia sẻ cảm xúc)",
+  "explanationVi": "Thêm ね cuối câu khi muốn người nghe đồng tình hoặc cùng chia sẻ cảm xúc.",
+  "notesVi": "Dùng khi người nói mong người nghe cùng quan điểm hoặc cùng hiểu biết. So sánh với よ, dùng để báo điều người nghe chưa biết.",
+  "examples": [
+   "Hôm nay nóng nhỉ.",
+   "Cái bánh này ngon nhỉ.",
+   "Bài kiểm tra ngày mai bắt đầu từ 10 giờ, đúng không?"
+  ],
+  "status": "draft",
+  "related": [
+   "yo"
+  ]
+ },
+ "yo": {
+  "meaningVi": "đấy, nhé (báo thông tin mới hoặc nhấn mạnh)",
+  "explanationVi": "Thêm よ cuối câu để báo cho người nghe điều họ có thể chưa biết hoặc để nhấn mạnh.",
+  "notesVi": "Báo cho người nghe điều họ có thể chưa biết. Dùng nhiều với cấp trên có thể nghe như đang ép.",
+  "examples": [
+   "Món ramen này rất ngon đấy.",
+   "Bạn đang quên ô kìa.",
+   "Ngày mai có bài kiểm tra đấy."
+  ],
+  "status": "draft",
+  "related": [
+   "ne"
+  ]
+ },
+ "yori": {
+  "meaningVi": "hơn (mốc so sánh)",
+  "explanationVi": "Đặt sau danh từ làm mốc so sánh: X は Y より + tính từ.",
+  "notesVi": "Trong mẫu X は Y より + tính từ, Y là mốc so sánh. Tính từ tiếng Nhật không có dạng so sánh hơn nên より làm nhiệm vụ đó.",
+  "examples": [
+   "Hôm nay lạnh hơn hôm qua.",
+   "Tàu điện nhanh hơn xe buýt.",
+   "Anh trai tôi cao hơn bố tôi."
+  ],
+  "status": "draft",
+  "related": [
+   "no-hou-ga-yori"
+  ]
+ },
+ "no-hou-ga-yori": {
+  "meaningVi": "X ... hơn Y",
+  "explanationVi": "So sánh hai thứ: vế có の方が là thứ được cho là hơn.",
+  "notesVi": "Hai vế có thể đổi chỗ cho nhau. Thường dùng để trả lời câu hỏi với どちら.",
+  "examples": [
+   "Tôi thích chó hơn mèo.",
+   "Tokyo đông người hơn Osaka.",
+   "Tôi thích mùa đông hơn mùa hè."
+  ],
+  "status": "draft",
+  "related": [
+   "yori",
+   "to-to-dochira-ga",
+   "no-naka-de-ga-ichiban"
+  ]
+ },
+ "to-to-dochira-ga": {
+  "meaningVi": "giữa X và Y, cái nào ... hơn?",
+  "explanationVi": "Câu hỏi so sánh giữa đúng hai thứ.",
+  "notesVi": "Chỉ so sánh đúng hai thứ. どっち là cách nói thân mật của どちら. Trả lời bằng 〜の方が.",
+  "examples": [
+   "Cà phê và trà, bạn thích cái nào hơn?",
+   "Tàu điện và xe buýt, cái nào rẻ hơn?",
+   "“Núi và biển, cái nào tốt hơn?” “Biển tốt hơn.”"
+  ],
+  "status": "draft",
+  "related": [
+   "no-hou-ga-yori"
+  ]
+ },
+ "no-naka-de-ga-ichiban": {
+  "meaningVi": "... nhất trong số ...",
+  "explanationVi": "So sánh nhất trong một nhóm từ ba thứ trở lên.",
+  "notesVi": "Dùng cho từ ba thứ trở lên. Trong câu hỏi thì đặt 何, だれ, どこ hoặc いつ trước が一番.",
+  "examples": [
+   "Trong các loại trái cây, tôi thích táo nhất.",
+   "Trong lớp ai cao nhất?",
+   "Trong gia đình, bố tôi dậy sớm nhất."
+  ],
+  "status": "draft",
+  "related": [
+   "no-hou-ga-yori"
+  ]
+ },
+ "desu": {
+  "meaningVi": "là (thể lịch sự)",
+  "explanationVi": "Đặt cuối câu sau danh từ hoặc tính từ để nói lịch sự “là, thì”.",
+  "notesVi": "Các dạng: です, ではありません, でした, ではありませんでした. Sau tính từ đuôi い, です chỉ thêm sự lịch sự: 高いです.",
+  "examples": [
+   "Tôi là Maria.",
+   "Hôm nay là thứ Hai.",
+   "Căn phòng này rất yên tĩnh."
+  ],
+  "status": "draft",
+  "related": [
+   "da",
+   "deshita"
+  ]
+ },
+ "da": {
+  "meaningVi": "là (thể thông thường)",
+  "explanationVi": "Đặt cuối câu sau danh từ hoặc tính từ な khi nói thân mật.",
+  "notesVi": "Các dạng: だ, じゃない, だった, じゃなかった. Không dùng ngay sau tính từ đuôi い (高いだ là sai). Trong câu hỏi thân mật thường bỏ だ: 学生？",
+  "examples": [
+   "Hôm nay là Chủ nhật.",
+   "Người kia là anh trai tôi.",
+   "Ngày mai được nghỉ nên tôi sẽ ngủ thoải mái."
+  ],
+  "status": "draft",
+  "related": [
+   "desu"
+  ]
+ },
+ "de-wa-arimasen-ja-nai": {
+  "meaningVi": "không phải là",
+  "explanationVi": "Phủ định của です/だ khi đi với danh từ hoặc tính từ な.",
+  "notesVi": "じゃありません và じゃないです là dạng lịch sự thiên về văn nói. Quá khứ: ではありませんでした / じゃなかった. Tính từ đuôi い dùng 〜くない.",
+  "examples": [
+   "Tôi không phải giáo viên. Tôi là học sinh.",
+   "Hôm nay không phải ngày nghỉ.",
+   "Thị trấn này không náo nhiệt lắm."
+  ],
+  "status": "draft",
+  "related": [
+   "desu"
+  ]
+ },
+ "deshita": {
+  "meaningVi": "đã là, đã (quá khứ lịch sự của です)",
+  "explanationVi": "Nói về điều đã xảy ra trong quá khứ với danh từ hoặc tính từ な, ở thể lịch sự.",
+  "notesVi": "Phủ định quá khứ: ではありませんでした. Tính từ đuôi い không dùng でした: nói 高かったです, không nói 高いでした.",
+  "examples": [
+   "Hôm qua là sinh nhật tôi.",
+   "Hồi nhỏ tôi không thích rau.",
+   "Bài kiểm tra dễ."
+  ],
+  "status": "draft",
+  "related": [
+   "desu"
+  ]
+ },
+ "masu": {
+  "meaningVi": "đuôi động từ lịch sự (hiện tại, tương lai)",
+  "explanationVi": "Thêm ます vào gốc động từ để nói thói quen hoặc việc sẽ làm ở thể lịch sự.",
+  "notesVi": "Dùng cho thói quen và hành động trong tương lai. 飲む→飲みます, 食べる→食べます, する→します, 来る→来ます.",
+  "examples": [
+   "Sáng nào tôi cũng uống cà phê.",
+   "Ngày mai tôi sẽ đi Kyoto.",
+   "Em trai tôi đi ngủ lúc 9 giờ mỗi tối."
+  ],
+  "status": "draft",
+  "related": [
+   "masen",
+   "mashita"
+  ]
+ },
+ "masen": {
+  "meaningVi": "không (phủ định lịch sự)",
+  "explanationVi": "Thêm ません vào gốc động từ để phủ định ở thể lịch sự.",
+  "notesVi": "Dạng thông thường tương ứng là thể ない: 飲みません = 飲まない.",
+  "examples": [
+   "Tôi không uống rượu.",
+   "Chủ nhật tôi không đến trường.",
+   "Tối nay tôi sẽ không xem tivi."
+  ],
+  "status": "draft",
+  "related": [
+   "masen-deshita",
+   "nai"
+  ]
+ },
+ "mashita": {
+  "meaningVi": "đã (quá khứ lịch sự)",
+  "explanationVi": "Thêm ました vào gốc động từ để nói việc đã xảy ra ở thể lịch sự.",
+  "notesVi": "Dạng thông thường tương ứng là thể た: 会いました = 会った.",
+  "examples": [
+   "Hôm qua tôi đã gặp bạn.",
+   "Tuần trước tôi đã mua đôi giày mới.",
+   "Sáng nay tôi đã dậy lúc 6 giờ."
+  ],
+  "status": "draft",
+  "related": [
+   "masen-deshita",
+   "ta"
+  ]
+ },
+ "masen-deshita": {
+  "meaningVi": "đã không (phủ định quá khứ lịch sự)",
+  "explanationVi": "Thêm ませんでした vào gốc động từ để nói việc đã không xảy ra, ở thể lịch sự.",
+  "notesVi": "Dạng thông thường tương ứng là 〜なかった: 食べませんでした = 食べなかった.",
+  "examples": [
+   "Sáng nay tôi đã không ăn sáng.",
+   "Cuối tuần tôi đã không làm bài tập.",
+   "Hôm qua trời mưa nên tôi đã không đi ra ngoài."
+  ],
+  "status": "draft",
+  "related": [
+   "masen"
+  ]
+ },
+ "nai": {
+  "meaningVi": "không (phủ định thông thường của động từ)",
+  "explanationVi": "Chia động từ sang gốc ない rồi thêm ない để phủ định ở thể thông thường.",
+  "notesVi": "Động từ nhóm う đổi âm cuối -u thành -a: 書く→書かない, 買う→買わない. Động từ nhóm る bỏ る: 食べない. する→しない, 来る→こない, ある→ない. Quá khứ: 〜なかった.",
+  "examples": [
+   "Hôm nay tôi không đến trường.",
+   "Anh trai tôi không ăn thịt.",
+   "“Uống cà phê không?” “Không, tôi không uống.”"
+  ],
+  "status": "draft",
+  "related": [
+   "masen"
+  ]
+ },
+ "ta": {
+  "meaningVi": "đã (quá khứ thông thường của động từ)",
+  "explanationVi": "Chia động từ sang thể た để nói việc đã xảy ra ở thể thông thường.",
+  "notesVi": "Chia giống hệt thể て, đổi て→た và で→だ: 書いて→書いた, 飲んで→飲んだ, 行って→行った. Dạng lịch sự tương ứng: 〜ました.",
+  "examples": [
+   "Cuối tuần tôi đã xem phim ở nhà.",
+   "Tôi đã gặp thầy giáo ở nhà ga.",
+   "“Ăn trưa chưa?” “Ừ, ăn rồi.”"
+  ],
+  "status": "draft",
+  "related": [
+   "mashita"
+  ]
+ },
+ "mashou": {
+  "meaningVi": "chúng ta hãy (làm gì đó)",
+  "explanationVi": "Thêm ましょう vào gốc động từ để rủ ai cùng làm.",
+  "notesVi": "Dùng khi người nói mong người nghe đồng ý. Muốn mời nhẹ nhàng hơn thì dùng 〜ませんか.",
+  "examples": [
+   "Chúng ta cùng đi nhé.",
+   "Chúng ta nghỉ một chút nhé.",
+   "Hẹn gặp trước nhà ga nhé."
+  ],
+  "status": "draft",
+  "related": [
+   "masen-ka",
+   "mashou-ka"
+  ]
+ },
+ "mashou-ka": {
+  "meaningVi": "để tôi ... nhé?; chúng ta ... nhé?",
+  "explanationVi": "Thêm ましょうか vào gốc động từ để đề nghị giúp hoặc hỏi ý cùng quyết định.",
+  "notesVi": "Dùng để đề nghị làm gì đó cho người nghe (để tôi ... nhé?) hoặc hỏi người nghe cùng quyết định (chúng ta ... nhé?).",
+  "examples": [
+   "Để tôi mở cửa sổ nhé?",
+   "Để tôi xách hành lý cho bạn nhé?",
+   "Chúng ta gặp nhau lúc mấy giờ nhé?"
+  ],
+  "status": "draft",
+  "related": [
+   "mashou"
+  ]
+ },
+ "masen-ka": {
+  "meaningVi": "bạn có muốn ... không? (lời mời lịch sự)",
+  "explanationVi": "Thêm ませんか vào gốc động từ để mời một cách lịch sự.",
+  "notesVi": "Nhẹ nhàng hơn 〜ましょう vì cho người nghe chỗ để từ chối. Nhận lời bằng ええ、〜ましょう.",
+  "examples": [
+   "Bạn có muốn cùng ăn trưa không?",
+   "Chủ nhật bạn có muốn chơi tennis không?",
+   "Ngày mai đi dạo công viên không?"
+  ],
+  "status": "draft",
+  "related": [
+   "mashou"
+  ]
+ },
+ "tai": {
+  "meaningVi": "muốn (làm gì)",
+  "explanationVi": "Thêm たい vào gốc động từ để nói điều mình muốn làm.",
+  "notesVi": "Chia như tính từ đuôi い: 〜たくない, 〜たかった. Tân ngữ có thể dùng が hoặc を. Không dùng để nói trực tiếp mong muốn của người khác.",
+  "examples": [
+   "Kỳ nghỉ hè tôi muốn đi Okinawa.",
+   "Tôi muốn uống nước lạnh.",
+   "Bạn muốn ăn gì?"
+  ],
+  "status": "draft",
+  "related": [
+   "ga-hoshii"
+  ]
+ },
+ "ga-hoshii": {
+  "meaningVi": "muốn có (một thứ gì đó)",
+  "explanationVi": "Đặt sau danh từ chỉ thứ mình muốn có.",
+  "notesVi": "Dùng cho đồ vật, không dùng cho hành động (hành động dùng 〜たい). Chia như tính từ đuôi い: ほしくない, ほしかった.",
+  "examples": [
+   "Tôi muốn có một chiếc máy tính mới.",
+   "Bạn muốn gì cho sinh nhật?",
+   "Bây giờ tôi không muốn gì cả."
+  ],
+  "status": "draft",
+  "related": [
+   "tai"
+  ]
+ },
+ "o-kudasai": {
+  "meaningVi": "cho tôi (một thứ gì đó); tôi lấy cái này",
+  "explanationVi": "Đặt sau danh từ khi mua hàng hoặc gọi món để xin thứ đó.",
+  "notesVi": "Dùng khi mua sắm hoặc gọi món. Số lượng đặt sau を, không cần trợ từ: 切手を二枚ください.",
+  "examples": [
+   "Xin lỗi, cho tôi xin ít nước.",
+   "Cho tôi ba quả táo này.",
+   "Cho tôi xem thực đơn."
+  ],
+  "status": "draft"
+ },
+ "te-kudasai": {
+  "meaningVi": "xin hãy (làm gì đó)",
+  "explanationVi": "Chia động từ sang thể て rồi thêm ください để nhờ hoặc yêu cầu lịch sự.",
+  "notesVi": "Lịch sự nhưng vẫn là lời chỉ dẫn mà người nói mong được làm theo. Lời nhờ nhẹ nhàng hơn dùng 〜てくれませんか (N4).",
+  "examples": [
+   "Xin hãy nói chậm hơn một chút.",
+   "Xin hãy cởi giày ở đây.",
+   "Xin lỗi, bạn chỉ giúp tôi đường đến nhà ga được không?"
+  ],
+  "status": "draft",
+  "related": [
+   "naide-kudasai",
+   "o-kudasai"
+  ]
+ },
+ "naide-kudasai": {
+  "meaningVi": "xin đừng (làm gì đó)",
+  "explanationVi": "Chia động từ sang thể ない rồi thêm でください để nhờ ai đừng làm gì.",
+  "notesVi": "Nhẹ hơn 〜てはいけません. Trong văn nói thân mật thường bỏ ください: 見ないで.",
+  "examples": [
+   "Xin đừng ăn trong lớp học.",
+   "Xin đừng vào căn phòng này.",
+   "Xin đừng lo lắng."
+  ],
+  "status": "draft",
+  "related": [
+   "te-kudasai",
+   "te-wa-ikenai"
+  ]
+ },
+ "te-mo-ii": {
+  "meaningVi": "có thể ... cũng được; được phép",
+  "explanationVi": "Chia động từ sang thể て rồi thêm もいい để cho phép hoặc xin phép.",
+  "notesVi": "Thêm ですか để xin phép. Khi từ chối lịch sự, người ta thường chỉ nói すみません、ちょっと….",
+  "examples": [
+   "Tôi dùng cuốn từ điển này được không?",
+   "Hôm nay bạn có thể về sớm.",
+   "Tôi ngồi ở đây có được không?"
+  ],
+  "status": "draft",
+  "related": [
+   "te-wa-ikenai",
+   "nakute-mo-ii"
+  ]
+ },
+ "te-wa-ikenai": {
+  "meaningVi": "không được làm",
+  "explanationVi": "Chia động từ sang thể て rồi thêm はいけない để cấm làm việc gì.",
+  "notesVi": "Cấm đoán mạnh, thường dùng cho quy định. Dạng lịch sự: 〜てはいけません. Dạng rút gọn thân mật: 〜ちゃいけない / 〜じゃいけない.",
+  "examples": [
+   "Không được nói to trong thư viện.",
+   "Trẻ em không được bơi ở con sông này.",
+   "Không được hút thuốc ở đây."
+  ],
+  "status": "draft",
+  "related": [
+   "naide-kudasai",
+   "te-mo-ii"
+  ]
+ },
+ "nakereba-naranai-nakute-wa-ikenai": {
+  "meaningVi": "phải, bắt buộc phải",
+  "explanationVi": "Chia động từ sang gốc ない rồi thêm なければならない hoặc なくてはいけない để nói việc bắt buộc phải làm.",
+  "notesVi": "Dạng lịch sự kết thúc bằng なりません / いけません. Hai cách có nghĩa như nhau; なければならない nghe trang trọng hơn một chút.",
+  "examples": [
+   "Ngày mai tôi phải dậy lúc 6 giờ.",
+   "Hôm nay tôi phải về nhà sớm.",
+   "Ở Nhật, bạn phải cởi giày trước khi vào nhà."
+  ],
+  "status": "draft",
+  "related": [
+   "nakute-mo-ii"
+  ]
+ },
+ "nakute-mo-ii": {
+  "meaningVi": "không cần ... cũng được",
+  "explanationVi": "Chia động từ sang gốc ない rồi thêm なくてもいい để nói không cần phải làm.",
+  "notesVi": "Ngược nghĩa với 〜なければならない. Hỏi bằng 〜なくてもいいですか (Nếu tôi không ... thì có sao không?).",
+  "examples": [
+   "Ngày mai bạn không cần đến trường.",
+   "Bạn không cần viết tên.",
+   "Hôm nay bạn không cần nấu ăn đâu."
+  ],
+  "status": "draft",
+  "related": [
+   "nakereba-naranai-nakute-wa-ikenai",
+   "te-mo-ii"
+  ]
+ },
+ "te-iru": {
+  "meaningVi": "đang (hành động đang diễn ra); ở trạng thái (kết quả của thay đổi); làm đều đặn",
+  "explanationVi": "Chia động từ sang thể て rồi thêm いる để chỉ hành động đang diễn ra hoặc trạng thái đang tiếp diễn.",
+  "notesVi": "Với động từ hành động (食べる, 読む) thì chỉ hành động đang diễn ra; với động từ biến đổi (結婚する, 開く, 知る) thì chỉ trạng thái kết quả. Dạng lịch sự: 〜ています.",
+  "examples": [
+   "Bây giờ em trai tôi đang chơi game trong phòng.",
+   "Chị gái tôi đã kết hôn.",
+   "Cửa sổ đang mở."
+  ],
+  "status": "draft",
+  "related": [
+   "te"
+  ]
+ },
+ "te": {
+  "meaningVi": "và, rồi (nối các hành động theo thứ tự)",
+  "explanationVi": "Chia động từ sang thể て để nối các hành động liên tiếp trong một câu.",
+  "notesVi": "Động từ cuối cùng quyết định thì của cả câu. 書く→書いて, 飲む→飲んで, 話す→話して, 買う→買って, 行く→行って (bất quy tắc).",
+  "examples": [
+   "Sáng ngủ dậy, tôi rửa mặt.",
+   "Tôi đã đến cửa hàng bách hóa và mua một chiếc áo len.",
+   "Tôi về nhà, ăn tối rồi đi ngủ."
+  ],
+  "status": "draft",
+  "related": [
+   "te-kara",
+   "kute-de",
+   "tari-tari-suru"
+  ]
+ },
+ "te-kara": {
+  "meaningVi": "sau khi làm ...; làm A rồi mới B; kể từ khi",
+  "explanationVi": "Chia động từ sang thể て rồi thêm から để nói A xong rồi mới đến B.",
+  "notesVi": "Nhấn mạnh rằng A đã xong trước khi B bắt đầu, rõ hơn thể て thông thường. Khi vế chính có ている thì thường mang nghĩa “kể từ khi”.",
+  "examples": [
+   "Rửa tay xong rồi mình ăn cơm nhé.",
+   "Làm bài tập xong tôi sẽ xem tivi.",
+   "Từ khi đến Nhật, ngày nào tôi cũng học tiếng Nhật."
+  ],
+  "status": "draft",
+  "related": [
+   "ato-de",
+   "te"
+  ]
+ },
+ "tari-tari-suru": {
+  "meaningVi": "nào là ... nào là ...; lúc thì ..., lúc thì ...",
+  "explanationVi": "Chia các động từ sang thể た rồi thêm り để nêu vài hành động tiêu biểu trong nhiều hành động.",
+  "notesVi": "Chọn ra vài hành động trong nhiều hành động. Thì và độ lịch sự đặt ở する cuối câu: 〜たりしました.",
+  "examples": [
+   "Chủ nhật tôi nào là dọn dẹp, nào là giặt đồ.",
+   "Những ngày nghỉ tôi nào là đọc sách, nào là nghe nhạc.",
+   "Kỳ nghỉ hè tôi nào là bơi ở biển, nào là leo núi."
+  ],
+  "status": "draft",
+  "related": [
+   "te"
+  ]
+ },
+ "ta-koto-ga-aru": {
+  "meaningVi": "đã từng (làm gì)",
+  "explanationVi": "Chia động từ sang thể た rồi thêm ことがある để nói về kinh nghiệm đã có trong đời.",
+  "notesVi": "Nói về kinh nghiệm trong đời, không phải việc vừa làm xong: きのう食べたことがある là sai. Phủ định 〜たことがありません nghĩa là “chưa bao giờ”.",
+  "examples": [
+   "Tôi đã từng leo núi Phú Sĩ.",
+   "Bạn đã từng xem phim Nhật chưa?",
+   "Tôi chưa bao giờ cưỡi ngựa."
+  ],
+  "status": "draft"
+ },
+ "mae-ni": {
+  "meaningVi": "trước khi (làm gì); trước (một sự kiện); cách đây",
+  "explanationVi": "Đặt sau động từ thể từ điển hoặc danh từ + の để nói việc xảy ra trước một việc khác.",
+  "notesVi": "Động từ trước 前に luôn ở thể từ điển, kể cả khi nói về quá khứ. Với khoảng thời gian thì không có の: 3年前に (cách đây ba năm).",
+  "examples": [
+   "Tôi đánh răng trước khi đi ngủ.",
+   "Tôi uống cà phê trước giờ học.",
+   "Tôi đã đến Nhật cách đây ba năm."
+  ],
+  "status": "draft",
+  "related": [
+   "ato-de"
+  ]
+ },
+ "ato-de": {
+  "meaningVi": "sau khi (làm gì); sau (một sự kiện)",
+  "explanationVi": "Đặt sau động từ thể た hoặc danh từ + の để nói việc xảy ra sau một việc khác.",
+  "notesVi": "Động từ trước 後で luôn ở thể た, kể cả khi nói kế hoạch tương lai. Đứng một mình, 後で nghĩa là “lát nữa”.",
+  "examples": [
+   "Tôi đi dạo sau khi ăn tối.",
+   "Sau giờ làm, bạn có muốn cùng đi uống không?",
+   "Sau khi bài kiểm tra kết thúc, tôi đã đi chơi với bạn."
+  ],
+  "status": "draft",
+  "related": [
+   "mae-ni",
+   "te-kara"
+  ]
+ },
+ "nagara": {
+  "meaningVi": "vừa ... vừa ... (hai hành động cùng lúc)",
+  "explanationVi": "Thêm ながら vào gốc động từ để nói hai hành động diễn ra cùng lúc bởi cùng một người.",
+  "notesVi": "Cả hai hành động do cùng một người làm. Hành động chính đứng cuối: trong A-ながら B thì B là việc chính.",
+  "examples": [
+   "Tôi vừa nghe nhạc vừa học.",
+   "Bố tôi lúc nào cũng vừa đọc báo vừa ăn sáng.",
+   "Chúng ta vừa uống cà phê vừa nói chuyện nhé."
+  ],
+  "status": "draft",
+  "qualifierVi": "trong khi"
+ },
+ "ni-iku": {
+  "meaningVi": "đi (đâu đó) để làm gì",
+  "explanationVi": "Thêm に行く vào gốc động từ hoặc danh từ để nói mục đích của việc đi.",
+  "notesVi": "来る và 帰る dùng giống vậy: 遊びに来る. Với danh từ dạng する thì danh từ đặt trực tiếp: 買い物に行く, 散歩に行く.",
+  "examples": [
+   "Tôi sẽ đến cửa hàng bách hóa để mua quần áo.",
+   "Cuối tuần tôi đã ra biển để bơi.",
+   "Bạn tôi đã đến nhà tôi chơi."
+  ],
+  "status": "draft"
+ },
+ "ga-suki-ga-kirai": {
+  "meaningVi": "thích; ghét",
+  "explanationVi": "Đặt が sau danh từ chỉ thứ mình thích hoặc ghét, rồi thêm 好き hoặc 嫌い.",
+  "notesVi": "好き và 嫌い là tính từ な nên thứ được thích dùng が chứ không dùng を. 大好き và 大嫌い mạnh hơn. 嫌い có thể nghe thẳng thừng; あまり好きじゃない nhẹ nhàng hơn.",
+  "examples": [
+   "Tôi thích đồ ngọt.",
+   "Em trai tôi không thích rau.",
+   "Mẹ tôi thích nấu ăn."
+  ],
+  "status": "draft"
+ },
+ "ga-jouzu-ga-heta": {
+  "meaningVi": "giỏi; kém (về việc gì)",
+  "explanationVi": "Đặt が sau danh từ chỉ lĩnh vực, rồi thêm 上手 (giỏi) hoặc 下手 (kém).",
+  "notesVi": "Chủ yếu dùng khi nói về người khác; tự nhận mình 上手 có thể nghe như khoe khoang. Cả hai đều là tính từ な: 料理が上手な人.",
+  "examples": [
+   "Chị gái tôi chơi piano giỏi.",
+   "Tôi hát dở.",
+   "Anh Mike, tiếng Nhật của anh giỏi thật đấy."
+  ],
+  "status": "draft"
+ },
+ "ga-aru-ga-iru": {
+  "meaningVi": "có (ある cho đồ vật, いる cho người và động vật)",
+  "explanationVi": "Nói sự tồn tại hoặc sự sở hữu: dùng ある cho đồ vật, sự kiện và いる cho người, động vật.",
+  "notesVi": "ある dùng cho đồ vật, cây cối và sự kiện; いる dùng cho người và động vật. Phủ định: ない / いない (lịch sự: ありません / いません).",
+  "examples": [
+   "Trong công viên có một cái cây lớn.",
+   "Tôi có một đứa em gái.",
+   "Ngày mai có bài kiểm tra tiếng Nhật."
+  ],
+  "status": "draft"
+ },
+ "kara-reason": {
+  "meaningVi": "vì, nên, cho nên",
+  "explanationVi": "Đặt から sau vế nêu lý do: A から B nghĩa là “A nên B”.",
+  "notesVi": "Lý do đứng trước: A から B (vì A nên B). Trả lời どうして bằng 〜からです. Danh từ và tính từ な cần だ: 雨だから.",
+  "examples": [
+   "Hôm nay lạnh nên tôi sẽ mặc áo khoác.",
+   "Không có thời gian nên chúng ta đi taxi nhé.",
+   "“Sao bạn nghỉ vậy?” “Vì tôi bị đau đầu.”"
+  ],
+  "status": "draft",
+  "qualifierVi": "lý do",
+  "related": [
+   "ga-but"
+  ]
+ },
+ "ga-but": {
+  "meaningVi": "nhưng; tuy nhiên",
+  "explanationVi": "Đặt が cuối vế thứ nhất để nối với vế đối lập hoặc để mở đầu câu nói.",
+  "notesVi": "Cũng dùng để làm mềm lời nhờ hoặc dẫn vào chủ đề: すみませんが…. Trang trọng hơn một chút so với けど (N4).",
+  "examples": [
+   "Quán này rẻ nhưng đồ ăn không ngon lắm.",
+   "Tiếng Nhật khó nhưng thú vị.",
+   "Xin lỗi, nhưng bạn làm ơn giữ yên lặng một chút."
+  ],
+  "status": "draft",
+  "qualifierVi": "nhưng",
+  "related": [
+   "kara-reason"
+  ]
+ },
+ "deshou": {
+  "meaningVi": "có lẽ; tôi nghĩ là; ..., đúng không?",
+  "explanationVi": "Đặt でしょう cuối câu để đoán điều gì đó, hoặc lên giọng để xin sự đồng tình.",
+  "notesVi": "Điển hình trong dự báo thời tiết. Khi lên giọng thì nhờ người nghe đồng ý. Dạng thông thường: だろう (N4).",
+  "examples": [
+   "Ngày mai có lẽ sẽ mưa.",
+   "Trên đỉnh núi chắc là lạnh.",
+   "Cái túi này dễ thương nhỉ?"
+  ],
+  "status": "draft"
+ },
+ "ku-naru-ni-naru": {
+  "meaningVi": "trở nên, trở thành",
+  "explanationVi": "Tính từ い đổi い thành く, tính từ な và danh từ thêm に, rồi thêm なる để nói sự thay đổi.",
+  "notesVi": "いい thành よくなる. Thường dùng ở quá khứ để nói thay đổi đã xảy ra: 大きくなりました.",
+  "examples": [
+   "Trời đã ấm lên rồi nhỉ.",
+   "Căn phòng đã trở nên sạch sẽ.",
+   "Năm sau anh trai tôi sẽ trở thành bác sĩ."
+  ],
+  "status": "draft"
+ },
+ "ni-suru": {
+  "meaningVi": "quyết định chọn; chọn; tôi sẽ lấy",
+  "explanationVi": "Đặt sau danh từ để nói mình chọn thứ đó trong các lựa chọn.",
+  "notesVi": "Thường dùng khi gọi món hoặc chọn trong nhiều lựa chọn. Quá khứ: 〜にしました (tôi đã chọn ...).",
+  "examples": [
+   "Tôi sẽ chọn món cà ri.",
+   "Bạn muốn uống gì?",
+   "Hãy để chuyến đi vào tháng sau nhé."
+  ],
+  "status": "draft",
+  "qualifierVi": "quyết định"
+ },
+ "mada-te-inai": {
+  "meaningVi": "vẫn chưa (làm)",
+  "explanationVi": "Dùng まだ với động từ thể て + いない để nói việc vẫn chưa làm.",
+  "notesVi": "Dùng ていない, không dùng ませんでした, cho việc có thể vẫn sẽ xảy ra. Câu trả lời ngắn: いいえ、まだです.",
+  "examples": [
+   "Tôi vẫn chưa ăn trưa.",
+   "“Bạn làm bài tập chưa?” “Chưa, tôi chưa làm.”",
+   "Tàu vẫn chưa đến."
+  ],
+  "status": "draft",
+  "related": [
+   "mou-ta"
+  ]
+ },
+ "mou-ta": {
+  "meaningVi": "đã ... rồi; (trong câu hỏi) ... chưa",
+  "explanationVi": "Dùng もう với động từ thể た để nói việc đã xong; trong câu hỏi nghĩa là “chưa”.",
+  "notesVi": "Trong câu hỏi, もう nghĩa là “chưa”. Với động từ phủ định, もう nghĩa là “không còn nữa”: もう食べません.",
+  "examples": [
+   "“Bạn ăn tối chưa?” “Vâng, tôi ăn rồi.”",
+   "Em gái tôi đã đi ngủ rồi.",
+   "Bộ phim đã bắt đầu rồi đấy."
+  ],
+  "status": "draft",
+  "related": [
+   "mada-te-inai"
+  ]
+ },
+ "amari-nai": {
+  "meaningVi": "không ... lắm; không nhiều; không thường",
+  "explanationVi": "Đặt あまり trước động từ hoặc tính từ ở dạng phủ định để giảm mức độ.",
+  "notesVi": "Luôn đi với dạng phủ định. あまり好きじゃない là cách nói nhẹ nhàng khi không thích điều gì.",
+  "examples": [
+   "Tôi không xem tivi nhiều.",
+   "Quả táo này không ngọt lắm.",
+   "Hôm nay tôi không bận lắm."
+  ],
+  "status": "draft",
+  "related": [
+   "zenzen-nai"
+  ]
+ },
+ "zenzen-nai": {
+  "meaningVi": "hoàn toàn không; không chút nào",
+  "explanationVi": "Đặt 全然 trước động từ hoặc tính từ ở dạng phủ định để phủ định hoàn toàn.",
+  "notesVi": "Mạnh hơn あまり〜ない. Trong văn nói thân mật 全然 đôi khi đi với từ khẳng định (全然大丈夫), nhưng đi với phủ định là cách dùng chuẩn.",
+  "examples": [
+   "Tôi hoàn toàn không hiểu bài này.",
+   "Hôm nay chẳng lạnh chút nào.",
+   "Em trai tôi không học chút nào."
+  ],
+  "status": "draft",
+  "related": [
+   "amari-nai"
+  ]
+ },
+ "dake": {
+  "meaningVi": "chỉ, chỉ có",
+  "explanationVi": "Đặt sau danh từ hoặc động từ thể từ điển để giới hạn ở đúng thứ đó.",
+  "notesVi": "Sắc thái trung tính. So sánh với しか〜ない (N4), nhấn mạnh rằng số lượng là ít.",
+  "examples": [
+   "Trong ví tôi chỉ có 100 yên.",
+   "Buổi sáng tôi chỉ uống cà phê.",
+   "Chỉ có Chủ nhật là ngày nghỉ."
+  ],
+  "status": "draft"
+ },
+ "kurai-gurai": {
+  "meaningVi": "khoảng, chừng (số lượng hoặc khoảng thời gian)",
+  "explanationVi": "Đặt sau số lượng hoặc khoảng thời gian để nói ước chừng.",
+  "notesVi": "Dùng với số lượng và khoảng thời gian. Với một thời điểm (khoảng ba giờ) thì dùng ごろ: 3時ごろ.",
+  "examples": [
+   "Đi bộ đến nhà ga mất khoảng 10 phút.",
+   "Ngày nào tôi cũng học khoảng hai tiếng.",
+   "Cái túi này giá khoảng 5.000 yên."
+  ],
+  "status": "draft",
+  "qualifierVi": "ước chừng",
+  "related": [
+   "goro"
+  ]
+ },
+ "goro": {
+  "meaningVi": "khoảng, vào lúc (một thời điểm)",
+  "explanationVi": "Đặt sau giờ, ngày, tháng để nói thời điểm ước chừng.",
+  "notesVi": "Gắn vào giờ, ngày và tháng. に sau ごろ có thể có hoặc không: 7時ごろ(に)起きます.",
+  "examples": [
+   "Tối nào tôi cũng đi ngủ khoảng 11 giờ.",
+   "Hoa anh đào nở vào khoảng tháng 4.",
+   "Tôi về đến nhà vào khoảng 6 giờ chiều."
+  ],
+  "status": "draft",
+  "related": [
+   "kurai-gurai"
+  ]
+ },
+ "nani-mo-nai-dare-mo-nai": {
+  "meaningVi": "không có gì; không ai; không ... gì cả; không ... ai cả",
+  "explanationVi": "Đặt 何も hoặc 誰も trước động từ ở dạng phủ định để nói “không gì”, “không ai”.",
+  "notesVi": "Với địa điểm thì có trợ từ đứng trước も: どこにも / どこへも行きません (không đi đâu cả). 誰 thường viết bằng hiragana: だれ.",
+  "examples": [
+   "Sáng nay tôi đã không ăn gì cả.",
+   "Trong lớp học không có ai.",
+   "Trong tủ lạnh không có gì cả."
+  ],
+  "status": "draft",
+  "related": [
+   "nani-ka-dare-ka-doko-ka"
+  ]
+ },
+ "nani-ka-dare-ka-doko-ka": {
+  "meaningVi": "cái gì đó; ai đó; đâu đó",
+  "explanationVi": "Thêm か sau từ để hỏi để thành “cái gì đó, ai đó, đâu đó”.",
+  "notesVi": "Từ để hỏi + か cho các từ “một ... nào đó”; từ để hỏi + も + phủ định cho các từ “không ... nào”. が và を sau 何か / だれか thường được bỏ.",
+  "examples": [
+   "Bạn có muốn uống gì không?",
+   "Có ai đó đến đấy.",
+   "Kỳ nghỉ hè bạn đã đi đâu chưa?"
+  ],
+  "status": "draft",
+  "related": [
+   "nani-mo-nai-dare-mo-nai"
+  ]
+ },
+ "kore-sore-are-dore": {
+  "meaningVi": "cái này; cái đó (gần người nghe); cái kia (xa cả hai); cái nào",
+  "explanationVi": "Bộ đại từ chỉ thị đứng một mình, thay cho danh từ.",
+  "notesVi": "こ = gần người nói, そ = gần người nghe, あ = xa cả hai, ど = nghi vấn. Chúng đứng một mình; làm chủ ngữ thì どれ đi với が chứ không phải は.",
+  "examples": [
+   "Đây là cuốn từ điển của tôi.",
+   "Đó là cái gì vậy?",
+   "“Cái ô của bạn là cái nào?” “Là cái kia.”"
+  ],
+  "status": "draft",
+  "related": [
+   "kono-sono-ano-dono",
+   "koko-soko-asoko-doko"
+  ]
+ },
+ "kono-sono-ano-dono": {
+  "meaningVi": "... này; ... đó (gần người nghe); ... kia; ... nào (đứng trước danh từ)",
+  "explanationVi": "Bộ từ chỉ thị đứng trước danh từ để chỉ rõ danh từ đó.",
+  "notesVi": "Luôn đi với danh từ: この本, không bao giờ để この một mình. Khi không có danh từ thì dùng これ / それ / あれ / どれ.",
+  "examples": [
+   "Cái bánh này ngon.",
+   "Cuốn sách đó là của ai?",
+   "“Người nào là giáo viên?” “Là người kia.”"
+  ],
+  "status": "draft",
+  "related": [
+   "kore-sore-are-dore"
+  ]
+ },
+ "koko-soko-asoko-doko": {
+  "meaningVi": "ở đây; ở đó (gần người nghe); ở kia; ở đâu",
+  "explanationVi": "Bộ từ chỉ nơi chốn: đây, đó, kia và hỏi “ở đâu”.",
+  "notesVi": "こちら / そちら / あちら / どちら là dạng lịch sự hơn: お国はどちらですか (Bạn đến từ đâu?).",
+  "examples": [
+   "Đây là trường của tôi.",
+   "Nhà vệ sinh ở đằng kia.",
+   "Xin lỗi, nhà ga ở đâu vậy?"
+  ],
+  "status": "draft",
+  "related": [
+   "kore-sore-are-dore"
+  ]
+ },
+ "ku-nai-katta-ku-nakatta": {
+  "meaningVi": "dạng phủ định và quá khứ của tính từ い (không; đã; đã không)",
+  "explanationVi": "Đổi い thành くない (phủ định), かった (quá khứ) hoặc くなかった (phủ định quá khứ).",
+  "notesVi": "高い→高くない, 高かった, 高くなかった. Thêm です để lịch sự. いい là bất quy tắc: よくない, よかった, よくなかった.",
+  "examples": [
+   "Căn phòng này không rộng lắm.",
+   "Bài kiểm tra hôm qua khó.",
+   "Bộ phim tôi xem tuần trước không thú vị."
+  ],
+  "status": "draft",
+  "related": [
+   "na-na-adjective"
+  ]
+ },
+ "na-na-adjective": {
+  "meaningVi": "tính từ な: thêm な trước danh từ; cuối câu dùng です hoặc だ",
+  "explanationVi": "Tính từ な thêm な khi bổ nghĩa cho danh từ, còn cuối câu thì đi với です hoặc だ.",
+  "notesVi": "Trước danh từ thì thêm な: 静かな部屋. Ở cuối câu chúng biến đổi như danh từ. きれい và きらい kết thúc bằng い nhưng là tính từ な.",
+  "examples": [
+   "Kyoto là một thành phố nổi tiếng.",
+   "Hôm qua tôi rảnh.",
+   "Căn phòng này không yên tĩnh lắm."
+  ],
+  "status": "draft",
+  "qualifierVi": "tính từ な",
+  "related": [
+   "kute-de"
+  ]
+ },
+ "kute-de": {
+  "meaningVi": "và (nối tính từ hoặc danh từ)",
+  "explanationVi": "Tính từ い đổi い thành くて, tính từ な và danh từ thêm で để nối các đặc điểm.",
+  "notesVi": "いい thành よくて. Nối các đặc điểm cùng chiều (cùng tốt hoặc cùng xấu); với ý đối lập thì dùng が.",
+  "examples": [
+   "Quán này vừa rẻ vừa ngon.",
+   "Thị trấn của tôi yên tĩnh và sạch sẽ.",
+   "Anh trai tôi là sinh viên đại học, còn em gái tôi là học sinh cấp ba."
+  ],
+  "status": "draft",
+  "related": [
+   "te"
+  ]
+ },
+ "to-iu-named": {
+  "meaningVi": "có tên là; gọi là",
+  "explanationVi": "Đặt giữa tên và danh từ để giới thiệu một cái tên mà người nghe có thể chưa biết.",
+  "notesVi": "Dùng để giới thiệu một cái tên mà người nghe có thể chưa biết.",
+  "examples": [
+   "Đây là món ăn có tên là sukiyaki.",
+   "Tôi làm thêm ở một cửa hàng tên là “Sakura”.",
+   "Có cuộc gọi từ một người tên là Yamada."
+  ],
+  "status": "draft",
+  "qualifierVi": "gọi là"
+ }
+}

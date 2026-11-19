@@ -53,6 +53,13 @@ public class LearningReviewService {
 
     @Transactional
     public UserVocabularyProgress reviewWord(Long tangoVocabularyId, Long vocabularyId, Rating rating) {
+        return reviewWord(tangoVocabularyId, vocabularyId, rating, null);
+    }
+
+    @Transactional
+    public UserVocabularyProgress reviewWord(Long tangoVocabularyId, Long vocabularyId, Rating rating,
+                                             LearningSource requestedSource) {
+        LearningSource source = requestedSource == null ? LearningSource.REVIEW : requestedSource;
         User user = currentUserService.getCurrentUser();
         if (rating == null || (tangoVocabularyId == null && vocabularyId == null)) {
             throw new IllegalArgumentException("A word and rating are required");
@@ -60,11 +67,11 @@ public class LearningReviewService {
         if (tangoVocabularyId != null) {
             TangoVocabulary t = tangoVocabularyRepository.findById(tangoVocabularyId)
                     .orElseThrow(() -> new IllegalArgumentException("Unknown Tango word"));
-            return learningEngine.record(user, null, t, LearningSource.REVIEW, rating);
+            return learningEngine.record(user, null, t, source, rating);
         }
         Vocabulary v = vocabularyRepository.findByIdAndDeckUserId(vocabularyId, user.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Unknown vocabulary"));
-        return learningEngine.record(user, v, null, LearningSource.REVIEW, rating);
+        return learningEngine.record(user, v, null, source, rating);
     }
 
     private ReviewItem toItem(UserVocabularyProgress p) {

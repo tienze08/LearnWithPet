@@ -5,6 +5,8 @@ import { Card } from "@/components/ui/card";
 import { useLearningAttemptMutation, useReviewQueueQuery } from "@/hooks/queries/learning.queries";
 import type { LearningRating } from "@/api/learning.api";
 import { EmptyBlock, ErrorBlock, LoadingBlock, ProgressBar } from "@/components/tango/shared";
+import { Link } from "@tanstack/react-router";
+import { usePathReviewQueueQuery, usePathStatusQuery } from "@/hooks/queries/learning-path.queries";
 
 export const Route = createFileRoute("/app/review")({
   component: ReviewCenter,
@@ -130,10 +132,29 @@ function ReviewCenter() {
 
 function Header() {
   return (
-    <div>
+    <div className="space-y-4">
+      <div>
       <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">Practice</p>
       <h1 className="mt-1 text-3xl font-extrabold tracking-tight">Review Center</h1>
       <p className="mt-2 text-sm text-muted-foreground">Từ đến hạn ôn, từ flashcard và bài học gộp chung.</p>
+      </div>
+      <PathDue />
+    </div>
+  );
+}
+
+/** Grammar and kanji due in the Learning Path: same queue as the Today review block, so either place clears it. */
+function PathDue() {
+  const status = usePathStatusQuery();
+  const due = usePathReviewQueueQuery(status.data?.enabled === true && status.data.onboarded);
+  const n = due.data?.length ?? 0;
+  if (n === 0) return null;
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-primary-soft p-4">
+      <p className="text-sm font-semibold text-primary-ink">{n} mẫu ngữ pháp và chữ Kanji của lộ trình đang cần ôn</p>
+      <Button size="sm" asChild>
+        <Link to="/app/path/study" search={{ block: "DUE" }}>Ôn ngay</Link>
+      </Button>
     </div>
   );
 }

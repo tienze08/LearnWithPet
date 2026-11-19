@@ -1,6 +1,8 @@
 package com.vocabpet.backend.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -9,11 +11,15 @@ import org.springframework.stereotype.Service;
 import com.vocabpet.backend.dto.VocabularyRe.VocabularyRequest;
 import com.vocabpet.backend.dto.VocabularyRe.VocabularyResponse;
 import com.vocabpet.backend.entity.Deck;
+import com.vocabpet.backend.entity.TangoLesson;
+import com.vocabpet.backend.entity.TangoLessonVocabulary;
+import com.vocabpet.backend.entity.TangoVocabulary;
 import com.vocabpet.backend.entity.User;
 import com.vocabpet.backend.entity.Vocabulary;
 import com.vocabpet.backend.mapper.VocabularyMapper;
 import com.vocabpet.backend.repository.BookmarkRepository;
 import com.vocabpet.backend.repository.DeckRepository;
+import com.vocabpet.backend.repository.TangoLessonVocabularyRepository;
 import com.vocabpet.backend.repository.VocabularyRepository;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -29,6 +35,7 @@ public class VocabularyService {
     private final DeckRepository deckRepository;
     private final VocabularyMapper vocabularyMapper;
     private final CurrentUserService currentUserService;
+    private final TangoLessonVocabularyRepository tangoLessonVocabularyRepository;
 
     @Transactional
     public VocabularyResponse createVocabulary(
@@ -59,14 +66,16 @@ public class VocabularyService {
                 .map(bookmark -> bookmark.getVocabulary().getId())
                 .collect(Collectors.toSet());
 
-        return vocabularyRepository.findByDeckId(deckId)
-                .stream()
+        List<Vocabulary> vocabularies = vocabularyRepository.findByDeckId(deckId);
+        List<VocabularyResponse> responses = vocabularies.stream()
                 .map(vocabulary -> {
                     VocabularyResponse response = vocabularyMapper.toResponse(vocabulary);
                     response.setBookmarked(bookmarkedIds.contains(vocabulary.getId()));
                     return response;
                 })
                 .toList();
+        fillLessons(vocabularies, responses);
+        return responses;
     }
 
     @Transactional
@@ -76,13 +85,37 @@ public class VocabularyService {
                 .map(bookmark -> bookmark.getVocabulary().getId())
                 .collect(Collectors.toSet());
 
-        return vocabularyRepository.findByDeckUserId(user.getId()).stream()
+        List<Vocabulary> vocabularies = vocabularyRepository.findByDeckUserId(user.getId());
+        List<VocabularyResponse> responses = vocabularies.stream()
                 .map(vocabulary -> {
                     VocabularyResponse response = vocabularyMapper.toResponse(vocabulary);
                     response.setBookmarked(bookmarkedIds.contains(vocabulary.getId()));
                     return response;
                 })
                 .toList();
+        fillLessons(vocabularies, responses);
+        return responses;
+    }
+
+    /** Adds the source lesson (first published one) to cards linked to a Tango word. */
+    private void fillLessons(List<Vocabulary> vocabularies, List<VocabularyResponse> responses) {
+        Set<Long> tangoIds = vocabularies.stream()
+                .filter(v -> v.getTangoVocabulary() != null)
+                .map(v -> v.getTangoVocabulary().getId())
+                .collect(Collectors.toSet());
+        if (tangoIds.isEmpty()) return;
+        Map<Long, TangoLesson> lessonByWord = new HashMap<>();
+        for (TangoLessonVocabulary lv : tangoLessonVocabularyRepository.findPublishedByVocabularyIds(tangoIds)) {
+            lessonByWord.putIfAbsent(lv.getVocabulary().getId(), lv.getLesson());
+        }
+        for (int i = 0; i < vocabularies.size(); i++) {
+            TangoVocabulary t = vocabularies.get(i).getTangoVocabulary();
+            TangoLesson lesson = t == null ? null : lessonByWord.get(t.getId());
+            if (lesson == null) continue;
+            responses.get(i).setLessonId(lesson.getId());
+            responses.get(i).setLessonNumber(lesson.getLessonNumber());
+            responses.get(i).setJlptLevel(lesson.getJlptLevel().name());
+        }
     }
 
     @Transactional

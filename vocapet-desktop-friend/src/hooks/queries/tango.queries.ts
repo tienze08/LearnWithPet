@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  addTangoLessonToDeck,
   getTangoFavorites,
   getTangoLesson,
   getTangoLessonVocabularies,
@@ -46,6 +47,7 @@ export function useTangoVocabularyQuery(vocabularyId: number) {
   return useQuery({
     queryKey: [TANGO, "vocabulary", vocabularyId],
     queryFn: () => getTangoVocabulary(vocabularyId),
+    enabled: vocabularyId > 0,
   });
 }
 
@@ -87,6 +89,18 @@ function useInvalidateTango() {
 export function useStartTangoLessonMutation() {
   const invalidate = useInvalidateTango();
   return useMutation({ mutationFn: startTangoLesson, onSuccess: invalidate });
+}
+
+export function useAddLessonToDeckMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: addTangoLessonToDeck,
+    onSuccess: () => {
+      for (const key of ["decks", "vocabularies", TANGO, "learning"]) {
+        queryClient.invalidateQueries({ queryKey: [key] });
+      }
+    },
+  });
 }
 
 export function useStudyProgressMutation(lessonId: number) {

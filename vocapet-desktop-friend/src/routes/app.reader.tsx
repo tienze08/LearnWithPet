@@ -698,7 +698,7 @@ export function ReaderPage() {
           ) : doc.text.trim() ? (
             <div
               onMouseUp={handleSelection}
-              onTouchEnd={handleSelection}
+              onTouchEnd={() => handleSelection()}
               className="prose-reader space-y-4 text-[17px] leading-8 selection:bg-primary/30 cursor-text"
             >
               {doc.text.split(/\n{2,}/).map((para, i) => (

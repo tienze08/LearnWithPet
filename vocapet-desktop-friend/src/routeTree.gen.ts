@@ -9,43 +9,41 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AppRouteImport } from './routes/app'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as RegisterRouteImport } from './routes/register'
 import { Route as WelcomeRouteImport } from './routes/welcome'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as AppRouteImport } from './routes/app'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
-import { Route as AppAchievementsRouteImport } from './routes/app.achievements'
-import { Route as AppPetsRouteImport } from './routes/app.pets'
-import { Route as AppProfileRouteImport } from './routes/app.profile'
-import { Route as AppReaderRouteImport } from './routes/app.reader'
-import { Route as AppReviewRouteImport } from './routes/app.review'
-import { Route as AppTasksRouteImport } from './routes/app.tasks'
 import { Route as AppWelcomeRouteImport } from './routes/app.welcome'
+import { Route as AppTasksRouteImport } from './routes/app.tasks'
+import { Route as AppReviewRouteImport } from './routes/app.review'
+import { Route as AppReaderRouteImport } from './routes/app.reader'
+import { Route as AppProfileRouteImport } from './routes/app.profile'
+import { Route as AppPetsRouteImport } from './routes/app.pets'
+import { Route as AppAchievementsRouteImport } from './routes/app.achievements'
+import { Route as AppPathIndexRouteImport } from './routes/app.path.index'
 import { Route as AppDecksIndexRouteImport } from './routes/app.decks.index'
-import { Route as AppDecksDeckIdRouteImport } from './routes/app.decks.$deckId'
-import { Route as AppJapaneseAlphabetRouteImport } from './routes/app.japanese.alphabet'
+import { Route as AppPathStudyRouteImport } from './routes/app.path.study'
+import { Route as AppPathSetupRouteImport } from './routes/app.path.setup'
+import { Route as AppJapaneseKanjiSourcesRouteImport } from './routes/app.japanese.kanji-sources'
+import { Route as AppJapaneseKanjiMapRouteImport } from './routes/app.japanese.kanji-map'
+import { Route as AppJapaneseKanjiRouteImport } from './routes/app.japanese.kanji'
 import { Route as AppJapaneseKanaRouteImport } from './routes/app.japanese.kana'
+import { Route as AppJapaneseAlphabetRouteImport } from './routes/app.japanese.alphabet'
+import { Route as AppDecksDeckIdRouteImport } from './routes/app.decks.$deckId'
 import { Route as AppJapaneseTangoIndexRouteImport } from './routes/app.japanese.tango.index'
+import { Route as AppJapaneseGrammarIndexRouteImport } from './routes/app.japanese.grammar.index'
 import { Route as AppJapaneseTangoMistakesRouteImport } from './routes/app.japanese.tango.mistakes'
-import { Route as AppJapaneseTangoLearnLessonIdRouteImport } from './routes/app.japanese.tango.learn.$lessonId'
-import { Route as AppJapaneseTangoLessonsLessonIdRouteImport } from './routes/app.japanese.tango.lessons.$lessonId'
-import { Route as AppJapaneseTangoPracticeLessonIdRouteImport } from './routes/app.japanese.tango.practice.$lessonId'
+import { Route as AppJapaneseGrammarGrammarIdRouteImport } from './routes/app.japanese.grammar.$grammarId'
 import { Route as AppJapaneseTangoVocabulariesVocabularyIdRouteImport } from './routes/app.japanese.tango.vocabularies.$vocabularyId'
+import { Route as AppJapaneseTangoPracticeLessonIdRouteImport } from './routes/app.japanese.tango.practice.$lessonId'
+import { Route as AppJapaneseTangoLessonsLessonIdRouteImport } from './routes/app.japanese.tango.lessons.$lessonId'
+import { Route as AppJapaneseTangoLearnLessonIdRouteImport } from './routes/app.japanese.tango.learn.$lessonId'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppRoute = AppRouteImport.update({
-  id: '/app',
-  path: '/app',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
+const WelcomeRoute = WelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegisterRoute = RegisterRouteImport.update({
@@ -53,9 +51,19 @@ const RegisterRoute = RegisterRouteImport.update({
   path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
-const WelcomeRoute = WelcomeRouteImport.update({
-  id: '/welcome',
-  path: '/welcome',
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppIndexRoute = AppIndexRouteImport.update({
@@ -63,29 +71,9 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
-const AppAchievementsRoute = AppAchievementsRouteImport.update({
-  id: '/achievements',
-  path: '/achievements',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppPetsRoute = AppPetsRouteImport.update({
-  id: '/pets',
-  path: '/pets',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppProfileRoute = AppProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppReaderRoute = AppReaderRouteImport.update({
-  id: '/reader',
-  path: '/reader',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppReviewRoute = AppReviewRouteImport.update({
-  id: '/review',
-  path: '/review',
+const AppWelcomeRoute = AppWelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
   getParentRoute: () => AppRoute,
 } as any)
 const AppTasksRoute = AppTasksRouteImport.update({
@@ -93,9 +81,34 @@ const AppTasksRoute = AppTasksRouteImport.update({
   path: '/tasks',
   getParentRoute: () => AppRoute,
 } as any)
-const AppWelcomeRoute = AppWelcomeRouteImport.update({
-  id: '/welcome',
-  path: '/welcome',
+const AppReviewRoute = AppReviewRouteImport.update({
+  id: '/review',
+  path: '/review',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppReaderRoute = AppReaderRouteImport.update({
+  id: '/reader',
+  path: '/reader',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProfileRoute = AppProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPetsRoute = AppPetsRouteImport.update({
+  id: '/pets',
+  path: '/pets',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAchievementsRoute = AppAchievementsRouteImport.update({
+  id: '/achievements',
+  path: '/achievements',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPathIndexRoute = AppPathIndexRouteImport.update({
+  id: '/path/',
+  path: '/path/',
   getParentRoute: () => AppRoute,
 } as any)
 const AppDecksIndexRoute = AppDecksIndexRouteImport.update({
@@ -103,14 +116,29 @@ const AppDecksIndexRoute = AppDecksIndexRouteImport.update({
   path: '/decks/',
   getParentRoute: () => AppRoute,
 } as any)
-const AppDecksDeckIdRoute = AppDecksDeckIdRouteImport.update({
-  id: '/decks/$deckId',
-  path: '/decks/$deckId',
+const AppPathStudyRoute = AppPathStudyRouteImport.update({
+  id: '/path/study',
+  path: '/path/study',
   getParentRoute: () => AppRoute,
 } as any)
-const AppJapaneseAlphabetRoute = AppJapaneseAlphabetRouteImport.update({
-  id: '/japanese/alphabet',
-  path: '/japanese/alphabet',
+const AppPathSetupRoute = AppPathSetupRouteImport.update({
+  id: '/path/setup',
+  path: '/path/setup',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppJapaneseKanjiSourcesRoute = AppJapaneseKanjiSourcesRouteImport.update({
+  id: '/japanese/kanji-sources',
+  path: '/japanese/kanji-sources',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppJapaneseKanjiMapRoute = AppJapaneseKanjiMapRouteImport.update({
+  id: '/japanese/kanji-map',
+  path: '/japanese/kanji-map',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppJapaneseKanjiRoute = AppJapaneseKanjiRouteImport.update({
+  id: '/japanese/kanji',
+  path: '/japanese/kanji',
   getParentRoute: () => AppRoute,
 } as any)
 const AppJapaneseKanaRoute = AppJapaneseKanaRouteImport.update({
@@ -118,9 +146,24 @@ const AppJapaneseKanaRoute = AppJapaneseKanaRouteImport.update({
   path: '/japanese/kana',
   getParentRoute: () => AppRoute,
 } as any)
+const AppJapaneseAlphabetRoute = AppJapaneseAlphabetRouteImport.update({
+  id: '/japanese/alphabet',
+  path: '/japanese/alphabet',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDecksDeckIdRoute = AppDecksDeckIdRouteImport.update({
+  id: '/decks/$deckId',
+  path: '/decks/$deckId',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppJapaneseTangoIndexRoute = AppJapaneseTangoIndexRouteImport.update({
   id: '/japanese/tango/',
   path: '/japanese/tango/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppJapaneseGrammarIndexRoute = AppJapaneseGrammarIndexRouteImport.update({
+  id: '/japanese/grammar/',
+  path: '/japanese/grammar/',
   getParentRoute: () => AppRoute,
 } as any)
 const AppJapaneseTangoMistakesRoute =
@@ -129,16 +172,16 @@ const AppJapaneseTangoMistakesRoute =
     path: '/japanese/tango/mistakes',
     getParentRoute: () => AppRoute,
   } as any)
-const AppJapaneseTangoLearnLessonIdRoute =
-  AppJapaneseTangoLearnLessonIdRouteImport.update({
-    id: '/japanese/tango/learn/$lessonId',
-    path: '/japanese/tango/learn/$lessonId',
+const AppJapaneseGrammarGrammarIdRoute =
+  AppJapaneseGrammarGrammarIdRouteImport.update({
+    id: '/japanese/grammar/$grammarId',
+    path: '/japanese/grammar/$grammarId',
     getParentRoute: () => AppRoute,
   } as any)
-const AppJapaneseTangoLessonsLessonIdRoute =
-  AppJapaneseTangoLessonsLessonIdRouteImport.update({
-    id: '/japanese/tango/lessons/$lessonId',
-    path: '/japanese/tango/lessons/$lessonId',
+const AppJapaneseTangoVocabulariesVocabularyIdRoute =
+  AppJapaneseTangoVocabulariesVocabularyIdRouteImport.update({
+    id: '/japanese/tango/vocabularies/$vocabularyId',
+    path: '/japanese/tango/vocabularies/$vocabularyId',
     getParentRoute: () => AppRoute,
   } as any)
 const AppJapaneseTangoPracticeLessonIdRoute =
@@ -147,10 +190,16 @@ const AppJapaneseTangoPracticeLessonIdRoute =
     path: '/japanese/tango/practice/$lessonId',
     getParentRoute: () => AppRoute,
   } as any)
-const AppJapaneseTangoVocabulariesVocabularyIdRoute =
-  AppJapaneseTangoVocabulariesVocabularyIdRouteImport.update({
-    id: '/japanese/tango/vocabularies/$vocabularyId',
-    path: '/japanese/tango/vocabularies/$vocabularyId',
+const AppJapaneseTangoLessonsLessonIdRoute =
+  AppJapaneseTangoLessonsLessonIdRouteImport.update({
+    id: '/japanese/tango/lessons/$lessonId',
+    path: '/japanese/tango/lessons/$lessonId',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppJapaneseTangoLearnLessonIdRoute =
+  AppJapaneseTangoLearnLessonIdRouteImport.update({
+    id: '/japanese/tango/learn/$lessonId',
+    path: '/japanese/tango/learn/$lessonId',
     getParentRoute: () => AppRoute,
   } as any)
 
@@ -171,8 +220,16 @@ export interface FileRoutesByFullPath {
   '/app/decks/$deckId': typeof AppDecksDeckIdRoute
   '/app/japanese/alphabet': typeof AppJapaneseAlphabetRoute
   '/app/japanese/kana': typeof AppJapaneseKanaRoute
+  '/app/japanese/kanji': typeof AppJapaneseKanjiRoute
+  '/app/japanese/kanji-map': typeof AppJapaneseKanjiMapRoute
+  '/app/japanese/kanji-sources': typeof AppJapaneseKanjiSourcesRoute
+  '/app/path/setup': typeof AppPathSetupRoute
+  '/app/path/study': typeof AppPathStudyRoute
   '/app/decks/': typeof AppDecksIndexRoute
+  '/app/path/': typeof AppPathIndexRoute
+  '/app/japanese/grammar/$grammarId': typeof AppJapaneseGrammarGrammarIdRoute
   '/app/japanese/tango/mistakes': typeof AppJapaneseTangoMistakesRoute
+  '/app/japanese/grammar/': typeof AppJapaneseGrammarIndexRoute
   '/app/japanese/tango/': typeof AppJapaneseTangoIndexRoute
   '/app/japanese/tango/learn/$lessonId': typeof AppJapaneseTangoLearnLessonIdRoute
   '/app/japanese/tango/lessons/$lessonId': typeof AppJapaneseTangoLessonsLessonIdRoute
@@ -195,8 +252,16 @@ export interface FileRoutesByTo {
   '/app/decks/$deckId': typeof AppDecksDeckIdRoute
   '/app/japanese/alphabet': typeof AppJapaneseAlphabetRoute
   '/app/japanese/kana': typeof AppJapaneseKanaRoute
+  '/app/japanese/kanji': typeof AppJapaneseKanjiRoute
+  '/app/japanese/kanji-map': typeof AppJapaneseKanjiMapRoute
+  '/app/japanese/kanji-sources': typeof AppJapaneseKanjiSourcesRoute
+  '/app/path/setup': typeof AppPathSetupRoute
+  '/app/path/study': typeof AppPathStudyRoute
   '/app/decks': typeof AppDecksIndexRoute
+  '/app/path': typeof AppPathIndexRoute
+  '/app/japanese/grammar/$grammarId': typeof AppJapaneseGrammarGrammarIdRoute
   '/app/japanese/tango/mistakes': typeof AppJapaneseTangoMistakesRoute
+  '/app/japanese/grammar': typeof AppJapaneseGrammarIndexRoute
   '/app/japanese/tango': typeof AppJapaneseTangoIndexRoute
   '/app/japanese/tango/learn/$lessonId': typeof AppJapaneseTangoLearnLessonIdRoute
   '/app/japanese/tango/lessons/$lessonId': typeof AppJapaneseTangoLessonsLessonIdRoute
@@ -221,8 +286,16 @@ export interface FileRoutesById {
   '/app/decks/$deckId': typeof AppDecksDeckIdRoute
   '/app/japanese/alphabet': typeof AppJapaneseAlphabetRoute
   '/app/japanese/kana': typeof AppJapaneseKanaRoute
+  '/app/japanese/kanji': typeof AppJapaneseKanjiRoute
+  '/app/japanese/kanji-map': typeof AppJapaneseKanjiMapRoute
+  '/app/japanese/kanji-sources': typeof AppJapaneseKanjiSourcesRoute
+  '/app/path/setup': typeof AppPathSetupRoute
+  '/app/path/study': typeof AppPathStudyRoute
   '/app/decks/': typeof AppDecksIndexRoute
+  '/app/path/': typeof AppPathIndexRoute
+  '/app/japanese/grammar/$grammarId': typeof AppJapaneseGrammarGrammarIdRoute
   '/app/japanese/tango/mistakes': typeof AppJapaneseTangoMistakesRoute
+  '/app/japanese/grammar/': typeof AppJapaneseGrammarIndexRoute
   '/app/japanese/tango/': typeof AppJapaneseTangoIndexRoute
   '/app/japanese/tango/learn/$lessonId': typeof AppJapaneseTangoLearnLessonIdRoute
   '/app/japanese/tango/lessons/$lessonId': typeof AppJapaneseTangoLessonsLessonIdRoute
@@ -248,8 +321,16 @@ export interface FileRouteTypes {
     | '/app/decks/$deckId'
     | '/app/japanese/alphabet'
     | '/app/japanese/kana'
+    | '/app/japanese/kanji'
+    | '/app/japanese/kanji-map'
+    | '/app/japanese/kanji-sources'
+    | '/app/path/setup'
+    | '/app/path/study'
     | '/app/decks/'
+    | '/app/path/'
+    | '/app/japanese/grammar/$grammarId'
     | '/app/japanese/tango/mistakes'
+    | '/app/japanese/grammar/'
     | '/app/japanese/tango/'
     | '/app/japanese/tango/learn/$lessonId'
     | '/app/japanese/tango/lessons/$lessonId'
@@ -272,8 +353,16 @@ export interface FileRouteTypes {
     | '/app/decks/$deckId'
     | '/app/japanese/alphabet'
     | '/app/japanese/kana'
+    | '/app/japanese/kanji'
+    | '/app/japanese/kanji-map'
+    | '/app/japanese/kanji-sources'
+    | '/app/path/setup'
+    | '/app/path/study'
     | '/app/decks'
+    | '/app/path'
+    | '/app/japanese/grammar/$grammarId'
     | '/app/japanese/tango/mistakes'
+    | '/app/japanese/grammar'
     | '/app/japanese/tango'
     | '/app/japanese/tango/learn/$lessonId'
     | '/app/japanese/tango/lessons/$lessonId'
@@ -297,8 +386,16 @@ export interface FileRouteTypes {
     | '/app/decks/$deckId'
     | '/app/japanese/alphabet'
     | '/app/japanese/kana'
+    | '/app/japanese/kanji'
+    | '/app/japanese/kanji-map'
+    | '/app/japanese/kanji-sources'
+    | '/app/path/setup'
+    | '/app/path/study'
     | '/app/decks/'
+    | '/app/path/'
+    | '/app/japanese/grammar/$grammarId'
     | '/app/japanese/tango/mistakes'
+    | '/app/japanese/grammar/'
     | '/app/japanese/tango/'
     | '/app/japanese/tango/learn/$lessonId'
     | '/app/japanese/tango/lessons/$lessonId'
@@ -316,25 +413,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/app': {
-      id: '/app'
-      path: '/app'
-      fullPath: '/app'
-      preLoaderRoute: typeof AppRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
+    '/welcome': {
+      id: '/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof WelcomeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/register': {
@@ -344,11 +427,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/welcome': {
-      id: '/welcome'
-      path: '/welcome'
-      fullPath: '/welcome'
-      preLoaderRoute: typeof WelcomeRouteImport
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/': {
@@ -358,39 +455,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/achievements': {
-      id: '/app/achievements'
-      path: '/achievements'
-      fullPath: '/app/achievements'
-      preLoaderRoute: typeof AppAchievementsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/pets': {
-      id: '/app/pets'
-      path: '/pets'
-      fullPath: '/app/pets'
-      preLoaderRoute: typeof AppPetsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/profile': {
-      id: '/app/profile'
-      path: '/profile'
-      fullPath: '/app/profile'
-      preLoaderRoute: typeof AppProfileRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/reader': {
-      id: '/app/reader'
-      path: '/reader'
-      fullPath: '/app/reader'
-      preLoaderRoute: typeof AppReaderRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/review': {
-      id: '/app/review'
-      path: '/review'
-      fullPath: '/app/review'
-      preLoaderRoute: typeof AppReviewRouteImport
+    '/app/welcome': {
+      id: '/app/welcome'
+      path: '/welcome'
+      fullPath: '/app/welcome'
+      preLoaderRoute: typeof AppWelcomeRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/tasks': {
@@ -400,11 +469,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTasksRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/welcome': {
-      id: '/app/welcome'
-      path: '/welcome'
-      fullPath: '/app/welcome'
-      preLoaderRoute: typeof AppWelcomeRouteImport
+    '/app/review': {
+      id: '/app/review'
+      path: '/review'
+      fullPath: '/app/review'
+      preLoaderRoute: typeof AppReviewRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/reader': {
+      id: '/app/reader'
+      path: '/reader'
+      fullPath: '/app/reader'
+      preLoaderRoute: typeof AppReaderRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/profile': {
+      id: '/app/profile'
+      path: '/profile'
+      fullPath: '/app/profile'
+      preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/pets': {
+      id: '/app/pets'
+      path: '/pets'
+      fullPath: '/app/pets'
+      preLoaderRoute: typeof AppPetsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/achievements': {
+      id: '/app/achievements'
+      path: '/achievements'
+      fullPath: '/app/achievements'
+      preLoaderRoute: typeof AppAchievementsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/path/': {
+      id: '/app/path/'
+      path: '/path'
+      fullPath: '/app/path/'
+      preLoaderRoute: typeof AppPathIndexRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/decks/': {
@@ -414,18 +518,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDecksIndexRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/decks/$deckId': {
-      id: '/app/decks/$deckId'
-      path: '/decks/$deckId'
-      fullPath: '/app/decks/$deckId'
-      preLoaderRoute: typeof AppDecksDeckIdRouteImport
+    '/app/path/study': {
+      id: '/app/path/study'
+      path: '/path/study'
+      fullPath: '/app/path/study'
+      preLoaderRoute: typeof AppPathStudyRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/japanese/alphabet': {
-      id: '/app/japanese/alphabet'
-      path: '/japanese/alphabet'
-      fullPath: '/app/japanese/alphabet'
-      preLoaderRoute: typeof AppJapaneseAlphabetRouteImport
+    '/app/path/setup': {
+      id: '/app/path/setup'
+      path: '/path/setup'
+      fullPath: '/app/path/setup'
+      preLoaderRoute: typeof AppPathSetupRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/japanese/kanji-sources': {
+      id: '/app/japanese/kanji-sources'
+      path: '/japanese/kanji-sources'
+      fullPath: '/app/japanese/kanji-sources'
+      preLoaderRoute: typeof AppJapaneseKanjiSourcesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/japanese/kanji-map': {
+      id: '/app/japanese/kanji-map'
+      path: '/japanese/kanji-map'
+      fullPath: '/app/japanese/kanji-map'
+      preLoaderRoute: typeof AppJapaneseKanjiMapRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/japanese/kanji': {
+      id: '/app/japanese/kanji'
+      path: '/japanese/kanji'
+      fullPath: '/app/japanese/kanji'
+      preLoaderRoute: typeof AppJapaneseKanjiRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/japanese/kana': {
@@ -435,11 +560,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppJapaneseKanaRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/japanese/alphabet': {
+      id: '/app/japanese/alphabet'
+      path: '/japanese/alphabet'
+      fullPath: '/app/japanese/alphabet'
+      preLoaderRoute: typeof AppJapaneseAlphabetRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/decks/$deckId': {
+      id: '/app/decks/$deckId'
+      path: '/decks/$deckId'
+      fullPath: '/app/decks/$deckId'
+      preLoaderRoute: typeof AppDecksDeckIdRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/japanese/tango/': {
       id: '/app/japanese/tango/'
       path: '/japanese/tango'
       fullPath: '/app/japanese/tango/'
       preLoaderRoute: typeof AppJapaneseTangoIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/japanese/grammar/': {
+      id: '/app/japanese/grammar/'
+      path: '/japanese/grammar'
+      fullPath: '/app/japanese/grammar/'
+      preLoaderRoute: typeof AppJapaneseGrammarIndexRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/japanese/tango/mistakes': {
@@ -449,18 +595,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppJapaneseTangoMistakesRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/japanese/tango/learn/$lessonId': {
-      id: '/app/japanese/tango/learn/$lessonId'
-      path: '/japanese/tango/learn/$lessonId'
-      fullPath: '/app/japanese/tango/learn/$lessonId'
-      preLoaderRoute: typeof AppJapaneseTangoLearnLessonIdRouteImport
+    '/app/japanese/grammar/$grammarId': {
+      id: '/app/japanese/grammar/$grammarId'
+      path: '/japanese/grammar/$grammarId'
+      fullPath: '/app/japanese/grammar/$grammarId'
+      preLoaderRoute: typeof AppJapaneseGrammarGrammarIdRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/japanese/tango/lessons/$lessonId': {
-      id: '/app/japanese/tango/lessons/$lessonId'
-      path: '/japanese/tango/lessons/$lessonId'
-      fullPath: '/app/japanese/tango/lessons/$lessonId'
-      preLoaderRoute: typeof AppJapaneseTangoLessonsLessonIdRouteImport
+    '/app/japanese/tango/vocabularies/$vocabularyId': {
+      id: '/app/japanese/tango/vocabularies/$vocabularyId'
+      path: '/japanese/tango/vocabularies/$vocabularyId'
+      fullPath: '/app/japanese/tango/vocabularies/$vocabularyId'
+      preLoaderRoute: typeof AppJapaneseTangoVocabulariesVocabularyIdRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/japanese/tango/practice/$lessonId': {
@@ -470,11 +616,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppJapaneseTangoPracticeLessonIdRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/japanese/tango/vocabularies/$vocabularyId': {
-      id: '/app/japanese/tango/vocabularies/$vocabularyId'
-      path: '/japanese/tango/vocabularies/$vocabularyId'
-      fullPath: '/app/japanese/tango/vocabularies/$vocabularyId'
-      preLoaderRoute: typeof AppJapaneseTangoVocabulariesVocabularyIdRouteImport
+    '/app/japanese/tango/lessons/$lessonId': {
+      id: '/app/japanese/tango/lessons/$lessonId'
+      path: '/japanese/tango/lessons/$lessonId'
+      fullPath: '/app/japanese/tango/lessons/$lessonId'
+      preLoaderRoute: typeof AppJapaneseTangoLessonsLessonIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/japanese/tango/learn/$lessonId': {
+      id: '/app/japanese/tango/learn/$lessonId'
+      path: '/japanese/tango/learn/$lessonId'
+      fullPath: '/app/japanese/tango/learn/$lessonId'
+      preLoaderRoute: typeof AppJapaneseTangoLearnLessonIdRouteImport
       parentRoute: typeof AppRoute
     }
   }
@@ -492,8 +645,16 @@ interface AppRouteChildren {
   AppDecksDeckIdRoute: typeof AppDecksDeckIdRoute
   AppJapaneseAlphabetRoute: typeof AppJapaneseAlphabetRoute
   AppJapaneseKanaRoute: typeof AppJapaneseKanaRoute
+  AppJapaneseKanjiRoute: typeof AppJapaneseKanjiRoute
+  AppJapaneseKanjiMapRoute: typeof AppJapaneseKanjiMapRoute
+  AppJapaneseKanjiSourcesRoute: typeof AppJapaneseKanjiSourcesRoute
+  AppPathSetupRoute: typeof AppPathSetupRoute
+  AppPathStudyRoute: typeof AppPathStudyRoute
   AppDecksIndexRoute: typeof AppDecksIndexRoute
+  AppPathIndexRoute: typeof AppPathIndexRoute
+  AppJapaneseGrammarGrammarIdRoute: typeof AppJapaneseGrammarGrammarIdRoute
   AppJapaneseTangoMistakesRoute: typeof AppJapaneseTangoMistakesRoute
+  AppJapaneseGrammarIndexRoute: typeof AppJapaneseGrammarIndexRoute
   AppJapaneseTangoIndexRoute: typeof AppJapaneseTangoIndexRoute
   AppJapaneseTangoLearnLessonIdRoute: typeof AppJapaneseTangoLearnLessonIdRoute
   AppJapaneseTangoLessonsLessonIdRoute: typeof AppJapaneseTangoLessonsLessonIdRoute
@@ -513,8 +674,16 @@ const AppRouteChildren: AppRouteChildren = {
   AppDecksDeckIdRoute: AppDecksDeckIdRoute,
   AppJapaneseAlphabetRoute: AppJapaneseAlphabetRoute,
   AppJapaneseKanaRoute: AppJapaneseKanaRoute,
+  AppJapaneseKanjiRoute: AppJapaneseKanjiRoute,
+  AppJapaneseKanjiMapRoute: AppJapaneseKanjiMapRoute,
+  AppJapaneseKanjiSourcesRoute: AppJapaneseKanjiSourcesRoute,
+  AppPathSetupRoute: AppPathSetupRoute,
+  AppPathStudyRoute: AppPathStudyRoute,
   AppDecksIndexRoute: AppDecksIndexRoute,
+  AppPathIndexRoute: AppPathIndexRoute,
+  AppJapaneseGrammarGrammarIdRoute: AppJapaneseGrammarGrammarIdRoute,
   AppJapaneseTangoMistakesRoute: AppJapaneseTangoMistakesRoute,
+  AppJapaneseGrammarIndexRoute: AppJapaneseGrammarIndexRoute,
   AppJapaneseTangoIndexRoute: AppJapaneseTangoIndexRoute,
   AppJapaneseTangoLearnLessonIdRoute: AppJapaneseTangoLearnLessonIdRoute,
   AppJapaneseTangoLessonsLessonIdRoute: AppJapaneseTangoLessonsLessonIdRoute,

@@ -6,7 +6,7 @@ import { ArrowLeft, ChevronLeft, ChevronRight, Volume2 } from "lucide-react";
 import { speakKana } from "@/lib/japanese/kana";
 import { useTangoLessonQuery, useTangoLessonVocabulariesQuery, useTangoVocabularyQuery, useStudyProgressMutation } from "@/hooks/queries/tango.queries";
 import { useLearningAttemptMutation } from "@/hooks/queries/learning.queries";
-import { ErrorBlock, LoadingBlock, ProgressBar, WordStatusBadge } from "@/components/tango/shared";
+import { Enso, ErrorBlock, JpText, LoadingBlock, ProgressBar, WordStatusBadge } from "@/components/tango/shared";
 
 export const Route = createFileRoute("/app/japanese/tango/learn/$lessonId")({
   component: TangoLearningMode,
@@ -105,7 +105,7 @@ function TangoLearningMode() {
             aria-pressed={mode === m}
             onClick={() => setMode(m)}
             className={`rounded-full border px-4 py-1.5 text-sm font-bold transition-colors ${
-              mode === m ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card hover:border-primary/60"
+              mode === m ? "border-transparent bg-primary-soft text-primary-ink" : "border-transparent bg-surface-2 hover:bg-primary-soft"
             }`}
           >
             {m === "guided" ? "Học có hướng dẫn" : "Flashcard"}
@@ -116,8 +116,9 @@ function TangoLearningMode() {
       <ProgressBar value={percent} label="Tiến độ học" />
 
       {current && (
-        <Card className="card-pop space-y-5 rounded-3xl p-8 text-center">
-          <div className="flex items-center justify-center gap-3">
+        <Card className="lift relative space-y-5 overflow-hidden rounded-3xl border-0 p-6 text-center sm:p-8">
+          <Enso className="left-1/2 top-6 h-48 w-48 -translate-x-1/2" />
+          <div className="relative flex items-center justify-center gap-3">
             <WordStatusBadge status={current.status} />
             {current.partOfSpeech && (
               <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-bold text-muted-foreground">
@@ -125,9 +126,9 @@ function TangoLearningMode() {
               </span>
             )}
           </div>
-          <div>
-            <p className="text-5xl font-extrabold tracking-tight">{current.expression ?? current.kana}</p>
-            {current.expression && <p className="mt-2 text-lg text-muted-foreground">{current.kana}</p>}
+          <div className="relative">
+            <JpText serif as="p" className="text-5xl sm:text-7xl">{current.expression ?? current.kana}</JpText>
+            {current.expression && <JpText as="p" className="mt-2 text-xl text-muted-foreground">{current.kana}</JpText>}
             {showMeaning && <p className="mt-1 text-sm text-muted-foreground">{current.romaji}</p>}
           </div>
           <Button variant="outline" size="sm" onClick={() => speakKana(current.kana)} aria-label="Phát âm">
@@ -203,11 +204,11 @@ function WordExamples({ vocabularyId }: { vocabularyId: number }) {
   const examples = detail.data.examples;
   if (examples.length === 0) return null;
   return (
-    <div className="space-y-2 rounded-2xl bg-muted/50 p-4 text-left">
-      <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">Ví dụ</p>
+    <div className="space-y-2 rounded-2xl bg-surface-2 p-4 text-left">
+      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">Ví dụ</p>
       {examples.map((e, i) => (
         <div key={i}>
-          <p className="font-bold">{e.japanese}</p>
+          <JpText as="p" className="text-lg font-medium">{e.japanese}</JpText>
           {e.reading && <p className="text-sm text-muted-foreground">{e.reading}</p>}
           <p className="text-sm">{e.vietnamese}</p>
         </div>

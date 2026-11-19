@@ -1,214 +1,150 @@
-# Design System Master File
+# VocaPet Design System — MASTER
 
-> **LOGIC:** When building a specific page, first check `design-system/pages/[page-name].md`.
-> If that file exists, its rules **override** this Master file.
-> If not, strictly follow the rules below.
+> Page overrides live in `pages/*.md` and win over this file. Tokens: `tokens.css`. Preview: `preview.html`.
+> Status: **proposal, not implemented.** No file under `src/` has been changed.
 
----
+## 0. How this was produced
 
-**Project:** VocaPet
-**Generated:** 2026-11-17 23:18:54
-**Category:** Language Learning App
+- Ran UI UX Pro Max `--design-system` for "japanese language learning flashcards spaced repetition natural green warm cream", plus `style`, `typography`, `ux` domain searches.
+- Inspected `src/styles.css`, `__root.tsx`, `AppShell.tsx`, `app.index.tsx`, `components/tango/shared.tsx`, and the Tango routes.
+- **Where I overrode the tool, and why.** The tool returned *Claymorphism + Baloo 2/Comic Neue + purple* (its "kids education" profile). That conflicts with the brief (natural green, cream, modern, not playful-childish) and cannot render Japanese. I kept its rules for accessibility, touch, motion and checklist, and replaced its style/palette/type.
 
----
+## 1. Product category
 
-## Global Rules
+Self-study language-learning platform for adults/teens (EdTech, SRS + curriculum). Reference class: Duolingo (momentum), Anki/WaniKani (SRS discipline), Bunpo/Benkyo-style structured JLPT courses (lesson path). Primary job: *"Tell me the one thing to do now, and let me see I'm getting somewhere."*
 
-### Color Palette
+## 2. UI style: "Washi Study"
 
-| Role | Hex | CSS Variable |
-|------|-----|--------------|
-| Primary | `#4F46E5` | `--color-primary` |
-| On Primary | `#FFFFFF` | `--color-on-primary` |
-| Secondary | `#818CF8` | `--color-secondary` |
-| On Secondary | `#0F172A` | `--color-on-secondary` |
-| Accent/CTA | `#16A34A` | `--color-accent` |
-| On Accent/CTA | `#000000` | `--color-on-accent` |
-| Background | `#EEF2FF` | `--color-background` |
-| Foreground | `#312E81` | `--color-foreground` |
-| Card | `#FFFFFF` | `--color-card` |
-| Card Foreground | `#312E81` | `--color-card-foreground` |
-| Muted | `#EBEEF8` | `--color-muted` |
-| Muted Foreground | `#475569` | `--color-muted-foreground` |
-| Border | `#C7D2FE` | `--color-border` |
-| Destructive | `#DC2626` | `--color-destructive` |
-| On Destructive | `#FFFFFF` | `--color-on-destructive` |
-| Ring | `#4F46E5` | `--color-ring` |
+Warm paper + ink, flat with tonal depth. **Not** claymorphism, not glass, not generic SaaS.
 
-**Color Notes:** Learning indigo + progress green [Accent adjusted from #22C55E]
+| Principle | Rule |
+|---|---|
+| Surfaces | Separate regions by **tone** (`bg` → `surface` → `surface-2`), not by a border on every card. Hairline dividers only inside a surface. |
+| Elevation | Two levels only: `flat` (default) and `lift` (one hero card per screen + hover). No hard `0 4px 0` "pop" shadows. |
+| Emphasis | Japanese headwords are the visual hero: large, serif, ink-coloured. UI chrome stays quiet. |
+| Colour | Green = progress/action. Hanko red (`seal`) = JLPT level stamp & mistakes, used in tiny doses. Amber = needs review. |
+| Gradients | None for fills. Existing page radial wash stays at ≤ 30% (already in `styles.css`). |
+| Decoration | One motif only: a faint, plain **ink-wash circle (enso)** behind the hero headword. No mascots, no stickers (Pet is hidden). |
+| Icons | Lucide only (already installed). No emoji as icons. |
 
-### Typography
+Dials used: variance 5, motion 4, density 6.
 
-- **Heading Font:** Baloo 2
-- **Body Font:** Comic Neue
-- **Mood:** kids, education, playful, friendly, colorful, learning
-- **Google Fonts:** [Baloo 2 + Comic Neue](https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&family=Comic+Neue:wght@300;400;700&display=swap)
+## 3. Colour
 
-**CSS Import:**
-```css
-@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&family=Comic+Neue:wght@300;400;700&display=swap');
-```
+Keep the existing semantic token names (`--background`, `--primary`, `--muted` …). Only values change/add. Contrast verified (WCAG, computed from the oklch values).
 
-### Spacing Variables
+| Token | oklch | ≈ Hex | Use | Contrast |
+|---|---|---|---|---|
+| `--background` | .982 .008 95 | #FBF9F3 | page (kept) | — |
+| `--surface-2` **new** | .965 .014 100 | #F5F4E9 | recessed bands, list shelves | — |
+| `--foreground` | .28 .022 155 | #202C24 | text (kept) | 13.8 : 1 on bg |
+| `--muted-foreground` | **.48** .02 155 | #556159 | secondary text | 6.2 : 1 (was .53 → 4.97, passing but thin on surface-2) |
+| `--primary` | **.50 .12 155** | #0B7643 | buttons, links, progress | white on it **5.7 : 1** |
+| `--primary-soft` **new** | .95 .03 150 | #E1F5E4 | tinted chips/bands | ink `.40 .09 155` on it 7.8 : 1 |
+| `--seal` **new** | .52 .17 28 | #B6322B | JLPT stamp, mistake mark | 5.7 : 1 on bg |
+| `--warning-ink` **new** | .45 .10 70 | #784900 | text on amber chips | 7.3 : 1 |
+| `--border` | .88 .014 115 | #D7D9CE | hairlines only (1.4 : 1 — decorative, never the only boundary of a control) | |
+| `--ring` | = primary | | focus ring 2px + 2px offset | |
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| `--space-xs` | `4px` / `0.25rem` | Tight gaps |
-| `--space-sm` | `8px` / `0.5rem` | Icon gaps, inline spacing |
-| `--space-md` | `16px` / `1rem` | Standard padding |
-| `--space-lg` | `24px` / `1.5rem` | Section padding |
-| `--space-xl` | `32px` / `2rem` | Large gaps |
-| `--space-2xl` | `48px` / `3rem` | Section margins |
-| `--space-3xl` | `64px` / `4rem` | Hero padding |
+**Finding:** the current `--primary` (#279055) gives white text only **4.0 : 1**, which fails AA for the 14px bold button/badge text used today. One value change (to .50) fixes every button app-wide.
 
-### Shadow Depths
+Word-status colours (never colour-only: each has an icon + label):
+`NEW` neutral · `LEARNING` info-blue · `NEED_REVIEW` amber (+`warning-ink` text) · `MASTERED` primary green. Already mapped in `components/tango/shared.tsx`; reuse, restyle only.
 
-| Level | Value | Usage |
-|-------|-------|-------|
-| `--shadow-sm` | `0 1px 2px rgba(0,0,0,0.05)` | Subtle lift |
-| `--shadow-md` | `0 4px 6px rgba(0,0,0,0.1)` | Cards, buttons |
-| `--shadow-lg` | `0 10px 15px rgba(0,0,0,0.1)` | Modals, dropdowns |
-| `--shadow-xl` | `0 20px 25px rgba(0,0,0,0.15)` | Hero images, featured cards |
+Dark mode: keep the existing `.dark` block; re-derive `--primary` lighter (.72) and verify 4.5 : 1 after the change. Not designed in detail in this pass.
 
----
+## 4. Typography
 
-## Component Specs
+| Role | Font | Why |
+|---|---|---|
+| Japanese headword / lesson title / display | **Noto Serif JP** 600–700 | Tool's top pairing ("Japanese Elegant"); stroke detail of kanji stays legible at 48–96px; gives the "textbook" warmth. |
+| Japanese body (kana lines, examples) | **Noto Sans JP** 400–500 | Clean at 14–18px. |
+| Latin / Vietnamese UI | **Geist** (existing) | Keep. **Risk:** confirm Geist's Vietnamese subset on Google Fonts; if absent, Vietnamese diacritics fall back to system font. Fallback candidate: *Be Vietnam Pro*. Check before implementing. |
+| Numerals | Geist, `font-variant-numeric: tabular-nums` | Counters/timers don't jitter. |
 
-### Buttons
+Today the app loads only Geist → Japanese falls back to whatever the OS has (Yu Gothic / Meiryo / none on Linux). That is the main Japanese-rendering bug to fix.
 
-```css
-/* Primary Button */
-.btn-primary {
-  background: #16A34A;
-  color: white;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 200ms ease;
-  cursor: pointer;
-}
+Rules:
+- Every Japanese text node gets `lang="ja"` (selects correct Han glyph variants vs Chinese; also helps screen readers).
+- Stack: `"Noto Serif JP","Hiragino Mincho ProN","Yu Mincho",serif` / `"Noto Sans JP","Hiragino Sans","Yu Gothic",sans-serif`.
+- Japanese line-height 1.7 (body) / 1.25 (display). No negative letter-spacing on Japanese (the global `h1..h5 { letter-spacing:-0.01em }` must not apply to `[lang=ja]`).
+- Load `Noto Sans JP` 400/500/700 and `Noto Serif JP` 600/700 with `display=swap`; use the `text=` or unicode-range subsets Google serves by default (don't self-host the full CJK files).
+- Scale (px): 12 · 14 · 16 · 18 · 24 · 32 · 48 · 72 · 96. Body 16. Minimum 12 for captions only.
+- Headings weight 700 (not the current 800 everywhere — 800 flattens hierarchy).
 
-.btn-primary:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
+## 5. Layout
 
-/* Secondary Button */
-.btn-secondary {
-  background: transparent;
-  color: #4F46E5;
-  border: 2px solid #4F46E5;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 200ms ease;
-  cursor: pointer;
-}
-```
+- App shell: keep `AppShell` (sidebar ≥ md, bottom nav on mobile). Content max-width **1120px** (dashboard) / **720px** (study screens), 24px gutter desktop, 16px mobile.
+- Spacing 4-pt scale: 4 8 12 16 24 32 48 64. Section gap 32, intra-section 12–16.
+- Breakpoints 375 / 768 / 1024 / 1440 (Tailwind `sm md lg 2xl` already match).
+- **Anti-emptiness rule:** a screen's first viewport must contain the primary action, today's status, and at least one data-bearing element. No full-width card holding one sentence.
+- **Anti-repetition rule:** no screen may show > 2 consecutive identical bordered boxes. Mix: hero band, tinted shelf, list, tile grid.
 
-### Cards
+## 6. Components (reuse first)
 
-```css
-.card {
-  background: #EEF2FF;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: var(--shadow-md);
-  transition: all 200ms ease;
-  cursor: pointer;
-}
+Reuse as-is (restyle via tokens): `Button`, `Card`, `Progress`, `Tabs`, `Badge`, `Skeleton`, `Dialog`, `Sheet`, `Tooltip`, `LoadingBlock/ErrorBlock/EmptyBlock/ProgressBar/WordStatusBadge/LessonStatusBadge` in `tango/shared.tsx`.
 
-.card:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
-}
-```
+New (small, only these):
+| Component | Purpose | Notes |
+|---|---|---|
+| `JpText` | Wraps text with `lang="ja"` + font role (`serif`/`sans`) | Single source for the Japanese font rule. |
+| `ProgressRing` | Circular % for lesson/daily goal | SVG, `role="progressbar"`, text label inside. |
+| `StatusMark` | Icon + label for word status | Replaces colour-only dots; extends `WordStatusBadge`, not a duplicate. |
+| `LevelStamp` | N5/N4… in a hanko-style rounded square | Uses `--seal`. |
 
-### Inputs
+Do **not** add: new button variants, a second card component, a chart library (SVG + existing `ui/chart.tsx` is enough).
 
-```css
-.input {
-  padding: 12px 16px;
-  border: 1px solid #E2E8F0;
-  border-radius: 8px;
-  font-size: 16px;
-  transition: border-color 200ms ease;
-}
+Component specs:
+- **Button**: primary = solid `--primary`; secondary = `--primary-soft` fill (no border); tertiary = text. One primary per screen region. Min height 44px; radius 12.
+- **Card**: radius 16, `--card` on `--background` with **no border** and `flat`; `lift` only for the hero. Border appears only on keyboard focus-within.
+- **Chip/Tab**: pill, 36px high min target 44 via padding, selected = filled primary-soft + ink text + check/underline (not colour alone).
+- **Vocabulary card / lesson card**: see `pages/vocabulary.md`.
+- **Progress**: bar 8px (existing) for lists; ring for hero metrics; always a numeric label.
 
-.input:focus {
-  border-color: #4F46E5;
-  outline: none;
-  box-shadow: 0 0 0 3px #4F46E520;
-}
-```
+## 7. Motion
 
-### Modals
+Tokens: `--dur-fast 120ms` (press), `--dur-base 200ms` (hover/colour), `--dur-slow 320ms` (reveal/flip), easing `cubic-bezier(.2,.8,.2,1)` out, in-out for flips. Transform/opacity only.
+Meaningful micro-interactions only: press scale .98; progress fills animate once on mount; card reveal = 180ms fade + 4px rise; correct answer = ring pulse once; streak increment = number tick. Max 1–2 animated elements per view. `@media (prefers-reduced-motion: reduce)` → durations 0, no stagger. Existing `bob/wiggle/blink` keyframes are Pet-only; leave them.
 
-```css
-.modal-overlay {
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-}
+## 8. UX guidelines (from the tool's rules, applied)
 
-.modal {
-  background: white;
-  border-radius: 16px;
-  padding: 32px;
-  box-shadow: var(--shadow-xl);
-  max-width: 500px;
-  width: 90%;
-}
-```
+1. One primary CTA per screen ("Continue lesson" / "Review N due").
+2. Every async action: disabled + spinner on button; skeletons (not spinners) for lists > 1s (already `LoadingBlock`).
+3. Errors beside the field/block with retry (already `ErrorBlock`).
+4. Study screens: keyboard parity — Space reveal, 1/2 rate (already present); add visible key hints.
+5. Progress is always shown as number + visual (e.g. "12 / 30" + bar).
+6. Don't gate: locked/"Coming soon" modules render as muted, non-focusable, with text "Soon" (not hover-only tooltip).
+7. Touch: targets ≥ 44px, ≥ 8px apart (heart & speaker buttons in word rows are currently 32px — fix).
+8. Empty states give the next action, not an apology.
 
----
+## 9. Accessibility checklist (WCAG 2.2 AA)
 
-## Style Guidelines
+- Text contrast ≥ 4.5 : 1, large ≥ 3 : 1, non-text UI ≥ 3 : 1 (progress fill vs track: primary on `muted` = ok; verify after change).
+- `:focus-visible` ring 2px primary + 2px offset on every interactive element; never `outline:none` without replacement.
+- Status never by colour alone (icon + text). ✓/✗ in "Recently studied" must keep text for SR (`sr-only` "Correct"/"Wrong").
+- Heading order h1→h2→h3; one h1 per route.
+- `lang="ja"` on Japanese; `lang="vi"` on `<html>`.
+- Icon-only buttons have `aria-label` (existing pattern ok). Speaker button label includes the word.
+- Progress uses `role="progressbar"` + `aria-valuenow` (existing `ProgressBar` ok; `ProgressRing` must match).
+- Live region (`aria-live="polite"`) for answer feedback and streak updates.
+- `prefers-reduced-motion` and `prefers-color-scheme` honoured.
+- Flashcards: reveal operable by keyboard and button, not by tap-on-card only.
 
-**Style:** Claymorphism
+## 10. Avoid list (from brief) → how it is prevented
 
-**Keywords:** Soft 3D, chunky, playful, toy-like, bubbly, thick borders (3-4px), double shadows, rounded (16-24px)
+| Avoid | Prevention |
+|---|---|
+| Generic SaaS dashboard | Ink/paper type-led hero; Japanese headword as focal point; no KPI-tile row of four equal boxes. |
+| Excessive empty space | §5 anti-emptiness rule; max-width + 2-column hero. |
+| Repetitive bordered cards | Tonal surfaces, borderless cards, §5 anti-repetition rule. |
+| Monotonous vocab lists | Two views (rows / tiles), headword-led rows with status marks, grouped by status or position. |
+| Excess gradients | None on fills. |
+| Unnecessary decoration | Single enso motif, only behind hero headword. |
 
-**Best For:** Educational apps, children's apps, SaaS platforms, creative tools, fun-focused, onboarding, casual games
+## 11. Open decisions for you
 
-**Key Effects:** Inner+outer shadows (subtle, no hard lines), soft press (200ms ease-out), fluffy elements, smooth transitions
-
-### Page Pattern
-
-**Pattern Name:** Hero + Testimonials + CTA
-
-- **Conversion Strategy:** Social proof before CTA. Use a concise set of verified testimonials with photo, name, and role. CTA after social proof. Provide previous/next and pause controls; stop rotation on focus, hover, and reduced motion; announce slide position. Previous/next buttons and keyboard controls must expose every slide without dragging.
-- **CTA Placement:** Hero (sticky) + Post-testimonials
-- **Section Order:** Hero > Problem statement > Solution overview > Testimonials carousel > CTA
-
----
-
-## Anti-Patterns (Do NOT Use)
-
-- ❌ Boring design
-- ❌ No motivation
-
-### Additional Forbidden Patterns
-
-- ❌ **Emojis as icons** — Use SVG icons (Heroicons, Lucide, Simple Icons)
-- ❌ **Missing cursor:pointer** — All clickable elements must have cursor:pointer
-- ❌ **Layout-shifting hovers** — Avoid scale transforms that shift layout
-- ❌ **Low contrast text** — Maintain 4.5:1 minimum contrast ratio
-- ❌ **Instant state changes** — Always use transitions (150-300ms)
-- ❌ **Invisible focus states** — Focus states must be visible for a11y
-
----
-
-## Pre-Delivery Checklist
-
-Before delivering any UI code, verify:
-
-- [ ] No emojis used as icons (use SVG instead)
-- [ ] All icons from consistent icon set (Heroicons/Lucide)
-- [ ] `cursor-pointer` on all clickable elements
-- [ ] Hover states with smooth transitions (150-300ms)
-- [ ] Light mode: text contrast 4.5:1 minimum
-- [ ] Focus states visible for keyboard navigation
-- [ ] `prefers-reduced-motion` respected
-- [ ] Responsive: 375px, 768px, 1024px, 1440px
-- [ ] No content hidden behind fixed navbars
-- [ ] No horizontal scroll on mobile
+1. Approve **primary darkening** (.58 → .50) — affects all buttons; or keep brand green and use `--primary-strong` for text/buttons only (more code churn).
+2. Approve **Noto Serif JP** for headwords (vs sans-only, more neutral).
+3. Dashboard analytics: weekly chart needs a per-day study endpoint. Does one exist? (Not found in current `study-session.queries`.) Spec falls back to what exists.
+4. Vietnamese font check (§4).
+5. Dark mode in scope for this redesign, or later?

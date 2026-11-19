@@ -29,7 +29,7 @@ export function useCompanion(userId: number | undefined, name: string, reviewCou
   useEffect(() => {
     if (!userId || !memoryRef.current || reviewCount <= reviewCountRef.current) { reviewCountRef.current = reviewCount; return; }
     const now = Date.now();
-    let memory = recordCompanionStudy(memoryRef.current, now);
+    let memory: CompanionMemory = recordCompanionStudy(memoryRef.current, now);
     const completed = studyCompleteMoment(memory, name, now);
     if (completed) { memory = completed.memory; speakPet(`Pip: ${completed.moment.message}`, 2, 5); }
     memoryRef.current = memory;

@@ -1,8 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { AddToDeckButton } from "@/components/tango/AddToDeckButton";
 import { Search } from "lucide-react";
 import { JLPT_LEVELS, type JlptLevel, type TangoLessonStatus } from "@/api/tango.api";
 import {
@@ -11,7 +11,7 @@ import {
   useTangoProgressQuery,
   useTangoSearchQuery,
 } from "@/hooks/queries/tango.queries";
-import { EmptyBlock, ErrorBlock, LessonStatusBadge, LoadingBlock, ProgressBar } from "@/components/tango/shared";
+import { EmptyBlock, ErrorBlock, JpText, LessonStatusBadge, LevelStamp, LoadingBlock, ProgressRing } from "@/components/tango/shared";
 
 export const Route = createFileRoute("/app/japanese/tango/")({
   validateSearch: (search: Record<string, unknown>): { level?: JlptLevel } => {
@@ -46,12 +46,14 @@ function TangoDashboard() {
   return (
     <div className="space-y-8">
       <header className="space-y-4">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">Tango</p>
-          <h1 className="mt-1 text-3xl font-extrabold tracking-tight">Từ vựng tiếng Nhật</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Học theo cấp độ JLPT, từng bài một. Tiến độ được theo dõi xuyên suốt các bài.
-          </p>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Từ vựng tiếng Nhật</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Học theo cấp độ JLPT, từng bài một. Tiến độ được theo dõi xuyên suốt các bài.
+            </p>
+          </div>
+          <LevelStamp level={level} />
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <div role="tablist" aria-label="Cấp độ JLPT" className="flex gap-2">
@@ -64,8 +66,8 @@ function TangoDashboard() {
                   role="tab"
                   aria-selected={active}
                   onClick={() => setLevel(item)}
-                  className={`rounded-full border px-4 py-1.5 text-sm font-bold transition-colors ${
-                    active ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card hover:border-primary/60"
+                  className={`min-h-10 rounded-full px-4 text-sm font-semibold transition-colors ${
+                    active ? "bg-primary text-primary-foreground" : "bg-surface-2 hover:bg-primary-soft"
                   }`}
                 >
                   {item}
@@ -91,24 +93,22 @@ function TangoDashboard() {
         <SearchResults state={search_} query={trimmed} />
       ) : (
         <>
-          <section aria-label="Tổng quan học tập" className="grid gap-4 sm:grid-cols-4">
-            {progress.isError ? (
-              <div className="sm:col-span-4"><ErrorBlock error={progress.error} onRetry={() => progress.refetch()} /></div>
-            ) : (
-              <>
-                <OverviewStat label="Tổng số từ" value={progress.data?.words.total} />
-                <OverviewStat label="Đã học" value={progress.data && progress.data.words.total - progress.data.words.new} />
-                <OverviewStat label="Đã thuộc" value={progress.data?.words.mastered} />
-                <OverviewStat label="Cần ôn" value={progress.data?.words.needReview} />
-              </>
-            )}
-          </section>
+          {progress.isError ? (
+            <ErrorBlock error={progress.error} onRetry={() => progress.refetch()} />
+          ) : (
+            <section aria-label="Tổng quan học tập" className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl bg-border sm:grid-cols-4">
+              <OverviewStat label="Tổng số từ" value={progress.data?.words.total} />
+              <OverviewStat label="Đã học" value={progress.data && progress.data.words.total - progress.data.words.new} />
+              <OverviewStat label="Đã thuộc" value={progress.data?.words.mastered} />
+              <OverviewStat label="Cần ôn" value={progress.data?.words.needReview} />
+            </section>
+          )}
 
           {progress.data?.continueLearning && (
-            <Card className="card-pop flex flex-col gap-3 rounded-2xl p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-3 rounded-2xl bg-primary-soft p-5 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">Tiếp tục học</p>
-                <p className="mt-1 font-extrabold">
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-primary-ink">Tiếp tục học</p>
+                <p className="mt-1 font-bold">
                   Bài {progress.data.continueLearning.lessonNumber} · {progress.data.continueLearning.title}
                 </p>
               </div>
@@ -120,7 +120,7 @@ function TangoDashboard() {
                   Tiếp tục
                 </Link>
               </Button>
-            </Card>
+            </div>
           )}
 
           <section aria-label="Danh sách bài học" className="space-y-3">
@@ -145,40 +145,60 @@ function TangoDashboard() {
                     type="button"
                     aria-pressed={statusFilter === f.key}
                     onClick={() => setStatusFilter(f.key)}
-                    className={`rounded-full border px-3 py-1 text-xs font-bold transition-colors ${
-                      statusFilter === f.key ? "border-primary bg-primary/10 text-primary" : "border-border bg-card hover:border-primary/60"
+                    className={`min-h-9 rounded-full px-3.5 text-sm font-semibold transition-colors ${
+                      statusFilter === f.key ? "bg-primary-soft text-primary-ink" : "bg-surface-2 hover:bg-primary-soft"
                     }`}
                   >
                     {f.label}
                   </button>
                 ))}
               </div>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {lessons.data.lessons
                   .filter((lesson) => statusFilter === "ALL" || lesson.status === statusFilter)
-                  .map((lesson) => (
-                  <Card key={lesson.id} className="card-pop flex flex-col gap-3 rounded-2xl p-5">
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <p className="text-xs font-bold text-muted-foreground">Bài {lesson.lessonNumber}</p>
-                        <p className="font-extrabold">{lesson.title}</p>
-                      </div>
-                      <LessonStatusBadge status={lesson.status} />
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {lesson.viewedCount}/{lesson.requiredCount} từ đã xem · {lesson.vocabularyCount} từ
-                    </p>
-                    <ProgressBar value={lesson.progressPercent} label={`Tiến độ bài ${lesson.lessonNumber}`} />
-                    <Button asChild variant="outline" size="sm" className="mt-auto w-fit">
-                      <Link
-                        to="/app/japanese/tango/lessons/$lessonId"
-                        params={{ lessonId: String(lesson.id) }}
+                  .map((lesson) => {
+                    const tone =
+                      lesson.status === "COMPLETED"
+                        ? "bg-primary-soft"
+                        : lesson.status === "IN_PROGRESS"
+                          ? "bg-card lift"
+                          : "bg-surface-2";
+                    return (
+                      <div
+                        key={lesson.id}
+                        className={`group pointer-events-none relative flex min-h-36 flex-col justify-end gap-1 overflow-hidden rounded-2xl p-4 transition-transform duration-200 hover:-translate-y-0.5 ${tone}`}
                       >
-                        {lesson.status === "NOT_STARTED" ? "Bắt đầu" : lesson.status === "COMPLETED" ? "Ôn lại" : "Tiếp tục"}
-                      </Link>
-                    </Button>
-                  </Card>
-                ))}
+                        <Link
+                          to="/app/japanese/tango/lessons/$lessonId"
+                          params={{ lessonId: String(lesson.id) }}
+                          aria-label={`Bài ${lesson.lessonNumber} · ${lesson.title}`}
+                          className="pointer-events-auto absolute inset-0 rounded-2xl"
+                        />
+                        <span aria-hidden lang="ja" className="jp-serif absolute right-3 top-1 text-6xl leading-none opacity-[0.12]">
+                          {lesson.lessonNumber}
+                        </span>
+                        {lesson.status === "IN_PROGRESS" && (
+                          <div className="absolute right-4 top-4">
+                            <ProgressRing size={40} value={lesson.progressPercent} label={`Tiến độ bài ${lesson.lessonNumber}`} />
+                          </div>
+                        )}
+                        <p className="max-w-[75%] font-bold">
+                          <span className="text-muted-foreground">Bài {lesson.lessonNumber} · </span>
+                          {lesson.title}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {lesson.viewedCount}/{lesson.requiredCount} từ đã xem · {lesson.vocabularyCount} từ
+                        </p>
+                        <div className="mt-2 flex items-center gap-2">
+                          <LessonStatusBadge status={lesson.status} />
+                          <AddToDeckButton lessonId={lesson.id} compact className="pointer-events-auto relative z-10" />
+                          <span className="ml-auto text-sm font-semibold text-primary">
+                            {lesson.status === "NOT_STARTED" ? "Bắt đầu" : lesson.status === "COMPLETED" ? "Ôn lại" : "Tiếp tục"} →
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
               </div>
               </>
             )}
@@ -191,14 +211,14 @@ function TangoDashboard() {
 
 function OverviewStat({ label, value }: { label: string; value: number | undefined }) {
   return (
-    <Card className="card-pop rounded-2xl p-5">
-      <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">{label}</p>
+    <div className="bg-card px-5 py-4">
+      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">{label}</p>
       {value === undefined ? (
-        <div className="mt-2 h-7 w-16 animate-pulse rounded bg-muted" />
+        <div className="mt-2 h-7 w-16 animate-pulse rounded bg-surface-2" />
       ) : (
-        <p className="mt-1 text-2xl font-extrabold">{value}</p>
+        <p className="mt-1 text-2xl font-bold tabular-nums">{value}</p>
       )}
-    </Card>
+    </div>
   );
 }
 
@@ -219,7 +239,7 @@ function SearchResults({ state, query }: { state: ReturnType<typeof useTangoSear
               key={l.id}
               to="/app/japanese/tango/lessons/$lessonId"
               params={{ lessonId: String(l.id) }}
-              className="block rounded-2xl border border-border bg-card p-4 font-bold hover:border-primary/60"
+              className="block rounded-2xl bg-surface-2 p-4 font-semibold transition-colors hover:bg-primary-soft"
             >
               {l.jlptLevel} · Bài {l.lessonNumber} · {l.title}
             </Link>
@@ -234,10 +254,10 @@ function SearchResults({ state, query }: { state: ReturnType<typeof useTangoSear
               key={v.vocabularyId}
               to="/app/japanese/tango/vocabularies/$vocabularyId"
               params={{ vocabularyId: String(v.vocabularyId) }}
-              className="flex items-baseline gap-3 rounded-2xl border border-border bg-card p-4 hover:border-primary/60"
+              className="flex items-baseline gap-3 rounded-2xl bg-surface-2 p-4 transition-colors hover:bg-primary-soft"
             >
-              <span className="text-lg font-bold">{v.expression ?? v.kana}</span>
-              <span className="text-sm text-muted-foreground">{v.kana}</span>
+              <JpText serif className="text-xl">{v.expression ?? v.kana}</JpText>
+              <JpText className="text-sm text-muted-foreground">{v.kana}</JpText>
               <span className="ml-auto text-sm">{v.primaryMeaning}</span>
             </Link>
           ))}

@@ -53,6 +53,20 @@ public class LearningEngineService {
         progressRepository.save(p);
     }
 
+    /**
+     * Placement test inferred the word is known: schedule it like a GOOD answer so FSRS verifies it soon.
+     * No LearningActivityEvent, so an inferred word earns no missions or rewards.
+     */
+    @Transactional
+    public void recordPlacement(User user, TangoVocabulary canonical) {
+        UserVocabularyProgress p = resolve(user, null, canonical);
+        p.setTimesSeen(p.getTimesSeen() + 1);
+        p.setCorrectCount(p.getCorrectCount() + 1);
+        p.setLastSource(LearningSource.TANGO); // path words are Tango words
+        fsrsService.review(p, Rating.GOOD);
+        progressRepository.save(p);
+    }
+
     private UserVocabularyProgress resolve(User user, Vocabulary vocabulary, TangoVocabulary canonical) {
         if (canonical == null && vocabulary != null) canonical = vocabulary.getTangoVocabulary();
 

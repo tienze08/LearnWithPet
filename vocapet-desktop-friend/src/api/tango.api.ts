@@ -195,6 +195,16 @@ export const getTangoVocabulary = (vocabularyId: number) =>
 export const startTangoLesson = (lessonId: number) =>
   apiFetch<TangoStartResponse>(`${base}/lessons/${lessonId}/start`, { method: "POST" });
 
+export interface TangoToDeckResponse {
+  deckId: number;
+  deckName: string;
+  added: number;
+  skipped: number;
+}
+
+export const addTangoLessonToDeck = (lessonId: number) =>
+  apiFetch<TangoToDeckResponse>(`${base}/lessons/${lessonId}/to-deck`, { method: "POST" });
+
 export const recordStudyProgress = (lessonId: number, vocabularyIds: number[], lastPosition?: number) =>
   apiFetch<TangoStudyProgressResponse>(`${base}/lessons/${lessonId}/study-progress`, {
     method: "POST",

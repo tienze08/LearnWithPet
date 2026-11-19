@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { AddToDeckButton } from "@/components/tango/AddToDeckButton";
 import { ArrowLeft, Heart, Volume2 } from "lucide-react";
 import { speakKana } from "@/lib/japanese/kana";
 import type { TangoLessonVocabulary } from "@/api/tango.api";
@@ -13,7 +13,9 @@ import {
 } from "@/hooks/queries/tango.queries";
 import {
   EmptyBlock,
+  Enso,
   ErrorBlock,
+  JpText,
   LessonStatusBadge,
   LoadingBlock,
   ProgressBar,
@@ -51,6 +53,21 @@ function TangoLessonDetail() {
   const id = Number(lessonId);
   const navigate = useNavigate();
   const [filter, setFilter] = useState<Filter>("all");
+  const [view, setView] = useState<"rows" | "tiles">(() => {
+    try {
+      return localStorage.getItem("tango-word-view") === "tiles" ? "tiles" : "rows";
+    } catch {
+      return "rows";
+    }
+  });
+  const changeView = (v: "rows" | "tiles") => {
+    setView(v);
+    try {
+      localStorage.setItem("tango-word-view", v);
+    } catch {
+      /* storage unavailable: view just isn't remembered */
+    }
+  };
 
   const lesson = useTangoLessonQuery(id);
   const vocabularies = useTangoLessonVocabulariesQuery(id);
@@ -82,13 +99,14 @@ function TangoLessonDetail() {
     <div className="space-y-6">
       <BackLink />
 
-      <Card className="card-pop rounded-2xl p-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="relative overflow-hidden rounded-2xl bg-primary-soft p-6">
+        <Enso className="-right-6 -top-6 h-44 w-44" />
+        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
-            <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-primary-ink">
               {data.jlptLevel} · Bài {data.lessonNumber}
             </p>
-            <h1 className="mt-1 text-2xl font-extrabold tracking-tight">{data.title}</h1>
+            <h1 className="mt-1 text-2xl font-bold tracking-tight">{data.title}</h1>
             {data.description && <p className="mt-2 text-sm text-muted-foreground">{data.description}</p>}
           </div>
           <div className="flex shrink-0 flex-wrap gap-2">
@@ -121,9 +139,10 @@ function TangoLessonDetail() {
               Ôn từ sai
             </Link>
           </Button>
+          <AddToDeckButton lessonId={id} />
         </div>
-        {start.isError && <p className="mt-3 text-sm text-destructive">{start.error.message}</p>}
-      </Card>
+        {start.isError && <p className="relative mt-3 text-sm text-destructive">{start.error.message}</p>}
+      </div>
 
       <section aria-label="Danh sách từ vựng" className="space-y-3">
         <div role="tablist" aria-label="Lọc từ vựng" className="flex flex-wrap gap-2">
@@ -133,13 +152,26 @@ function TangoLessonDetail() {
               role="tab"
               aria-selected={filter === f.key}
               onClick={() => setFilter(f.key)}
-              className={`rounded-full border px-3 py-1 text-sm font-bold ${
-                filter === f.key ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card"
+              className={`min-h-10 rounded-full px-4 text-sm font-semibold transition-colors ${
+                filter === f.key ? "bg-primary-soft text-primary-ink" : "bg-surface-2 hover:bg-primary-soft"
               }`}
             >
               {f.label}
             </button>
           ))}
+          <div role="group" aria-label="Kiểu hiển thị" className="ml-auto flex gap-1 rounded-full bg-surface-2 p-1">
+            {(["rows", "tiles"] as const).map((v) => (
+              <button
+                key={v}
+                type="button"
+                aria-pressed={view === v}
+                onClick={() => changeView(v)}
+                className={`min-h-8 rounded-full px-3 text-sm font-semibold ${view === v ? "bg-card shadow-sm" : "text-muted-foreground"}`}
+              >
+                {v === "rows" ? "Danh sách" : "Thẻ"}
+              </button>
+            ))}
+          </div>
         </div>
 
         {vocabularies.isPending ? (
@@ -155,6 +187,7 @@ function TangoLessonDetail() {
               favorite.mutate({ vocabularyId: word.id, favorite: !word.favorite })
             }
             favoritePending={favorite.isPending}
+            view={view}
           />
         )}
       </section>
@@ -166,50 +199,87 @@ function WordList({
   words,
   onToggleFavorite,
   favoritePending,
+  view,
 }: {
   words: TangoLessonVocabulary[];
   onToggleFavorite: (word: TangoLessonVocabulary) => void;
   favoritePending: boolean;
+  view: "rows" | "tiles";
 }) {
   if (words.length === 0) {
     return <EmptyBlock title="Không có từ nào trong bộ lọc này." />;
   }
+  const actions = (word: TangoLessonVocabulary) => (
+    <>
+      <button
+        type="button"
+        aria-label={word.favorite ? "Bỏ yêu thích" : "Yêu thích"}
+        aria-pressed={word.favorite}
+        disabled={favoritePending}
+        onClick={() => onToggleFavorite(word)}
+        className="grid h-11 w-11 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-surface-2"
+      >
+        <Heart className={`h-5 w-5 ${word.favorite ? "fill-current text-seal" : ""}`} />
+      </button>
+      <button
+        type="button"
+        aria-label={`Phát âm ${word.kana}`}
+        onClick={() => speakKana(word.kana)}
+        className="grid h-11 w-11 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-surface-2"
+      >
+        <Volume2 className="h-5 w-5" />
+      </button>
+    </>
+  );
+
+  if (view === "tiles") {
+    return (
+      <ul className="grid grid-cols-2 gap-3 rounded-2xl bg-surface-2 p-3 sm:grid-cols-3 lg:grid-cols-4">
+        {words.map((word) => (
+          <li key={word.id} className="flex flex-col items-center gap-1 rounded-2xl bg-card p-4 text-center transition-transform duration-200 hover:-translate-y-0.5">
+            <Link
+              to="/app/japanese/tango/vocabularies/$vocabularyId"
+              params={{ vocabularyId: String(word.id) }}
+              className="flex flex-col items-center"
+            >
+              <JpText serif className="text-3xl">{word.expression ?? word.kana}</JpText>
+              {word.expression && <JpText className="text-sm text-muted-foreground">{word.kana}</JpText>}
+              <span className="mt-1 text-sm">{word.primaryMeaning}</span>
+            </Link>
+            <div className="mt-2">
+              <WordStatusBadge status={word.status} />
+            </div>
+            <div className="flex">{actions(word)}</div>
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
   return (
-    <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
+    <ul className="divide-y divide-border overflow-hidden rounded-2xl bg-card">
       {words.map((word) => (
-        <li key={word.id} className="flex items-center gap-3 p-4">
-          <span className="w-6 shrink-0 text-xs text-muted-foreground">{word.position}</span>
+        <li key={word.id} className="flex min-h-16 items-center gap-3 py-2 pl-4 pr-1">
+          <span className="w-6 shrink-0 text-xs tabular-nums text-muted-foreground">{word.position}</span>
           <div className="min-w-0 flex-1">
             <Link
               to="/app/japanese/tango/vocabularies/$vocabularyId"
               params={{ vocabularyId: String(word.id) }}
               className="flex flex-wrap items-baseline gap-x-3"
             >
-              <span className="text-lg font-bold">{word.expression ?? word.kana}</span>
-              {word.expression && <span className="text-sm text-muted-foreground">{word.kana}</span>}
-              <span className="text-xs text-muted-foreground">{word.romaji}</span>
+              <JpText serif className="text-2xl">{word.expression ?? word.kana}</JpText>
+              {word.expression && <JpText className="text-sm text-muted-foreground">{word.kana}</JpText>}
+              <span className="hidden text-xs text-muted-foreground sm:inline">{word.romaji}</span>
             </Link>
-            <p className="truncate text-sm">{word.primaryMeaning}</p>
+            <p className="text-[15px]">{word.primaryMeaning}</p>
+            <span className="mt-1 inline-block sm:hidden">
+              <WordStatusBadge status={word.status} />
+            </span>
           </div>
-          <WordStatusBadge status={word.status} />
-          <button
-            type="button"
-            aria-label={word.favorite ? "Bỏ yêu thích" : "Yêu thích"}
-            aria-pressed={word.favorite}
-            disabled={favoritePending}
-            onClick={() => onToggleFavorite(word)}
-            className="rounded-full p-2 hover:bg-muted"
-          >
-            <Heart className={`h-4 w-4 ${word.favorite ? "fill-current text-destructive" : ""}`} />
-          </button>
-          <button
-            type="button"
-            aria-label={`Phát âm ${word.kana}`}
-            onClick={() => speakKana(word.kana)}
-            className="rounded-full p-2 hover:bg-muted"
-          >
-            <Volume2 className="h-4 w-4" />
-          </button>
+          <span className="hidden sm:block">
+            <WordStatusBadge status={word.status} />
+          </span>
+          {actions(word)}
         </li>
       ))}
     </ul>

@@ -99,4 +99,10 @@ class LearningEngineServiceTest {
         assertThat(existing.getNextReviewTime()).isEqualTo(due);
         verifyNoInteractions(fsrs);
     }
+
+    /** MySQL stores last_source as a native ENUM that ddl-auto=update never widens: a new value breaks every write. */
+    @Test
+    void learningSourceValuesMatchTheDeployedColumn() {
+        assertThat(LearningSource.values()).extracting(Enum::name).containsExactly("TANGO", "FLASHCARD", "REVIEW", "QUIZ");
+    }
 }

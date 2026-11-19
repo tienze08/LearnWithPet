@@ -9,6 +9,7 @@ import com.vocabpet.backend.entity.enums.TangoQuizScope;
 import com.vocabpet.backend.exception.TangoBadRequestException;
 import com.vocabpet.backend.exception.TangoConflictException;
 import com.vocabpet.backend.exception.TangoNotFoundException;
+import com.vocabpet.backend.service.TangoDeckService;
 import com.vocabpet.backend.service.TangoLearningService;
 import com.vocabpet.backend.service.TangoLearningService.AttemptSubmission;
 import com.vocabpet.backend.service.TangoProgressService;
@@ -34,6 +35,7 @@ public class TangoController {
     private final TangoReadService tangoReadService;
     private final TangoLearningService tangoLearningService;
     private final TangoProgressService tangoProgressService;
+    private final TangoDeckService tangoDeckService;
 
     @GetMapping("/levels")
     public LevelsResponse getLevels() {
@@ -58,6 +60,11 @@ public class TangoController {
     @GetMapping("/vocabularies/{id}")
     public VocabularyDetail getVocabulary(@PathVariable Long id) {
         return tangoReadService.getVocabulary(id);
+    }
+
+    @PostMapping("/lessons/{id}/to-deck")
+    public TangoDeckService.ToDeckResponse addToDeck(@PathVariable Long id) {
+        return tangoDeckService.addLessonToDeck(id);
     }
 
     @PostMapping("/lessons/{id}/start")

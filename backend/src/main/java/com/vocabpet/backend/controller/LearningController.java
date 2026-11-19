@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.*;
 
+import com.vocabpet.backend.entity.enums.LearningSource;
 import com.vocabpet.backend.entity.enums.Rating;
 import com.vocabpet.backend.service.LearningReviewService;
 import com.vocabpet.backend.service.LearningReviewService.ReviewItem;
@@ -26,11 +27,12 @@ public class LearningController {
 
     @PostMapping("/attempts")
     public AttemptResponse attempt(@RequestBody AttemptRequest request) {
-        var p = reviewService.reviewWord(request.tangoVocabularyId(), request.vocabularyId(), request.rating());
+        var p = reviewService.reviewWord(request.tangoVocabularyId(), request.vocabularyId(), request.rating(), request.source());
         return new AttemptResponse(p.getNextReviewTime(), p.getTimesSeen(), p.getCorrectCount(), p.getIncorrectCount());
     }
 
-    public record AttemptRequest(Long tangoVocabularyId, Long vocabularyId, Rating rating) {}
+    /** {@code source} is optional; defaults to REVIEW. */
+    public record AttemptRequest(Long tangoVocabularyId, Long vocabularyId, Rating rating, LearningSource source) {}
 
     public record AttemptResponse(LocalDateTime nextReviewTime, int timesSeen, int correctCount, int incorrectCount) {}
 }

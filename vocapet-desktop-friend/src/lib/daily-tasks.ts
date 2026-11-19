@@ -40,7 +40,9 @@ export const DAILY_TASKS: DailyTask[] = [
     xp: 40,
     coins: 15,
     target: 10,
-    progress: (s) => Math.min(10, s.dailyCorrect),
+    // GameState has no daily-correct counter: count today's correct answers in the review history.
+    progress: (s) =>
+      Math.min(10, s.reviewHistory.filter((r) => r.correct && new Date(r.at).toDateString() === new Date().toDateString()).length),
   },
   {
     id: "double-up",

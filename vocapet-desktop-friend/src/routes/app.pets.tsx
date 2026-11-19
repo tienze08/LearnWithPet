@@ -154,7 +154,6 @@ function PetsPage() {
                   {u.title}
                 </p>
                 <h2 className="text-xl font-extrabold flex items-center justify-center gap-2">
-                  <span>{meta.emoji}</span>
                   <span>{meta.name}</span>
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1 ">{meta.desc}</p>

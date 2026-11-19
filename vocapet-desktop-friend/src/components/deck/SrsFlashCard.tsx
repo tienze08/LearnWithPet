@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { Link } from "@tanstack/react-router";
 import { Volume2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
 import { speak } from "./speak";
+import { speakKana } from "@/lib/japanese/kana";
 
 import {
   useFinishStudySessionMutation,
@@ -217,16 +219,41 @@ export default function StudySessionFlashcards({ deckId }: Props) {
             >
               {!flipped ? (
                 <>
-                  <p className="text-xs italic text-muted-foreground">{data.partOfSpeech}</p>
+                  {data.lessonId ? (
+                    <Link
+                      to="/app/japanese/tango/lessons/$lessonId"
+                      params={{ lessonId: String(data.lessonId) }}
+                      onClick={(e) => e.stopPropagation()}
+                      className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary-ink hover:underline"
+                    >
+                      Minna · Bài {data.lessonNumber}
+                    </Link>
+                  ) : (
+                    <p className="text-xs italic text-muted-foreground">{data.partOfSpeech}</p>
+                  )}
 
-                  <h2 className="text-4xl font-extrabold mt-2 tracking-tight md:text-5xl">{data.word}</h2>
+                  {data.kana ? (
+                    <h2 lang="ja" className="jp-serif mt-2 text-5xl md:text-6xl">{data.word}</h2>
+                  ) : (
+                    <h2 className="text-4xl font-extrabold mt-2 tracking-tight md:text-5xl">{data.word}</h2>
+                  )}
+                  {data.kana && (
+                    <>
+                      {data.kana !== data.word && (
+                        <p lang="ja" className="mt-2 text-xl text-muted-foreground">{data.kana}</p>
+                      )}
+                      {data.romaji && <p className="text-sm text-muted-foreground">{data.romaji}</p>}
+                    </>
+                  )}
 
                   <button
+                    aria-label="Phát âm"
                     onClick={(e) => {
                       e.stopPropagation();
-                      speak(data.word);
+                      if (data.kana) speakKana(data.kana);
+                      else speak(data.word);
                     }}
-                    className="mt-4"
+                    className="mt-4 grid h-11 w-11 place-items-center rounded-full hover:bg-surface-2"
                   >
                     <Volume2 className="h-6 w-6" />
                   </button>

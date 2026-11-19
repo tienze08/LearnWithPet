@@ -26,4 +26,15 @@ export interface Vocabulary {
   deckId: number;
 
   bookmarked: boolean;
+
+  // Set only for cards linked to a Tango word; null for English cards.
+  kana?: string | null;
+
+  romaji?: string | null;
+
+  lessonId?: number | null;
+
+  lessonNumber?: number | null;
+
+  jlptLevel?: string | null;
 }

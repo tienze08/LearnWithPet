@@ -18,6 +18,8 @@ export default defineConfig({
   },
 
   vite: {
+  // @xyflow/react pulls in CJS use-sync-external-store; pre-bundle it so dev doesn't serve the raw CJS file.
+  optimizeDeps: { include: ["@xyflow/react"] },
   server: {
     port: 5173,
     proxy: {
