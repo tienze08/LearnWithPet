@@ -28,6 +28,7 @@ import {
   Trophy,
   BookOpen,
   BarChart3,
+  Languages,
 } from "lucide-react";
 
 function TopBar() {
@@ -164,6 +165,7 @@ function DesktopSidebar() {
           <NavLink to="/app/decks" icon={<Library className="w-4 h-4" />} label="Study & decks" />
           <NavLink to="/app/plan" icon={<CalendarClock className="w-4 h-4" />} label="Today’s plan" />
           <NavLink to="/app/reader" icon={<BookOpen className="w-4 h-4" />} label="Reader" />
+          <NavLink to="/app/practice" icon={<Languages className="w-4 h-4" />} label="Luyện câu" />
           <NavLink to="/app/tasks" icon={<Target className="w-4 h-4" />} label="Missions" />
         </nav>
         <p className="mb-3 mt-8 px-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">

@@ -7,6 +7,7 @@ import { useMeQuery } from "@/hooks/queries/user.queries";
 import { useDecksQuery } from "@/hooks/queries/deck.queries";
 import { useActiveStudySessionQuery, useRecentReviewsQuery, useStartStudySessionMutation, useStudyDashboardStatsQuery, useTodayStudyPlanQuery } from "@/hooks/queries/study-session.queries";
 import { useCompanionStateQuery } from "@/hooks/queries/companion.queries";
+import { PracticeHomeCard } from "@/components/practice/PracticeHomeCard";
 
 export const Route = createFileRoute("/app/")({
   component: Dashboard,
@@ -96,6 +97,8 @@ function Dashboard() {
           </div>
         </div>
       </div>
+
+      <PracticeHomeCard />
 
       {/* Stat grid */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
