@@ -1,6 +1,8 @@
 // Bộ câu thử nghiệm, Minna no Nihongo bài 1–5.
 // CHƯA được người biết tiếng Nhật duyệt; số bài của từng từ chưa đối chiếu giáo trình.
 
+export type Example = { ja: string; kana: string; vi: string };
+
 export type Grammar = { id: string; lesson: number; title: string; note: string };
 
 export type Sentence = {
@@ -661,3 +663,39 @@ export const SENTENCES = [
     minLesson: 5,
   },
 ] as Sentence[];
+
+// Ví dụ cho màn "Hiểu mẫu". Không dùng câu đã có trong phần luyện hay kiểm tra.
+export const EXAMPLES: Record<string, Example[]> = {
+  g1: [
+    {
+      ja: "あの人は 会社員です。",
+      kana: "あのひとは かいしゃいんです。",
+      vi: "Người kia là nhân viên công ty.",
+    },
+    {
+      ja: "わたしは 医者じゃありません。",
+      kana: "わたしは いしゃじゃありません。",
+      vi: "Tôi không phải là bác sĩ.",
+    },
+  ],
+  g2: [
+    {
+      ja: "わたしは 5時に 起きます。",
+      kana: "わたしは ごじに おきます。",
+      vi: "Tôi dậy lúc 5 giờ.",
+    },
+    { ja: "あした 勉強します。", kana: "あした べんきょうします。", vi: "Ngày mai tôi sẽ học." },
+  ],
+  g3: [
+    {
+      ja: "あした 図書館へ 行きます。",
+      kana: "あした としょかんへ いきます。",
+      vi: "Ngày mai tôi đi thư viện.",
+    },
+    {
+      ja: "バスで うちへ 帰ります。",
+      kana: "バスで うちへ かえります。",
+      vi: "Tôi về nhà bằng xe buýt.",
+    },
+  ],
+};

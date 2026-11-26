@@ -145,7 +145,6 @@ function MobileNav() {
       <div className="flex justify-around py-2">
         <NavLink to="/app" icon={<LayoutDashboard className="w-5 h-5" />} label="Home" />
         <NavLink to="/app/decks" icon={<Library className="w-5 h-5" />} label="Decks" />
-        <NavLink to="/app/practice" icon={<Languages className="w-5 h-5" />} label="Luyện câu" />
         <NavLink to="/app/tasks" icon={<Target className="w-5 h-5" />} label="Tasks" />
         <NavLink to="/app/pets" icon={<PawPrint className="w-5 h-5" />} label="Pets" />
         <NavLink to="/app/profile" icon={<User className="w-5 h-5" />} label="Profile" />
