@@ -4,24 +4,16 @@ import type { UserResponse } from "@/types/user";
 import type { PetVariant } from "@/lib/store";
 
 export function getMeApi() {
-  return apiFetch<UserResponse>(
-    "/api/users/me",
-    {
-      method: "GET",
-    },
-  );
+  return apiFetch<UserResponse>("/api/users/me", {
+    method: "GET",
+  });
 }
 
-export function onboardingApi(
-  payload: OnboardingPayload,
-) {
-  return apiFetch<void>(
-    "/api/users/onboarding",
-    {
-      method: "POST",
-      body: JSON.stringify(payload),
-    },
-  );
+export function onboardingApi(payload: OnboardingPayload) {
+  return apiFetch<void>("/api/users/onboarding", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
 }
 
 export function updateAvatarApi(avatar: string) {

@@ -21,6 +21,7 @@ import com.vocabpet.backend.entity.StudyReview;
 import com.vocabpet.backend.entity.StudySession;
 import com.vocabpet.backend.entity.enums.PetAction;
 import com.vocabpet.backend.entity.enums.PetMood;
+import com.vocabpet.backend.entity.enums.LearningSource;
 import com.vocabpet.backend.entity.enums.Rating;
 import com.vocabpet.backend.repository.StudyReviewRepository;
 import com.vocabpet.backend.repository.StudySessionRepository;
@@ -43,7 +44,7 @@ public class QuizServiceImpl implements QuizService {
     private final UserVocabularyProgressRepository progressRepository;
     private final StudySessionRepository studySessionRepository;
     private final StudyReviewRepository studyReviewRepository;
-    private final FsrsService fsrsService;
+    private final LearningEngineService learningEngine;
 
     private final RewardService rewardService;
     private final MissionService missionService;
@@ -197,14 +198,7 @@ public class QuizServiceImpl implements QuizService {
     }
 
     private void recordQuizAttempt(User user, Vocabulary vocabulary, Rating rating) {
-        UserVocabularyProgress progress = progressRepository
-                .findByUserIdAndVocabularyId(user.getId(), vocabulary.getId())
-                .orElseGet(() -> UserVocabularyProgress.builder()
-                        .user(user)
-                        .vocabulary(vocabulary)
-                        .build());
-        fsrsService.review(progress, rating);
-        progressRepository.save(progress);
+        learningEngine.record(user, vocabulary, null, LearningSource.QUIZ, rating);
 
         LocalDateTime now = LocalDateTime.now();
         StudySession quizSession = studySessionRepository.save(StudySession.builder()

@@ -9,6 +9,8 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 export const Route = createFileRoute("/register")({
+  // Client-only so beforeLoad can see the saved token (localStorage).
+  ssr: false,
   beforeLoad: () => {
     if (isAuthenticated()) {
       throw redirect({

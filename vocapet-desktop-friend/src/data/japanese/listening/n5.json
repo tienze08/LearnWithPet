@@ -1,0 +1,188 @@
+{
+  "level": "N5",
+  "status": "draft",
+  "lessons": [
+    {
+      "id": "n5-station",
+      "topic": "Nhà ga và đi lại",
+      "title": "Hỏi đường đến nhà ga",
+      "context": "Một người hỏi đường người qua đường ngay trên phố.",
+      "tip": "Chú ý từ chỉ địa điểm và khoảng thời gian.",
+      "speakers": { "A": "Người hỏi đường", "B": "Người qua đường" },
+      "lines": [
+        { "speaker": "A", "ref": "koko-soko-asoko-doko:2" },
+        { "speaker": "B", "ja": "駅はあの大きいビルの前です。", "furigana": "{駅|えき}はあの{大|おお}きいビルの{前|まえ}です。", "vi": "Nhà ga ở trước tòa nhà lớn đằng kia.", "grammar": ["kono-sono-ano-dono", "desu"] },
+        { "speaker": "A", "ja": "ここから歩いて何分ですか。", "furigana": "ここから{歩|ある}いて{何分|なんぷん}ですか。", "vi": "Từ đây đi bộ mất mấy phút?", "grammar": ["kara-from", "ka-question"] },
+        { "speaker": "B", "ref": "kurai-gurai:0" },
+        { "speaker": "A", "ja": "ありがとうございます。", "vi": "Cảm ơn bạn nhiều." }
+      ],
+      "exercises": [
+        {
+          "id": "place", "type": "choose", "difficulty": "EASY", "line": 0,
+          "question": "Người nói đang tìm nơi nào?",
+          "options": ["Nhà ga", "Trường học", "Nhà vệ sinh", "Cửa hàng"],
+          "answer": "Nhà ga",
+          "explain": "Người nói hỏi 「駅はどこですか」. 駅（えき）là nhà ga, どこ hỏi vị trí.",
+          "hint": "Nghe danh từ đứng ngay trước は.", "words": ["駅"]
+        },
+        {
+          "id": "front", "type": "fill", "difficulty": "MEDIUM", "line": 1,
+          "blanks": [{ "text": "前", "kind": "word" }],
+          "explain": "「〜の前」 nghĩa là phía trước của một nơi.",
+          "hint": "Từ chỉ vị trí đứng sau ビルの.", "words": ["前"], "grammar": ["no"]
+        },
+        {
+          "id": "minutes", "type": "dictation", "difficulty": "HARD", "line": 3,
+          "accept": ["駅まで歩いて十分ぐらいです。"],
+          "explain": "まで đánh dấu điểm đến; ぐらい nghĩa là khoảng chừng.",
+          "hint": "Câu bắt đầu bằng tên nơi cần đến, rồi đến まで.", "words": ["駅", "歩いて"], "grammar": ["made", "kurai-gurai"]
+        },
+        {
+          "id": "talk", "type": "dialogue", "difficulty": "MEDIUM", "lines": [0, 1, 2, 3, 4],
+          "hint": "Nghe cả đoạn: ai hỏi, ai trả lời, và con số cuối cùng.",
+          "questions": [
+            { "id": "who", "question": "Ai là người đang tìm đường?", "options": ["Người nói đầu tiên (A)", "Người trả lời (B)", "Cả hai"], "answer": "Người nói đầu tiên (A)", "explain": "A mở đầu bằng 「すみません、駅はどこですか」." },
+            { "id": "where", "question": "Nhà ga ở đâu?", "options": ["Trước tòa nhà lớn", "Sau trường học", "Bên trong cửa hàng", "Cạnh công viên"], "answer": "Trước tòa nhà lớn", "explain": "B nói 「あの大きいビルの前です」.", "words": ["前"] },
+            { "id": "time", "question": "Đi bộ đến nhà ga mất khoảng bao lâu?", "options": ["5 phút", "10 phút", "15 phút", "1 giờ"], "answer": "10 phút", "explain": "「歩いて10分ぐらい」: khoảng 10 phút đi bộ.", "grammar": ["kurai-gurai"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "n5-cafe",
+      "topic": "Ăn uống và mua sắm",
+      "title": "Gọi món ở quán",
+      "context": "Khách gọi đồ ở một quán nhỏ.",
+      "tip": "Nghe kỹ số lượng và giá tiền.",
+      "speakers": { "A": "Nhân viên", "B": "Khách" },
+      "lines": [
+        { "speaker": "A", "ja": "いらっしゃいませ。", "vi": "Xin chào quý khách." },
+        { "speaker": "B", "ref": "o-kudasai:2" },
+        { "speaker": "A", "ja": "はい、どうぞ。", "vi": "Vâng, xin mời." },
+        { "speaker": "B", "ja": "このケーキを二つください。", "furigana": "このケーキを{二|ふた}つください。", "vi": "Cho tôi hai cái bánh này.", "grammar": ["o-kudasai", "kono-sono-ano-dono"] },
+        { "speaker": "A", "ja": "はい。全部で六百円です。", "furigana": "はい。{全部|ぜんぶ}で{六百|ろっぴゃく}{円|えん}です。", "vi": "Vâng. Tổng cộng 600 yên ạ.", "grammar": ["desu"] }
+      ],
+      "exercises": [
+        {
+          "id": "ask", "type": "choose", "difficulty": "EASY", "line": 1,
+          "question": "Khách muốn xin thứ gì?",
+          "options": ["Thực đơn", "Nước", "Hóa đơn", "Cái ô"],
+          "answer": "Thực đơn",
+          "explain": "「メニューをください」: cho tôi xem thực đơn.",
+          "hint": "Nghe từ katakana đứng trước を.", "words": ["メニュー"]
+        },
+        {
+          "id": "order", "type": "fill", "difficulty": "EASY", "line": 3,
+          "blanks": [{ "text": "を", "kind": "particle" }, { "text": "ください", "kind": "verb" }],
+          "explain": "「N を（số lượng）ください」 dùng để xin hoặc gọi món.",
+          "hint": "Trợ từ đứng sau món đồ, rồi đến lời đề nghị lịch sự."
+        },
+        {
+          "id": "price", "type": "dictation", "difficulty": "HARD", "line": 4,
+          "accept": ["はい。全部で600円です。"],
+          "explain": "全部で nghĩa là tổng cộng. 600 đọc là ろっぴゃく.",
+          "hint": "Nhân viên nói tổng số tiền.", "words": ["全部", "円"]
+        },
+        {
+          "id": "talk", "type": "dialogue", "difficulty": "MEDIUM", "lines": [0, 1, 2, 3, 4],
+          "hint": "Chú ý lời chào đầu tiên và con số sau ケーキを.",
+          "questions": [
+            { "id": "where", "question": "Cuộc hội thoại diễn ra ở đâu?", "options": ["Quán ăn", "Nhà ga", "Lớp học", "Bệnh viện"], "answer": "Quán ăn", "explain": "いらっしゃいませ, メニュー và ケーキ cho biết đây là quán ăn." },
+            { "id": "count", "question": "Khách gọi mấy cái bánh?", "options": ["Một", "Hai", "Ba", "Bốn"], "answer": "Hai", "explain": "二つ（ふたつ）là hai cái.", "words": ["二つ"] },
+            { "id": "intent", "question": "Câu 「このケーキを二つください」 nhằm mục đích gì?", "options": ["Gọi món", "Hỏi giá", "Từ chối", "Cảm ơn"], "answer": "Gọi món", "explain": "〜をください là cách đề nghị được nhận một thứ gì.", "grammar": ["o-kudasai"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "n5-weekend",
+      "topic": "Bạn bè",
+      "title": "Rủ bạn đi chơi cuối tuần",
+      "context": "Hai người bạn bàn kế hoạch cuối tuần.",
+      "tip": "Lời từ chối trong tiếng Nhật thường nói vòng: chú ý ちょっと.",
+      "speakers": { "A": "Người rủ", "B": "Bạn" },
+      "lines": [
+        { "speaker": "A", "ref": "masen-ka:1" },
+        { "speaker": "B", "ja": "すみません、日曜日はちょっと。仕事があります。", "furigana": "すみません、{日曜日|にちようび}はちょっと。{仕事|しごと}があります。", "vi": "Xin lỗi, Chủ nhật thì hơi khó. Tôi có việc.", "grammar": ["ga-aru-ga-iru", "wa"] },
+        { "speaker": "A", "ja": "じゃあ、土曜日はどうですか。", "furigana": "じゃあ、{土曜日|どようび}はどうですか。", "vi": "Vậy thứ Bảy thì sao?", "grammar": ["wa", "ka-question"] },
+        { "speaker": "B", "ja": "土曜日はいいですよ。", "furigana": "{土曜日|どようび}はいいですよ。", "vi": "Thứ Bảy thì được đấy.", "grammar": ["yo"] },
+        { "speaker": "A", "ref": "mashou:2" }
+      ],
+      "exercises": [
+        {
+          "id": "invite", "type": "choose", "difficulty": "EASY", "line": 0,
+          "question": "Người nói đang làm gì?",
+          "options": ["Rủ chơi tennis", "Xin phép về sớm", "Hỏi đường", "Gọi món"],
+          "answer": "Rủ chơi tennis",
+          "explain": "〜ませんか là lời mời, rủ ai cùng làm gì.",
+          "hint": "Nghe đuôi câu.", "words": ["テニス", "日曜日"]
+        },
+        {
+          "id": "work", "type": "fill", "difficulty": "MEDIUM", "line": 1,
+          "blanks": [{ "text": "仕事", "kind": "word" }, { "text": "が", "kind": "particle" }],
+          "explain": "「N があります」 nói rằng có một việc / một vật.",
+          "hint": "Lý do không đi được.", "words": ["仕事"]
+        },
+        {
+          "id": "meet", "type": "dictation", "difficulty": "MEDIUM", "line": 4,
+          "explain": "〜ましょう là lời đề nghị cùng làm; で đánh dấu nơi diễn ra hành động.",
+          "hint": "Câu hẹn gặp, có một địa điểm.", "words": ["駅", "前"]
+        },
+        {
+          "id": "talk", "type": "dialogue", "difficulty": "MEDIUM", "lines": [0, 1, 2, 3, 4],
+          "hint": "Ngày nào bị từ chối, ngày nào được đồng ý?",
+          "questions": [
+            { "id": "topic", "question": "Hai người đang nói về chuyện gì?", "options": ["Kế hoạch cuối tuần", "Bài tập ở trường", "Giá đồ ăn", "Thời tiết"], "answer": "Kế hoạch cuối tuần", "explain": "Họ bàn về 日曜日, 土曜日 và việc gặp nhau." },
+            { "id": "day", "question": "Cuối cùng họ chọn ngày nào?", "options": ["Thứ Sáu", "Thứ Bảy", "Chủ nhật", "Thứ Hai"], "answer": "Thứ Bảy", "explain": "B đồng ý: 「土曜日はいいですよ」.", "words": ["土曜日"] },
+            { "id": "intent", "question": "「日曜日はちょっと」 có ý gì?", "options": ["Từ chối khéo", "Đồng ý ngay", "Hỏi lại giờ", "Khen ngợi"], "answer": "Từ chối khéo", "explain": "ちょっと bỏ lửng câu để từ chối nhẹ nhàng." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "n5-hello",
+      "topic": "Làm quen",
+      "title": "Lần đầu gặp mặt",
+      "context": "Hai người mới gặp nhau tự giới thiệu.",
+      "tip": "Nghe tên riêng và câu phủ định ではありません.",
+      "speakers": { "A": "Tanaka", "B": "Minh" },
+      "lines": [
+        { "speaker": "A", "ja": "はじめまして。田中です。", "furigana": "はじめまして。{田中|たなか}です。", "vi": "Rất vui được gặp bạn. Tôi là Tanaka.", "grammar": ["desu"] },
+        { "speaker": "B", "ja": "はじめまして。ミンです。ベトナムから来ました。", "furigana": "はじめまして。ミンです。ベトナムから{来|き}ました。", "vi": "Rất vui được gặp bạn. Tôi là Minh. Tôi đến từ Việt Nam.", "grammar": ["desu", "kara-from", "mashita"] },
+        { "speaker": "A", "ja": "ミンさんは先生ですか。", "furigana": "ミンさんは{先生|せんせい}ですか。", "vi": "Bạn Minh là giáo viên à?", "grammar": ["wa", "ka-question"] },
+        { "speaker": "B", "ref": "de-wa-arimasen-ja-nai:0" },
+        { "speaker": "A", "ref": "mo:0" }
+      ],
+      "exercises": [
+        {
+          "id": "from", "type": "choose", "difficulty": "EASY", "line": 1,
+          "question": "Người nói đến từ đâu?",
+          "options": ["Việt Nam", "Nhật Bản", "Trung Quốc", "Thái Lan"],
+          "answer": "Việt Nam",
+          "explain": "「ベトナムから来ました」: đến từ Việt Nam.",
+          "hint": "Nghe tên nước đứng trước から.", "words": ["ベトナム"], "grammar": ["kara-from"]
+        },
+        {
+          "id": "question", "type": "fill", "difficulty": "EASY", "line": 2,
+          "blanks": [{ "text": "は", "kind": "particle" }, { "text": "先生", "kind": "word" }],
+          "explain": "は nêu chủ đề; か cuối câu biến câu thành câu hỏi.",
+          "hint": "Trợ từ chủ đề, rồi đến một nghề nghiệp.", "words": ["先生"]
+        },
+        {
+          "id": "student", "type": "dictation", "difficulty": "HARD", "line": 3,
+          "explain": "ではありません là phủ định lịch sự của です.",
+          "hint": "Gồm hai câu: một câu phủ định, một câu khẳng định.", "words": ["先生", "学生"]
+        },
+        {
+          "id": "talk", "type": "dialogue", "difficulty": "MEDIUM", "lines": [0, 1, 2, 3, 4],
+          "hint": "Chú ý も trong câu cuối.",
+          "questions": [
+            { "id": "job", "question": "Minh làm gì?", "options": ["Học sinh", "Giáo viên", "Nhân viên quán", "Bác sĩ"], "answer": "Học sinh", "explain": "「先生ではありません。学生です」.", "words": ["学生"], "grammar": ["de-wa-arimasen-ja-nai"] },
+            { "id": "who", "question": "Câu cuối 「私も学生です」 do ai nói?", "options": ["Tanaka", "Minh", "Một người thứ ba"], "answer": "Tanaka", "explain": "Người hỏi nghề (Tanaka) đáp rằng mình cũng là học sinh.", "grammar": ["mo"] },
+            { "id": "topic", "question": "Đoạn hội thoại chủ yếu là gì?", "options": ["Tự giới thiệu", "Mua đồ", "Hỏi đường", "Hẹn giờ"], "answer": "Tự giới thiệu", "explain": "はじめまして dùng khi gặp nhau lần đầu." }
+          ]
+        }
+      ]
+    }
+  ]
+}

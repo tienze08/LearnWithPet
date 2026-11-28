@@ -18,6 +18,23 @@ public interface UserVocabularyProgressRepository
                         Long userId,
                         Long vocabularyId);
 
+        // Review Center: due rows from any source (flashcard or Tango)
+        @Query("""
+                        SELECT p
+                        FROM UserVocabularyProgress p
+                        WHERE p.user.id = :userId
+                        AND (p.nextReviewTime IS NULL OR p.nextReviewTime <= :now)
+                        ORDER BY p.nextReviewTime ASC
+                        """)
+        List<UserVocabularyProgress> findAllDueForUser(
+                        @org.springframework.data.repository.query.Param("userId") Long userId,
+                        @org.springframework.data.repository.query.Param("now") LocalDateTime now);
+
+        // Unified record: canonical Tango word shared by lessons and decks
+        Optional<UserVocabularyProgress> findByUserIdAndTangoVocabularyId(
+                        Long userId,
+                        Long tangoVocabularyId);
+
         // Study Session
         @Query("""
                         SELECT p
@@ -112,6 +129,8 @@ public interface UserVocabularyProgressRepository
                         ORDER BY v.id ASC
                         """)
         List<Vocabulary> findNewCardsForQuiz(Long userId);
+
+        List<UserVocabularyProgress> findByUserIdAndTangoVocabularyIdIn(Long userId, java.util.Collection<Long> tangoVocabularyIds);
 
         long countByUserIdAndRepetitionsGreaterThanEqual(Long userId, int repetitions);
 

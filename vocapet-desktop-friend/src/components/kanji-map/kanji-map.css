@@ -1,0 +1,33 @@
+@import "@xyflow/react/dist/style.css";
+
+/* Soft branch tones. Light: pastel fill + dark ink. Dark: deep fill + light ink. */
+.km-tone-green  { --km-bg: oklch(0.95 0.035 150); --km-ink: oklch(0.36 0.08 155); --km-line: oklch(0.72 0.1 152); }
+.km-tone-sky    { --km-bg: oklch(0.95 0.025 235); --km-ink: oklch(0.38 0.09 240); --km-line: oklch(0.72 0.1 235); }
+.km-tone-amber  { --km-bg: oklch(0.96 0.05 85);  --km-ink: oklch(0.42 0.09 70);  --km-line: oklch(0.78 0.13 80); }
+.km-tone-rose   { --km-bg: oklch(0.95 0.03 15);  --km-ink: oklch(0.42 0.12 20);  --km-line: oklch(0.74 0.11 18); }
+.km-tone-violet { --km-bg: oklch(0.95 0.025 300); --km-ink: oklch(0.4 0.1 300);  --km-line: oklch(0.74 0.09 300); }
+.km-tone-neutral{ --km-bg: var(--surface-2); --km-ink: var(--foreground); --km-line: var(--border); }
+
+.dark .km-tone-green  { --km-bg: oklch(0.3 0.05 155); --km-ink: oklch(0.92 0.06 150); --km-line: oklch(0.55 0.1 152); }
+.dark .km-tone-sky    { --km-bg: oklch(0.3 0.045 240); --km-ink: oklch(0.92 0.04 235); --km-line: oklch(0.55 0.1 235); }
+.dark .km-tone-amber  { --km-bg: oklch(0.32 0.05 80);  --km-ink: oklch(0.93 0.07 85);  --km-line: oklch(0.6 0.12 80); }
+.dark .km-tone-rose   { --km-bg: oklch(0.3 0.05 15);   --km-ink: oklch(0.93 0.04 15);  --km-line: oklch(0.58 0.11 18); }
+.dark .km-tone-violet { --km-bg: oklch(0.3 0.045 300); --km-ink: oklch(0.93 0.04 300); --km-line: oklch(0.58 0.09 300); }
+
+.km-flow .react-flow { --xy-background-color: transparent; background: transparent; }
+.km-flow .react-flow__node { transition: opacity 200ms ease; }
+.km-flow .react-flow__edge-path { transition: stroke 200ms ease, stroke-width 200ms ease, opacity 200ms ease; }
+.km-flow .react-flow__attribution { display: none; }
+.km-flow .react-flow__node:focus-visible { outline: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .km-flow .react-flow__node,
+  .km-flow .react-flow__edge-path { transition: none; }
+}
+
+/* Stroke order animation: each stroke draws in turn (see StrokeOrder). */
+@keyframes km-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+.km-stroke { stroke-dasharray: 1; stroke-dashoffset: 1; animation: km-draw 0.5s ease-out forwards; }
+@media (prefers-reduced-motion: reduce) {
+  .km-stroke { animation: none; stroke-dashoffset: 0; }
+}

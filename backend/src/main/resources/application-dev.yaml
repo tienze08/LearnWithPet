@@ -1,0 +1,13 @@
+# Local development profile. `mvnw spring-boot:run` activates it (see pom.xml); the packaged jar does not.
+spring:
+    # Local MySQL: Hibernate keeps the schema. The Flyway migrations use TiDB syntax (production).
+    jpa:
+        hibernate:
+            ddl-auto: update
+    flyway:
+        enabled: false
+
+app:
+    learning-path:
+        # On by default while developing; set LEARNING_PATH_ENABLED=false to try the app without it.
+        enabled: ${LEARNING_PATH_ENABLED:true}

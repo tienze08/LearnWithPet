@@ -34,15 +34,7 @@ export default function VocabularyCard({
   deleteWord,
 }: VocabularyCardProps) {
   return (
-    <div
-      className="
-      rounded-2xl
-      border-2
-      border-border
-      bg-card
-      p-4
-      card-pop"
-    >
+    <div className="rounded-lg border border-border bg-sheet p-4 transition-colors hover:border-input">
       <div className="flex items-start justify-between">
         <div>
           <h3 className="text-2xl font-extrabold">{word.word}</h3>

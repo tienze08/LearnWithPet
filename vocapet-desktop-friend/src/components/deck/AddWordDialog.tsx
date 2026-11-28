@@ -106,57 +106,57 @@ export default function AddWordDialog({ deckId, onAdd }: AddWordDialogProps) {
       <DialogTrigger asChild>
         <Button className="btn-pop">
           <Plus className="mr-1 h-4 w-4" />
-          Add word
+          Thêm từ
         </Button>
       </DialogTrigger>
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add to deck</DialogTitle>
+          <DialogTitle>Thêm từ vào bộ thẻ</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-3">
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <Label>Word</Label>
+              <Label>Từ</Label>
 
               <Input value={word} onChange={(e) => setWord(e.target.value)} />
             </div>
 
             <div>
-              <Label>Part of speech</Label>
+              <Label>Từ loại</Label>
 
               <Input
                 value={partOfSpeech}
-                onChange={(e) => setPartOfSpeech(e.target.value as any)}
+                onChange={(e) => setPartOfSpeech(e.target.value as typeof partOfSpeech)}
               />
             </div>
           </div>
 
           <div>
-            <Label>Meaning</Label>
+            <Label>Nghĩa</Label>
 
             <Input value={meaning} onChange={(e) => setMeaning(e.target.value)} />
           </div>
 
           <div>
-            <Label>Example</Label>
+            <Label>Ví dụ</Label>
 
             <Input value={example} onChange={(e) => setExample(e.target.value)} />
           </div>
 
           <Button className="btn-pop w-full" onClick={handleSubmit}>
-            Add
+            Thêm
           </Button>
 
           <div className="border-t-2 pt-2">
-            <Label className="text-xs">Or import CSV (word, meaning, example, pos)</Label>
+            <Label className="text-xs">Hoặc nhập CSV (từ, nghĩa, ví dụ, từ loại)</Label>
 
             <Textarea
               rows={4}
               value={csv}
               onChange={(e) => setCsv(e.target.value)}
-              placeholder="apple, quả táo, I eat an apple., noun"
+              placeholder="学生, học sinh, わたしは がくせいです。, noun"
             />
 
             <Button

@@ -1,0 +1,92 @@
+/*
+ * VocaPet design tokens — PROPOSAL. Not imported anywhere yet.
+ * Merge plan: values below replace/extend the matching names in src/styles.css.
+ * Existing token names are kept so shadcn components keep working.
+ */
+
+/* ---- 1. Changed existing tokens (light) ---- */
+:root {
+  --primary: oklch(0.50 0.12 155);            /* was .58 .13 154: white text 4.0 -> 5.7 : 1 */
+  --primary-foreground: oklch(0.99 0.004 100);
+  --ring: oklch(0.50 0.12 155);
+  --muted-foreground: oklch(0.48 0.02 155);   /* was .53 */
+  --sidebar-primary: oklch(0.50 0.12 155);
+  --success: oklch(0.50 0.12 155);
+  --radius: 1rem;                              /* unchanged */
+}
+
+/* ---- 2. New tokens ---- */
+:root {
+  /* surfaces */
+  --surface-2: oklch(0.965 0.014 100);        /* recessed band / list shelf */
+  --primary-soft: oklch(0.95 0.03 150);
+  --primary-ink: oklch(0.40 0.09 155);        /* text on primary-soft */
+  --seal: oklch(0.52 0.17 28);                /* hanko red: JLPT stamp, mistakes */
+  --seal-soft: oklch(0.95 0.03 28);
+  --warning-ink: oklch(0.45 0.10 70);         /* text on amber chips */
+
+  /* Japanese type roles */
+  --font-jp-serif: "Noto Serif JP", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --font-jp-sans: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
+  --font-ui: "Geist", system-ui, "Noto Sans JP", sans-serif;
+
+  /* type scale (px) */
+  --text-xs: 0.75rem;   /* 12 caption only */
+  --text-sm: 0.875rem;  /* 14 */
+  --text-base: 1rem;    /* 16 */
+  --text-lg: 1.125rem;  /* 18 */
+  --text-xl: 1.5rem;    /* 24 */
+  --text-2xl: 2rem;     /* 32 */
+  --text-3xl: 3rem;     /* 48 */
+  --text-hero: 4.5rem;  /* 72 — vocabulary headword (flashcard) */
+
+  /* spacing (4pt) */
+  --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem;
+  --space-6: 1.5rem; --space-8: 2rem; --space-12: 3rem; --space-16: 4rem;
+
+  /* elevation: only two */
+  --elev-flat: none;
+  --elev-lift: 0 1px 2px oklch(0.3 0.03 150 / 8%), 0 12px 28px -18px oklch(0.3 0.04 150 / 38%);
+
+  /* layout */
+  --content-dashboard: 70rem;  /* 1120 */
+  --content-study: 45rem;      /* 720 */
+
+  /* motion */
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 320ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* z-index scale */
+  --z-base: 0; --z-sticky: 10; --z-overlay: 40; --z-modal: 100; --z-toast: 1000;
+}
+
+/* ---- 3. Japanese text rule ---- */
+[lang="ja"] { font-family: var(--font-jp-sans); line-height: 1.7; letter-spacing: 0; }
+[lang="ja"].jp-serif, .jp-serif [lang="ja"] { font-family: var(--font-jp-serif); font-weight: 600; line-height: 1.25; }
+h1[lang="ja"], h2[lang="ja"], h3[lang="ja"] { letter-spacing: 0; } /* override global -0.01em */
+
+/* ---- 4. Dark (to re-verify after primary change) ---- */
+.dark {
+  --primary: oklch(0.72 0.14 152);
+  --primary-foreground: oklch(0.15 0.02 160);
+  --ring: oklch(0.72 0.14 152);
+  --surface-2: oklch(0.25 0.025 160);
+  --primary-soft: oklch(0.30 0.05 155);
+  --primary-ink: oklch(0.90 0.06 150);
+  --seal: oklch(0.72 0.15 28);
+  --seal-soft: oklch(0.30 0.06 28);
+  --warning-ink: oklch(0.86 0.12 80);
+}
+
+/* ---- 5. Reduced motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-fast: 0ms; --dur-base: 0ms; --dur-slow: 0ms; }
+}
+
+/* ---- 6. Utilities to add (replace btn-pop/card-pop for new screens) ---- */
+/* .surface   { background: var(--card); border-radius: var(--radius); }
+   .surface-2 { background: var(--surface-2); border-radius: var(--radius); }
+   .lift      { box-shadow: var(--elev-lift); } */

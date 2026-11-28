@@ -13,6 +13,10 @@ spring:
             # do not match, instead of letting Hibernate issue ALTER commands.
             ddl-auto: validate
         show-sql: true
+        properties:
+            hibernate:
+                # Loads lazy relations (a word's meanings, a link's vocabulary) in batches instead of one query each.
+                default_batch_fetch_size: 100
 
     flyway:
         enabled: true
@@ -32,6 +36,22 @@ app:
             bucket: ${SUPABASE_STORAGE_BUCKET:vocapet-pdfs}
     cors:
         allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:*,http://127.0.0.1:*}
+    tango:
+        mastery:
+            min-answered: 5
+            min-accuracy: 0.80
+        need-review:
+            max-accuracy: 0.60
+        lesson:
+            quiz-pass-accuracy: 0.80
+        answer:
+            ignore-vietnamese-diacritics: false
+        seed:
+            enabled: true
+    learning-path:
+        enabled: ${LEARNING_PATH_ENABLED:false}
+        # Comma-separated emails that get the feature while enabled=false, e.g. for trying it on production.
+        allowlist: ${LEARNING_PATH_ALLOWLIST:}
 
 server:
     port: ${PORT:8080}

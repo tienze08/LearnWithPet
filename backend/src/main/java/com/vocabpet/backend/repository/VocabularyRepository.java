@@ -13,6 +13,8 @@ public interface VocabularyRepository extends JpaRepository<Vocabulary, Long> {
 
     List<Vocabulary> findByDeckId(Long deckId);
 
+    List<Vocabulary> findByTangoVocabularyIsNull();
+
     Optional<Vocabulary> findByIdAndDeckUserId(Long id, Long userId);
 
     Optional<Vocabulary> findByIdAndDeckId(Long id, Long deckId);

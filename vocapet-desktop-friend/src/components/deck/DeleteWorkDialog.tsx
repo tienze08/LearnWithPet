@@ -25,12 +25,9 @@ export default function DeleteWordDialog({ wordName, onConfirm }: DeleteWordDial
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <button
-          className="
-          text-muted-foreground
-          hover:text-destructive
-          transition
-          cursor-pointer
-          "
+          type="button"
+          aria-label="Xoá từ"
+          className="grid h-10 w-10 cursor-pointer place-items-center rounded-[var(--radius)] text-muted-foreground transition-colors hover:bg-primary-soft hover:text-destructive"
         >
           <Trash2 className="h-4 w-4" />
         </button>
@@ -38,16 +35,16 @@ export default function DeleteWordDialog({ wordName, onConfirm }: DeleteWordDial
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete "{wordName}"?</DialogTitle>
+          <DialogTitle>Xoá “{wordName}”?</DialogTitle>
         </DialogHeader>
 
         <p className="text-sm text-muted-foreground">
-          This will permanently remove the word from the deck. This action cannot be undone.
+          Từ này sẽ bị xoá khỏi bộ thẻ vĩnh viễn. Không thể hoàn tác.
         </p>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>
-            Cancel
+            Huỷ
           </Button>
 
           <Button
@@ -57,7 +54,7 @@ export default function DeleteWordDialog({ wordName, onConfirm }: DeleteWordDial
               setOpen(false);
             }}
           >
-            Delete vocabulary
+            Xoá từ
           </Button>
         </DialogFooter>
       </DialogContent>

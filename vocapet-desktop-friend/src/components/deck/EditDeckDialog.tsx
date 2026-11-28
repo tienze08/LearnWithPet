@@ -72,24 +72,24 @@ export default function EditDeckDialog({ deck, onSave }: EditDeckDialogProps) {
       <DialogTrigger asChild>
         <Button variant="outline">
           <Pencil className="mr-1 h-4 w-4" />
-          Edit deck
+          Sửa bộ thẻ
         </Button>
       </DialogTrigger>
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit deck</DialogTitle>
+          <DialogTitle>Sửa bộ thẻ</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-3">
           <div>
-            <Label>Name</Label>
+            <Label>Tên bộ thẻ</Label>
 
             <Input value={name} onChange={(e) => setName(e.target.value)} maxLength={60} />
           </div>
 
           <div>
-            <Label>Description</Label>
+            <Label>Mô tả</Label>
 
             <Input
               value={description}
@@ -99,7 +99,7 @@ export default function EditDeckDialog({ deck, onSave }: EditDeckDialogProps) {
           </div>
 
           <div>
-            <Label>Emoji</Label>
+            <Label>Biểu tượng</Label>
 
             <div className="mt-2 flex flex-wrap gap-2">
               {EMOJIS.map((item) => (
@@ -118,7 +118,7 @@ export default function EditDeckDialog({ deck, onSave }: EditDeckDialogProps) {
           </div>
 
           <div>
-            <Label>Color</Label>
+            <Label>Màu nền</Label>
 
             <div className="mt-2 flex flex-wrap gap-2">
               {COLORS.map((item) => (
@@ -135,7 +135,7 @@ export default function EditDeckDialog({ deck, onSave }: EditDeckDialogProps) {
           </div>
 
           <Button className="btn-pop w-full" onClick={handleSave}>
-            Save changes
+            Lưu thay đổi
           </Button>
         </div>
       </DialogContent>

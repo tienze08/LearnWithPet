@@ -37,7 +37,7 @@ import SrsFlashCard from "@/components/deck/SrsFlashCard";
 import { useGame } from "@/lib/store";
 
 export const Route = createFileRoute("/app/decks/$deckId")({
-  validateSearch: (search: Record<string, unknown>) => ({
+  validateSearch: (search: Record<string, unknown>): { mode?: "srs" } => ({
     mode: search.mode === "srs" ? "srs" : undefined,
   }),
   component: DeckDetail,
@@ -85,7 +85,7 @@ export default function DeckDetail() {
   if (!deck) {
     return (
       <div className="py-20 text-center">
-        <p>Deck not found.</p>
+        <p className="studio-head text-2xl">Không tìm thấy bộ thẻ này.</p>
 
         <Button
           className="mt-3"
@@ -95,27 +95,20 @@ export default function DeckDetail() {
             })
           }
         >
-          Back to decks
+          Về danh sách bộ thẻ
         </Button>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-[1120px] space-y-8">
       <Link
         to="/app/decks"
-        className="
-        inline-flex
-        items-center
-        gap-1
-        text-sm
-        font-bold
-        text-muted-foreground
-        hover:text-foreground"
+        className="inline-flex min-h-11 items-center gap-1.5 text-sm studio-muted hover:text-foreground"
       >
-        <ArrowLeft className="h-4 w-4" />
-        All decks
+        <ArrowLeft aria-hidden className="h-4 w-4" />
+        Tất cả bộ thẻ
       </Link>
 
       <DeckHeader deck={deck} wordCount={words.length}>
@@ -136,7 +129,7 @@ export default function DeckDetail() {
               },
             });
 
-            toast.success("Deck updated");
+            toast.success("Đã lưu bộ thẻ");
           }}
         />
 
@@ -145,11 +138,11 @@ export default function DeckDetail() {
           onConfirm={() => {
             deleteDeck.mutate(deck.id, {
               onSuccess: () => {
-                toast.success("Deck deleted");
+                toast.success("Đã xoá bộ thẻ");
                 navigate({ to: "/app/decks" });
               },
               onError: (err) => {
-                toast.error("Delete failed");
+                toast.error("Chưa xoá được bộ thẻ");
               },
             });
 
@@ -181,13 +174,17 @@ export default function DeckDetail() {
         />
       </DeckHeader>
 
-      <div className="flex flex-wrap gap-2">
+      <div
+        role="tablist"
+        aria-label="Cách học"
+        className="flex gap-1 overflow-x-auto border-b border-border"
+      >
         <ModeButton
           active={mode === "browse"}
           onClick={() => setMode("browse")}
           icon={<Layers className="h-4 w-4" />}
         >
-          Browse
+          Danh sách
         </ModeButton>
 
         <ModeButton
@@ -195,7 +192,7 @@ export default function DeckDetail() {
           onClick={() => setMode("srs")}
           icon={<Brain className="h-4 w-4" />}
         >
-          SRS Review
+          Ôn SRS
         </ModeButton>
 
         <ModeButton
@@ -203,7 +200,7 @@ export default function DeckDetail() {
           onClick={() => setMode("flashcards")}
           icon={<Sparkles className="h-4 w-4" />}
         >
-          Flashcards
+          Lật thẻ
         </ModeButton>
 
         <ModeButton
@@ -211,7 +208,7 @@ export default function DeckDetail() {
           onClick={() => setMode("quiz")}
           icon={<ListChecks className="h-4 w-4" />}
         >
-          Multiple Choice
+          Trắc nghiệm
         </ModeButton>
 
         <ModeButton
@@ -219,7 +216,7 @@ export default function DeckDetail() {
           onClick={() => setMode("type")}
           icon={<Type className="h-4 w-4" />}
         >
-          Type
+          Gõ từ
         </ModeButton>
       </div>
 
@@ -244,7 +241,7 @@ export default function DeckDetail() {
 
               vocabularyId: id,
 
-              payload: patch as any,
+              payload: patch as Parameters<typeof updateVocabulary.mutate>[0]["payload"],
             });
           }}
           deleteWord={(id) => {
@@ -257,13 +254,14 @@ export default function DeckDetail() {
         />
       )}
 
-      {mode === "srs" && <SrsFlashCard deckId={deck.id} />}
-
-      {mode === "flashcards" && <Flashcards words={words} onAnswer={recordAnswer} />}
-
-      {mode === "quiz" && <QuizGame words={words} allWords={words} onAnswer={recordAnswer} />}
-
-      {mode === "type" && <TypeGame words={words} onAnswer={recordAnswer} />}
+      {mode !== "browse" && (
+        <div className="mx-auto max-w-[680px]">
+          {mode === "srs" && <SrsFlashCard deckId={deck.id} />}
+          {mode === "flashcards" && <Flashcards words={words} onAnswer={recordAnswer} />}
+          {mode === "quiz" && <QuizGame words={words} allWords={words} onAnswer={recordAnswer} />}
+          {mode === "type" && <TypeGame words={words} onAnswer={recordAnswer} />}
+        </div>
+      )}
     </div>
   );
 }

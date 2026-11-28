@@ -8,15 +8,14 @@ function clearExpiredSession() {
   }
 }
 
-export async function apiFetch<T>(
-  endpoint: string,
-  options?: RequestInit,
-): Promise<T> {
+export async function apiFetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const request = (token: string | null) =>
     fetch(`${API_URL}${endpoint}`, {
       ...options,
       headers: {
-        ...(typeof FormData !== "undefined" && options?.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
+        ...(typeof FormData !== "undefined" && options?.body instanceof FormData
+          ? {}
+          : { "Content-Type": "application/json" }),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...options?.headers,
       },
@@ -51,13 +50,15 @@ export async function apiFetch<T>(
   }
 
   const text = await response.text();
-  let data: any = null;
-  try { data = text ? JSON.parse(text) : null; } catch { data = { message: text }; }
+  let data: { message?: string } | null = null;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    data = { message: text };
+  }
 
   if (!response.ok) {
-    throw new Error(
-      data?.message || `HTTP ${response.status} - Unknown error`,
-    );
+    throw new Error(data?.message || `HTTP ${response.status} - Unknown error`);
   }
 
   return data as T;

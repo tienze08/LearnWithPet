@@ -16,7 +16,6 @@ export function useOnboardingMutation() {
     mutationFn: onboardingApi,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["me"] });
-
     },
   });
 }

@@ -7,10 +7,13 @@ import { useAuthStore } from "@/hooks/stores/auth.store";
 import { isAuthenticated } from "@/lib/auth";
 import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { z } from "zod";
 
 export const Route = createFileRoute("/login")({
+  // Client-only so beforeLoad can see the saved token (localStorage) and send a signed-in user to /app.
+  ssr: false,
   beforeLoad: () => {
     if (isAuthenticated()) {
       throw redirect({
@@ -34,6 +37,7 @@ function LoginPage() {
 
   const authStore = useAuthStore();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState<Errors>({});
   const [loading, setLoading] = useState(false);
@@ -63,6 +67,8 @@ function LoginPage() {
       console.log(res);
 
       authStore.login(res.token, res.name, false, res.refreshToken);
+      // Drop anything cached for a previous account (e.g. its Learning Path flag) before routing.
+      queryClient.clear();
 
       localStorage.setItem("vocapet_token", res.token);
       localStorage.setItem("vocapet_name", res.name);
@@ -75,6 +81,7 @@ function LoginPage() {
         });
       } else {
         toast.success("Login successful");
+        // /app decides: Today, path setup, or the progress page when Learning Path is off.
         navigate({
           to: "/app",
         });

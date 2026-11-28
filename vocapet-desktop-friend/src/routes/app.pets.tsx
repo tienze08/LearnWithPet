@@ -24,7 +24,7 @@ type Unlock = {
 
 const masteredCount = (stats: UnlockProgress) => stats.masteredWords;
 
-export const PET_UNLOCKS: Unlock[] = [
+const PET_UNLOCKS: Unlock[] = [
   {
     id: "CAT",
     title: "Starter Companion",
@@ -154,7 +154,6 @@ function PetsPage() {
                   {u.title}
                 </p>
                 <h2 className="text-xl font-extrabold flex items-center justify-center gap-2">
-                  <span>{meta.emoji}</span>
                   <span>{meta.name}</span>
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1 ">{meta.desc}</p>
@@ -182,9 +181,11 @@ function PetsPage() {
                   <Button
                     className="w-full"
                     variant={active ? "secondary" : "default"}
-                    onClick={() => selectPetMutation.mutate(u.id, {
-                      onSuccess: () => setState((s) => ({ ...s, petVariant: u.id })),
-                    })}
+                    onClick={() =>
+                      selectPetMutation.mutate(u.id, {
+                        onSuccess: () => setState((s) => ({ ...s, petVariant: u.id })),
+                      })
+                    }
                     disabled={active || selectPetMutation.isPending}
                   >
                     {active ? "Currently Active" : "Set as Companion"}

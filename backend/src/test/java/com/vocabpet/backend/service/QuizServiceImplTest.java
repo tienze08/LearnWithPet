@@ -62,11 +62,11 @@ class QuizServiceImplTest {
     }
 
     @Test
-    void answerRequiresNonBlankAnswerBeforeTouchingProgress() {
+    void answerRequiresAnswerBeforeTouchingProgress() {
         User currentUser = new User(); currentUser.setId(10L);
         QuizAnswerRequest request = new QuizAnswerRequest();
         request.setVocabularyId(88L);
-        request.setAnswer(" ");
+        request.setAnswer(null); // an empty string is a timed-out quiz and is accepted
         when(currentUserService.getCurrentUser()).thenReturn(currentUser);
 
         ResponseStatusException error = assertThrows(ResponseStatusException.class, () -> service.answer(request));

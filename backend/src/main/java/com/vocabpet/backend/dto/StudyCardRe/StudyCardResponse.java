@@ -23,4 +23,11 @@ public class StudyCardResponse {
     private Difficulty difficulty;
 
     private PartOfSpeech partOfSpeech;
+
+    /** Set only for cards linked to a Tango word; null for plain (English) cards. */
+    private String kana;
+    private String romaji;
+    private Long lessonId;
+    private Integer lessonNumber;
+    private String jlptLevel;
 }

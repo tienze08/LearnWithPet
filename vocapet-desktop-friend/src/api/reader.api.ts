@@ -22,10 +22,10 @@ export function generateReaderFlashcardsApi(payload: {
 }
 
 export function suggestReaderVocabularyApi(payload: { context: string; sourceTitle: string }) {
-  return apiFetch<{ companionMessage: string; suggestions: Array<{ word: string; contextSentence: string; reason: string }> }>(
-    "/api/reader/suggest-vocabulary",
-    { method: "POST", body: JSON.stringify(payload) },
-  );
+  return apiFetch<{
+    companionMessage: string;
+    suggestions: Array<{ word: string; contextSentence: string; reason: string }>;
+  }>("/api/reader/suggest-vocabulary", { method: "POST", body: JSON.stringify(payload) });
 }
 
 export type ReaderDocument = {
@@ -56,6 +56,7 @@ export function getLatestReaderPdfFileApi() {
 
 export function updateReaderPdfStateApi(payload: { basketJson: string; highlightsJson: string }) {
   return apiFetch<ReaderDocument>("/api/reader/documents/latest/state", {
-    method: "PUT", body: JSON.stringify(payload),
+    method: "PUT",
+    body: JSON.stringify(payload),
   });
 }

@@ -36,8 +36,7 @@ async function request<T>(url: string, body: unknown): Promise<T> {
 
   if (!res.ok) {
     const message =
-      (data as { message?: string } | null)?.message ??
-      "Something went wrong. Please try again.";
+      (data as { message?: string } | null)?.message ?? "Something went wrong. Please try again.";
     throw new Error(message);
   }
 

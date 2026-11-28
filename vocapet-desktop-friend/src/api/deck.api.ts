@@ -1,95 +1,55 @@
 import { apiFetch } from "./client";
 
-
 export interface DeckRequest {
+  name: string;
 
-  name:string;
+  description: string;
 
-  description:string;
+  emoji: string;
 
-  emoji:string;
-
-  color:string;
-
+  color: string;
 }
-
-
 
 export interface DeckResponse {
+  id: number;
 
-  id:number;
+  name: string;
 
-  name:string;
+  description: string;
 
-  description:string;
+  emoji: string;
 
-  emoji:string;
+  color: string;
 
-  color:string;
+  wordCount: number;
 
-  wordCount:number;
+  studiedCount: number;
 
-  studiedCount:number;
-
-  masteredCount:number;
-
+  masteredCount: number;
 }
 
-
-
-export function getDecksApi(){
-
-  return apiFetch<DeckResponse[]>(
-    "/api/decks",
-    {
-      method:"GET",
-    }
-  );
-
+export function getDecksApi() {
+  return apiFetch<DeckResponse[]>("/api/decks", {
+    method: "GET",
+  });
 }
 
-
-
-export function createDeckApi(
-  payload:DeckRequest
-){
-
-  return apiFetch<DeckResponse>(
-    "/api/decks",
-    {
-      method:"POST",
-      body:JSON.stringify(payload),
-    }
-  );
-
+export function createDeckApi(payload: DeckRequest) {
+  return apiFetch<DeckResponse>("/api/decks", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
 }
 
-
-
-export function updateDeckApi(
-  id:number,
-  payload:DeckRequest
-){
-
-  return apiFetch<DeckResponse>(
-    `/api/decks/${id}`,
-    {
-      method:"PUT",
-      body:JSON.stringify(payload),
-    }
-  );
-
+export function updateDeckApi(id: number, payload: DeckRequest) {
+  return apiFetch<DeckResponse>(`/api/decks/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
 }
 
-
-
-export function deleteDeckApi(id:number){
-
-  return apiFetch<string>(
-    `/api/decks/${id}`,
-    {
-      method:"DELETE",
-    }
-  );
-
+export function deleteDeckApi(id: number) {
+  return apiFetch<string>(`/api/decks/${id}`, {
+    method: "DELETE",
+  });
 }

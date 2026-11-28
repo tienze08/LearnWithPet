@@ -1,17 +1,20 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { BookOpen, Plus, Search } from "lucide-react";
+import { ArrowRight, Plus, Search } from "lucide-react";
 import { useState } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useCreateDeckMutation, useDecksQuery } from "@/hooks/queries/deck.queries";
+import { ErrorBlock, LoadingBlock } from "@/components/tango/shared";
+import { PetNote } from "@/components/learning-path/studio";
 
 export const Route = createFileRoute("/app/decks/")({
   component: DecksPage,
@@ -19,220 +22,234 @@ export const Route = createFileRoute("/app/decks/")({
 
 const EMOJIS = ["📚", "🌍", "🍔", "💼", "🎨", "🧪", "🏃", "🎵", "🎮", "🌱"];
 
+// Stored on the deck as-is (the API keeps the class name), so the values must not change.
 const COLORS = [
-  {
-    name: "emerald",
-    class: "bg-emerald-100",
-  },
-  {
-    name: "sky",
-    class: "bg-sky-100",
-  },
-  {
-    name: "amber",
-    class: "bg-amber-100",
-  },
-  {
-    name: "rose",
-    class: "bg-rose-100",
-  },
-  {
-    name: "violet",
-    class: "bg-violet-100",
-  },
-  {
-    name: "teal",
-    class: "bg-teal-100",
-  },
+  { name: "emerald", label: "Lục", class: "bg-emerald-100" },
+  { name: "sky", label: "Lam", class: "bg-sky-100" },
+  { name: "amber", label: "Vàng", class: "bg-amber-100" },
+  { name: "rose", label: "Hồng", class: "bg-rose-100" },
+  { name: "violet", label: "Tím", class: "bg-violet-100" },
+  { name: "teal", label: "Ngọc", class: "bg-teal-100" },
 ];
 
+/** Flashcards: the learner's own decks as a ruled list, a search when there are several, and a create dialog. */
 function DecksPage() {
-  const { data: decks = [], isLoading } = useDecksQuery();
-  const createDeckMutation = useCreateDeckMutation();
+  const decks = useDecksQuery();
+  const list = decks.data ?? [];
   const [q, setQ] = useState("");
+  const filtered = list.filter((d) => d.name.toLowerCase().includes(q.trim().toLowerCase()));
+  const totalWords = list.reduce((n, d) => n + (d.wordCount ?? 0), 0);
+
+  return (
+    <div className="mx-auto max-w-[1120px] space-y-10">
+      <header className="grid gap-6 lg:grid-cols-[minmax(0,7fr)_minmax(0,4fr)] lg:items-end lg:gap-16">
+        <div className="space-y-3">
+          <p className="studio-kicker">
+            <span lang="ja" className="normal-case tracking-normal">
+              単語帳
+            </span>{" "}
+            · Flashcards
+          </p>
+          <h1 className="studio-head text-4xl leading-[1.05] sm:text-5xl">Bộ thẻ của bạn</h1>
+          <p className="studio-muted">
+            {list.length > 0
+              ? `${list.length} bộ thẻ · ${totalWords} từ bạn tự sưu tầm.`
+              : "Nơi gom những từ bạn muốn tự ôn theo cách riêng."}
+          </p>
+        </div>
+        {list.length > 0 && (
+          <div className="flex flex-wrap items-center gap-3 lg:justify-end">
+            <CreateDeck />
+          </div>
+        )}
+      </header>
+
+      {decks.isPending ? (
+        <LoadingBlock rows={3} />
+      ) : decks.isError ? (
+        <ErrorBlock error={decks.error} onRetry={() => decks.refetch()} />
+      ) : list.length === 0 ? (
+        <section className="studio-rule-t studio-rule-b grid gap-6 py-10 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+          <PetNote mood="waiting" size={64}>
+            Chưa có bộ thẻ nào. Tạo một bộ cho chủ đề bạn thích, mình học cùng bạn.
+          </PetNote>
+          <CreateDeck />
+        </section>
+      ) : (
+        <section aria-labelledby="deck-list" className="space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 id="deck-list" className="studio-kicker studio-kicker-muted">
+              {filtered.length} bộ thẻ
+            </h2>
+            {list.length > 3 && (
+              <div className="relative">
+                <Search
+                  aria-hidden
+                  className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 studio-muted"
+                />
+                <Input
+                  aria-label="Tìm bộ thẻ"
+                  placeholder="Tìm bộ thẻ"
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  className="h-11 w-64 pl-9"
+                />
+              </div>
+            )}
+          </div>
+          <ul className="studio-rule-t">
+            {filtered.map((d) => {
+              const words = d.wordCount ?? 0;
+              return (
+                <li key={d.id}>
+                  <Link
+                    to="/app/decks/$deckId"
+                    params={{ deckId: `${d.id}` }}
+                    className="studio-row studio-rule-b group grid grid-cols-[3.5rem_minmax(0,1fr)_auto] items-center gap-4 px-2 py-4 sm:grid-cols-[3.5rem_minmax(0,1fr)_8rem_1.5rem]"
+                  >
+                    <span
+                      aria-hidden
+                      className={`grid h-12 w-12 place-items-center rounded-[var(--radius)] border border-border text-2xl ${d.color}`}
+                    >
+                      {d.emoji}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="studio-head block truncate text-xl">{d.name}</span>
+                      <span className="block truncate text-sm studio-muted">
+                        {d.description || "Bộ thẻ riêng của bạn"}
+                      </span>
+                    </span>
+                    <span className="text-right">
+                      <span className="studio-head block text-2xl tabular-nums">{words}</span>
+                      <span className="block text-xs studio-muted">
+                        từ{d.studiedCount ? ` · đã ôn ${d.studiedCount}` : ""}
+                      </span>
+                    </span>
+                    <ArrowRight
+                      aria-hidden
+                      className="hidden h-4 w-4 text-primary transition-transform group-hover:translate-x-1 sm:block"
+                    />
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+          {filtered.length === 0 && (
+            <p className="text-sm studio-muted">Không có bộ thẻ nào tên “{q}”.</p>
+          )}
+        </section>
+      )}
+    </div>
+  );
+}
+
+function CreateDeck() {
+  const createDeckMutation = useCreateDeckMutation();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
   const [emoji, setEmoji] = useState(EMOJIS[0]);
   const [color, setColor] = useState(COLORS[0].class);
 
-  const filteredDecks = decks.filter((d) => d.name.toLowerCase().includes(q.toLowerCase()));
-
   async function handleCreate() {
     if (!name.trim()) return;
-
     await createDeckMutation.mutateAsync({
       name: name.trim(),
-
       description: desc.trim(),
-
       emoji,
-
       color,
     });
-
     setName("");
     setDesc("");
     setEmoji(EMOJIS[0]);
     setOpen(false);
   }
 
-  if (isLoading) {
-    return (
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-label="Loading decks">
-        {[0, 1, 2].map((item) => <div key={item} className="h-56 animate-pulse rounded-2xl border border-border bg-card/60" />)}
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-6">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">Learning library</p>
-          <h1 className="mt-1 text-3xl font-extrabold tracking-tight">Your decks</h1>
-          <p className="mt-2 text-sm text-muted-foreground">A quiet place to collect, practise and remember new words.</p>
-        </div>
-        <div className="flex gap-2">
-          <div className="relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button>
+          <Plus aria-hidden className="h-4 w-4" /> Tạo bộ thẻ
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="studio-head text-2xl">Tạo bộ thẻ</DialogTitle>
+          <DialogDescription>Đặt tên theo chủ đề để dễ tìm lại.</DialogDescription>
+        </DialogHeader>
+        <form
+          className="space-y-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleCreate();
+          }}
+        >
+          <div className="space-y-1.5">
+            <Label htmlFor="deck-name">Tên bộ thẻ</Label>
             <Input
-              placeholder="Search decks"
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              className="pl-9 w-56"
+              id="deck-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Ví dụ: Từ về nấu ăn"
+              required
             />
           </div>
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button className="btn-pop">
-                <Plus className="w-4 h-4 mr-1" /> New deck
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create a deck</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-3">
-                <div>
-                  <Label>Name</Label>
-                  <Input
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="e.g. Cooking words"
-                  />
-                </div>
-                <div>
-                  <Label>Description</Label>
-                  <Input
-                    value={desc}
-                    onChange={(e) => setDesc(e.target.value)}
-                    placeholder="optional"
-                  />
-                </div>
-                <div>
-                  <Label>Emoji</Label>
-                  <div className="flex flex-wrap gap-2 mt-1">
-                    {EMOJIS.map((e) => (
-                      <button
-                        key={e}
-                        onClick={() => setEmoji(e)}
-                        className={`w-10 h-10 text-xl rounded-xl border-2 ${emoji === e ? "border-primary bg-primary/10" : "border-border"}`}
-                      >
-                        {e}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <Label>Color</Label>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {COLORS.map((c) => (
-                      <button
-                        key={c.name}
-                        type="button"
-                        onClick={() => setColor(c.class)}
-                        className={`
-          h-10 w-10 rounded-full border-2 transition
-          ${c.class}
-          ${color === c.class ? "border-primary ring-2 ring-primary/30" : "border-border"}
-        `}
-                      />
-                    ))}
-                  </div>
-                </div>
-                <Button className="btn-pop w-full" onClick={handleCreate}>
-                  Create deck
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
-      </header>
-
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {filteredDecks.map((d) => {
-          const wordCount = d.wordCount ?? 0;
-          const studiedCount = d.studiedCount ?? 0;
-          const masteredCount = d.masteredCount ?? 0;
-          const progress = wordCount > 0 ? Math.round((studiedCount / wordCount) * 100) : 0;
-          return (
-            <Link
-              key={d.id}
-              to="/app/decks/$deckId"
-              params={{
-                deckId: `${d.id}`,
-              }}
-              className="group rounded-2xl border border-border bg-card/80 p-5 card-pop transition-all hover:-translate-y-0.5 hover:border-primary/50"
-            >
-              <div
-                className={`flex h-16 w-16 items-center justify-center rounded-2xl text-4xl ${d.color}`}
-              >
-                {d.emoji}
-              </div>
-              <div className="mt-4 flex items-start justify-between gap-3">
-                <div>
-                  <h3 className="font-extrabold text-lg">{d.name}</h3>
-                  <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">{d.description || "Your personal vocabulary workspace."}</p>
-                </div>
-                <span className="text-xs font-semibold text-primary opacity-0 transition-opacity group-hover:opacity-100">Open</span>
-              </div>
-              <div className="mt-5 rounded-xl bg-muted/55 p-3">
-                <div className="flex items-center justify-between gap-3 text-xs font-bold">
-                  <span className="inline-flex items-center gap-1.5 text-foreground">
-                    <BookOpen className="h-3.5 w-3.5 text-primary" />
-                    {wordCount} {wordCount === 1 ? "word" : "words"}
-                  </span>
-                  <span className={progress > 0 ? "text-primary" : "text-muted-foreground"}>{progress}% studied</span>
-                </div>
-                <div
-                  className="mt-2.5 h-2.5 overflow-hidden rounded-full bg-background ring-1 ring-border/70"
-                  role="progressbar"
-                  aria-label={`Mastery progress for ${d.name}`}
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                  aria-valuenow={progress}
-                >
-                  <div
-                    className="h-full rounded-full bg-linear-to-r from-primary/75 via-primary to-emerald-400 transition-[width] duration-500 ease-out"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-                <p className="mt-2 text-[11px] font-medium text-muted-foreground">
-                  {wordCount === 0 ? "Add words to begin studying." : progress === 0 ? "Start your first review to build progress." : `${studiedCount} of ${wordCount} words reviewed${masteredCount > 0 ? ` · ${masteredCount} mastered` : ""}`}
-                </p>
-              </div>
-            </Link>
-          );
-        })}
-        {!isLoading && filteredDecks.length === 0 && (
-          <div className="col-span-full rounded-2xl border border-dashed border-border bg-card/55 px-6 py-14 text-center">
-            <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary"><BookOpen className="h-5 w-5" /></div>
-            <h2 className="font-bold">Your learning journey starts here.</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Create a deck and give Burumaru something new to learn with you.</p>
+          <div className="space-y-1.5">
+            <Label htmlFor="deck-desc">Mô tả (không bắt buộc)</Label>
+            <Input id="deck-desc" value={desc} onChange={(e) => setDesc(e.target.value)} />
           </div>
-        )}
-      </div>
-    </div>
+          <fieldset className="space-y-1.5">
+            <legend className="text-sm font-medium">Biểu tượng</legend>
+            <div className="flex flex-wrap gap-2">
+              {EMOJIS.map((e) => (
+                <button
+                  key={e}
+                  type="button"
+                  aria-pressed={emoji === e}
+                  aria-label={`Biểu tượng ${e}`}
+                  onClick={() => setEmoji(e)}
+                  className={`grid h-11 w-11 place-items-center rounded-[var(--radius)] border text-xl ${
+                    emoji === e ? "border-primary bg-primary-soft" : "border-border"
+                  }`}
+                >
+                  {e}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+          <fieldset className="space-y-1.5">
+            <legend className="text-sm font-medium">Màu nền</legend>
+            <div className="flex flex-wrap gap-2">
+              {COLORS.map((c) => (
+                <button
+                  key={c.name}
+                  type="button"
+                  aria-pressed={color === c.class}
+                  aria-label={`Màu ${c.label}`}
+                  onClick={() => setColor(c.class)}
+                  className={`h-11 w-11 rounded-[var(--radius)] border ${c.class} ${
+                    color === c.class
+                      ? "border-primary outline-2 outline-offset-2 outline-primary"
+                      : "border-border"
+                  }`}
+                />
+              ))}
+            </div>
+          </fieldset>
+          {createDeckMutation.isError && (
+            <p role="alert" className="text-sm text-destructive">
+              Chưa tạo được bộ thẻ. Thử lại.
+            </p>
+          )}
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={createDeckMutation.isPending || !name.trim()}
+          >
+            {createDeckMutation.isPending ? "Đang tạo…" : "Tạo bộ thẻ"}
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

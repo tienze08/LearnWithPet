@@ -1,8 +1,4 @@
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
   finishStudySessionApi,
@@ -21,15 +17,12 @@ import { StartStudySessionRequest } from "@/types/study-session";
 export function useStartStudySessionMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: StartStudySessionRequest) =>
-      startStudySessionApi(payload),
+    mutationFn: (payload: StartStudySessionRequest) => startStudySessionApi(payload),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["study-session", "active"] }),
   });
 }
 
-export function useNextStudyCardQuery(
-  sessionId: number | null,
-) {
+export function useNextStudyCardQuery(sessionId: number | null) {
   return useQuery({
     queryKey: ["study-session", sessionId, "next-card"],
     queryFn: () => getNextStudyCardApi(sessionId!),
@@ -37,14 +30,11 @@ export function useNextStudyCardQuery(
   });
 }
 
-export function useReviewStudyCardMutation(
-  sessionId: number,
-) {
+export function useReviewStudyCardMutation(sessionId: number) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: ReviewRequest) =>
-      reviewStudyCardApi(sessionId, payload),
+    mutationFn: (payload: ReviewRequest) => reviewStudyCardApi(sessionId, payload),
 
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -62,8 +52,7 @@ export function useReviewStudyCardMutation(
 export function useFinishStudySessionMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (sessionId: number) =>
-      finishStudySessionApi(sessionId),
+    mutationFn: (sessionId: number) => finishStudySessionApi(sessionId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["study-plan", "today"] });
       queryClient.invalidateQueries({ queryKey: ["companion", "state"] });
@@ -101,5 +90,8 @@ export function useActiveStudySessionQuery() {
 }
 
 export function useStudyAnalyticsQuery(days = 7) {
-  return useQuery({ queryKey: ["study-analytics", days], queryFn: () => getStudyAnalyticsApi(days) });
+  return useQuery({
+    queryKey: ["study-analytics", days],
+    queryFn: () => getStudyAnalyticsApi(days),
+  });
 }

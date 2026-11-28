@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VocaPet Design Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:oklch(.982 .008 95);--surface-2:oklch(.965 .014 100);--card:#fff;
+  --fg:oklch(.28 .022 155);--muted:oklch(.48 .02 155);--border:oklch(.88 .014 115);
+  --primary:oklch(.50 .12 155);--on-primary:oklch(.99 .004 100);--soft:oklch(.95 .03 150);--ink:oklch(.40 .09 155);
+  --seal:oklch(.52 .17 28);--amber:oklch(.82 .17 75);--amber-ink:oklch(.45 .10 70);--amber-soft:oklch(.96 .06 85);
+  --info:oklch(.55 .14 240);--info-soft:oklch(.95 .03 240);
+  --serif:"Noto Serif JP","Hiragino Mincho ProN","Yu Mincho",serif;--sans:"Noto Sans JP","Hiragino Sans","Yu Gothic",sans-serif;
+  --ui:"Geist",system-ui,"Noto Sans JP",sans-serif;
+  --lift:0 1px 2px oklch(.3 .03 150/8%),0 12px 28px -18px oklch(.3 .04 150/38%);
+  --ease:cubic-bezier(.2,.8,.2,1);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 var(--ui);-webkit-font-smoothing:antialiased}
+[lang=ja]{font-family:var(--sans);line-height:1.7;letter-spacing:0}
+.jp{font-family:var(--serif);font-weight:600;line-height:1.25}
+h1,h2,h3{margin:0;font-weight:700;letter-spacing:-.01em}
+.wrap{max-width:1120px;margin:0 auto;padding:24px 16px 64px}
+.sec{margin-top:56px}
+.sec>h2{font-size:24px;margin-bottom:4px}.sec>p{margin:0 0 20px;color:var(--muted);font-size:14px}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.row{display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+.btn{min-height:44px;padding:0 20px;border-radius:12px;border:0;font:600 15px var(--ui);cursor:pointer;transition:transform .12s var(--ease),filter .2s}
+.btn:active{transform:scale(.98)}
+.btn.p{background:var(--primary);color:var(--on-primary)}.btn.p:hover{filter:brightness(1.08)}
+.btn.s{background:var(--soft);color:var(--ink)}.btn.s:hover{filter:brightness(.97)}
+.btn:focus-visible,a:focus-visible,button:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.stamp{display:inline-grid;place-items:center;min-width:36px;height:36px;padding:0 8px;border-radius:8px;background:var(--seal);color:#fff;font:700 14px var(--ui)}
+.chip{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:0 12px;border-radius:999px;background:var(--surface-2);font-size:14px;font-weight:600}
+.chip.on{background:var(--soft);color:var(--ink)}
+
+/* palette */
+.sw{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.sw div{border-radius:12px;padding:12px;min-height:84px;font-size:12px;display:flex;flex-direction:column;justify-content:flex-end}
+.sw b{font-size:13px}
+
+/* dashboard */
+.dash{display:grid;gap:16px;grid-template-columns:2fr 1fr}
+.hero{position:relative;overflow:hidden;background:var(--soft);border-radius:20px;padding:32px;box-shadow:var(--lift);min-height:240px;display:flex;flex-direction:column;justify-content:space-between;gap:20px}
+.hero .enso{position:absolute;right:-30px;top:-30px;width:260px;height:260px;opacity:.08}
+.hero .hw{font-size:72px;color:var(--ink);position:relative}
+.hero h2{font-size:20px;position:relative}
+.today{background:var(--card);border-radius:20px;padding:24px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
+.ring{--p:70;width:96px;height:96px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--primary) calc(var(--p)*1%),var(--surface-2) 0)}
+.ring i{font-style:normal;width:76px;height:76px;border-radius:50%;background:var(--card);display:grid;place-items:center;font:700 20px var(--ui);font-variant-numeric:tabular-nums}
+.ring.sm{width:40px;height:40px}.ring.sm i{width:30px;height:30px;font-size:11px}
+.path{grid-column:1/-1;display:flex;gap:0;list-style:none;margin:0;padding:0;overflow-x:auto;background:var(--surface-2);border-radius:16px}
+.path li{flex:1;min-width:140px;padding:14px 16px;display:flex;flex-direction:column;gap:2px;font-size:14px;position:relative}
+.path li+li:before{content:"";position:absolute;left:0;top:25%;height:50%;width:1px;background:var(--border)}
+.path li b{font-size:15px}.path .soon{color:var(--muted)}.path .live{cursor:pointer}.path .live:hover{background:var(--soft);border-radius:16px}
+.shelf{background:var(--surface-2);border-radius:16px;padding:8px}
+.lrow{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;min-height:64px;transition:background .2s}
+.lrow:hover{background:var(--card)}.lrow b{display:block}.lrow small{color:var(--muted)}
+.mix{display:flex;height:12px;border-radius:99px;overflow:hidden;gap:2px}
+.mix span{display:block}
+.legend{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;margin-top:14px;font-size:14px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:8px}
+.legend b{font-variant-numeric:tabular-nums}
+.two{display:grid;gap:16px;grid-template-columns:7fr 5fr}
+
+/* vocab */
+.status{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:2px 10px;border-radius:99px;white-space:nowrap}
+.st-new{background:var(--surface-2);color:var(--muted)}.st-lrn{background:var(--info-soft);color:var(--info)}
+.st-rev{background:var(--amber-soft);color:var(--amber-ink)}.st-ok{background:var(--soft);color:var(--ink)}
+.words{background:var(--card);border-radius:16px}
+.w{display:grid;grid-template-columns:28px 1fr auto 44px 44px;align-items:center;gap:8px;padding:12px 8px 12px 16px;min-height:64px;border-top:1px solid var(--border)}
+.w:first-child{border-top:0}
+.w .n{color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
+.w .hw{font-size:22px}.w .ka{color:var(--muted);font-size:14px;margin-left:10px}
+.w p{margin:0;font-size:15px}
+.icon{width:44px;height:44px;border-radius:50%;border:0;background:transparent;cursor:pointer;display:grid;place-items:center;color:var(--muted);transition:background .2s}
+.icon:hover{background:var(--surface-2)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.tile{background:var(--card);border-radius:16px;padding:16px;text-align:center;display:flex;flex-direction:column;gap:4px;transition:transform .2s var(--ease)}
+.tile:hover{transform:translateY(-2px)}.tile .hw{font-size:28px}.tile small{color:var(--muted)}
+.tile .status{align-self:center;margin-top:8px}
+.lessons{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.lesson{position:relative;overflow:hidden;border-radius:16px;padding:16px;min-height:132px;display:flex;flex-direction:column;justify-content:flex-end;gap:2px}
+.lesson .num{position:absolute;right:12px;top:0;font:700 64px/1 var(--serif);opacity:.12}
+.lesson .ring{position:absolute;right:16px;bottom:16px}
+.lesson.done{background:var(--soft)}.lesson.prog{background:var(--card)}.lesson.new{background:var(--surface-2)}
+.lesson b{font-size:16px;max-width:75%}.lesson small{color:var(--muted)}
+.study{max-width:720px;margin:0 auto;background:var(--card);border-radius:24px;box-shadow:var(--lift);padding:32px;text-align:center;position:relative;overflow:hidden}
+.study .enso{position:absolute;left:50%;top:40px;transform:translateX(-50%);width:200px;opacity:.05}
+.study .hw{font-size:72px;position:relative}
+.bar{height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden}.bar i{display:block;height:100%;background:var(--primary);width:40%}
+.ex{background:var(--surface-2);border-radius:12px;padding:14px 16px;text-align:left;margin-top:16px}
+.ex mark{background:none;color:var(--ink);font-weight:700}
+kbd{font:600 12px var(--ui);border:1px solid var(--border);border-bottom-width:2px;border-radius:6px;padding:1px 6px;background:var(--card)}
+.type td{padding:8px 16px 8px 0;vertical-align:baseline}
+@media(max-width:800px){.dash,.two{grid-template-columns:1fr}.hero .hw{font-size:56px}.w{grid-template-columns:24px 1fr 44px 44px}.w .status{display:none}.study .hw{font-size:48px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs>
+<symbol id="enso" viewBox="0 0 100 100"><path d="M58 8C28 4 6 28 10 56c4 28 32 42 56 32 22-9 28-34 18-52" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round"/></symbol>
+<symbol id="vol" viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4zM16 8.5a5 5 0 0 1 0 7M19 5.5a9 9 0 0 1 0 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="heart" viewBox="0 0 24 24"><path d="M20.8 5.6a5.5 5.5 0 0 0-7.8 0L12 6.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 22l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+<symbol id="check" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="alert" viewBox="0 0 24 24"><path d="M12 7v6m0 4h.01" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+<symbol id="half" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></symbol>
+<symbol id="circ" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.4"/></symbol>
+<symbol id="flame" viewBox="0 0 24 24"><path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z" fill="currentColor"/></symbol>
+</defs></svg>
+
+<div class="wrap">
+  <p class="eyebrow">VocaPet · Design preview · proposal</p>
+  <h1 style="font-size:32px;margin-top:4px">Washi Study</h1>
+  <p style="color:var(--muted);max-width:60ch">Warm paper, ink typography, green for progress. Static mock using the proposed tokens. Nothing here is wired to the app.</p>
+
+  <!-- PALETTE -->
+  <section class="sec"><h2>Colour</h2><p>Contrast computed from the oklch values. Fills below show white/ink text as used.</p>
+  <div class="sw">
+    <div style="background:var(--bg);border:1px solid var(--border)"><b>background</b>#FBF9F3</div>
+    <div style="background:var(--surface-2)"><b>surface-2</b>#F5F4E9</div>
+    <div style="background:var(--primary);color:#fff"><b>primary</b>#0B7643 · 5.7:1 white</div>
+    <div style="background:var(--soft);color:var(--ink)"><b>primary-soft / ink</b>#E1F5E4 · 7.8:1</div>
+    <div style="background:var(--seal);color:#fff"><b>seal</b>#B6322B · 6.0:1 white</div>
+    <div style="background:var(--amber-soft);color:var(--amber-ink)"><b>amber soft / ink</b>7.3:1</div>
+    <div style="background:var(--fg);color:#fff"><b>foreground</b>#202C24 · 13.8:1</div>
+    <div style="background:var(--bg);color:var(--muted);border:1px solid var(--border)"><b>muted-foreground</b>#556159 · 6.2:1</div>
+  </div></section>
+
+  <!-- TYPE -->
+  <section class="sec"><h2>Typography</h2><p>Noto Serif JP for headwords · Noto Sans JP for Japanese text · Geist for UI.</p>
+  <table class="type"><tr><td class="eyebrow">Headword 72</td><td><span class="jp" lang="ja" style="font-size:72px">日本語 食べる</span></td></tr>
+  <tr><td class="eyebrow">Headword 28</td><td><span class="jp" lang="ja" style="font-size:28px">学校 · がっこう · 私は学生です</span></td></tr>
+  <tr><td class="eyebrow">JP body 18</td><td><span lang="ja" style="font-size:18px">毎日、日本語を勉強しています。</span></td></tr>
+  <tr><td class="eyebrow">UI / Vietnamese</td><td><span>Tiếp tục học · Hiện nghĩa · Đã thuộc — Geist 16/24</span></td></tr></table></section>
+
+  <!-- DASHBOARD -->
+  <section class="sec"><h2>Dashboard</h2><p>One elevated hero, a single "path" strip instead of six tiles, a segmented word-mix bar instead of four numbers.</p>
+  <div class="row" style="justify-content:space-between;margin-bottom:16px">
+    <div><div style="font-size:14px;color:var(--muted)">Welcome back</div><h2 style="font-size:28px">Phúc, hôm nay học gì?</h2></div>
+    <div class="row" style="gap:8px"><span class="chip"><svg width="16" height="16" style="color:oklch(.7 .21 40)"><use href="#flame"/></svg> 12 ngày</span><span class="stamp" title="JLPT N5">N5</span></div>
+  </div>
+  <div class="dash">
+    <div class="hero">
+      <svg class="enso" style="color:var(--ink)"><use href="#enso"/></svg>
+      <div><div class="eyebrow" style="color:var(--ink)">Continue learning</div>
+      <div class="hw jp" lang="ja">買い物</div>
+      <h2>Lesson 3 · Shopping</h2></div>
+      <div class="row"><button class="btn p">Continue lesson</button><button class="btn s">Flashcards</button></div>
+    </div>
+    <div class="today">
+      <div class="eyebrow">Daily goal</div>
+      <div class="ring" style="--p:70" role="progressbar" aria-valuenow="7" aria-valuemin="0" aria-valuemax="10" aria-label="Daily goal 7 of 10 words"><i>7/10</i></div>
+      <div style="font-size:14px;color:var(--muted)">Words in learning</div>
+      <a href="#" style="font-weight:700;color:var(--primary);text-decoration:none">24 →</a>
+    </div>
+    <ol class="path" aria-label="Learning path">
+      <li class="live"><b>Alphabet</b><span>Hiragana · Katakana</span></li>
+      <li class="live"><b>Vocabulary</b><span>N5 · 38%</span></li>
+      <li class="soon"><b>Kanji</b><span>Soon</span></li>
+      <li class="soon"><b>Grammar</b><span>Soon</span></li>
+      <li class="soon"><b>Listening</b><span>Soon</span></li>
+      <li class="soon"><b>JLPT Practice</b><span>Soon</span></li>
+    </ol>
+  </div>
+  <div class="two" style="margin-top:16px">
+    <div class="shelf">
+      <div class="row" style="justify-content:space-between;padding:8px 12px"><b>In progress</b><a href="#" style="color:var(--primary);font-weight:600;font-size:14px;text-decoration:none">All lessons →</a></div>
+      <a class="lrow" href="#" style="text-decoration:none;color:inherit"><div class="ring sm" style="--p:62"><i>62</i></div><div style="flex:1"><b>3. 買い物</b><small>Shopping</small></div><span class="status st-lrn"><svg width="14" height="14"><use href="#half"/></svg>Đang học</span></a>
+      <a class="lrow" href="#" style="text-decoration:none;color:inherit"><div class="ring sm" style="--p:100"><i>✓</i></div><div style="flex:1"><b>2. 家族</b><small>Family</small></div><span class="status st-ok"><svg width="14" height="14"><use href="#check"/></svg>Hoàn thành</span></a>
+      <a class="lrow" href="#" style="text-decoration:none;color:inherit"><div class="ring sm" style="--p:20"><i>20</i></div><div style="flex:1"><b>4. 食べ物</b><small>Food</small></div><span class="status st-rev"><svg width="14" height="14"><use href="#alert"/></svg>Cần ôn</span></a>
+    </div>
+    <div class="shelf" style="padding:16px">
+      <b>Word mix</b>
+      <div class="mix" style="margin-top:12px" role="img" aria-label="Mastered 42, Learning 28, Needs review 9, New 121"><span style="flex:42;background:var(--primary)"></span><span style="flex:28;background:var(--info)"></span><span style="flex:9;background:var(--amber)"></span><span style="flex:121;background:var(--border)"></span></div>
+      <div class="legend"><span><i style="background:var(--primary)"></i>Đã thuộc <b>42</b></span><span><i style="background:var(--info)"></i>Đang học <b>28</b></span><span><i style="background:var(--amber)"></i>Cần ôn <b>9</b></span><span><i style="background:var(--border)"></i>Mới <b>121</b></span></div>
+    </div>
+  </div></section>
+
+  <!-- VOCAB -->
+  <section class="sec"><h2>Vocabulary · lesson library</h2><p>State is shown by treatment: completed = tinted, in-progress = white + ring, not started = recessed.</p>
+  <div class="lessons">
+    <a class="lesson done"><span class="num">1</span><b lang="ja" class="jp" style="font-size:18px">はじめまして</b><small>12 / 12 từ · Hoàn thành</small><span class="ring sm" style="--p:100"><i>✓</i></span></a>
+    <a class="lesson prog"><span class="num">3</span><b lang="ja" class="jp" style="font-size:18px">買い物</b><small>14 / 22 từ · Đang học</small><span class="ring sm" style="--p:62"><i>62</i></span></a>
+    <a class="lesson new"><span class="num">4</span><b lang="ja" class="jp" style="font-size:18px">食べ物</b><small>0 / 18 từ · Chưa học</small></a>
+  </div></section>
+
+  <section class="sec"><h2>Vocabulary · word list</h2><p>Rows view (default). Headword leads; status has icon + text; targets are 44px.</p>
+  <div class="words">
+    <div class="w"><span class="n">01</span><div><span class="hw jp" lang="ja">食べる</span><span class="ka" lang="ja">たべる · taberu</span><p>ăn</p></div><span class="status st-ok"><svg width="14" height="14"><use href="#check"/></svg>Đã thuộc</span><button class="icon" aria-label="Yêu thích" aria-pressed="true" style="color:var(--seal)"><svg width="20" height="20"><use href="#heart"/></svg></button><button class="icon" aria-label="Phát âm たべる"><svg width="20" height="20"><use href="#vol"/></svg></button></div>
+    <div class="w"><span class="n">02</span><div><span class="hw jp" lang="ja">買う</span><span class="ka" lang="ja">かう · kau</span><p>mua</p></div><span class="status st-rev"><svg width="14" height="14"><use href="#alert"/></svg>Cần ôn</span><button class="icon" aria-label="Yêu thích" aria-pressed="false"><svg width="20" height="20"><use href="#heart"/></svg></button><button class="icon" aria-label="Phát âm かう"><svg width="20" height="20"><use href="#vol"/></svg></button></div>
+    <div class="w"><span class="n">03</span><div><span class="hw jp" lang="ja">学校</span><span class="ka" lang="ja">がっこう · gakkou</span><p>trường học</p></div><span class="status st-lrn"><svg width="14" height="14"><use href="#half"/></svg>Đang học</span><button class="icon" aria-label="Yêu thích" aria-pressed="false"><svg width="20" height="20"><use href="#heart"/></svg></button><button class="icon" aria-label="Phát âm がっこう"><svg width="20" height="20"><use href="#vol"/></svg></button></div>
+    <div class="w"><span class="n">04</span><div><span class="hw jp" lang="ja">ありがとう</span><span class="ka" lang="ja">arigatou</span><p>cảm ơn</p></div><span class="status st-new"><svg width="14" height="14"><use href="#circ"/></svg>Mới</span><button class="icon" aria-label="Yêu thích" aria-pressed="false"><svg width="20" height="20"><use href="#heart"/></svg></button><button class="icon" aria-label="Phát âm ありがとう"><svg width="20" height="20"><use href="#vol"/></svg></button></div>
+  </div>
+  <p style="margin-top:28px" class="eyebrow">Tiles view</p>
+  <div class="tiles" style="background:var(--surface-2);border-radius:16px;padding:12px">
+    <div class="tile"><span class="hw jp" lang="ja">食べる</span><small lang="ja">たべる</small><span>ăn</span><span class="status st-ok"><svg width="14" height="14"><use href="#check"/></svg>Đã thuộc</span></div>
+    <div class="tile"><span class="hw jp" lang="ja">買う</span><small lang="ja">かう</small><span>mua</span><span class="status st-rev"><svg width="14" height="14"><use href="#alert"/></svg>Cần ôn</span></div>
+    <div class="tile"><span class="hw jp" lang="ja">学校</span><small lang="ja">がっこう</small><span>trường học</span><span class="status st-lrn"><svg width="14" height="14"><use href="#half"/></svg>Đang học</span></div>
+    <div class="tile"><span class="hw jp" lang="ja">水</span><small lang="ja">みず</small><span>nước</span><span class="status st-new"><svg width="14" height="14"><use href="#circ"/></svg>Mới</span></div>
+  </div></section>
+
+  <section class="sec"><h2>Vocabulary · study card</h2><p>The Japanese headword is the hero. Borderless, one lift, key hints visible.</p>
+  <div class="study">
+    <svg class="enso" style="color:var(--ink)"><use href="#enso"/></svg>
+    <div class="row" style="justify-content:space-between;position:relative"><span style="font-size:14px;font-weight:600">12 / 30</span><span class="status st-lrn"><svg width="14" height="14"><use href="#half"/></svg>Đang học</span></div>
+    <div class="bar" style="margin:12px 0 28px" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" aria-label="Tiến độ học"><i></i></div>
+    <div class="hw jp" lang="ja">買い物</div>
+    <div lang="ja" style="font-size:20px;color:var(--muted);margin-top:4px;position:relative">かいもの</div>
+    <div style="font-size:14px;color:var(--muted)">kaimono</div>
+    <div class="row" style="justify-content:center;margin:16px 0 8px;position:relative"><button class="btn s"><svg width="18" height="18" style="vertical-align:-4px;margin-right:6px"><use href="#vol"/></svg>Nghe</button></div>
+    <div style="font-size:22px;font-weight:700;margin-top:16px;position:relative">mua sắm</div>
+    <div class="ex"><div lang="ja" style="font-size:18px">日曜日に<mark>買い物</mark>に行きます。</div><div style="font-size:14px;color:var(--muted)">Chủ nhật tôi đi mua sắm.</div></div>
+    <div class="row" style="justify-content:center;margin-top:24px"><button class="btn s">Chưa biết <kbd>1</kbd></button><button class="btn p">Đã biết <kbd style="color:var(--fg)">2</kbd></button></div>
+  </div></section>
+</div>
+</body>
+</html>

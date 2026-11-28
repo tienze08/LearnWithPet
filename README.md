@@ -74,7 +74,7 @@ cd backend
 .\mvnw.cmd spring-boot:run
 ```
 
-The backend starts at `http://localhost:8080`.
+The backend starts at `http://localhost:8080`. `spring-boot:run` uses the `dev` profile, which turns the Learning Path on (see below).
 
 ### 4. Start the frontend
 
@@ -87,6 +87,21 @@ npm run dev
 ```
 
 Vite displays the local application URL, normally `http://localhost:5173`.
+
+## Learning Path feature flag
+
+The personalized Learning Path (Today page, onboarding, placement test) is behind a backend flag. The frontend reads it from `GET /api/learning-path/status`, so switching it needs no frontend rebuild.
+
+| Variable | Default | Effect |
+|---|---|---|
+| `LEARNING_PATH_ENABLED` | `false` (production jar), `true` (`spring-boot:run`, `dev` profile) | `true` turns it on for every user. |
+| `LEARNING_PATH_ALLOWLIST` | empty | Comma-separated emails that get the feature while `LEARNING_PATH_ENABLED=false`, e.g. `you@example.com,teammate@example.com`. Matching ignores case. |
+
+Trying it on production before a full rollout: set `LEARNING_PATH_ENABLED=false` and `LEARNING_PATH_ALLOWLIST=<your email>` in the backend service's environment, then restart it. Users outside the list keep the old home (`/app` shows the progress dashboard). To roll out to everyone, set `LEARNING_PATH_ENABLED=true`. To roll back, set it to `false` and clear the allowlist; learning data is kept.
+
+The new tables (`path_profiles`, `learning_plans`, `daily_plans`, `item_progress`, `learning_sessions`, `question_reports`) are created by `ddl-auto: update` on first start. The database must use `utf8mb4` (kanji ids are stored in `item_progress`).
+
+On MySQL, `LearningPathSchemaPatch` runs at every start and makes two column changes that `ddl-auto: update` never makes, once: `item_progress.item_type` and `question_reports.item_type` from native ENUM to `VARCHAR(16)` (so the `KANA` type fits), and `kana_item_progress.kana` to `utf8mb4_bin` (under `utf8mb4_unicode_ci` MySQL treats か and が as equal, which merged their progress). Take a database backup before the first deploy of this version.
 
 ## Useful commands
 

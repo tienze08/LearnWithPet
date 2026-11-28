@@ -26,22 +26,22 @@ export default function DeleteDeckDialog({ deckName, onConfirm }: DeleteDeckDial
       <DialogTrigger asChild>
         <Button variant="outline" className="text-destructive hover:text-destructive">
           <Trash2 className="mr-1 h-4 w-4" />
-          Delete
+          Xoá
         </Button>
       </DialogTrigger>
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete "{deckName}"?</DialogTitle>
+          <DialogTitle>Xoá “{deckName}”?</DialogTitle>
         </DialogHeader>
 
         <p className="text-sm text-muted-foreground">
-          This will permanently remove the deck and all of its words. This action cannot be undone.
+          Bộ thẻ và toàn bộ từ trong đó sẽ bị xoá vĩnh viễn. Không thể hoàn tác.
         </p>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>
-            Cancel
+            Huỷ
           </Button>
 
           <Button
@@ -51,7 +51,7 @@ export default function DeleteDeckDialog({ deckName, onConfirm }: DeleteDeckDial
               setOpen(false);
             }}
           >
-            Delete deck
+            Xoá bộ thẻ
           </Button>
         </DialogFooter>
       </DialogContent>

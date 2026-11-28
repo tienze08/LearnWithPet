@@ -57,9 +57,9 @@ export default function StreakPopup({ open, streak, onClose }: Props) {
             <div className="text-3xl">🔥</div>
 
             <div>
-              <p className="font-bold text-lg">{streak} Day Streak!</p>
+              <p className="font-bold text-lg">{streak} ngày liên tiếp!</p>
 
-              <p className="text-sm text-muted-foreground">Keep up the great work!</p>
+              <p className="text-sm text-muted-foreground">Giữ nhịp này nhé!</p>
             </div>
           </div>
         </motion.div>

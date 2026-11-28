@@ -30,6 +30,8 @@ public class VocabularyMapper {
                 .difficulty(vocabulary.getDifficulty().name())
                 .partOfSpeech(vocabulary.getPartOfSpeech().name())
                 .deckId(vocabulary.getDeck().getId())
+                .kana(vocabulary.getTangoVocabulary() == null ? null : vocabulary.getTangoVocabulary().getKana())
+                .romaji(vocabulary.getTangoVocabulary() == null ? null : vocabulary.getTangoVocabulary().getRomaji())
                 .build();
     }
 

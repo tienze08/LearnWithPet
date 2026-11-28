@@ -1,13 +1,6 @@
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import {
-  getDailyMissionsApi,
-  claimMissionApi,
-} from "@/api/mission.api";
+import { getDailyMissionsApi, claimMissionApi } from "@/api/mission.api";
 
 export function useDailyMissionsQuery() {
   return useQuery({
@@ -20,8 +13,7 @@ export function useClaimMissionMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (missionId: number) =>
-      claimMissionApi(missionId),
+    mutationFn: (missionId: number) => claimMissionApi(missionId),
 
     onSuccess: () => {
       queryClient.invalidateQueries({

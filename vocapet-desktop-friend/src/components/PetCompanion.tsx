@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { useGame, stageForLevel, computePetMood, type PetMood } from "@/lib/store";
+import { useGame, type PetMood } from "@/lib/store";
+import { computePetMood } from "@/lib/pet/rules";
+import { stageForLevel } from "@/lib/pet/rules";
 import { Button } from "@/components/ui/button";
 import { BookOpen, PencilLine, Sparkles, Target, X } from "lucide-react";
 import { useAnswerQuizMutation, useRandomQuizMutation } from "@/hooks/queries/quiz.queries";
@@ -15,7 +17,11 @@ import { reactionFor } from "@/lib/pet/behavior";
 import { petEvents } from "@/lib/pet/events";
 import type { UserResponse } from "@/types/user";
 import { useMeQuery } from "@/hooks/queries/user.queries";
-import { useCompanionEventMutation, useCompanionPreferencesMutation, useCompanionStateQuery } from "@/hooks/queries/companion.queries";
+import {
+  useCompanionEventMutation,
+  useCompanionPreferencesMutation,
+  useCompanionStateQuery,
+} from "@/hooks/queries/companion.queries";
 import { useActiveStudySessionQuery } from "@/hooks/queries/study-session.queries";
 import type { PetBehaviorResponse as ServerPetBehaviorResponse } from "@/types/pet";
 
@@ -66,7 +72,9 @@ export function PetCompanion() {
   const queryClient = useQueryClient();
   const { state, setPetInterval, recordAnswer } = useGame();
   const { data: me } = useMeQuery();
-  const { data: companionState, refetch: refreshCompanionState } = useCompanionStateQuery(Boolean(me?.pet));
+  const { data: companionState, refetch: refreshCompanionState } = useCompanionStateQuery(
+    Boolean(me?.pet),
+  );
   const { data: activeStudySession } = useActiveStudySessionQuery();
   const [reminder, setReminder] = useState(false);
   const [open, setOpen] = useState(false);
@@ -146,13 +154,18 @@ export function PetCompanion() {
   };
 
   const openPetQuiz = async () => {
-    if (activeStudySession || open || reminder || interrupting || quizArrivalInProgress.current) return;
+    if (activeStudySession || open || reminder || interrupting || quizArrivalInProgress.current)
+      return;
     try {
       const nextQuiz = await getQuiz(undefined);
       showQuizAtRight(nextQuiz);
     } catch (error) {
       console.error("Pet click quiz failed", error);
-      speakPet(`${state.petName}: Add a word to one of your decks, then we can practise together.`, 1, 4);
+      speakPet(
+        `${state.petName}: Add a word to one of your decks, then we can practise together.`,
+        1,
+        4,
+      );
     }
   };
 
@@ -175,7 +188,11 @@ export function PetCompanion() {
 
   useEffect(() => {
     if (!me?.id || !me.pet) return;
-    recordCompanionEvent("APP_OPENED", { onSuccess: (snapshot) => applyServerReaction(snapshot.reaction) });
+    recordCompanionEvent("APP_OPENED", {
+      onSuccess: (snapshot) => applyServerReaction(snapshot.reaction),
+    });
+    // Greets once per signed-in user, not on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [me?.id]);
 
   useEffect(() => {
@@ -191,11 +208,7 @@ export function PetCompanion() {
       const reaction = reactionFor(event);
       setEventMood(reaction.emotion);
       triggerPetAnimation(reaction.action);
-      if (
-        reaction.message &&
-        event.type !== "ANSWER_CORRECT" &&
-        event.type !== "ANSWER_WRONG"
-      ) {
+      if (reaction.message && event.type !== "ANSWER_CORRECT" && event.type !== "ANSWER_WRONG") {
         speakPet(`${state.petName}: ${reaction.message}`, reaction.priority, 3);
       }
       window.setTimeout(() => setEventMood(null), 1800);
@@ -216,44 +229,59 @@ export function PetCompanion() {
     };
     window.addEventListener("resize", keepOnScreen);
     return () => window.removeEventListener("resize", keepOnScreen);
+    // movePetTo only writes refs and state; re-running would restart the walk.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    if (activeStudySession || open || reminder || showSettings || interrupting || typeof window === "undefined") return;
+    if (
+      activeStudySession ||
+      open ||
+      reminder ||
+      showSettings ||
+      interrupting ||
+      typeof window === "undefined"
+    )
+      return;
 
     let finishWalkTimer: number | undefined;
     // After reaching an edge, only pause long enough for the turn to read.
     // walkCycle schedules the opposite trip instead of leaving the pet idle.
-    const walkTimer = window.setTimeout(() => {
-      if (walkInProgress.current) return;
+    const walkTimer = window.setTimeout(
+      () => {
+        if (walkInProgress.current) return;
 
-      walkInProgress.current = true;
-      // Determine the direction from the actual current position. This is
-      // more reliable than a stale direction flag after a quiz interrupts a
-      // route: an edge arrival always turns around for the next trip.
-      const atRightEdge = petXRef.current >= maxPetX() - 2;
-      const nextX = atRightEdge ? 24 : maxPetX();
-      const direction = atRightEdge ? "left" : "right";
-      movePetTo(nextX, direction);
-      triggerPetAnimation("WALK");
+        walkInProgress.current = true;
+        // Determine the direction from the actual current position. This is
+        // more reliable than a stale direction flag after a quiz interrupts a
+        // route: an edge arrival always turns around for the next trip.
+        const atRightEdge = petXRef.current >= maxPetX() - 2;
+        const nextX = atRightEdge ? 24 : maxPetX();
+        const direction = atRightEdge ? "left" : "right";
+        movePetTo(nextX, direction);
+        triggerPetAnimation("WALK");
 
-      finishWalkTimer = window.setTimeout(() => {
-        triggerPetAnimation("IDLE");
-        const nextDirection = direction === "right" ? "left" : "right";
-        facingRef.current = nextDirection;
-        // Store the turned direction immediately so the next authored walk
-        // row is the opposite row, never a backwards slide.
-        petRef.current?.setFacing(nextDirection);
-        walkInProgress.current = false;
-        setWalkCycle((cycle) => cycle + 1);
-      }, 6200);
-    }, walkCycle === 0 ? 6000 : 700);
+        finishWalkTimer = window.setTimeout(() => {
+          triggerPetAnimation("IDLE");
+          const nextDirection = direction === "right" ? "left" : "right";
+          facingRef.current = nextDirection;
+          // Store the turned direction immediately so the next authored walk
+          // row is the opposite row, never a backwards slide.
+          petRef.current?.setFacing(nextDirection);
+          walkInProgress.current = false;
+          setWalkCycle((cycle) => cycle + 1);
+        }, 6200);
+      },
+      walkCycle === 0 ? 6000 : 700,
+    );
 
     return () => {
       window.clearTimeout(walkTimer);
       if (finishWalkTimer) window.clearTimeout(finishWalkTimer);
       walkInProgress.current = false;
     };
+    // movePetTo only writes refs and state; re-running would restart the walk.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeStudySession, open, reminder, showSettings, interrupting, walkCycle]);
 
   useEffect(() => {
@@ -344,7 +372,16 @@ export function PetCompanion() {
       if (approachTimer) window.clearTimeout(approachTimer);
       if (invitationTimer) window.clearTimeout(invitationTimer);
     };
-  }, [activeStudySession, open, reminder, state.popupIntervalMin, companionState?.remindersEnabled, state.petName]);
+    // The reminder timer must not restart when the quiz mutation's identity changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    activeStudySession,
+    open,
+    reminder,
+    state.popupIntervalMin,
+    companionState?.remindersEnabled,
+    state.petName,
+  ]);
 
   const [quiz, setQuiz] = useState<QuizQuestionResponse | null>(null);
   const studiedToday = state.lastStudyDate === todayISO();
@@ -388,6 +425,8 @@ export function PetCompanion() {
     }, 90_000);
     void notes;
     return () => window.clearInterval(id);
+    // The poll must not restart on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, reminder, refreshCompanionState]);
 
   // auto-open quiz a few seconds after reminder appears
@@ -411,6 +450,8 @@ export function PetCompanion() {
       });
     }, 1000);
     return () => clearInterval(id);
+    // The countdown restarts only for a new question.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, quiz?.vocabularyId]);
 
   const { mutateAsync: answerQuiz } = useAnswerQuizMutation();
@@ -440,22 +481,22 @@ export function PetCompanion() {
 
     if (!result) return;
 
-      setAnswerResult(result);
-      recordAnswer(String(quiz.vocabularyId), result.correct, { xp: result.xp, coin: result.coin });
-      queryClient.setQueryData<UserResponse>(["me"], (currentUser) =>
-        currentUser
-          ? {
-              ...currentUser,
-              xp: currentUser.xp + result.xp,
-              totalXp: currentUser.totalXp + result.xp,
-              coin: currentUser.coin + result.coin,
-            }
-          : currentUser,
-      );
-      void Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["achievements", "me"] }),
-        queryClient.invalidateQueries({ queryKey: ["me"] }),
-      ]);
+    setAnswerResult(result);
+    recordAnswer(String(quiz.vocabularyId), result.correct, { xp: result.xp, coin: result.coin });
+    queryClient.setQueryData<UserResponse>(["me"], (currentUser) =>
+      currentUser
+        ? {
+            ...currentUser,
+            xp: currentUser.xp + result.xp,
+            totalXp: currentUser.totalXp + result.xp,
+            coin: currentUser.coin + result.coin,
+          }
+        : currentUser,
+    );
+    void Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["achievements", "me"] }),
+      queryClient.invalidateQueries({ queryKey: ["me"] }),
+    ]);
 
     // Show the result immediately. Server-side companion memory may return a
     // message afterwards, but it must not make a correct answer look like an
@@ -494,16 +535,18 @@ export function PetCompanion() {
   const visibleMood = eventMood ?? (open ? reactionMood : state.petMood);
   // The quiz is 320px wide. Keep the entire companion group inside the
   // viewport when it opens instead of letting a right-edge pet clip the card.
-  const overlayX = open || reminder || showSettings
-    ? Math.max(16, viewportWidth - 344)
-    : petX;
+  const overlayX = open || reminder || showSettings ? Math.max(16, viewportWidth - 344) : petX;
   const isOverlayOpen = open || reminder || showSettings;
 
   return (
     <motion.div
       className="fixed bottom-6 left-0 z-40 flex flex-col items-end gap-2 pointer-events-none"
       animate={{ x: overlayX }}
-      transition={{ type: "tween", ease: "easeInOut", duration: isApproachingQuiz ? 0.8 : isOverlayOpen ? 0.25 : 6 }}
+      transition={{
+        type: "tween",
+        ease: "easeInOut",
+        duration: isApproachingQuiz ? 0.8 : isOverlayOpen ? 0.25 : 6,
+      }}
     >
       {/* Reminder speech bubble */}
       <AnimatePresence>
@@ -612,7 +655,9 @@ export function PetCompanion() {
                 {answerResult === null ? (
                   <span className="text-muted-foreground">Checking your answer…</span>
                 ) : answerResult.correct ? (
-                  <span className="text-success">✨ Amazing! +{answerResult.xp} XP · +{answerResult.coin} 🪙</span>
+                  <span className="text-success">
+                    ✨ Amazing! +{answerResult.xp} XP · +{answerResult.coin} 🪙
+                  </span>
                 ) : (
                   <span className="text-destructive">😅 Don't worry — we'll learn together.</span>
                 )}
@@ -645,11 +690,13 @@ export function PetCompanion() {
           {companionState && (
             <div className="mb-3 rounded-xl border border-border bg-muted/40 p-2">
               <p className="text-xs font-semibold capitalize">
-                Companion · {companionState.personality.toLowerCase()} · Energy {companionState.energy}%
+                Companion · {companionState.personality.toLowerCase()} · Energy{" "}
+                {companionState.energy}%
               </p>
               {companionState.daysTogether > 0 && (
                 <p className="mt-1 text-[11px] text-muted-foreground">
-                  Together {companionState.daysTogether} days · {companionState.totalSessionsTogether} study moments
+                  Together {companionState.daysTogether} days ·{" "}
+                  {companionState.totalSessionsTogether} study moments
                 </p>
               )}
               {companionState.frequentlyWrongWord && (
@@ -675,7 +722,11 @@ export function PetCompanion() {
                           showQuizAtRight(quiz);
                         } catch (error) {
                           console.error("Weak-topic quiz failed", error);
-                          speakPet(`${state.petName}: I couldn't prepare that practice set yet.`, 1, 4);
+                          speakPet(
+                            `${state.petName}: I couldn't prepare that practice set yet.`,
+                            1,
+                            4,
+                          );
                         }
                       }}
                     >
@@ -686,14 +737,19 @@ export function PetCompanion() {
               )}
               {companionState.learningProfile?.totalStudyMinutes > 0 && (
                 <p className="mt-1 text-[11px] text-muted-foreground">
-                  We have studied {companionState.learningProfile.totalStudyMinutes} minutes together.
+                  We have studied {companionState.learningProfile.totalStudyMinutes} minutes
+                  together.
                 </p>
               )}
               <button
                 className="mt-1 text-xs font-medium text-primary hover:underline"
-                onClick={() => updateCompanionPreferences({ remindersEnabled: !companionState.remindersEnabled })}
+                onClick={() =>
+                  updateCompanionPreferences({ remindersEnabled: !companionState.remindersEnabled })
+                }
               >
-                {companionState.remindersEnabled ? "Pause companion reminders" : "Turn on companion reminders"}
+                {companionState.remindersEnabled
+                  ? "Pause companion reminders"
+                  : "Turn on companion reminders"}
               </button>
             </div>
           )}
@@ -721,7 +777,11 @@ export function PetCompanion() {
                   showQuizAtRight(quiz);
                 } catch (e) {
                   console.error(e);
-                  speakPet(`${state.petName}: Add a word to one of your decks, then we can practise together.`, 1, 5);
+                  speakPet(
+                    `${state.petName}: Add a word to one of your decks, then we can practise together.`,
+                    1,
+                    5,
+                  );
                 }
               }}
             >

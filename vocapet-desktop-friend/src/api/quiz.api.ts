@@ -1,9 +1,5 @@
 import { apiFetch } from "./client";
-import type {
-  QuizAnswerRequest,
-  QuizAnswerResponse,
-  QuizQuestionResponse,
-} from "@/types/quiz";
+import type { QuizAnswerRequest, QuizAnswerResponse, QuizQuestionResponse } from "@/types/quiz";
 
 export function getRandomQuiz(deckId: number | undefined = undefined) {
   const params = deckId ? `?deckId=${deckId}` : "";
