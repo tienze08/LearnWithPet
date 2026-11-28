@@ -26,13 +26,13 @@ public class LeitnerScheduler implements SrsScheduler {
         int w = s.wrong() + (correct ? 0 : 1);
         MasteryState state = mastery.afterAnswer(s.state(), stage, c, w, correct);
         Instant next = now.plus(Duration.ofDays(days.get(stage - 1)));
-        return new ItemState(s.key(), state, stage, next, c, w, now);
+        return new ItemState(s.key(), state, stage, next, c, w, now, s.weak());
     }
 
     @Override
     public ItemState provisionallyKnown(ItemState s, Instant now) {
         if (s.atLeast(MasteryState.UNDERSTOOD)) return s;
         return new ItemState(s.key(), MasteryState.UNDERSTOOD, 1, now.plus(Duration.ofDays(days.get(0))),
-                s.correct(), s.wrong(), s.lastReviewedAt());
+                s.correct(), s.wrong(), s.lastReviewedAt(), s.weak());
     }
 }

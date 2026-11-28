@@ -86,10 +86,20 @@ function TangoLessonDetail() {
 
   const data = lesson.data;
   const learnPath = { to: "/app/japanese/tango/learn/$lessonId" as const, params: { lessonId } };
-  const practicePath = { to: "/app/japanese/tango/practice/$lessonId" as const, params: { lessonId } };
-  const percent = data.status === "COMPLETED" ? 100 : data.requiredCount === 0 ? 0 : Math.round(
-    ((vocabularies.data?.vocabularies.filter((w) => w.required && w.viewed).length ?? 0) / data.requiredCount) * 100,
-  );
+  const practicePath = {
+    to: "/app/japanese/tango/practice/$lessonId" as const,
+    params: { lessonId },
+  };
+  const percent =
+    data.status === "COMPLETED"
+      ? 100
+      : data.requiredCount === 0
+        ? 0
+        : Math.round(
+            ((vocabularies.data?.vocabularies.filter((w) => w.required && w.viewed).length ?? 0) /
+              data.requiredCount) *
+              100,
+          );
 
   const startLearning = () => {
     start.mutate(id, { onSuccess: () => navigate(learnPath) });
@@ -107,7 +117,9 @@ function TangoLessonDetail() {
               {data.jlptLevel} · Bài {data.lessonNumber}
             </p>
             <h1 className="mt-1 text-2xl font-bold tracking-tight">{data.title}</h1>
-            {data.description && <p className="mt-2 text-sm text-muted-foreground">{data.description}</p>}
+            {data.description && (
+              <p className="mt-2 text-sm text-muted-foreground">{data.description}</p>
+            )}
           </div>
           <div className="flex shrink-0 flex-wrap gap-2">
             <LessonStatusBadge status={data.status} />
@@ -117,7 +129,8 @@ function TangoLessonDetail() {
           <ProgressBar value={percent} label="Tiến độ bài học" />
           <p className="text-xs text-muted-foreground">
             {data.requiredCount} từ bắt buộc
-            {data.bestQuizAccuracy !== null && ` · Điểm kiểm tra tốt nhất ${Math.round(data.bestQuizAccuracy * 100)}%`}
+            {data.bestQuizAccuracy !== null &&
+              ` · Điểm kiểm tra tốt nhất ${Math.round(data.bestQuizAccuracy * 100)}%`}
             {data.quizPassed && " · Đã đạt kiểm tra"}
           </p>
         </div>
@@ -132,6 +145,9 @@ function TangoLessonDetail() {
             </Button>
           )}
           <Button asChild variant="outline">
+            <Link to="/app/practice" search={{ mode: "vocab", lesson: data.id }}>Luyện tập từ vựng</Link>
+          </Button>
+          <Button asChild variant="outline">
             <Link {...practicePath}>Làm bài kiểm tra</Link>
           </Button>
           <Button asChild variant="outline">
@@ -141,7 +157,9 @@ function TangoLessonDetail() {
           </Button>
           <AddToDeckButton lessonId={id} />
         </div>
-        {start.isError && <p className="relative mt-3 text-sm text-destructive">{start.error.message}</p>}
+        {start.isError && (
+          <p className="relative mt-3 text-sm text-destructive">{start.error.message}</p>
+        )}
       </div>
 
       <section aria-label="Danh sách từ vựng" className="space-y-3">
@@ -153,13 +171,19 @@ function TangoLessonDetail() {
               aria-selected={filter === f.key}
               onClick={() => setFilter(f.key)}
               className={`min-h-10 rounded-full px-4 text-sm font-semibold transition-colors ${
-                filter === f.key ? "bg-primary-soft text-primary-ink" : "bg-surface-2 hover:bg-primary-soft"
+                filter === f.key
+                  ? "bg-primary-soft text-primary-ink"
+                  : "bg-surface-2 hover:bg-primary-soft"
               }`}
             >
               {f.label}
             </button>
           ))}
-          <div role="group" aria-label="Kiểu hiển thị" className="ml-auto flex gap-1 rounded-full bg-surface-2 p-1">
+          <div
+            role="group"
+            aria-label="Kiểu hiển thị"
+            className="ml-auto flex gap-1 rounded-full bg-surface-2 p-1"
+          >
             {(["rows", "tiles"] as const).map((v) => (
               <button
                 key={v}
@@ -219,7 +243,7 @@ function WordList({
         onClick={() => onToggleFavorite(word)}
         className="grid h-11 w-11 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-surface-2"
       >
-        <Heart className={`h-5 w-5 ${word.favorite ? "fill-current text-seal" : ""}`} />
+        <Heart className={`h-5 w-5 ${word.favorite ? "fill-current text-seal-ink" : ""}`} />
       </button>
       <button
         type="button"
@@ -236,14 +260,21 @@ function WordList({
     return (
       <ul className="grid grid-cols-2 gap-3 rounded-2xl bg-surface-2 p-3 sm:grid-cols-3 lg:grid-cols-4">
         {words.map((word) => (
-          <li key={word.id} className="flex flex-col items-center gap-1 rounded-2xl bg-card p-4 text-center transition-transform duration-200 hover:-translate-y-0.5">
+          <li
+            key={word.id}
+            className="flex flex-col items-center gap-1 rounded-2xl bg-card p-4 text-center transition-transform duration-200 hover:-translate-y-0.5"
+          >
             <Link
               to="/app/japanese/tango/vocabularies/$vocabularyId"
               params={{ vocabularyId: String(word.id) }}
               className="flex flex-col items-center"
             >
-              <JpText serif className="text-3xl">{word.expression ?? word.kana}</JpText>
-              {word.expression && <JpText className="text-sm text-muted-foreground">{word.kana}</JpText>}
+              <JpText serif className="text-3xl">
+                {word.expression ?? word.kana}
+              </JpText>
+              {word.expression && (
+                <JpText className="text-sm text-muted-foreground">{word.kana}</JpText>
+              )}
               <span className="mt-1 text-sm">{word.primaryMeaning}</span>
             </Link>
             <div className="mt-2">
@@ -260,15 +291,21 @@ function WordList({
     <ul className="divide-y divide-border overflow-hidden rounded-2xl bg-card">
       {words.map((word) => (
         <li key={word.id} className="flex min-h-16 items-center gap-3 py-2 pl-4 pr-1">
-          <span className="w-6 shrink-0 text-xs tabular-nums text-muted-foreground">{word.position}</span>
+          <span className="w-6 shrink-0 text-xs tabular-nums text-muted-foreground">
+            {word.position}
+          </span>
           <div className="min-w-0 flex-1">
             <Link
               to="/app/japanese/tango/vocabularies/$vocabularyId"
               params={{ vocabularyId: String(word.id) }}
               className="flex flex-wrap items-baseline gap-x-3"
             >
-              <JpText serif className="text-2xl">{word.expression ?? word.kana}</JpText>
-              {word.expression && <JpText className="text-sm text-muted-foreground">{word.kana}</JpText>}
+              <JpText serif className="text-2xl">
+                {word.expression ?? word.kana}
+              </JpText>
+              {word.expression && (
+                <JpText className="text-sm text-muted-foreground">{word.kana}</JpText>
+              )}
               <span className="hidden text-xs text-muted-foreground sm:inline">{word.romaji}</span>
             </Link>
             <p className="text-[15px]">{word.primaryMeaning}</p>
@@ -288,7 +325,10 @@ function WordList({
 
 function BackLink() {
   return (
-    <Link to="/app/japanese/tango" className="inline-flex items-center gap-1 text-sm font-bold text-muted-foreground hover:text-foreground">
+    <Link
+      to="/app/japanese/tango"
+      className="inline-flex items-center gap-1 text-sm font-bold text-muted-foreground hover:text-foreground"
+    >
       <ArrowLeft className="h-4 w-4" /> Tango
     </Link>
   );

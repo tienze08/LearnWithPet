@@ -36,10 +36,24 @@ export function useTangoLessonQuery(lessonId: number) {
   return useQuery({ queryKey: [TANGO, "lesson", lessonId], queryFn: () => getTangoLesson(lessonId) });
 }
 
-export function useTangoLessonVocabulariesQuery(lessonId: number) {
+export function useTangoLessonVocabulariesQuery(lessonId: number, enabled = true) {
   return useQuery({
+    enabled,
     queryKey: [TANGO, "lesson", lessonId, "vocabularies"],
     queryFn: () => getTangoLessonVocabularies(lessonId),
+  });
+}
+
+/** Every word of a level, for linking sentences to vocabulary. */
+export function useTangoLevelWordsQuery(level: JlptLevel) {
+  return useQuery({
+    queryKey: [TANGO, "words", level],
+    queryFn: async () => {
+      const { lessons } = await getTangoLessons(level);
+      const lists = await Promise.all(lessons.map((l) => getTangoLessonVocabularies(l.id)));
+      return [...new Map(lists.flatMap((l) => l.vocabularies).map((v) => [v.id, v])).values()];
+    },
+    staleTime: Infinity,
   });
 }
 

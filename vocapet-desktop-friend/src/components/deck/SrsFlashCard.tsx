@@ -16,50 +16,57 @@ import {
 } from "@/hooks/queries/study-session.queries";
 import StreakPopup from "./StreakPopup";
 import { petEvents } from "@/lib/pet/events";
+import { LoadingBlock } from "@/components/tango/shared";
+import { PetNote, Seal } from "@/components/learning-path/studio";
 
 interface Props {
   deckId: number;
 }
 
-function scheduleMessage(rating: "AGAIN" | "HARD" | "GOOD" | "EASY", nextReviewTime: string) {
-  if (rating === "AGAIN") return "Pip will bring this word back in about 10 minutes.";
+type Rating = "AGAIN" | "HARD" | "GOOD" | "EASY";
+
+function scheduleMessage(rating: Rating, nextReviewTime: string) {
+  if (rating === "AGAIN") return "Thẻ này sẽ quay lại sau khoảng 10 phút.";
   const next = new Date(nextReviewTime);
-  return `Next review: ${next.toLocaleDateString([], { month: "short", day: "numeric" })}.`;
+  return `Lần ôn tiếp: ${next.toLocaleDateString("vi-VN", { weekday: "long", day: "numeric", month: "numeric" })}.`;
 }
 
-const RATINGS = [
+const RATINGS: { label: string; value: Rating; key: string; className: string }[] = [
   {
-    label: "Again",
-    value: "AGAIN" as const,
-    className: "bg-red-500 hover:bg-red-600 text-white",
+    label: "Chưa nhớ",
+    value: "AGAIN",
+    key: "1",
+    className: "border-seal bg-sheet text-seal-ink hover:bg-background",
   },
   {
-    label: "Hard",
-    value: "HARD" as const,
-    className: "bg-orange-500 hover:bg-orange-600 text-white",
+    label: "Khó",
+    value: "HARD",
+    key: "2",
+    className: "border-border bg-sheet hover:bg-primary-soft",
   },
   {
-    label: "Good",
-    value: "GOOD" as const,
-    className: "bg-primary text-primary-foreground",
+    label: "Nhớ",
+    value: "GOOD",
+    key: "3",
+    className: "border-primary bg-primary text-primary-foreground hover:brightness-110",
   },
   {
-    label: "Easy",
-    value: "EASY" as const,
-    className: "bg-sky-500 hover:bg-sky-600 text-white",
+    label: "Dễ",
+    value: "EASY",
+    key: "4",
+    className: "border-border bg-sheet hover:bg-primary-soft",
   },
 ];
 
+/** A deck's FSRS session: one card at a time, flip, rate 1–4; ends with a stamp and the count reviewed. */
 export default function StudySessionFlashcards({ deckId }: Props) {
-  console.log("SrsFlashCard render");
   const [started, setStarted] = useState(false);
-
   const [sessionId, setSessionId] = useState<number | null>(null);
-
   const [flipped, setFlipped] = useState(false);
   const [showStreak, setShowStreak] = useState(false);
   const [streak, setStreak] = useState(0);
   const [scheduleNotice, setScheduleNotice] = useState<string | null>(null);
+  const [reviewed, setReviewed] = useState(0);
 
   const startMutation = useStartStudySessionMutation();
   const finishMutation = useFinishStudySessionMutation();
@@ -81,83 +88,36 @@ export default function StudySessionFlashcards({ deckId }: Props) {
     setFlipped(false);
   }, [data]);
 
-  if (!started) {
-    return (
-      <div className="max-w-xl mx-auto rounded-[2rem] border border-border bg-card/85 p-8 md:p-10 text-center card-pop">
-        <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">Focused session</p>
-        <h2 className="mt-2 text-3xl font-bold tracking-tight">Ready to study?</h2>
-
-        <p className="mt-3 text-muted-foreground">Review today's due cards with FSRS.</p>
-
-        <Button
-          className="mt-8 w-full h-12"
-          onClick={startSession}
-          disabled={startMutation.isPending}
-        >
-          {startMutation.isPending ? "Starting..." : "Start Study"}
-        </Button>
-      </div>
-    );
-  }
-
-  const streakPopup = (
-    <StreakPopup open={showStreak} streak={streak} onClose={() => setShowStreak(false)} />
-  );
-
-  if (finished) {
-    return (
-      <>
-        {streakPopup}
-        <div className="max-w-xl mx-auto rounded-[2rem] border border-border bg-card/85 p-10 text-center card-pop">
-          <div className="text-6xl">🎉</div>
-
-          <h2 className="mt-4 text-3xl font-extrabold">Finished!</h2>
-
-          <p className="mt-3 text-muted-foreground">
-            You have finished all vocabulary in this study session.
-          </p>
-
-          <Button variant="outline" className="mt-8 w-full h-12" disabled>
-            Session complete
-          </Button>
-        </div>
-      </>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <>
-        {streakPopup}
-        <div className="text-center py-12">Loading...</div>
-      </>
-    );
-  }
-
-  if (!data) {
-    return null;
-  }
+  // Keyboard: Space flips, 1–4 rate once the answer shows (same keys as the Review Center).
+  useEffect(() => {
+    if (!started || finished || !data) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.code === "Space") {
+        e.preventDefault();
+        setFlipped((f) => !f);
+      } else if (flipped && !reviewMutation.isPending) {
+        const hit = RATINGS.find((r) => r.key === e.key);
+        if (hit) review(hit.value);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [started, finished, data, flipped, reviewMutation.isPending]);
 
   async function startSession() {
-    const session = await startMutation.mutateAsync({
-      deckId,
-    });
-
+    const session = await startMutation.mutateAsync({ deckId });
     setSessionId(session.sessionId);
     setStarted(true);
     petEvents.emit({ type: "SESSION_STARTED" });
   }
 
-  async function review(rating: "AGAIN" | "HARD" | "GOOD" | "EASY") {
+  async function review(rating: Rating) {
     if (!data) return;
-
-    const result = await reviewMutation.mutateAsync({
-      vocabularyId: data.vocabularyId,
-      rating,
-    });
-
+    const result = await reviewMutation.mutateAsync({ vocabularyId: data.vocabularyId, rating });
+    setReviewed((n) => n + 1);
     setScheduleNotice(scheduleMessage(rating, result.nextReviewTime));
-
     if (result.streakUpdated) {
       setStreak(result.currentStreak);
       setShowStreak(true);
@@ -166,56 +126,87 @@ export default function StudySessionFlashcards({ deckId }: Props) {
     petEvents.emit({ type: "CARD_REVIEWED" });
   }
 
+  const streakPopup = (
+    <StreakPopup open={showStreak} streak={streak} onClose={() => setShowStreak(false)} />
+  );
+
+  if (!started) {
+    return (
+      <section className="grid justify-items-center gap-4 border-y border-border py-12 text-center">
+        <p className="studio-kicker">Ôn theo lịch FSRS</p>
+        <h2 className="studio-head text-3xl">Ôn các thẻ đến hạn của bộ này</h2>
+        <p className="max-w-md text-sm studio-muted">
+          Mỗi lần một thẻ. Lật thẻ, rồi cho biết bạn nhớ đến đâu để lịch ôn tự điều chỉnh.
+        </p>
+        <Button size="lg" onClick={startSession} disabled={startMutation.isPending}>
+          {startMutation.isPending ? "Đang bắt đầu…" : "Bắt đầu ôn"}
+        </Button>
+        {startMutation.isError && (
+          <p role="alert" className="text-sm text-destructive">
+            Chưa bắt đầu được. Thử lại.
+          </p>
+        )}
+      </section>
+    );
+  }
+
+  if (finished) {
+    return (
+      <>
+        {streakPopup}
+        <section className="grid justify-items-center gap-5 border-y border-border py-12 text-center">
+          <Seal state="done" size={4} stamp label="Đã ôn xong" />
+          <h2 className="studio-head text-3xl">
+            {reviewed > 0 ? `Xong ${reviewed} thẻ` : "Không có thẻ nào đến hạn"}
+          </h2>
+          <PetNote mood={reviewed > 0 ? "excited" : "sleepy"} size={48}>
+            {reviewed > 0
+              ? "Giỏi lắm! Mình sẽ nhắc lại đúng lúc bạn sắp quên."
+              : "Bộ này chưa có thẻ cần ôn. Quay lại sau nhé."}
+          </PetNote>
+        </section>
+      </>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <>
+        {streakPopup}
+        <LoadingBlock rows={2} label="Đang lấy thẻ tiếp theo…" />
+      </>
+    );
+  }
+
+  if (!data) return null;
+
   return (
     <>
-      <StreakPopup open={showStreak} streak={streak} onClose={() => setShowStreak(false)} />
-
-      <div className="max-w-xl mx-auto space-y-5">
-        <div className="flex items-center justify-between px-1 text-xs font-semibold text-muted-foreground">
-          <span>Study session</span>
-          <span>Tap the card to reveal</span>
+      {streakPopup}
+      <section aria-label="Phiên ôn thẻ" className="space-y-5">
+        <div className="flex items-center justify-between text-sm">
+          <span className="studio-kicker studio-kicker-muted">Ôn theo lịch</span>
+          <span className="tabular-nums studio-muted">Đã ôn {reviewed} thẻ</span>
         </div>
-        {scheduleNotice && (
-          <motion.p
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="rounded-xl border border-primary/20 bg-primary/5 px-3 py-2 text-center text-sm text-muted-foreground"
-          >
-            {scheduleNotice}
-          </motion.p>
-        )}
-        <div onClick={() => setFlipped((f) => !f)} className="cursor-pointer">
+
+        <div
+          role="button"
+          tabIndex={0}
+          aria-label={flipped ? "Mặt sau, bấm để lật lại" : "Mặt trước, bấm để lật"}
+          onClick={() => setFlipped((f) => !f)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") setFlipped((f) => !f);
+          }}
+          className="cursor-pointer"
+        >
           <AnimatePresence mode="wait">
             <motion.div
               key={data.vocabularyId + (flipped ? "-back" : "-front")}
-              initial={{
-                opacity: 0,
-                y: 12,
-              }}
-              animate={{
-                opacity: 1,
-                y: 0,
-              }}
-              exit={{
-                opacity: 0,
-                y: -12,
-              }}
-              className="
-            relative
-            rounded-[2rem]
-            border
-            border-border
-            bg-card
-            p-8 md:p-10
-            aspect-4/3
-            min-h-420px
-            card-pop
-            flex
-            flex-col
-            items-center
-            justify-center
-            text-center
-            "
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.18 }}
+              className="grid min-h-[340px] content-center justify-items-center gap-3 rounded-lg border border-border bg-sheet px-6 py-10 text-center"
             >
               {!flipped ? (
                 <>
@@ -224,47 +215,54 @@ export default function StudySessionFlashcards({ deckId }: Props) {
                       to="/app/japanese/tango/lessons/$lessonId"
                       params={{ lessonId: String(data.lessonId) }}
                       onClick={(e) => e.stopPropagation()}
-                      className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary-ink hover:underline"
+                      className="studio-kicker studio-kicker-muted hover:text-primary"
                     >
                       Minna · Bài {data.lessonNumber}
                     </Link>
                   ) : (
-                    <p className="text-xs italic text-muted-foreground">{data.partOfSpeech}</p>
+                    data.partOfSpeech && (
+                      <p className="studio-kicker studio-kicker-muted">{data.partOfSpeech}</p>
+                    )
                   )}
-
                   {data.kana ? (
-                    <h2 lang="ja" className="jp-serif mt-2 text-5xl md:text-6xl">{data.word}</h2>
-                  ) : (
-                    <h2 className="text-4xl font-extrabold mt-2 tracking-tight md:text-5xl">{data.word}</h2>
-                  )}
-                  {data.kana && (
-                    <>
-                      {data.kana !== data.word && (
-                        <p lang="ja" className="mt-2 text-xl text-muted-foreground">{data.kana}</p>
+                    <h2 lang="ja" className="studio-jp text-5xl leading-tight md:text-6xl">
+                      {data.kana !== data.word ? (
+                        <ruby>
+                          {data.word}
+                          <rt className="text-base">{data.kana}</rt>
+                        </ruby>
+                      ) : (
+                        data.word
                       )}
-                      {data.romaji && <p className="text-sm text-muted-foreground">{data.romaji}</p>}
-                    </>
+                    </h2>
+                  ) : (
+                    <h2 className="studio-head text-5xl">{data.word}</h2>
                   )}
-
+                  {data.romaji && <p className="text-sm studio-muted">{data.romaji}</p>}
                   <button
-                    aria-label="Phát âm"
+                    type="button"
+                    aria-label={`Nghe cách đọc ${data.word}`}
                     onClick={(e) => {
                       e.stopPropagation();
                       if (data.kana) speakKana(data.kana);
                       else speak(data.word);
                     }}
-                    className="mt-4 grid h-11 w-11 place-items-center rounded-full hover:bg-surface-2"
+                    className="grid h-11 w-11 place-items-center rounded-[var(--radius)] hover:bg-primary-soft"
                   >
-                    <Volume2 className="h-6 w-6" />
+                    <Volume2 aria-hidden className="h-5 w-5" />
                   </button>
-
-                  <p className="mt-5 text-xs text-muted-foreground">Click to reveal</p>
                 </>
               ) : (
                 <>
-                  <h2 className="text-3xl font-bold">{data.meaning}</h2>
-
-                  <p className="mt-4 italic text-muted-foreground">"{data.example}"</p>
+                  <p lang={data.kana ? "ja" : undefined} className="text-lg studio-muted">
+                    {data.word}
+                  </p>
+                  <h2 className="studio-head text-3xl sm:text-4xl">{data.meaning}</h2>
+                  {data.example && (
+                    <p className="max-w-md border-t border-border pt-4 text-sm studio-muted">
+                      {data.example}
+                    </p>
+                  )}
                 </>
               )}
             </motion.div>
@@ -272,24 +270,42 @@ export default function StudySessionFlashcards({ deckId }: Props) {
         </div>
 
         {flipped ? (
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {RATINGS.map((rating) => (
-              <Button
-                key={rating.value}
-                onClick={() => review(rating.value)}
+          <div
+            className="grid grid-cols-2 gap-2 sm:grid-cols-4"
+            role="group"
+            aria-label="Mức độ nhớ"
+          >
+            {RATINGS.map((r) => (
+              <button
+                key={r.value}
+                type="button"
+                onClick={() => review(r.value)}
                 disabled={reviewMutation.isPending}
-                className={rating.className}
+                className={`flex min-h-12 items-center justify-center gap-2 rounded-[var(--radius)] border text-sm transition-colors disabled:opacity-50 ${r.className}`}
               >
-                {rating.label}
-              </Button>
+                {r.label}
+                <kbd aria-hidden className="hidden font-sans text-xs opacity-60 sm:inline">
+                  {r.key}
+                </kbd>
+              </button>
             ))}
           </div>
         ) : (
-          <Button className="w-full" onClick={() => setFlipped(true)}>
-            Show Answer
+          <Button size="lg" className="w-full" onClick={() => setFlipped(true)}>
+            Lật thẻ <span className="hidden text-xs opacity-70 sm:inline">Space</span>
           </Button>
         )}
-      </div>
+        {scheduleNotice && (
+          <p className="studio-rise text-center text-sm studio-muted" aria-live="polite">
+            {scheduleNotice}
+          </p>
+        )}
+        {reviewMutation.isError && (
+          <p role="alert" className="text-center text-sm text-destructive">
+            Chưa lưu được đánh giá. Thử lại.
+          </p>
+        )}
+      </section>
     </>
   );
 }

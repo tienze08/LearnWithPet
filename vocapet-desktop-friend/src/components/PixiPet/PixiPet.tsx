@@ -78,6 +78,9 @@ const PetCanvas = forwardRef<PetCanvasHandle, Props>(({ variant, stage, size, mo
 
       await controller.load();
 
+      // Unmounted while the sheet loaded (e.g. the feedback bar closed): the app is already destroyed.
+      if (destroyed) return;
+
       const sprite = controller.getSprite();
 
       sprite.anchor.set(0.5);

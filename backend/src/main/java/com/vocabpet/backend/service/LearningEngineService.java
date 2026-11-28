@@ -28,6 +28,7 @@ public class LearningEngineService {
     private final UserVocabularyProgressRepository progressRepository;
     private final FsrsService fsrsService;
     private final ApplicationEventPublisher events;
+    private final com.vocabpet.backend.service.learningpath.MasteryRules masteryRules;
 
     /** Rated outcome: flashcard review or quiz answer. Schedules the next review. */
     @Transactional
@@ -38,6 +39,9 @@ public class LearningEngineService {
         if (rating == Rating.AGAIN) p.setIncorrectCount(p.getIncorrectCount() + 1);
         else p.setCorrectCount(p.getCorrectCount() + 1);
         p.setLastSource(source);
+        // Answer streak and weak flag (Learning Path), updated by every source so misses in the Review Center count too.
+        p.setAnswerStreak(com.vocabpet.backend.service.learningpath.MasteryRules.nextStreak(p.getAnswerStreak(), rating != Rating.AGAIN));
+        p.setWeak(masteryRules.nextWeak(p.isWeak(), p.getAnswerStreak(), rating != Rating.AGAIN, false));
         fsrsService.review(p, rating);
         UserVocabularyProgress saved = progressRepository.save(p);
         events.publishEvent(new LearningActivityEvent(user.getId(), source, rating != Rating.AGAIN));

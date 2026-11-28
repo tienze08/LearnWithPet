@@ -19,13 +19,21 @@ import { Route as AppWelcomeRouteImport } from './routes/app.welcome'
 import { Route as AppTasksRouteImport } from './routes/app.tasks'
 import { Route as AppReviewRouteImport } from './routes/app.review'
 import { Route as AppReaderRouteImport } from './routes/app.reader'
+import { Route as AppProgressRouteImport } from './routes/app.progress'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
+import { Route as AppPracticeRouteImport } from './routes/app.practice'
 import { Route as AppPetsRouteImport } from './routes/app.pets'
+import { Route as AppLibraryRouteImport } from './routes/app.library'
 import { Route as AppAchievementsRouteImport } from './routes/app.achievements'
+import { Route as AppShadowingIndexRouteImport } from './routes/app.shadowing.index'
 import { Route as AppPathIndexRouteImport } from './routes/app.path.index'
+import { Route as AppListeningIndexRouteImport } from './routes/app.listening.index'
 import { Route as AppDecksIndexRouteImport } from './routes/app.decks.index'
+import { Route as AppShadowingUnitIdRouteImport } from './routes/app.shadowing.$unitId'
 import { Route as AppPathStudyRouteImport } from './routes/app.path.study'
 import { Route as AppPathSetupRouteImport } from './routes/app.path.setup'
+import { Route as AppPathRoadmapRouteImport } from './routes/app.path.roadmap'
+import { Route as AppListeningLessonIdRouteImport } from './routes/app.listening.$lessonId'
 import { Route as AppJapaneseKanjiSourcesRouteImport } from './routes/app.japanese.kanji-sources'
 import { Route as AppJapaneseKanjiMapRouteImport } from './routes/app.japanese.kanji-map'
 import { Route as AppJapaneseKanjiRouteImport } from './routes/app.japanese.kanji'
@@ -91,9 +99,19 @@ const AppReaderRoute = AppReaderRouteImport.update({
   path: '/reader',
   getParentRoute: () => AppRoute,
 } as any)
+const AppProgressRoute = AppProgressRouteImport.update({
+  id: '/progress',
+  path: '/progress',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppProfileRoute = AppProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPracticeRoute = AppPracticeRouteImport.update({
+  id: '/practice',
+  path: '/practice',
   getParentRoute: () => AppRoute,
 } as any)
 const AppPetsRoute = AppPetsRouteImport.update({
@@ -101,9 +119,19 @@ const AppPetsRoute = AppPetsRouteImport.update({
   path: '/pets',
   getParentRoute: () => AppRoute,
 } as any)
+const AppLibraryRoute = AppLibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAchievementsRoute = AppAchievementsRouteImport.update({
   id: '/achievements',
   path: '/achievements',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppShadowingIndexRoute = AppShadowingIndexRouteImport.update({
+  id: '/shadowing/',
+  path: '/shadowing/',
   getParentRoute: () => AppRoute,
 } as any)
 const AppPathIndexRoute = AppPathIndexRouteImport.update({
@@ -111,9 +139,19 @@ const AppPathIndexRoute = AppPathIndexRouteImport.update({
   path: '/path/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppListeningIndexRoute = AppListeningIndexRouteImport.update({
+  id: '/listening/',
+  path: '/listening/',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDecksIndexRoute = AppDecksIndexRouteImport.update({
   id: '/decks/',
   path: '/decks/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppShadowingUnitIdRoute = AppShadowingUnitIdRouteImport.update({
+  id: '/shadowing/$unitId',
+  path: '/shadowing/$unitId',
   getParentRoute: () => AppRoute,
 } as any)
 const AppPathStudyRoute = AppPathStudyRouteImport.update({
@@ -124,6 +162,16 @@ const AppPathStudyRoute = AppPathStudyRouteImport.update({
 const AppPathSetupRoute = AppPathSetupRouteImport.update({
   id: '/path/setup',
   path: '/path/setup',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPathRoadmapRoute = AppPathRoadmapRouteImport.update({
+  id: '/path/roadmap',
+  path: '/path/roadmap',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppListeningLessonIdRoute = AppListeningLessonIdRouteImport.update({
+  id: '/listening/$lessonId',
+  path: '/listening/$lessonId',
   getParentRoute: () => AppRoute,
 } as any)
 const AppJapaneseKanjiSourcesRoute = AppJapaneseKanjiSourcesRouteImport.update({
@@ -210,8 +258,11 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/welcome': typeof WelcomeRoute
   '/app/achievements': typeof AppAchievementsRoute
+  '/app/library': typeof AppLibraryRoute
   '/app/pets': typeof AppPetsRoute
+  '/app/practice': typeof AppPracticeRoute
   '/app/profile': typeof AppProfileRoute
+  '/app/progress': typeof AppProgressRoute
   '/app/reader': typeof AppReaderRoute
   '/app/review': typeof AppReviewRoute
   '/app/tasks': typeof AppTasksRoute
@@ -223,10 +274,15 @@ export interface FileRoutesByFullPath {
   '/app/japanese/kanji': typeof AppJapaneseKanjiRoute
   '/app/japanese/kanji-map': typeof AppJapaneseKanjiMapRoute
   '/app/japanese/kanji-sources': typeof AppJapaneseKanjiSourcesRoute
+  '/app/listening/$lessonId': typeof AppListeningLessonIdRoute
+  '/app/path/roadmap': typeof AppPathRoadmapRoute
   '/app/path/setup': typeof AppPathSetupRoute
   '/app/path/study': typeof AppPathStudyRoute
+  '/app/shadowing/$unitId': typeof AppShadowingUnitIdRoute
   '/app/decks/': typeof AppDecksIndexRoute
+  '/app/listening/': typeof AppListeningIndexRoute
   '/app/path/': typeof AppPathIndexRoute
+  '/app/shadowing/': typeof AppShadowingIndexRoute
   '/app/japanese/grammar/$grammarId': typeof AppJapaneseGrammarGrammarIdRoute
   '/app/japanese/tango/mistakes': typeof AppJapaneseTangoMistakesRoute
   '/app/japanese/grammar/': typeof AppJapaneseGrammarIndexRoute
@@ -242,8 +298,11 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/welcome': typeof WelcomeRoute
   '/app/achievements': typeof AppAchievementsRoute
+  '/app/library': typeof AppLibraryRoute
   '/app/pets': typeof AppPetsRoute
+  '/app/practice': typeof AppPracticeRoute
   '/app/profile': typeof AppProfileRoute
+  '/app/progress': typeof AppProgressRoute
   '/app/reader': typeof AppReaderRoute
   '/app/review': typeof AppReviewRoute
   '/app/tasks': typeof AppTasksRoute
@@ -255,10 +314,15 @@ export interface FileRoutesByTo {
   '/app/japanese/kanji': typeof AppJapaneseKanjiRoute
   '/app/japanese/kanji-map': typeof AppJapaneseKanjiMapRoute
   '/app/japanese/kanji-sources': typeof AppJapaneseKanjiSourcesRoute
+  '/app/listening/$lessonId': typeof AppListeningLessonIdRoute
+  '/app/path/roadmap': typeof AppPathRoadmapRoute
   '/app/path/setup': typeof AppPathSetupRoute
   '/app/path/study': typeof AppPathStudyRoute
+  '/app/shadowing/$unitId': typeof AppShadowingUnitIdRoute
   '/app/decks': typeof AppDecksIndexRoute
+  '/app/listening': typeof AppListeningIndexRoute
   '/app/path': typeof AppPathIndexRoute
+  '/app/shadowing': typeof AppShadowingIndexRoute
   '/app/japanese/grammar/$grammarId': typeof AppJapaneseGrammarGrammarIdRoute
   '/app/japanese/tango/mistakes': typeof AppJapaneseTangoMistakesRoute
   '/app/japanese/grammar': typeof AppJapaneseGrammarIndexRoute
@@ -276,8 +340,11 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/welcome': typeof WelcomeRoute
   '/app/achievements': typeof AppAchievementsRoute
+  '/app/library': typeof AppLibraryRoute
   '/app/pets': typeof AppPetsRoute
+  '/app/practice': typeof AppPracticeRoute
   '/app/profile': typeof AppProfileRoute
+  '/app/progress': typeof AppProgressRoute
   '/app/reader': typeof AppReaderRoute
   '/app/review': typeof AppReviewRoute
   '/app/tasks': typeof AppTasksRoute
@@ -289,10 +356,15 @@ export interface FileRoutesById {
   '/app/japanese/kanji': typeof AppJapaneseKanjiRoute
   '/app/japanese/kanji-map': typeof AppJapaneseKanjiMapRoute
   '/app/japanese/kanji-sources': typeof AppJapaneseKanjiSourcesRoute
+  '/app/listening/$lessonId': typeof AppListeningLessonIdRoute
+  '/app/path/roadmap': typeof AppPathRoadmapRoute
   '/app/path/setup': typeof AppPathSetupRoute
   '/app/path/study': typeof AppPathStudyRoute
+  '/app/shadowing/$unitId': typeof AppShadowingUnitIdRoute
   '/app/decks/': typeof AppDecksIndexRoute
+  '/app/listening/': typeof AppListeningIndexRoute
   '/app/path/': typeof AppPathIndexRoute
+  '/app/shadowing/': typeof AppShadowingIndexRoute
   '/app/japanese/grammar/$grammarId': typeof AppJapaneseGrammarGrammarIdRoute
   '/app/japanese/tango/mistakes': typeof AppJapaneseTangoMistakesRoute
   '/app/japanese/grammar/': typeof AppJapaneseGrammarIndexRoute
@@ -311,8 +383,11 @@ export interface FileRouteTypes {
     | '/register'
     | '/welcome'
     | '/app/achievements'
+    | '/app/library'
     | '/app/pets'
+    | '/app/practice'
     | '/app/profile'
+    | '/app/progress'
     | '/app/reader'
     | '/app/review'
     | '/app/tasks'
@@ -324,10 +399,15 @@ export interface FileRouteTypes {
     | '/app/japanese/kanji'
     | '/app/japanese/kanji-map'
     | '/app/japanese/kanji-sources'
+    | '/app/listening/$lessonId'
+    | '/app/path/roadmap'
     | '/app/path/setup'
     | '/app/path/study'
+    | '/app/shadowing/$unitId'
     | '/app/decks/'
+    | '/app/listening/'
     | '/app/path/'
+    | '/app/shadowing/'
     | '/app/japanese/grammar/$grammarId'
     | '/app/japanese/tango/mistakes'
     | '/app/japanese/grammar/'
@@ -343,8 +423,11 @@ export interface FileRouteTypes {
     | '/register'
     | '/welcome'
     | '/app/achievements'
+    | '/app/library'
     | '/app/pets'
+    | '/app/practice'
     | '/app/profile'
+    | '/app/progress'
     | '/app/reader'
     | '/app/review'
     | '/app/tasks'
@@ -356,10 +439,15 @@ export interface FileRouteTypes {
     | '/app/japanese/kanji'
     | '/app/japanese/kanji-map'
     | '/app/japanese/kanji-sources'
+    | '/app/listening/$lessonId'
+    | '/app/path/roadmap'
     | '/app/path/setup'
     | '/app/path/study'
+    | '/app/shadowing/$unitId'
     | '/app/decks'
+    | '/app/listening'
     | '/app/path'
+    | '/app/shadowing'
     | '/app/japanese/grammar/$grammarId'
     | '/app/japanese/tango/mistakes'
     | '/app/japanese/grammar'
@@ -376,8 +464,11 @@ export interface FileRouteTypes {
     | '/register'
     | '/welcome'
     | '/app/achievements'
+    | '/app/library'
     | '/app/pets'
+    | '/app/practice'
     | '/app/profile'
+    | '/app/progress'
     | '/app/reader'
     | '/app/review'
     | '/app/tasks'
@@ -389,10 +480,15 @@ export interface FileRouteTypes {
     | '/app/japanese/kanji'
     | '/app/japanese/kanji-map'
     | '/app/japanese/kanji-sources'
+    | '/app/listening/$lessonId'
+    | '/app/path/roadmap'
     | '/app/path/setup'
     | '/app/path/study'
+    | '/app/shadowing/$unitId'
     | '/app/decks/'
+    | '/app/listening/'
     | '/app/path/'
+    | '/app/shadowing/'
     | '/app/japanese/grammar/$grammarId'
     | '/app/japanese/tango/mistakes'
     | '/app/japanese/grammar/'
@@ -483,11 +579,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppReaderRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/progress': {
+      id: '/app/progress'
+      path: '/progress'
+      fullPath: '/app/progress'
+      preLoaderRoute: typeof AppProgressRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/profile': {
       id: '/app/profile'
       path: '/profile'
       fullPath: '/app/profile'
       preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/practice': {
+      id: '/app/practice'
+      path: '/practice'
+      fullPath: '/app/practice'
+      preLoaderRoute: typeof AppPracticeRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/pets': {
@@ -497,11 +607,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPetsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/library': {
+      id: '/app/library'
+      path: '/library'
+      fullPath: '/app/library'
+      preLoaderRoute: typeof AppLibraryRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/achievements': {
       id: '/app/achievements'
       path: '/achievements'
       fullPath: '/app/achievements'
       preLoaderRoute: typeof AppAchievementsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/shadowing/': {
+      id: '/app/shadowing/'
+      path: '/shadowing'
+      fullPath: '/app/shadowing/'
+      preLoaderRoute: typeof AppShadowingIndexRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/path/': {
@@ -511,11 +635,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPathIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/listening/': {
+      id: '/app/listening/'
+      path: '/listening'
+      fullPath: '/app/listening/'
+      preLoaderRoute: typeof AppListeningIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/decks/': {
       id: '/app/decks/'
       path: '/decks'
       fullPath: '/app/decks/'
       preLoaderRoute: typeof AppDecksIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/shadowing/$unitId': {
+      id: '/app/shadowing/$unitId'
+      path: '/shadowing/$unitId'
+      fullPath: '/app/shadowing/$unitId'
+      preLoaderRoute: typeof AppShadowingUnitIdRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/path/study': {
@@ -530,6 +668,20 @@ declare module '@tanstack/react-router' {
       path: '/path/setup'
       fullPath: '/app/path/setup'
       preLoaderRoute: typeof AppPathSetupRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/path/roadmap': {
+      id: '/app/path/roadmap'
+      path: '/path/roadmap'
+      fullPath: '/app/path/roadmap'
+      preLoaderRoute: typeof AppPathRoadmapRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/listening/$lessonId': {
+      id: '/app/listening/$lessonId'
+      path: '/listening/$lessonId'
+      fullPath: '/app/listening/$lessonId'
+      preLoaderRoute: typeof AppListeningLessonIdRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/japanese/kanji-sources': {
@@ -635,8 +787,11 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppAchievementsRoute: typeof AppAchievementsRoute
+  AppLibraryRoute: typeof AppLibraryRoute
   AppPetsRoute: typeof AppPetsRoute
+  AppPracticeRoute: typeof AppPracticeRoute
   AppProfileRoute: typeof AppProfileRoute
+  AppProgressRoute: typeof AppProgressRoute
   AppReaderRoute: typeof AppReaderRoute
   AppReviewRoute: typeof AppReviewRoute
   AppTasksRoute: typeof AppTasksRoute
@@ -648,10 +803,15 @@ interface AppRouteChildren {
   AppJapaneseKanjiRoute: typeof AppJapaneseKanjiRoute
   AppJapaneseKanjiMapRoute: typeof AppJapaneseKanjiMapRoute
   AppJapaneseKanjiSourcesRoute: typeof AppJapaneseKanjiSourcesRoute
+  AppListeningLessonIdRoute: typeof AppListeningLessonIdRoute
+  AppPathRoadmapRoute: typeof AppPathRoadmapRoute
   AppPathSetupRoute: typeof AppPathSetupRoute
   AppPathStudyRoute: typeof AppPathStudyRoute
+  AppShadowingUnitIdRoute: typeof AppShadowingUnitIdRoute
   AppDecksIndexRoute: typeof AppDecksIndexRoute
+  AppListeningIndexRoute: typeof AppListeningIndexRoute
   AppPathIndexRoute: typeof AppPathIndexRoute
+  AppShadowingIndexRoute: typeof AppShadowingIndexRoute
   AppJapaneseGrammarGrammarIdRoute: typeof AppJapaneseGrammarGrammarIdRoute
   AppJapaneseTangoMistakesRoute: typeof AppJapaneseTangoMistakesRoute
   AppJapaneseGrammarIndexRoute: typeof AppJapaneseGrammarIndexRoute
@@ -664,8 +824,11 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppAchievementsRoute: AppAchievementsRoute,
+  AppLibraryRoute: AppLibraryRoute,
   AppPetsRoute: AppPetsRoute,
+  AppPracticeRoute: AppPracticeRoute,
   AppProfileRoute: AppProfileRoute,
+  AppProgressRoute: AppProgressRoute,
   AppReaderRoute: AppReaderRoute,
   AppReviewRoute: AppReviewRoute,
   AppTasksRoute: AppTasksRoute,
@@ -677,10 +840,15 @@ const AppRouteChildren: AppRouteChildren = {
   AppJapaneseKanjiRoute: AppJapaneseKanjiRoute,
   AppJapaneseKanjiMapRoute: AppJapaneseKanjiMapRoute,
   AppJapaneseKanjiSourcesRoute: AppJapaneseKanjiSourcesRoute,
+  AppListeningLessonIdRoute: AppListeningLessonIdRoute,
+  AppPathRoadmapRoute: AppPathRoadmapRoute,
   AppPathSetupRoute: AppPathSetupRoute,
   AppPathStudyRoute: AppPathStudyRoute,
+  AppShadowingUnitIdRoute: AppShadowingUnitIdRoute,
   AppDecksIndexRoute: AppDecksIndexRoute,
+  AppListeningIndexRoute: AppListeningIndexRoute,
   AppPathIndexRoute: AppPathIndexRoute,
+  AppShadowingIndexRoute: AppShadowingIndexRoute,
   AppJapaneseGrammarGrammarIdRoute: AppJapaneseGrammarGrammarIdRoute,
   AppJapaneseTangoMistakesRoute: AppJapaneseTangoMistakesRoute,
   AppJapaneseGrammarIndexRoute: AppJapaneseGrammarIndexRoute,

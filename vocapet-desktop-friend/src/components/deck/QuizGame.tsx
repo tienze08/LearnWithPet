@@ -45,12 +45,15 @@ export default function QuizGame({ words, allWords, onAnswer }: QuizGameProps) {
   }
 
   return (
-    <div className="mx-auto max-w-xl rounded-[2rem] border border-border bg-card/85 p-6 md:p-8 card-pop">
+    <div className="mx-auto max-w-xl border-y border-border py-8">
       <div className="flex items-center justify-between text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
-        <span>Quick practice</span><span>Pick the meaning</span>
+        <span>Trắc nghiệm nhanh</span>
+        <span>Chọn nghĩa đúng</span>
       </div>
 
-      <h2 className="my-8 text-center text-4xl font-extrabold tracking-tight md:text-5xl">{question.target.word}</h2>
+      <h2 className="my-8 text-center text-4xl font-extrabold tracking-tight md:text-5xl">
+        {question.target.word}
+      </h2>
 
       <div className="grid gap-2">
         {question.options.map((option) => {

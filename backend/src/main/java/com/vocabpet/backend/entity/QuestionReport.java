@@ -26,7 +26,7 @@ public class QuestionReport {
     private User user;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "item_type", nullable = false, length = 8)
+    @Column(name = "item_type", nullable = false, length = 16, columnDefinition = "varchar(16)")
     private PathItemType itemType;
 
     @Column(name = "item_id", nullable = false, length = 64)

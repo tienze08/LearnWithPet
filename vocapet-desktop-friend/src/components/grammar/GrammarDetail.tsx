@@ -6,6 +6,9 @@ import { JpText, LevelStamp } from "@/components/tango/shared";
 import { PatternTitle } from "./PatternTitle";
 import { toggleMark, useMarks } from "@/lib/japanese/grammar/progress";
 import { ExampleSentence } from "./ExampleSentence";
+import { useTangoLevelWordsQuery } from "@/hooks/queries/tango.queries";
+import { usesWord } from "@/lib/japanese/sentences";
+import { GrammarExercises, GrammarTranslation } from "./GrammarExercises";
 
 const NO_DATA = "Chưa có dữ liệu";
 
@@ -36,9 +39,11 @@ function PointLinks({ items }: { items: GrammarPoint[] }) {
 }
 
 /** Full page for one grammar point. `sameForm` and `sameTopic` are derived hints (see lib/japanese/grammar/search.ts). */
-export function GrammarDetail({ g, related, sameForm, sameTopic, prev, next }: { g: GrammarPoint; related: GrammarPoint[]; sameForm: GrammarPoint[]; sameTopic: GrammarPoint[]; prev: GrammarPoint | null; next: GrammarPoint | null }) {
+export function GrammarDetail({ g, all, related, sameForm, sameTopic, prev, next }: { g: GrammarPoint; all?: GrammarPoint[]; related: GrammarPoint[]; sameForm: GrammarPoint[]; sameTopic: GrammarPoint[]; prev: GrammarPoint | null; next: GrammarPoint | null }) {
   const learned = useMarks("learned").has(g.id);
   const favorite = useMarks("favorite").has(g.id);
+  // Word links are extra: while loading or if the request fails, the examples simply show without them.
+  const words = useTangoLevelWordsQuery(g.level).data ?? [];
 
   return (
     <article className="mx-auto max-w-2xl space-y-5">
@@ -78,8 +83,38 @@ export function GrammarDetail({ g, related, sameForm, sameTopic, prev, next }: {
       </Section>
 
       <Section title={`Ví dụ (${g.examples.length})`}>
-        <ul className="space-y-2">{g.examples.map((e, i) => <ExampleSentence key={i} e={e} />)}</ul>
+        <ul className="space-y-2">
+          {g.examples.map((e, i) => {
+            const used = words.filter((w) => usesWord(e, w));
+            return (
+              <ExampleSentence key={i} e={e}>
+                {used.length > 0 && (
+                  <ul aria-label="Từ vựng trong câu" className="mt-2 flex flex-wrap gap-1.5">
+                    {used.map((w) => (
+                      <li key={w.id}>
+                        <Link to="/app/japanese/tango/vocabularies/$vocabularyId" params={{ vocabularyId: String(w.id) }} className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-card px-3 text-sm transition-colors hover:bg-primary-soft">
+                          <span lang="ja" className="font-bold">{w.expression ?? w.kana}</span>
+                          <span className="max-w-40 truncate text-xs text-muted-foreground">{w.primaryMeaning}</span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </ExampleSentence>
+            );
+          })}
+        </ul>
       </Section>
+
+      {/* Only on the grammar page: a Learning Path lesson has its own practice phase. */}
+      {all && <Section title="Bài tập">
+        {/* Keyed so moving to another pattern starts from a clean state. */}
+        <GrammarExercises key={g.id} g={g} all={all} />
+      </Section>}
+
+      {all && <Section title="Luyện dịch">
+        <GrammarTranslation key={g.id} g={g} />
+      </Section>}
 
       <Section title="Lưu ý khi dùng">
         {g.notesVi ? <p className="text-sm leading-relaxed">{g.notesVi}</p> : <Missing what="Lưu ý" />}

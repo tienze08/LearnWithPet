@@ -49,12 +49,12 @@ export default function BrowseMode({
           updateWord={(id, patch) => {
             updateWord(id, patch);
 
-            toast.success("Word updated");
+            toast.success("Đã lưu từ");
           }}
           deleteWord={(id) => {
             deleteWord(id);
 
-            toast.success("Word deleted");
+            toast.success("Đã xoá từ");
           }}
         />
       ))}

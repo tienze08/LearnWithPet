@@ -23,7 +23,10 @@ class LearningEngineServiceTest {
     private final UserVocabularyProgressRepository repo = mock(UserVocabularyProgressRepository.class);
     private final FsrsService fsrs = mock(FsrsService.class);
     private final ApplicationEventPublisher events = mock(ApplicationEventPublisher.class);
-    private final LearningEngineService engine = new LearningEngineService(repo, fsrs, events);
+    private final LearningEngineService engine = new LearningEngineService(repo, fsrs, events,
+            new com.vocabpet.backend.service.learningpath.MasteryRules(
+                    new org.springframework.boot.context.properties.bind.Binder(new org.springframework.boot.context.properties.source.MapConfigurationPropertySource())
+                            .bindOrCreate("e", com.vocabpet.backend.config.LearningPathProperties.Engine.class)));
 
     private final User user = User.builder().id(1L).build();
 

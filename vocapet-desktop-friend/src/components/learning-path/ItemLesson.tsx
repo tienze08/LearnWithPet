@@ -12,7 +12,7 @@ import { speakKana } from "@/lib/japanese/kana";
 import type { PathItemType } from "@/api/learning-path.api";
 import type { PathContent } from "@/lib/learning-path/content";
 
-/** The existing study view for one new item: the Grammar detail page, the Kanji panel, or a word card. */
+/** The existing study view for one new item: the Grammar detail page, the Kanji panel, a kana or a word card. */
 export function ItemLesson({
   type,
   id,
@@ -31,6 +31,7 @@ export function ItemLesson({
     );
   }
   if (type === "KANJI") return <KanjiLesson char={id} content={content} />;
+  if (type === "KANA") return <KanaLesson id={id} content={content} />;
   return <VocabLesson id={id} content={content} />;
 }
 
@@ -62,7 +63,7 @@ function KanjiLesson({ char, content }: { char: string; content: PathContent }) 
   const k = content.kanji.get(char);
   if (!k) return <Missing />;
   return (
-    <div className="space-y-2 rounded-3xl bg-card p-6 text-center">
+    <div className="space-y-2 rounded-lg border border-border bg-sheet p-6 text-center">
       <JpText serif as="p" className="text-8xl font-bold">
         {k.char}
       </JpText>
@@ -76,21 +77,55 @@ function KanjiLesson({ char, content }: { char: string; content: PathContent }) 
   );
 }
 
+/** One kana: the character, its romaji and its sound. Links to the full chart on the Kana page. */
+function KanaLesson({ id, content }: { id: string; content: PathContent }) {
+  const k = content.kana.get(id);
+  if (!k) return <Missing />;
+  return (
+    <div className="grid justify-items-center gap-5 rounded-lg border border-border bg-sheet px-6 py-10 text-center">
+      <p className="studio-kicker studio-kicker-muted">
+        {k.script === "hiragana" ? "Hiragana" : "Katakana"}
+      </p>
+      {/* A genkō practice cell, like the first page of a kana workbook. */}
+      <div
+        className="studio-genko w-40 sm:w-48"
+        style={{ "--genko-cols": 1, fontSize: "clamp(5rem, 16vw, 7.5rem)" } as React.CSSProperties}
+      >
+        <p lang="ja" className="!text-foreground">
+          {k.kana}
+        </p>
+      </div>
+      <p className="studio-head text-3xl">{k.romaji}</p>
+      <div className="flex flex-wrap justify-center gap-2">
+        <Button variant="outline" onClick={() => speakKana(k.kana)}>
+          <Volume2 aria-hidden className="mr-1.5 h-4 w-4" /> Nghe
+        </Button>
+        <Button variant="outline" asChild>
+          <Link to="/app/japanese/alphabet">Bảng chữ cái</Link>
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 function VocabLesson({ id, content }: { id: string; content: PathContent }) {
   const v = content.vocab.get(id);
   if (!v) return <Missing />;
   return (
-    <div className="space-y-4 rounded-3xl bg-card p-8 text-center shadow-sm">
-      <JpText serif as="p" className="text-5xl font-bold">
-        {v.word}
+    <div className="grid justify-items-center gap-4 rounded-lg border border-border bg-sheet px-6 py-10 text-center">
+      {/* Reading sits above the word as ruby, the way a Japanese textbook prints it. */}
+      <JpText serif as="p" className="text-5xl sm:text-6xl">
+        {v.kana !== v.word ? (
+          <ruby>
+            {v.word}
+            <rt className="text-base">{v.kana}</rt>
+          </ruby>
+        ) : (
+          v.word
+        )}
       </JpText>
-      {v.kana !== v.word && (
-        <JpText as="p" className="text-lg text-muted-foreground">
-          {v.kana}
-        </JpText>
-      )}
-      <p className="text-sm text-muted-foreground">{v.romaji}</p>
-      <p className="text-xl font-bold">{v.meaning}</p>
+      <p className="text-sm studio-muted">{v.romaji}</p>
+      <p className="studio-head text-2xl">{v.meaning}</p>
       <div className="flex flex-wrap justify-center gap-2">
         <Button variant="outline" onClick={() => speakKana(v.kana)}>
           <Volume2 aria-hidden className="mr-1.5 h-4 w-4" /> Nghe

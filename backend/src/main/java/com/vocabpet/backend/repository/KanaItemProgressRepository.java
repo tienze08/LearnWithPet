@@ -13,6 +13,8 @@ public interface KanaItemProgressRepository extends JpaRepository<KanaItemProgre
 
     List<KanaItemProgress> findByUserIdAndScript(Long userId, String script);
 
+    List<KanaItemProgress> findByUserId(Long userId);
+
     List<KanaItemProgress> findByUserIdAndScriptAndSection(Long userId, String script, String section);
 
     @Query("SELECT p FROM KanaItemProgress p WHERE p.user.id = :userId AND p.script = :script " +

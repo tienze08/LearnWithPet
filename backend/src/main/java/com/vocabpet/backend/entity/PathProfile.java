@@ -5,6 +5,7 @@ import java.time.LocalDate;
 
 import com.vocabpet.backend.entity.enums.JlptLevel;
 import com.vocabpet.backend.entity.enums.PathGoal;
+import com.vocabpet.backend.entity.enums.PathPace;
 import com.vocabpet.backend.entity.enums.PathStartingLevel;
 
 import jakarta.persistence.*;
@@ -52,6 +53,16 @@ public class PathProfile {
     /** IANA zone, e.g. Asia/Bangkok. Day boundaries for plans and streaks use this zone. */
     @Column(nullable = false, length = 64)
     private String timezone;
+
+    /** Null on rows from before pace existed: read as FLEXIBLE (see {@link #pace()}). Nullable so ddl-auto can add the column. */
+    // varchar, not a native MySQL ENUM: the same trap LearningPathSchemaPatch repairs for item_type.
+    @Enumerated(EnumType.STRING)
+    @Column(length = 16, columnDefinition = "varchar(16)")
+    private PathPace pace;
+
+    public PathPace pace() {
+        return pace == null ? PathPace.FLEXIBLE : pace;
+    }
 
     private Instant createdAt;
 

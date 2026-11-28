@@ -5,12 +5,13 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
+  /* Reference shape scale (design-system/references/vocapet-reference.png): soft cards ~20px, controls ~12px. */
+  --radius-sm: 8px;
+  --radius-md: 10px;
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-xl: 18px;
+  --radius-2xl: 22px;
+  --radius-3xl: 28px;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -39,110 +40,123 @@
   --color-coin: var(--coin);
   --color-streak: var(--streak);
   --color-xp: var(--xp);
-  --font-display: "Geist", system-ui, "Noto Sans JP", sans-serif;
-  --font-jp-serif: "Noto Serif JP", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --font-display: "Be Vietnam Pro", system-ui, "Noto Sans JP", sans-serif;
+  --font-head: "Noto Serif", "Playfair Display", Georgia, serif;
+  --font-jp-serif: "Shippori Mincho", "Hiragino Mincho ProN", "Yu Mincho", serif;
   --font-jp-sans: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
   --color-surface-2: var(--surface-2);
+  --color-sheet: var(--sheet);
   --color-primary-soft: var(--primary-soft);
   --color-primary-ink: var(--primary-ink);
+  --color-sage: var(--sage);
   --color-seal: var(--seal);
+  --color-seal-ink: var(--seal-ink);
+  --color-butter: var(--butter);
+  --color-subtle-foreground: var(--subtle-foreground);
+  --color-ochre: var(--ochre);
   --color-warning-ink: var(--warning-ink);
+  --color-peach: var(--p-peach);
+  --color-rose: var(--p-rose);
+  --color-sky: var(--p-sky);
+  --color-mint: var(--p-mint);
+  --color-lilac: var(--p-lilac);
 
-  --shadow-pop: 0 4px 0 0 var(--shadow-pop-color);
-  --shadow-pop-sm: 0 2px 0 0 var(--shadow-pop-color);
-  --shadow-card: 0 2px 0 0 var(--border);
+  --shadow-pop: 0 2px 4px rgba(52, 66, 48, 0.05), 0 14px 32px -14px rgba(52, 66, 48, 0.22);
+  --shadow-pop-sm: 0 1px 2px rgba(52, 66, 48, 0.05), 0 6px 16px -8px rgba(52, 66, 48, 0.18);
+  --shadow-card: 0 1px 2px rgba(52, 66, 48, 0.04), 0 10px 28px -16px rgba(52, 66, 48, 0.2);
 }
 
+/* Modern Japanese Studio (DESIGN.md): paper, charcoal ink, forest, sage, seal red, ochre. No gradients, no shadows. */
+/*
+ * Tokens, two layers (DESIGN.md §2).
+ * 1. Primitives: the palette, named by what the colour is. Never used by components directly.
+ * 2. Semantic: what a colour is for. Components and Tailwind use only these.
+ * A future dark theme only remaps the semantic layer (add a `.dark` / [data-theme="dark"] block); not shipped yet.
+ */
 :root {
-  --radius: 1rem;
-  /* Calm study companion: warm paper, ink, and a restrained sage accent. */
-  --background: oklch(0.982 0.008 95);
-  --foreground: oklch(0.28 0.022 155);
+  /* 1 · Primitives: Japanese Studio Playground */
+  --p-ivory: #f6f1e5;
+  --p-paper: #fdfbf5;
+  --p-paper-deep: #efe9da;
+  --p-ink: #252922;
+  --p-forest: #1f5a45;
+  --p-forest-soft: #e3ead9;
+  --p-sage: #a8b5a0;
+  --p-butter: #e9d49b;
+  --p-terracotta: #c98568;
+  --p-terracotta-dark: #9a4f33;
+  --p-warm-gray: #85877d;
+  --p-warm-gray-dark: #6e7066;
+  --p-rule: #e3dcc9;
+  --p-rule-strong: #c9c0ab;
+  --p-white: #ffffff;
+  /* Reference pastels: category cards, blossoms */
+  --p-rose: #f8dfdc;
+  --p-rose-ink: #b4533f;
+  --p-sky: #dfe6f6;
+  --p-sky-ink: #4a5fa8;
+  --p-mint: #dfead8;
+  --p-peach: #f9e7d2;
+  --p-peach-ink: #a8652a;
+  --p-lilac: #e6e1f4;
+  --p-lilac-ink: #6a58a8;
+  --p-blossom: #f3d3d0;
 
-  --card: oklch(1 0.004 100 / 92%);
-  --card-foreground: oklch(0.28 0.022 155);
-  --popover: oklch(1 0.004 100);
-  --popover-foreground: oklch(0.28 0.022 155);
-
-  --primary: oklch(0.50 0.12 155);
-  --primary-foreground: oklch(0.99 0.004 100);
-
-  --secondary: oklch(0.94 0.025 152);
-  --secondary-foreground: oklch(0.32 0.075 154);
-
-  --muted: oklch(0.95 0.012 105);
-  --muted-foreground: oklch(0.48 0.02 155);
-
-  --accent: oklch(0.92 0.045 150);
-  --accent-foreground: oklch(0.3 0.075 154);
-
-  --destructive: oklch(0.65 0.22 25);
-  --destructive-foreground: oklch(0.99 0 0);
-
-  --success: oklch(0.50 0.12 155);
-  --success-foreground: oklch(0.99 0 0);
-  --warning: oklch(0.82 0.17 75);
-  --warning-foreground: oklch(0.25 0.05 80);
-  --info: oklch(0.72 0.15 230);
-  --info-foreground: oklch(0.99 0 0);
-
-  --coin: oklch(0.82 0.17 80);
-  --streak: oklch(0.7 0.21 40);
-  --xp: oklch(0.75 0.18 200);
-
-  --surface-2: oklch(0.965 0.014 100);
-  --primary-soft: oklch(0.95 0.03 150);
-  --primary-ink: oklch(0.4 0.09 155);
-  --seal: oklch(0.52 0.17 28);
-  --warning-ink: oklch(0.45 0.1 70);
-  --border: oklch(0.88 0.014 115);
-  --input: oklch(0.86 0.014 115);
-  --ring: oklch(0.50 0.12 155);
-
-  --shadow-pop-color: oklch(0.58 0.045 135 / 25%);
-
-  --chart-1: oklch(0.72 0.21 145);
-  --chart-2: oklch(0.72 0.15 230);
-  --chart-3: oklch(0.82 0.17 80);
-  --chart-4: oklch(0.7 0.21 40);
-  --chart-5: oklch(0.65 0.2 300);
-
-  --sidebar: oklch(0.985 0.008 95 / 85%);
-  --sidebar-foreground: oklch(0.28 0.022 155);
-  --sidebar-primary: oklch(0.50 0.12 155);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.93 0.06 145);
-  --sidebar-accent-foreground: oklch(0.3 0.1 150);
-  --sidebar-border: oklch(0.9 0.01 145);
-  --sidebar-ring: oklch(0.72 0.21 145);
-}
-
-.dark {
-  --background: oklch(0.18 0.02 160);
-  --foreground: oklch(0.97 0.01 145);
-  --card: oklch(0.22 0.025 160);
-  --card-foreground: oklch(0.97 0.01 145);
-  --popover: oklch(0.22 0.025 160);
-  --popover-foreground: oklch(0.97 0.01 145);
-  --primary: oklch(0.75 0.21 145);
-  --primary-foreground: oklch(0.15 0.02 160);
-  --secondary: oklch(0.3 0.04 160);
-  --secondary-foreground: oklch(0.97 0.01 145);
-  --muted: oklch(0.28 0.03 160);
-  --muted-foreground: oklch(0.72 0.02 145);
-  --accent: oklch(0.35 0.08 145);
-  --accent-foreground: oklch(0.97 0.01 145);
-  --destructive: oklch(0.65 0.22 25);
-  --destructive-foreground: oklch(0.99 0 0);
-  --border: oklch(1 0 0 / 12%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.75 0.21 145);
-  --shadow-pop-color: oklch(0.45 0.18 145);
-  --surface-2: oklch(0.25 0.025 160);
-  --primary-soft: oklch(0.3 0.05 155);
-  --primary-ink: oklch(0.9 0.06 150);
-  --seal: oklch(0.72 0.15 28);
-  --warning-ink: oklch(0.86 0.12 80);
+  /* 2 · Semantic */
+  --radius: 14px;
+  --background: var(--p-ivory);
+  --foreground: var(--p-ink);
+  --sheet: var(--p-paper);
+  --card: var(--p-paper);
+  --card-foreground: var(--p-ink);
+  --popover: var(--p-paper);
+  --popover-foreground: var(--p-ink);
+  --primary: var(--p-forest);
+  --primary-foreground: var(--p-white);
+  --secondary: var(--p-paper-deep);
+  --secondary-foreground: var(--p-ink);
+  --muted: var(--p-paper-deep);
+  --muted-foreground: var(--p-warm-gray-dark);
+  --subtle-foreground: var(--p-warm-gray); /* large text (>= 18px) and disabled only: 3.3:1 */
+  --accent: var(--p-forest-soft);
+  --accent-foreground: var(--p-ink);
+  --destructive: var(--p-terracotta-dark);
+  --destructive-foreground: var(--p-white);
+  --success: var(--p-forest);
+  --success-foreground: var(--p-white);
+  --warning: var(--p-butter);
+  --warning-foreground: var(--p-ink);
+  --info: var(--p-sage);
+  --info-foreground: var(--p-ink);
+  --coin: var(--p-terracotta-dark);
+  --streak: var(--p-terracotta-dark);
+  --xp: var(--p-forest);
+  --surface-2: var(--p-paper-deep);
+  --sage: var(--p-sage);
+  --butter: var(--p-butter);
+  --primary-soft: var(--p-forest-soft);
+  --primary-ink: var(--p-forest);
+  --seal: var(--p-terracotta);
+  --seal-ink: var(--p-terracotta-dark);
+  --ochre: var(--p-terracotta-dark);
+  --warning-ink: var(--p-terracotta-dark);
+  --border: var(--p-rule);
+  --input: var(--p-rule-strong);
+  --ring: var(--p-forest);
+  --shadow-pop-color: transparent;
+  --chart-1: var(--p-forest);
+  --chart-2: var(--p-sage);
+  --chart-3: var(--p-butter);
+  --chart-4: var(--p-terracotta);
+  --chart-5: var(--p-warm-gray);
+  --sidebar: var(--p-paper);
+  --sidebar-foreground: var(--p-ink);
+  --sidebar-primary: var(--p-forest);
+  --sidebar-primary-foreground: var(--p-white);
+  --sidebar-accent: var(--p-forest-soft);
+  --sidebar-accent-foreground: var(--p-ink);
+  --sidebar-border: var(--p-rule);
+  --sidebar-ring: var(--p-forest);
 }
 
 @layer base {
@@ -155,14 +169,14 @@
   }
   body {
     background-color: var(--color-background);
-    background-image: radial-gradient(circle at 15% -10%, oklch(0.92 0.045 150 / 28%), transparent 30rem),
-      radial-gradient(circle at 95% 10%, oklch(0.96 0.035 85 / 45%), transparent 26rem);
-    background-attachment: fixed;
     color: var(--color-foreground);
   }
   h1, h2, h3, h4, h5 {
-    font-weight: 700;
-    letter-spacing: -0.01em;
+    font-weight: 600;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
   }
   [lang="ja"] {
     font-family: var(--font-jp-sans), var(--font-display);
@@ -171,32 +185,27 @@
   }
   [lang="ja"].jp-serif {
     font-family: var(--font-jp-serif);
-    font-weight: 600;
+    font-weight: 800;
     line-height: 1.25;
   }
+  rt {
+    font-family: var(--font-jp-sans);
+    font-weight: 400;
+    color: var(--color-muted-foreground);
+  }
 }
 
+/* Kept as no-ops so pages not yet moved over still build; the studio uses tone and rules, not shadows. */
 @utility lift {
-  box-shadow: 0 1px 2px oklch(0.3 0.03 150 / 8%), 0 12px 28px -18px oklch(0.3 0.04 150 / 38%);
+  box-shadow: var(--shadow-card);
 }
-
 @utility btn-pop {
-  box-shadow: 0 5px 14px -8px var(--shadow-pop-color);
-  transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 10px 22px -12px var(--shadow-pop-color);
-    filter: saturate(.96);
-  }
-  &:active {
-    transform: translateY(0);
-    box-shadow: 0 3px 9px -8px var(--shadow-pop-color);
-  }
+  transition: transform 120ms ease, filter 120ms ease;
+  &:hover { transform: translateY(-1px); }
+  &:active { transform: translateY(0); }
 }
-
 @utility card-pop {
-  box-shadow: 0 12px 32px -24px oklch(0.32 0.04 150 / 48%);
-  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-card);
 }
 
 @keyframes bob {
@@ -265,3 +274,234 @@
   background: rgb(59 130 246 / 32%);
   border-radius: 2px;
 }
+
+
+/* ---------- Studio layer (DESIGN.md). Every value comes from the tokens above. ---------- */
+.studio-head {
+  font-family: var(--font-head);
+  font-variant-numeric: lining-nums;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.studio-jp {
+  font-family: var(--font-jp-serif);
+  font-weight: 800;
+  letter-spacing: 0;
+}
+.studio-kicker {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+}
+.studio-kicker-muted { color: var(--color-muted-foreground); }
+.studio-muted { color: var(--color-muted-foreground); }
+.studio-rule-t { border-top: 1px solid var(--color-border); }
+.studio-rule-b { border-bottom: 1px solid var(--color-border); }
+.studio-bar {
+  height: 4px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: var(--color-surface-2);
+}
+.studio-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--color-primary);
+  transition: width 400ms cubic-bezier(.2,.8,.2,1);
+}
+.studio-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0 1.25rem;
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-pop-sm);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  transition: transform 120ms ease, filter 120ms ease, background-color 120ms ease;
+}
+.studio-btn:hover { transform: translateY(-1px); filter: brightness(1.08); }
+.studio-btn:active { transform: translateY(0); }
+.studio-btn:disabled { opacity: 0.5; pointer-events: none; }
+.studio-btn-quiet { background: transparent; color: var(--color-primary); box-shadow: none; }
+.studio-btn-quiet:hover { background: var(--color-primary-soft); filter: none; }
+.studio-note {
+  background: color-mix(in oklab, var(--color-butter) 28%, transparent);
+  border-radius: var(--radius);
+  padding: 0.625rem 0.875rem;
+}
+.studio-row {
+  transition: background-color 120ms ease;
+}
+.studio-row:hover { background: var(--color-primary-soft); }
+.studio-link {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+/* Hanko seal: done (済), test (試), empty slot. */
+.studio-seal {
+  display: inline-grid;
+  place-items: center;
+  width: var(--seal-size, 2.25rem);
+  height: var(--seal-size, 2.25rem);
+  border: 2px solid var(--color-seal);
+  border-radius: var(--radius);
+  color: var(--color-seal-ink);
+  font-family: var(--font-jp-serif);
+  font-weight: 800;
+  font-size: calc(var(--seal-size, 2.25rem) * 0.44);
+  line-height: 1;
+  transform: rotate(-4deg);
+}
+.studio-seal[data-state="done"] { background: var(--color-seal); color: var(--color-foreground); }
+.studio-seal[data-state="empty"] { border: 1px dashed var(--color-border); transform: none; }
+.studio-seal[data-state="today"] { border: 2px solid var(--color-primary); transform: none; }
+.studio-seal[data-stamp] { animation: studio-stamp 320ms cubic-bezier(.2,1.4,.4,1) both; }
+@keyframes studio-stamp {
+  0% { transform: scale(1.35) rotate(-10deg); opacity: 0; }
+  100% { transform: scale(1) rotate(-4deg); opacity: 1; }
+}
+
+/* Genkō grid: one cell per character. */
+.studio-genko {
+  display: grid;
+  grid-template-columns: repeat(var(--genko-cols, 5), minmax(0, 1fr));
+  border-left: 1px solid var(--color-border);
+  border-top: 1px solid var(--color-border);
+}
+.studio-genko > * {
+  position: relative;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-right: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  font-family: var(--font-jp-serif);
+  font-weight: 600;
+  color: var(--color-muted-foreground);
+  background: var(--color-sheet);
+}
+.studio-genko > *::before {
+  content: "";
+  position: absolute;
+  inset: 50% 0 auto;
+  border-top: 1px dashed var(--color-border);
+  pointer-events: none;
+}
+.studio-genko > [data-state="mastered"] { background: var(--color-primary); color: var(--color-primary-foreground); }
+.studio-genko > [data-state="mastered"]::before { display: none; }
+.studio-genko > [data-state="learning"] { box-shadow: inset 0 0 0 2px var(--color-sage); color: var(--color-foreground); }
+.studio-genko > [data-state="weak"] { box-shadow: inset 0 0 0 2px var(--color-ochre); color: var(--color-foreground); }
+
+/* Answer feedback */
+@keyframes studio-rise { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes studio-shake { 0%, 100% { transform: none; } 25% { transform: translateX(-2px); } 75% { transform: translateX(2px); } }
+.studio-rise { animation: studio-rise 180ms ease-out both; }
+.studio-shake { animation: studio-shake 100ms ease-in-out 2; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
+
+/* Butter highlighter: one phrase per screen at most (the thing being learned). */
+.studio-mark {
+  background: linear-gradient(transparent 58%, var(--color-butter) 58%, var(--color-butter) 92%, transparent 92%);
+  padding: 0 0.06em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+/* The companion's speech bubble: paper, hairline, one square corner pointing at the pet. */
+.studio-bubble {
+  background: var(--color-sheet);
+  border: 1px solid var(--color-border);
+  border-radius: 18px 18px 18px 6px;
+  padding: 0.625rem 0.875rem;
+  box-shadow: var(--shadow-pop-sm);
+}
+
+/* ---------- Reference layer: cards, pills, paper wash (design-system/references/vocapet-reference.png) ---------- */
+body {
+  background-image:
+    radial-gradient(60rem 28rem at 100% 0%, color-mix(in oklab, var(--p-blossom) 38%, transparent), transparent 70%),
+    radial-gradient(70rem 26rem at 0% 100%, color-mix(in oklab, var(--p-forest-soft) 70%, transparent), transparent 70%);
+  background-attachment: fixed;
+}
+@layer components {
+.ref-card {
+  background: color-mix(in oklab, var(--color-sheet) 86%, transparent);
+  backdrop-filter: blur(6px);
+  border: 1px solid color-mix(in oklab, var(--color-border) 70%, transparent);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-card);
+}
+.ref-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+.ref-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.25rem;
+  padding: 0 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-sheet);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+.ref-chip[aria-pressed="true"], .ref-chip[data-active="true"] {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-primary-foreground);
+}
+.ref-cat { user-select: none; -webkit-user-drag: none; }
+.ref-scene {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+/* hand-painted hills + blossoms behind a mascot scene, pure CSS so no stock art is needed */
+.ref-scene::before {
+  content: "";
+  position: absolute;
+  inset: auto -10% -22% -10%;
+  height: 60%;
+  z-index: -1;
+  background:
+    radial-gradient(60% 90% at 25% 100%, color-mix(in oklab, var(--p-forest-soft) 95%, white) 0 60%, transparent 61%),
+    radial-gradient(55% 80% at 78% 105%, color-mix(in oklab, var(--p-sage) 45%, var(--p-forest-soft)) 0 62%, transparent 63%);
+}
+.ref-scene::after {
+  content: "";
+  position: absolute;
+  top: -20%;
+  right: -8%;
+  width: 55%;
+  aspect-ratio: 1;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in oklab, var(--p-blossom) 80%, transparent) 0 40%, transparent 70%);
+}
+}
+::selection { background: color-mix(in oklab, var(--color-primary) 22%, transparent); }

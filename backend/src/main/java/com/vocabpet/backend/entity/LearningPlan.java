@@ -41,6 +41,13 @@ public class LearningPlan {
     @Column(nullable = false)
     private LocalDate targetDate;
 
+    /**
+     * Day the daily pace was last set (plan start, or the last settings change). The cap on catching up after missed
+     * days is measured from here, so a learner who chooses more minutes or a new date gets a pace that fits it.
+     * Null on plans created before this existed: startDate is used.
+     */
+    private LocalDate paceFrom;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 16)
     @Builder.Default

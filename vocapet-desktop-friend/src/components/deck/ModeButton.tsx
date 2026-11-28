@@ -7,17 +7,23 @@ interface ModeButtonProps {
   children: ReactNode;
 }
 
+/** One segment of the study-mode switch (the parent is a role="tablist" row). */
 export default function ModeButton({ active, onClick, icon, children }: ModeButtonProps) {
   return (
     <button
+      type="button"
+      role="tab"
+      aria-selected={active}
       onClick={onClick}
-      className={`flex items-center gap-2 rounded-xl border-2 px-4 py-2 text-sm font-bold transition-colors ${
+      className={`flex min-h-11 shrink-0 items-center gap-2 border-b-2 px-3 text-sm transition-colors ${
         active
-          ? "border-primary bg-primary text-primary-foreground"
-          : "border-border bg-card hover:border-primary"
+          ? "border-primary font-semibold text-foreground"
+          : "border-transparent text-muted-foreground hover:text-foreground"
       }`}
     >
-      {icon}
+      <span aria-hidden className="[&_svg]:h-4 [&_svg]:w-4">
+        {icon}
+      </span>
       <span>{children}</span>
     </button>
   );

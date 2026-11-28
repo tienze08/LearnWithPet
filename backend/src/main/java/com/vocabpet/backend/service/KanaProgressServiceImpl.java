@@ -158,8 +158,13 @@ public class KanaProgressServiceImpl implements KanaProgressService {
     }
 
     private boolean isMastered(KanaItemProgress p) {
-        int total = p.getCorrectCount() + p.getWrongCount();
-        return total >= MIN_TOTAL_SEEN && (double) p.getCorrectCount() / total >= MIN_ACCURACY;
+        return isMastered(p.getCorrectCount(), p.getWrongCount());
+    }
+
+    /** Kana page mastery rule, shared with the Learning Path so both write the same flag. */
+    public static boolean isMastered(int correct, int wrong) {
+        int total = correct + wrong;
+        return total >= MIN_TOTAL_SEEN && (double) correct / total >= MIN_ACCURACY;
     }
 
     private List<WeakKanaItem> getWeakKanaForAttempt(KanaAttempt attempt) {

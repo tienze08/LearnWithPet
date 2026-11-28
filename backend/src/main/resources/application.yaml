@@ -10,6 +10,10 @@ spring:
         hibernate:
             ddl-auto: update
         show-sql: true
+        properties:
+            hibernate:
+                # Loads lazy relations (a word's meanings, a link's vocabulary) in batches instead of one query each.
+                default_batch_fetch_size: 100
 
 app:
     jwt:

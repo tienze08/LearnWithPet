@@ -48,6 +48,42 @@ public class MasteryRules {
         return s;
     }
 
+    /** Kana state from KanaItemProgress counters (written by the Kana page too) and its Learning Path stage. */
+    public MasteryState forKana(int correct, int wrong, int stage, boolean mastered, int answerStreak) {
+        if (correct + wrong == 0) return MasteryState.NOT_STARTED;
+        if (correct == 0 || answerStreak < 0) return stage >= cfg.memorizedStage() ? MasteryState.UNDERSTOOD : MasteryState.LEARNING;
+        if (mastered && stage >= cfg.leitnerDays().size()) return MasteryState.MASTERED;
+        if (stage >= cfg.memorizedStage() || mastered) return MasteryState.MEMORIZED;
+        return MasteryState.UNDERSTOOD;
+    }
+
+    /** +n = n correct in a row, -n = n wrong in a row. */
+    public static int nextStreak(int streak, boolean correct) {
+        return correct ? (streak > 0 ? streak + 1 : 1) : (streak < 0 ? streak - 1 : -1);
+    }
+
+    /**
+     * Weak flag after one answer: any miss in a test, or weakAfterWrongStreak misses in a row, turns it on;
+     * weakClearAfterCorrectStreak correct answers in a row turn it off. Mastery is not touched.
+     */
+    public boolean nextWeak(boolean weak, int newStreak, boolean correct, boolean inTest) {
+        if (!correct && inTest) return true;
+        if (newStreak <= -cfg.weakAfterWrongStreak()) return true;
+        if (newStreak >= cfg.weakClearAfterCorrectStreak()) return false;
+        return weak;
+    }
+
+    /** Learner-facing label: Mới / Đang học / Đang ôn / Thành thạo, or Yếu when the weak flag is on. */
+    public static String label(MasteryState s, boolean weak) {
+        if (weak) return "Yếu";
+        return switch (s) {
+            case NOT_STARTED -> "Mới";
+            case LEARNING -> "Đang học";
+            case UNDERSTOOD, MEMORIZED -> "Đang ôn";
+            case MASTERED -> "Thành thạo";
+        };
+    }
+
     private static MasteryState max(MasteryState a, MasteryState b) {
         return a.ordinal() >= b.ordinal() ? a : b;
     }

@@ -20,13 +20,13 @@ export type PetSpeciesUnlock = {
 };
 
 export const PET_UNLOCKS: PetSpeciesUnlock[] = [
-  { id: "CAT", requirement: "Starter companion", isUnlocked: () => true },
-  { id: "FOX", requirement: "Reach level 3", isUnlocked: (s) => s.level >= 3 },
-  { id: "BUNNY", requirement: "Maintain a 5-day streak", isUnlocked: (s) => s.streak >= 5 },
-  { id: "PANDA", requirement: "Reach level 5", isUnlocked: (s) => s.level >= 5 },
+  { id: "CAT", requirement: "Bạn đồng hành đầu tiên", isUnlocked: () => true },
+  { id: "FOX", requirement: "Đạt cấp 3", isUnlocked: (s) => s.level >= 3 },
+  { id: "BUNNY", requirement: "Học 5 ngày liên tiếp", isUnlocked: (s) => s.streak >= 5 },
+  { id: "PANDA", requirement: "Đạt cấp 5", isUnlocked: (s) => s.level >= 5 },
   {
     id: "DRAGON",
-    requirement: "Master 10 words",
+    requirement: "Thuộc 10 từ",
     isUnlocked: (s) => Object.values(s.masteryByWord).filter((m) => m >= 4).length >= 10,
   },
 ];
@@ -55,8 +55,8 @@ export function PetSpecies() {
     <div>
       <div className="flex items-end justify-between mb-3">
         <div>
-          <h2 className="text-xl font-extrabold">Pet collection</h2>
-          <p className="text-sm text-muted-foreground">Unlock new species as you learn.</p>
+          <h3 className="studio-head text-xl">Bộ sưu tập</h3>
+          <p className="text-sm text-muted-foreground">Mở khoá thêm loài mới khi bạn học.</p>
         </div>
         <p className="text-sm font-bold text-muted-foreground">
           {unlockedCount} / {PET_UNLOCKS.length}
@@ -100,7 +100,7 @@ export function PetSpecies() {
                   unlocked ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"
                 }`}
               >
-                {unlocked ? "Unlocked" : u.requirement}
+                {unlocked ? "Đã mở" : u.requirement}
               </p>
             </button>
           );

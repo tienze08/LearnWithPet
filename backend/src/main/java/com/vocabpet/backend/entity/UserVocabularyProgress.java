@@ -67,4 +67,16 @@ public class UserVocabularyProgress {
 
     @Enumerated(EnumType.STRING)
     private LearningSource lastSource;
+
+    /** Learning Path: weak = needs extra work (wrong in a test, or several misses in a row). Separate from mastery. */
+    @Column(nullable = false)
+    @org.hibernate.annotations.ColumnDefault("false")
+    @Builder.Default
+    private boolean weak = false;
+
+    /** +n = n correct answers in a row, -n = n wrong in a row. Drives the weak flag. */
+    @Column(nullable = false)
+    @org.hibernate.annotations.ColumnDefault("0")
+    @Builder.Default
+    private int answerStreak = 0;
 }

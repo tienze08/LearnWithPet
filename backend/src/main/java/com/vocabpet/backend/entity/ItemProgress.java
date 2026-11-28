@@ -32,7 +32,7 @@ public class ItemProgress {
     private User user;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "item_type", nullable = false, length = 8)
+    @Column(name = "item_type", nullable = false, length = 16, columnDefinition = "varchar(16)")
     private PathItemType itemType;
 
     /** Grammar slug (e.g. "ni-time") or the kanji character itself. */
@@ -62,6 +62,18 @@ public class ItemProgress {
     private int wrongCount = 0;
 
     private Instant lastReviewedAt;
+
+    /** Learning Path: weak = needs extra work (wrong in a test, or several misses in a row). Separate from mastery. */
+    @Column(nullable = false)
+    @org.hibernate.annotations.ColumnDefault("false")
+    @Builder.Default
+    private boolean weak = false;
+
+    /** +n = n correct answers in a row, -n = n wrong in a row. Drives the weak flag. */
+    @Column(nullable = false)
+    @org.hibernate.annotations.ColumnDefault("0")
+    @Builder.Default
+    private int answerStreak = 0;
 
     @Version
     private Long version;

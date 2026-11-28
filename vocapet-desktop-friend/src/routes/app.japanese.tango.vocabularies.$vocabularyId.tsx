@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { speakKana } from "@/lib/japanese/kana";
 import { useSetTangoFavoriteMutation, useTangoVocabularyQuery } from "@/hooks/queries/tango.queries";
+import { BankSentences } from "@/components/grammar/BankSentences";
+import { ComposeSentence } from "@/components/practice/ComposeSentence";
 import { Enso, ErrorBlock, JpText, LoadingBlock, WordStatusBadge, WORD_STATUS_LABEL } from "@/components/tango/shared";
 
 export const Route = createFileRoute("/app/japanese/tango/vocabularies/$vocabularyId")({
@@ -85,6 +87,10 @@ function TangoVocabularyDetail() {
               ))}
             </Card>
           )}
+
+          <BankSentences word={word.data} />
+
+          <ComposeSentence key={id} word={word.data.expression ?? word.data.kana} />
 
           <Card className="space-y-2 rounded-2xl border-0 bg-surface-2 p-6 shadow-none">
             <h2 className="font-bold">Thuộc bài học</h2>

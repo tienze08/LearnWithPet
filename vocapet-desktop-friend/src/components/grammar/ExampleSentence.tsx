@@ -6,7 +6,7 @@ import { parseFurigana, readingOf } from "@/lib/japanese/grammar/furigana";
 import { Ruby } from "@/components/kanji-map/Ruby";
 
 /** One example: Japanese with furigana, Vietnamese translation, and a play button. English stays in the collapsed source block. */
-export function ExampleSentence({ e }: { e: GrammarExample }) {
+export function ExampleSentence({ e, children }: { e: GrammarExample; children?: React.ReactNode }) {
   const text = e.furigana ? readingOf(e.furigana) : e.japanese;
   return (
     <li className="rounded-2xl bg-surface-2 p-3">
@@ -21,6 +21,7 @@ export function ExampleSentence({ e }: { e: GrammarExample }) {
       <Button type="button" variant="outline" size="sm" className="mt-2" onClick={() => speakKana(text)} aria-label={`Nghe câu: ${e.japanese}`}>
         <Volume2 aria-hidden className="mr-1.5 h-4 w-4" /> Nghe
       </Button>
+      {children}
     </li>
   );
 }

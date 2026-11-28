@@ -40,6 +40,11 @@ public class LearningPathController {
         return service.feasibility(request);
     }
 
+    @PostMapping("/preview")
+    public PreviewResponse preview(@RequestBody ProfileRequest request) {
+        return service.preview(request);
+    }
+
     @GetMapping("/vocabulary")
     public List<VocabItem> vocabulary() {
         return service.vocabulary();
@@ -60,9 +65,57 @@ public class LearningPathController {
         return service.today();
     }
 
+    @GetMapping("/next-up")
+    public NextUpResponse nextUp() {
+        return service.nextUp();
+    }
+
+    /** Every lesson with its unlock state (LOCKED / AVAILABLE / IN_PROGRESS / COMPLETED) and suggested day. */
+    @GetMapping("/units")
+    public UnitsResponse units() {
+        return service.unitStates();
+    }
+
+    /** One lesson to start or continue at any time once unlocked; LOCKED comes back with the reason and no items. */
+    @GetMapping("/units/{unitId}")
+    public UnitLesson unit(@PathVariable String unitId) {
+        return service.unitLesson(unitId);
+    }
+
+    /** Submit a review lesson or chapter test taken on its own; it completes (and unlocks what follows) right away. */
+    @PostMapping("/units/{unitId}/check")
+    public TestView checkUnit(@PathVariable String unitId, @RequestBody TestRequest request) {
+        return service.checkUnit(unitId, request);
+    }
+
+    @PutMapping("/pace")
+    public ProfileResponse setPace(@RequestBody PaceRequest request) {
+        return service.setPace(request);
+    }
+
     @PostMapping("/answers")
     public AnswerResponse answer(@RequestBody AnswerRequest request) {
         return service.answer(request);
+    }
+
+    @PostMapping("/tests")
+    public TestView submitTest(@RequestBody TestRequest request) {
+        return service.submitTest(request);
+    }
+
+    @PostMapping("/tests/skip-retake")
+    public TestView skipRetake() {
+        return service.skipRetake();
+    }
+
+    @GetMapping("/roadmap")
+    public RoadmapResponse roadmap() {
+        return service.roadmap();
+    }
+
+    @GetMapping("/review-overview")
+    public ReviewOverview reviewOverview() {
+        return service.reviewOverview();
     }
 
     @GetMapping("/review-queue")

@@ -81,12 +81,9 @@ export default function EditWordDialog({ word, onSave }: EditWordDialogProps) {
     >
       <DialogTrigger asChild>
         <button
-          className="
-          text-muted-foreground
-          transition-colors
-          hover:text-primary"
-          aria-label="Edit word"
-          cursor-pointer
+          type="button"
+          className="grid h-10 w-10 cursor-pointer place-items-center rounded-[var(--radius)] text-muted-foreground transition-colors hover:bg-primary-soft hover:text-primary"
+          aria-label="Sửa từ"
         >
           <Pencil className="h-4 w-4" />
         </button>
@@ -94,13 +91,13 @@ export default function EditWordDialog({ word, onSave }: EditWordDialogProps) {
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit word</DialogTitle>
+          <DialogTitle>Sửa từ</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-3">
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <Label>Word</Label>
+              <Label>Từ</Label>
 
               <Input
                 value={editedWord}
@@ -110,7 +107,7 @@ export default function EditWordDialog({ word, onSave }: EditWordDialogProps) {
             </div>
 
             <div>
-              <Label>Part of speech</Label>
+              <Label>Từ loại</Label>
 
               <Input
                 value={partOfSpeech}
@@ -121,7 +118,7 @@ export default function EditWordDialog({ word, onSave }: EditWordDialogProps) {
           </div>
 
           <div>
-            <Label>Difficulty</Label>
+            <Label>Độ khó</Label>
 
             <select
               className="
@@ -133,22 +130,22 @@ export default function EditWordDialog({ word, onSave }: EditWordDialogProps) {
               value={difficulty}
               onChange={(e) => setDifficulty(e.target.value as Difficulty)}
             >
-              <option value="EASY">EASY</option>
+              <option value="EASY">Dễ</option>
 
-              <option value="MEDIUM">MEDIUM</option>
+              <option value="MEDIUM">Vừa</option>
 
-              <option value="HARD">HARD</option>
+              <option value="HARD">Khó</option>
             </select>
           </div>
 
           <div>
-            <Label>Meaning</Label>
+            <Label>Nghĩa</Label>
 
             <Input value={meaning} maxLength={200} onChange={(e) => setMeaning(e.target.value)} />
           </div>
 
           <div>
-            <Label>Example</Label>
+            <Label>Ví dụ</Label>
 
             <Textarea
               rows={3}
@@ -159,7 +156,7 @@ export default function EditWordDialog({ word, onSave }: EditWordDialogProps) {
           </div>
 
           <Button className="btn-pop w-full" onClick={handleSave}>
-            Save changes
+            Lưu thay đổi
           </Button>
         </div>
       </DialogContent>

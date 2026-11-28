@@ -53,14 +53,8 @@ export default function TypeGame({ words, onAnswer }: TypeGameProps) {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="
-      mx-auto max-w-xl rounded-3xl
-      border-2 border-border
-      bg-card p-6 card-pop"
-    >
-      <p className="text-xs font-bold uppercase text-muted-foreground">Type the word</p>
+    <form onSubmit={handleSubmit} className="mx-auto max-w-xl border-y border-border py-8">
+      <p className="studio-kicker studio-kicker-muted">Gõ từ có nghĩa này</p>
 
       <p className="mt-3 text-lg">{word.meaning}</p>
 
@@ -74,7 +68,7 @@ export default function TypeGame({ words, onAnswer }: TypeGameProps) {
         autoFocus
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        placeholder="Your answer"
+        placeholder="Câu trả lời của bạn"
         className="mt-4 h-12 text-lg"
       />
 
@@ -85,12 +79,12 @@ export default function TypeGame({ words, onAnswer }: TypeGameProps) {
           ${result ? "text-success" : "text-destructive"}
           `}
         >
-          {result ? "Correct!" : `Answer: ${word.word}`}
+          {result ? "Đúng rồi!" : `Đáp án: ${word.word}`}
         </p>
       )}
 
       <Button type="submit" className="btn-pop mt-4 h-12 w-full">
-        Check
+        Kiểm tra
       </Button>
     </form>
   );

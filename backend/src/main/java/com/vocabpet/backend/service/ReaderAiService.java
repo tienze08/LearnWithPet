@@ -74,12 +74,18 @@ public class ReaderAiService {
         }
     }
 
-    private String requestGemini(String prompt) throws Exception {
+    boolean isConfigured() {
+        return !geminiApiKey.isBlank();
+    }
+
+    /** Package access: TranslationAiService sends its own prompt through the same client. */
+    String requestGemini(String prompt) throws Exception {
         var payload = new GeminiGenerateContentRequest(
                 List.of(new GeminiGenerateContentRequest.Content(List.of(new GeminiGenerateContentRequest.Part(prompt)))),
                 new GeminiGenerateContentRequest.GenerationConfig("application/json", 1));
         HttpRequest request = HttpRequest.newBuilder(URI.create("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent"))
                 .header("Content-Type", "application/json").header("x-goog-api-key", geminiApiKey)
+                .timeout(java.time.Duration.ofSeconds(45))
                 .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(payload))).build();
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() == 429) {

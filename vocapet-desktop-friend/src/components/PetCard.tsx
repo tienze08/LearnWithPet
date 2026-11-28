@@ -175,7 +175,7 @@ export function PetCard() {
         <div className="flex-1 w-full">
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1 rounded-full bg-primary text-primary-foreground text-xs font-extrabold px-2.5 py-1">
-              <Star className="w-3 h-3" /> Stage {stage}
+              <Star className="w-3 h-3" /> Giai đoạn {stage}
             </span>
             <span className="text-xs font-bold text-muted-foreground uppercase">{stageName}</span>
           </div>
@@ -186,7 +186,7 @@ export function PetCard() {
               <Zap className="w-5 h-5 fill-yellow-400" /> Lv {state.petLevel}
             </span>
           </h2>
-          <p className="text-sm text-muted-foreground capitalize">Mood: {state.petMood}</p>
+          <p className="text-sm text-muted-foreground capitalize">Tâm trạng: {state.petMood}</p>
 
           {/* RPG EXP bar */}
           <div className="mt-4">
@@ -213,8 +213,8 @@ export function PetCard() {
               </div>
             </div>
             <p className="text-[11px] text-muted-foreground mt-1">
-              {state.expToNextLevel - state.petExp} EXP to next level
-              {stage < 3 && <> · Evolves at Lv {stage === 1 ? 5 : 10}</>}
+              Còn {state.expToNextLevel - state.petExp} EXP để lên cấp
+              {stage < 3 && <> · Tiến hoá ở cấp {stage === 1 ? 5 : 10}</>}
             </p>
           </div>
 
@@ -250,7 +250,7 @@ export function PetCard() {
           >
             <Sparkles className="w-4 h-4 text-yellow-600" />
             <div className="text-xs">
-              <p className="font-extrabold leading-tight">Your pet evolved!</p>
+              <p className="font-extrabold leading-tight">Thú cưng đã tiến hoá!</p>
               <p className="font-bold leading-tight">{unlockToast} unlocked!</p>
             </div>
           </motion.div>

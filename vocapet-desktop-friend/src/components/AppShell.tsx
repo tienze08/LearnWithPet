@@ -1,11 +1,12 @@
 import { useEffect } from "react";
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { GameProvider, useGame, type PetVariant } from "@/lib/store";
 import { useMeQuery } from "@/hooks/queries/user.queries";
 import { usePathStatusQuery } from "@/hooks/queries/learning-path.queries";
 import { useAuthStore } from "@/hooks/stores/auth.store";
 import { avatarMap } from "@/types/avatar";
-import { Button } from "@/components/ui/button";
+import { Landscape, type LandscapeVariant } from "@/components/ref/Landscape";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,130 +16,87 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  CalendarCheck,
-  Coins,
-  Flame,
-  Zap,
-  LayoutDashboard,
-  Library,
-  User,
-  PawPrintIcon,
-  Target,
-  LogOut,
-  Trophy,
   BookOpen,
+  Dumbbell,
+  Headphones,
+  CalendarCheck,
   Languages,
-  Mic,
-  ScrollText,
-  Sparkles,
   Layers,
-  Search,
+  Library,
+  LogOut,
+  Mic,
+  PawPrint,
   Repeat,
-  GraduationCap,
+  Settings,
+  Sparkles,
+  TrendingUp,
+  Type,
 } from "lucide-react";
+import { Logo } from "@/components/ref/Logo";
 
-function TopBar() {
+/** Pages under Thư viện: the Library index lists them, so the nav carries only one entry. */
+const LIBRARY_PATHS = ["/app/library", "/app/japanese", "/app/reader"];
+/** Study runs full screen: no sidebar, no nav, only the lesson and its own exit. */
+const FOCUS_PATHS = ["/app/path/study"];
+
+function usePath() {
+  return useRouterState({ select: (s) => s.location.pathname });
+}
+
+/** Keeps the local game store on the account's pet; was in the old top bar, which every page rendered. */
+function usePetSync() {
   const { state, setState } = useGame();
-  const logout = useAuthStore((auth) => auth.logout);
-  const navigate = useNavigate();
   const { data: me } = useMeQuery();
-  const userLevel = me?.level ?? state.level;
-  const userXp = me?.xp ?? state.xp;
-  const userCoins = me?.coin ?? state.coins;
-  const pct = userXp % 100;
-  const avatarEmoji = me?.avatar ? (avatarMap[me.avatar] ?? "🦊") : state.user.avatarEmoji;
-  const displayName = me?.name || state.user.displayName || "You";
-
   useEffect(() => {
     const selectedSpecies = me?.pet?.species as PetVariant | undefined;
     if (selectedSpecies && selectedSpecies !== state.petVariant) {
       setState((current) => ({ ...current, petVariant: selectedSpecies }));
     }
   }, [me?.pet?.species, setState, state.petVariant]);
-
-  return (
-    <header className="flex h-14 shrink-0 items-center gap-3 border-b border-border/70 px-4 md:px-6">
-      <Link to="/app" className="flex items-center gap-2 font-bold tracking-tight md:hidden">
-        <span className="text-xl">🌱</span>
-        <span>VocaPet</span>
-      </Link>
-      <div className="ml-auto flex items-center gap-2 text-sm font-semibold">
-        <Stat icon={<Flame className="h-4 w-4 text-streak" />} value={me?.streak ?? state.streak} />
-        <Stat icon={<Coins className="h-4 w-4 text-coin" />} value={userCoins} />
-        <div className="hidden items-center gap-2 rounded-full bg-muted/70 px-3 py-1 sm:flex">
-          <Zap className="h-4 w-4 text-xp" />
-          <span>Lv {userLevel}</span>
-          <div className="h-1.5 w-20 overflow-hidden rounded-full bg-background">
-            <div className="h-full bg-xp" style={{ width: `${pct}%` }} />
-          </div>
-        </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              className="ml-1 flex items-center gap-2 rounded-full border border-border bg-card py-1 pl-1 pr-3 transition-colors hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-              aria-label="Open account menu"
-            >
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-base">
-                {avatarEmoji}
-              </span>
-              <span className="hidden max-w-28 truncate sm:inline">{displayName}</span>
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-52 rounded-xl">
-            <DropdownMenuLabel>
-              <p className="truncate font-bold">{displayName}</p>
-              {me?.email && <p className="mt-0.5 truncate text-xs font-normal text-muted-foreground">{me.email}</p>}
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={() => navigate({ to: "/app/profile" })}>
-              <User className="mr-2 h-4 w-4" />
-              Profile
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="text-destructive focus:text-destructive"
-              onSelect={() => {
-                logout();
-                navigate({ to: "/login" });
-              }}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              Log out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    </header>
-  );
 }
 
-function Stat({ icon, value }: { icon: React.ReactNode; value: number }) {
-  return (
-    <div className="flex items-center gap-1.5 rounded-full bg-muted/70 px-3 py-1">
-      {icon}
-      <span>{value}</span>
-    </div>
-  );
-}
-
-function NavLink({ to, icon, label, soon }: { to: string; icon: React.ReactNode; label: string; soon?: boolean }) {
-  const path = useRouterState({ select: (s) => s.location.pathname });
-  const active = path === to || (to !== "/app" && path.startsWith(to));
-  if (soon) {
+/** Highlights on its own path, on its sub-paths, and on any extra prefix in `match` (e.g. Today also owns /app/path). */
+function NavLink({
+  to,
+  icon,
+  label,
+  match = [],
+  compact,
+}: {
+  to: string;
+  icon: React.ReactNode;
+  label: string;
+  match?: string[];
+  compact?: boolean;
+}) {
+  const path = usePath();
+  const active =
+    path === to || (to !== "/app" && path.startsWith(to)) || match.some((m) => path.startsWith(m));
+  if (compact) {
     return (
-      <span className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-semibold text-muted-foreground/60" aria-disabled="true">
+      <Link
+        to={to}
+        // exact: otherwise Link marks /app (Today) current on every /app/* page; `active` decides instead.
+        activeOptions={{ exact: true }}
+        aria-current={active ? "page" : undefined}
+        className={`flex min-h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors ${
+          active ? "text-primary" : "text-muted-foreground hover:text-foreground"
+        }`}
+      >
         {icon}
-        {label}
-        <span className="ml-auto rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide">Soon</span>
-      </span>
+        <span className="truncate">{label}</span>
+      </Link>
     );
   }
   return (
     <Link
       to={to}
-      className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
-        active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+      activeOptions={{ exact: true }}
+      aria-current={active ? "page" : undefined}
+      className={`flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm transition-colors ${
+        active
+          ? "bg-primary-soft font-semibold text-foreground [&_svg]:text-primary"
+          : "text-muted-foreground hover:bg-primary-soft/60 hover:text-foreground"
       }`}
     >
       {icon}
@@ -147,97 +105,257 @@ function NavLink({ to, icon, label, soon }: { to: string; icon: React.ReactNode;
   );
 }
 
-function NavGroup({ label, children }: { label: string; children: React.ReactNode }) {
+/** Library's children, indented under it as in the reference. Exact-prefix match so Từ vựng ≠ Kanji. */
+function SubLink({ to, icon, label }: { to: string; icon: React.ReactNode; label: string }) {
+  const active = usePath().startsWith(to);
   return (
-    <div>
-      <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">{label}</p>
-      <div className="space-y-0.5">{children}</div>
-    </div>
+    <Link
+      to={to}
+      activeOptions={{ exact: true }}
+      aria-current={active ? "page" : undefined}
+      className={`ml-5 flex min-h-9 items-center gap-3 rounded-xl px-3 text-[0.8125rem] transition-colors ${
+        active
+          ? "font-semibold text-primary"
+          : "text-muted-foreground hover:bg-primary-soft/60 hover:text-foreground"
+      }`}
+    >
+      {icon}
+      {label}
+    </Link>
   );
 }
 
-function MobileNav() {
-  const path = usePathStatusQuery();
+function Wordmark() {
   return (
-    <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 border-t border-border/70 bg-background/90 backdrop-blur-xl">
-      <div className="flex justify-around py-2">
-        {/* Learning Path on: Today takes the Home slot so the bar keeps 5 items. */}
-        {path.data?.enabled ? (
-          <NavLink to="/app/path" icon={<CalendarCheck className="w-5 h-5" />} label="Hôm nay" />
-        ) : (
-          <NavLink to="/app" icon={<LayoutDashboard className="w-5 h-5" />} label="Home" />
+    <Link to="/app" className="flex min-h-11 items-center" aria-label="VocaPet, về Hôm nay">
+      <Logo />
+    </Link>
+  );
+}
+
+function Streak() {
+  const { state } = useGame();
+  const { data: me } = useMeQuery();
+  const streak = me?.streak ?? state.streak;
+  return (
+    <span className="flex items-center gap-2 text-sm" aria-label={`${streak} ngày học liên tiếp`}>
+      <span
+        aria-hidden
+        className="studio-seal"
+        data-state={streak > 0 ? "done" : "empty"}
+        style={{ "--seal-size": "1.5rem" } as React.CSSProperties}
+      >
+        {streak > 0 ? "済" : ""}
+      </span>
+      <span className="tabular-nums">
+        <b>{streak}</b> <span className="studio-muted">ngày liên tiếp</span>
+      </span>
+    </span>
+  );
+}
+
+function AccountMenu({ withName, extra }: { withName?: boolean; extra?: boolean }) {
+  const { state } = useGame();
+  const logout = useAuthStore((auth) => auth.logout);
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const { data: me } = useMeQuery();
+  const avatarEmoji = me?.avatar ? (avatarMap[me.avatar] ?? "🦊") : state.user.avatarEmoji;
+  const displayName = me?.name || state.user.displayName || "Bạn";
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className="flex min-h-11 min-w-11 items-center gap-2 rounded-[var(--radius)] px-1.5 text-sm transition-colors hover:bg-sheet"
+          aria-label="Mở menu tài khoản"
+        >
+          <span
+            aria-hidden
+            className="grid h-8 w-8 place-items-center rounded-full bg-sheet text-base"
+          >
+            {avatarEmoji}
+          </span>
+          {withName && <span className="max-w-32 truncate font-medium">{displayName}</span>}
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuLabel>
+          <p className="truncate font-semibold">{displayName}</p>
+          {me?.email && (
+            <p className="mt-0.5 truncate text-xs font-normal text-muted-foreground">{me.email}</p>
+          )}
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {extra && (
+          <DropdownMenuItem onSelect={() => navigate({ to: "/app/listening" })}>
+            <Headphones className="mr-2 h-4 w-4" />
+            Luyện nghe
+          </DropdownMenuItem>
         )}
-        <NavLink to="/app/japanese/alphabet" icon={<Languages className="w-5 h-5" />} label="Alphabet" />
-        <NavLink to="/app/japanese/tango" icon={<BookOpen className="w-5 h-5" />} label="Vocab" />
-        <NavLink to="/app/decks" icon={<Library className="w-5 h-5" />} label="Flashcards" />
-        <NavLink to="/app/profile" icon={<User className="w-5 h-5" />} label="Settings" />
-      </div>
-    </nav>
+        {extra && (
+          <DropdownMenuItem onSelect={() => navigate({ to: "/app/shadowing" })}>
+            <Mic className="mr-2 h-4 w-4" />
+            Shadowing
+          </DropdownMenuItem>
+        )}
+        {extra && (
+          <DropdownMenuItem onSelect={() => navigate({ to: "/app/decks" })}>
+            <Layers className="mr-2 h-4 w-4" />
+            Flashcards
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuItem onSelect={() => navigate({ to: "/app/pets" })}>
+          <PawPrint className="mr-2 h-4 w-4" />
+          Thú cưng
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => navigate({ to: "/app/profile" })}>
+          <Settings className="mr-2 h-4 w-4" />
+          Cài đặt
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          className="text-destructive focus:text-destructive"
+          onSelect={() => {
+            logout();
+            queryClient.clear(); // the next account must not see this one's cached data
+            navigate({ to: "/login" });
+          }}
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          Đăng xuất
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
 function DesktopSidebar() {
   const path = usePathStatusQuery();
   return (
-    <aside className="hidden w-60 shrink-0 flex-col p-3 md:sticky md:top-0 md:flex md:h-screen">
-      <Link to="/app" className="flex items-center gap-3 rounded-xl px-2 py-2">
-        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-xl">🌱</span>
-        <span className="grid leading-tight">
-          <span className="text-base font-bold tracking-tight">VocaPet</span>
-          <span className="text-[11px] text-muted-foreground">Study companion</span>
-        </span>
-      </Link>
-
-      <Button asChild className="btn-pop mt-4 w-full justify-start">
-        <Link to="/app/decks">
-          <BookOpen className="mr-2 h-4 w-4" />
-          Start studying
-        </Link>
-      </Button>
-
-      <nav className="mt-6 flex-1 space-y-6 overflow-y-auto">
-        <NavGroup label="Main">
-          {path.data?.enabled && <NavLink to="/app/path" icon={<CalendarCheck className="w-4 h-4" />} label="Hôm nay" />}
-          <NavLink to="/app" icon={<LayoutDashboard className="w-4 h-4" />} label="Dashboard" />
-        </NavGroup>
-        <NavGroup label="Learning">
-          <NavLink to="/app/japanese/alphabet" icon={<Languages className="w-4 h-4" />} label="Alphabet" />
-          <NavLink to="/app/japanese/tango" icon={<BookOpen className="w-4 h-4" />} label="Vocabulary" />
-          <NavLink to="/app/japanese/kanji" icon={<Sparkles className="w-4 h-4" />} label="Kanji" />
-          <NavLink to="/app/japanese/grammar" icon={<ScrollText className="w-4 h-4" />} label="Grammar" />
-          <NavLink to="/app/japanese/listening" icon={<Mic className="w-4 h-4" />} label="Listening" soon />
-          <NavLink to="/app/japanese/jlpt" icon={<GraduationCap className="w-4 h-4" />} label="JLPT Practice" soon />
-        </NavGroup>
-        <NavGroup label="Practice">
-          <NavLink to="/app/decks" icon={<Layers className="w-4 h-4" />} label="Flashcards" />
-          <NavLink to="/app/review" icon={<Repeat className="w-4 h-4" />} label="Review Center" />
-          <NavLink to="/app/vocabulary" icon={<Search className="w-4 h-4" />} label="My Vocabulary" soon />
-          <NavLink to="/app/reader" icon={<BookOpen className="w-4 h-4" />} label="Reader" />
-        </NavGroup>
-        <NavGroup label="Personal">
-          <NavLink to="/app/achievements" icon={<Trophy className="w-4 h-4" />} label="My Progress" />
-          <NavLink to="/app/tasks" icon={<Target className="w-4 h-4" />} label="Missions" />
-          <NavLink to="/app/profile" icon={<User className="w-4 h-4" />} label="Settings" />
-        </NavGroup>
+    <aside className="hidden w-60 shrink-0 flex-col border-r border-border/70 bg-sheet/80 px-3 py-5 md:sticky md:top-0 md:flex md:h-screen">
+      <div className="px-2">
+        <Wordmark />
+      </div>
+      <nav aria-label="Điều hướng chính" className="mt-8 flex-1 space-y-0.5 overflow-y-auto">
+        {path.data?.enabled && (
+          <NavLink
+            to="/app"
+            match={["/app/path"]}
+            icon={<CalendarCheck className="h-4 w-4" />}
+            label="Hôm nay"
+          />
+        )}
+        <NavLink to="/app/review" icon={<Repeat className="h-4 w-4" />} label="Ôn tập" />
+        <NavLink
+          to="/app/library"
+          match={["/app/reader"]}
+          icon={<Library className="h-4 w-4" />}
+          label="Thư viện"
+        />
+        <div className="space-y-0.5" role="group" aria-label="Trong thư viện">
+          <SubLink to="/app/japanese/grammar" icon={<BookOpen className="h-4 w-4" />} label="Ngữ pháp" />
+          <SubLink to="/app/japanese/tango" icon={<Languages className="h-4 w-4" />} label="Từ vựng" />
+          <SubLink to="/app/japanese/kanji" icon={<Sparkles className="h-4 w-4" />} label="Kanji" />
+          <SubLink to="/app/japanese/alphabet" icon={<Type className="h-4 w-4" />} label="Bảng chữ cái" />
+        </div>
+        <NavLink to="/app/listening" icon={<Headphones className="h-4 w-4" />} label="Luyện nghe" />
+        <NavLink to="/app/shadowing" icon={<Mic className="h-4 w-4" />} label="Shadowing" />
+        <NavLink to="/app/practice" icon={<Dumbbell className="h-4 w-4" />} label="Luyện tập" />
+        <NavLink to="/app/decks" icon={<Layers className="h-4 w-4" />} label="Flashcards" />
+        <NavLink to="/app/progress" icon={<TrendingUp className="h-4 w-4" />} label="Tiến độ" />
+        <NavLink to="/app/profile" icon={<Settings className="h-4 w-4" />} label="Cài đặt" />
       </nav>
+      <div className="space-y-3 border-t border-border px-2 pt-4">
+        <Streak />
+        <AccountMenu withName />
+      </div>
     </aside>
   );
 }
 
+function MobileTopBar() {
+  return (
+    <header className="flex h-14 items-center gap-3 border-b border-border px-4 md:hidden">
+      <Wordmark />
+      <div className="ml-auto flex items-center gap-2">
+        <Streak />
+        <AccountMenu extra />
+      </div>
+    </header>
+  );
+}
+
+function MobileNav() {
+  const path = usePathStatusQuery();
+  return (
+    <nav
+      aria-label="Điều hướng chính"
+      className="fixed inset-x-0 bottom-0 z-30 flex border-t border-border bg-background pb-[env(safe-area-inset-bottom)] md:hidden"
+    >
+      {path.data?.enabled && (
+        <NavLink
+          compact
+          to="/app"
+          match={["/app/path"]}
+          icon={<CalendarCheck className="h-5 w-5" />}
+          label="Hôm nay"
+        />
+      )}
+      <NavLink compact to="/app/review" icon={<Repeat className="h-5 w-5" />} label="Ôn tập" />
+      <NavLink
+        compact
+        to="/app/library"
+        match={LIBRARY_PATHS}
+        icon={<Library className="h-5 w-5" />}
+        label="Thư viện"
+      />
+      <NavLink
+        compact
+        to="/app/practice"
+        icon={<Dumbbell className="h-5 w-5" />}
+        label="Luyện tập"
+      />
+      <NavLink
+        compact
+        to="/app/progress"
+        icon={<TrendingUp className="h-5 w-5" />}
+        label="Tiến độ"
+      />
+    </nav>
+  );
+}
+
+function sceneryFor(path: string): LandscapeVariant {
+  if (path.startsWith("/app/path")) return "plan";
+  if (path.startsWith("/app/library") || path.startsWith("/app/japanese") || path.startsWith("/app/decks")) return "library";
+  if (path.startsWith("/app/review") || path.startsWith("/app/practice") || path.startsWith("/app/listening") || path.startsWith("/app/shadowing")) return "flash";
+  if (path.startsWith("/app/progress")) return "progress";
+  return "today";
+}
+
 function ShellInner() {
+  usePetSync();
+  const path = usePath();
+  if (FOCUS_PATHS.some((p) => path.startsWith(p))) {
+    return (
+      <main className="min-h-screen">
+        <Outlet />
+      </main>
+    );
+  }
   return (
     <div className="min-h-screen pb-20 md:flex md:pb-0">
       <DesktopSidebar />
-
-      <div className="flex min-h-screen min-w-0 flex-1 flex-col md:h-screen md:py-3 md:pr-3">
-        <div className="flex min-h-0 flex-1 flex-col md:overflow-hidden md:rounded-2xl md:border md:border-border/70 md:bg-card/80 md:shadow-sm md:backdrop-blur-xl">
-          <TopBar />
-          <main className="min-h-0 flex-1 overflow-y-auto px-4 py-6 md:px-8 md:py-8">
-            <Outlet />
-          </main>
+      <div className="relative min-w-0 flex-1">
+        <div aria-hidden className="pointer-events-none fixed inset-0 md:left-60">
+          <Landscape variant={sceneryFor(path)} />
         </div>
+        <MobileTopBar />
+        <main className="relative px-4 py-6 md:px-8 md:py-10 lg:px-12">
+          <Outlet />
+        </main>
       </div>
-
       <MobileNav />
     </div>
   );

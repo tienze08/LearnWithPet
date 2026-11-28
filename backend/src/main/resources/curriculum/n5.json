@@ -1,204 +1,111 @@
 {
   "level": "N5",
-  "version": 1,
+  "version": 3,
   "paths": [
     {
       "id": "n5-minna-1-5",
       "title": "Lộ trình N5 (Minna bài 1–5)",
-      "scope": "Ngữ pháp, từ vựng và Kanji của Minna no Nihongo bài 1–5",
-      "units": ["n5-u01", "n5-u02", "n5-u03", "n5-u04", "n5-u05"]
+      "scope": "Bảng chữ cái Hiragana, Katakana và Minna no Nihongo bài 1–5",
+      "units": [
+        "n5-h01",
+        "n5-h02",
+        "n5-h03",
+        "n5-h04",
+        "n5-h05",
+        "n5-h06",
+        "n5-h07",
+        "n5-h08",
+        "n5-h09",
+        "n5-k01",
+        "n5-k02",
+        "n5-k03",
+        "n5-k04",
+        "n5-k05",
+        "n5-k06",
+        "n5-k07",
+        "n5-k08",
+        "n5-k09",
+        "n5-m01",
+        "n5-m02",
+        "n5-m03",
+        "n5-m04",
+        "n5-m05",
+        "n5-u01",
+        "n5-u02",
+        "n5-u03",
+        "n5-u04",
+        "n5-u05",
+        "n5-u06",
+        "n5-u07",
+        "n5-u08",
+        "n5-u09",
+        "n5-u10",
+        "n5-u11",
+        "n5-u12",
+        "n5-u13",
+        "n5-u14",
+        "n5-u15",
+        "n5-u16",
+        "n5-u17",
+        "n5-u18",
+        "n5-u19",
+        "n5-u20",
+        "n5-u21",
+        "n5-u22"
+      ]
     }
   ],
+  "chapters": [
+    {"id": "n5-ch1", "title": "Hiragana", "goal": "Đọc được toàn bộ Hiragana, kể cả âm đục và âm ghép", "units": ["n5-h01", "n5-h02", "n5-h03", "n5-h04", "n5-h05", "n5-h06", "n5-h07", "n5-h08", "n5-h09"]},
+    {"id": "n5-ch2", "title": "Katakana", "goal": "Đọc được toàn bộ Katakana cho từ mượn và tên riêng", "units": ["n5-k01", "n5-k02", "n5-k03", "n5-k04", "n5-k05", "n5-k06", "n5-k07", "n5-k08", "n5-k09"]},
+    {"id": "n5-ch3", "title": "Kana Mastery", "goal": "Đọc từ kana trôi chảy và không nhầm các ký tự giống nhau", "units": ["n5-m01", "n5-m02", "n5-m03", "n5-m04", "n5-m05"]},
+    {"id": "n5-ch4", "title": "Minna no Nihongo bài 1–5", "goal": "Giới thiệu bản thân, hỏi đáp và kể lịch sinh hoạt cơ bản", "units": ["n5-u01", "n5-u02", "n5-u03", "n5-u04", "n5-u05", "n5-u06", "n5-u07", "n5-u08", "n5-u09", "n5-u10", "n5-u11", "n5-u12", "n5-u13", "n5-u14", "n5-u15", "n5-u16", "n5-u17", "n5-u18", "n5-u19", "n5-u20", "n5-u21", "n5-u22"]}
+  ],
   "units": [
-    {
-      "id": "n5-u01", "order": 1, "topic": "Giới thiệu bản thân", "minnaLesson": 1,
-      "grammar": ["wa", "desu", "de-wa-arimasen-ja-nai", "ka-question", "mo", "no"],
-      "vocabLessons": [1],
-      "kanji": ["人", "日", "本", "学", "生", "先", "大"],
-      "prerequisites": [],
-      "notes": []
-    },
-    {
-      "id": "n5-u02", "order": 2, "topic": "Đồ vật quanh ta", "minnaLesson": 2,
-      "grammar": ["kore-sore-are-dore", "kono-sono-ano-dono", "ka-or"],
-      "vocabLessons": [2],
-      "kanji": ["新", "聞", "書", "手"],
-      "prerequisites": ["n5-u01"],
-      "notes": [
-        "ka-or: Minna bài 2 dạy câu hỏi lựa chọn「〜ですか、〜ですか」, còn OpenJLPT 'ka-or' là「N か N」nối danh từ. Gần nghĩa nhưng không trùng, cân nhắc dời sang sau.",
-        "手: lấy từ 手帳 (sổ tay) của bài 2; nếu thấy gượng thì dời sang n5-u16 (bộ phận cơ thể)."
-      ]
-    },
-    {
-      "id": "n5-u03", "order": 3, "topic": "Hỏi chỗ và mua sắm", "minnaLesson": 3,
-      "grammar": ["koko-soko-asoko-doko", "o-kudasai"],
-      "vocabLessons": [3],
-      "kanji": ["一", "二", "三", "上", "下", "中", "校", "買"],
-      "prerequisites": ["n5-u02"],
-      "notes": [
-        "o-kudasai: Minna bài 3 dùng「これをください」như một cụm cố định, trước khi bài 6 dạy trợ từ を. Giữ ở đây vì đúng tình huống mua sắm.",
-        "一 二 三 (giá tiền) và 上 下 中 (tầng, 地下) là lựa chọn theo ngữ cảnh. 校 (学校) không có trong từ vựng bài 3."
-      ]
-    },
-    {
-      "id": "n5-u04", "order": 4, "topic": "Giờ giấc và lịch sinh hoạt", "minnaLesson": 4,
-      "grammar": ["masu", "masen", "mashita", "masen-deshita", "ni-time", "kara-from", "made", "to-and", "ne"],
-      "vocabLessons": [4],
-      "kanji": ["月", "火", "水", "木", "金", "土", "前", "後", "明"],
-      "prerequisites": ["n5-u03"],
-      "notes": [
-        "Unit nặng nhất của phạm vi bài 1–5 (9 mẫu, 9 Kanji). Engine chia theo chỉ tiêu ngày nên không học hết trong một ngày, nhưng có thể muốn tách thành 2 unit.",
-        "ne: Minna giới thiệu〜ね khá sớm (bài 4–5); đặt ở đây là ước lượng."
-      ]
-    },
-    {
-      "id": "n5-u05", "order": 5, "topic": "Đi lại", "minnaLesson": 5,
-      "grammar": ["e", "de-means", "to-with", "yo", "nani-mo-nai-dare-mo-nai"],
-      "vocabLessons": [5],
-      "kanji": ["行", "来", "年", "友"],
-      "prerequisites": ["n5-u04"],
-      "notes": [
-        "nani-mo-nai-dare-mo-nai: bài 5 chỉ có「どこ[へ]も行きません」; 何も/誰も xuất hiện ở bài 6 và 10. Có thể dời sang n5-u06."
-      ]
-    },
-    {
-      "id": "n5-u06", "order": 6, "topic": "Ăn uống và hoạt động hằng ngày", "minnaLesson": 6,
-      "grammar": ["o", "de-place", "masen-ka", "mashou"],
-      "vocabLessons": [],
-      "kanji": ["食", "飲", "見", "読", "話", "朝", "夜"],
-      "prerequisites": ["n5-u05"],
-      "notes": ["Chưa có từ vựng: seed Tango hiện chỉ có bài 1–5."]
-    },
-    {
-      "id": "n5-u07", "order": 7, "topic": "Cho và nhận", "minnaLesson": 7,
-      "grammar": ["ni-indirect-object", "mou-ta"],
-      "vocabLessons": [],
-      "kanji": ["父", "母", "子"],
-      "prerequisites": ["n5-u06"],
-      "notes": []
-    },
-    {
-      "id": "n5-u08", "order": 8, "topic": "Miêu tả người và đồ vật", "minnaLesson": 8,
-      "grammar": ["na-na-adjective", "ga-but", "amari-nai"],
-      "vocabLessons": [],
-      "kanji": ["高", "安", "古", "小", "白", "黒", "赤", "青"],
-      "prerequisites": ["n5-u07"],
-      "notes": ["Phủ định tính từ đuôi い (〜くない) Minna dạy ở bài 8, nhưng OpenJLPT gộp nó với thể quá khứ trong 'ku-nai-katta-ku-nakatta' nên mẫu đó được đặt ở n5-u12."]
-    },
-    {
-      "id": "n5-u09", "order": 9, "topic": "Sở thích và khả năng", "minnaLesson": 9,
-      "grammar": ["ga-suki-ga-kirai", "ga-jouzu-ga-heta", "kara-reason", "zenzen-nai", "ga-subject"],
-      "vocabLessons": [],
-      "kanji": [],
-      "prerequisites": ["n5-u08"],
-      "notes": ["ga-subject: が chỉ chủ ngữ được dùng rải rác từ bài 9 (好き/上手) và bài 10 (あります). Đặt ở đây là ước lượng."]
-    },
-    {
-      "id": "n5-u10", "order": 10, "topic": "Vị trí và sự tồn tại", "minnaLesson": 10,
-      "grammar": ["ga-aru-ga-iru", "ni-location", "ya"],
-      "vocabLessons": [],
-      "kanji": ["左", "右", "東", "西", "南", "北", "男", "女"],
-      "prerequisites": ["n5-u09"],
-      "notes": []
-    },
-    {
-      "id": "n5-u11", "order": 11, "topic": "Số lượng và tần suất", "minnaLesson": 11,
-      "grammar": ["ni-frequency", "dake", "kurai-gurai"],
-      "vocabLessons": [],
-      "kanji": [],
-      "prerequisites": ["n5-u10"],
-      "notes": []
-    },
-    {
-      "id": "n5-u12", "order": 12, "topic": "So sánh và kể chuyện đã qua", "minnaLesson": 12,
-      "grammar": ["deshita", "ku-nai-katta-ku-nakatta", "yori", "no-hou-ga-yori", "to-to-dochira-ga", "no-naka-de-ga-ichiban"],
-      "vocabLessons": [],
-      "kanji": ["長", "多", "少"],
-      "prerequisites": ["n5-u11"],
-      "notes": ["deshita: でした có thể đã cần từ bài 4 (きのうは休みでした). Nếu vậy thì chuyển lên n5-u04."]
-    },
-    {
-      "id": "n5-u13", "order": 13, "topic": "Mong muốn và đi chơi", "minnaLesson": 13,
-      "grammar": ["ga-hoshii", "tai", "ni-iku", "ni-destination", "nani-ka-dare-ka-doko-ka", "goro"],
-      "vocabLessons": [],
-      "kanji": ["山", "川", "田", "夕"],
-      "prerequisites": ["n5-u12"],
-      "notes": [
-        "ni-destination: に chỉ đích đến (〜に行きます) thường đi cùng へ ở bài 5. Đặt ở đây cùng〜に行く cho dễ phân biệt; có thể dời lên n5-u05.",
-        "goro: không chắc Minna dạy〜ごろ ở bài nào (khả năng bài 13). Cần bạn kiểm tra."
-      ]
-    },
-    {
-      "id": "n5-u14", "order": 14, "topic": "Nhờ vả và việc đang làm", "minnaLesson": 14,
-      "grammar": ["te-kudasai", "te-iru", "mashou-ka"],
-      "vocabLessons": [],
-      "kanji": [],
-      "prerequisites": ["n5-u13"],
-      "notes": []
-    },
-    {
-      "id": "n5-u15", "order": 15, "topic": "Xin phép và quy định", "minnaLesson": 15,
-      "grammar": ["te-mo-ii", "te-wa-ikenai"],
-      "vocabLessons": [],
-      "kanji": [],
-      "prerequisites": ["n5-u14"],
-      "notes": []
-    },
-    {
-      "id": "n5-u16", "order": 16, "topic": "Kể trình tự trong ngày", "minnaLesson": 16,
-      "grammar": ["te", "te-kara", "kute-de"],
-      "vocabLessons": [],
-      "kanji": ["目", "耳", "足", "口", "出", "入"],
-      "prerequisites": ["n5-u15"],
-      "notes": []
-    },
-    {
-      "id": "n5-u17", "order": 17, "topic": "Việc phải làm và không cần làm", "minnaLesson": 17,
-      "grammar": ["nai", "naide-kudasai", "nakereba-naranai-nakute-wa-ikenai", "nakute-mo-ii"],
-      "vocabLessons": [],
-      "kanji": [],
-      "prerequisites": ["n5-u16"],
-      "notes": []
-    },
-    {
-      "id": "n5-u18", "order": 18, "topic": "Trước khi làm gì đó", "minnaLesson": 18,
-      "grammar": ["mae-ni"],
-      "vocabLessons": [],
-      "kanji": [],
-      "prerequisites": ["n5-u17"],
-      "notes": ["Minna bài 18 còn có〜ことができます, nhưng OpenJLPT N5 không có mẫu này."]
-    },
-    {
-      "id": "n5-u19", "order": 19, "topic": "Kinh nghiệm và thay đổi", "minnaLesson": 19,
-      "grammar": ["ta", "ta-koto-ga-aru", "tari-tari-suru", "ku-naru-ni-naru"],
-      "vocabLessons": [],
-      "kanji": [],
-      "prerequisites": ["n5-u18"],
-      "notes": []
-    },
-    {
-      "id": "n5-u20", "order": 20, "topic": "Nói chuyện thân mật", "minnaLesson": 20,
-      "grammar": ["da"],
-      "vocabLessons": [],
-      "kanji": [],
-      "prerequisites": ["n5-u19"],
-      "notes": []
-    },
-    {
-      "id": "n5-u21", "order": 21, "topic": "Phỏng đoán và gọi tên", "minnaLesson": 21,
-      "grammar": ["deshou", "to-iu-named"],
-      "vocabLessons": [],
-      "kanji": [],
-      "prerequisites": ["n5-u20"],
-      "notes": ["to-iu-named:〜という không chắc thuộc bài 21. Cần bạn kiểm tra."]
-    },
-    {
-      "id": "n5-u22", "order": 22, "topic": "Bổ sung N5", "minnaLesson": null,
-      "grammar": ["ato-de", "nagara", "mada-te-inai", "ni-suru"],
-      "vocabLessons": [],
-      "kanji": [],
-      "prerequisites": ["n5-u21"],
-      "notes": ["OpenJLPT xếp 4 mẫu này vào N5, nhưng Minna dạy chúng sau bài 25 (thuộc N4). Gom lại ở cuối."]
-    }
+    {"id":"n5-h01","order":1,"topic":"Hiragana: năm nguyên âm あ い う え お","kana":[{"script":"hiragana","section":"basic","chars":["あ","い","う","え","お"]}],"grammar":[],"vocabLessons":[],"kanji":[],"prerequisites":[],"notes":[]},
+    {"id":"n5-h02","order":2,"topic":"Hiragana: hàng K và S","kana":[{"script":"hiragana","section":"basic","chars":["か","き","く","け","こ","さ","し","す","せ","そ"]}],"grammar":[],"vocabLessons":[],"kanji":[],"prerequisites":["n5-h01"],"notes":[]},
+    {"id":"n5-h03","order":3,"topic":"Hiragana: hàng T và N","kana":[{"script":"hiragana","section":"basic","chars":["た","ち","つ","て","と","な","に","ぬ","ね","の"]}],"grammar":[],"vocabLessons":[],"kanji":[],"prerequisites":["n5-h02"],"notes":[]},
+    {"id":"n5-h04","order":4,"topic":"Hiragana: hàng H và M","kana":[{"script":"hiragana","section":"basic","chars":["は","ひ","ふ","へ","ほ","ま","み","む","め","も"]}],"grammar":[],"vocabLessons":[],"kanji":[],"prerequisites":["n5-h03"],"notes":[]},
+    {"id":"n5-h05","order":5,"topic":"Hiragana: hàng Y, R, W và ん","kana":[{"script":"hiragana","section":"basic","chars":["や","ゆ","よ","ら","り","る","れ","ろ","わ","を","ん"]}],"grammar":[],"vocabLessons":[],"kanji":[],"prerequisites":["n5-h04"],"notes":[]},
+    {"id":"n5-h06","order":6,"topic":"Ôn Hiragana cơ bản","reviewOf":["n5-h01","n5-h02","n5-h03","n5-h04","n5-h05"],"grammar":[],"vocabLessons":[],"kanji":[],"prerequisites":["n5-h05"],"notes":[]},
+    {"id":"n5-h07","order":7,"topic":"Hiragana: âm đục và bán đục","kana":[{"script":"hiragana","section":"dakuten","chars":["が","ぎ","ぐ","げ","ご","ざ","じ","ず","ぜ","ぞ","だ","ぢ","づ","で","ど","ば","び","ぶ","べ","ぼ"]},{"script":"hiragana","section":"handakuten","chars":["ぱ","ぴ","ぷ","ぺ","ぽ"]}],"grammar":[],"vocabLessons":[],"kanji":[],"prerequisites":["n5-h06"],"notes":[]},
+    {"id":"n5-h08","order":8,"topic":"Hiragana: âm ghép","kana":[{"script":"hiragana","section":"yoon","chars":["きゃ","きゅ","きょ","しゃ","しゅ","しょ","ちゃ","ちゅ","ちょ","にゃ","にゅ","にょ","ひゃ","ひゅ","ひょ","みゃ","みゅ","みょ","りゃ","りゅ","りょ","ぎゃ","ぎゅ","ぎょ","じゃ","じゅ","じょ","びゃ","びゅ","びょ","ぴゃ","ぴゅ","ぴょ"]}],"grammar":[],"vocabLessons":[],"kanji":[],"prerequisites":["n5-h07"],"notes":[]},
+    {"id":"n5-h09","order":9,"topic":"Kiểm tra tổng hợp Hiragana","kind":"TEST","reviewOf":["n5-h01","n5-h02","n5-h03","n5-h04","n5-h05","n5-h07","n5-h08"],"grammar":[],"vocabLessons":[],"kanji":[],"prerequisites":["n5-h08"],"notes":[]},
+    {"id":"n5-k01","order":10,"topic":"Katakana: năm nguyên âm ア イ ウ エ オ","kana":[{"script":"katakana","section":"basic","chars":["ア","イ","ウ","エ","オ"]}],"grammar":[],"vocabLessons":[],"kanji":[],"prerequisites":["n5-h09"],"notes":[]},
+    {"id":"n5-k02","order":11,"topic":"Katakana: hàng K và S","kana":[{"script":"katakana","section":"basic","chars":["カ","キ","ク","ケ","コ","サ","シ","ス","セ","ソ"]}],"grammar":[],"vocabLessons":[],"kanji":[],"prerequisites":["n5-k01"],"notes":[]},
+    {"id":"n5-k03","order":12,"topic":"Katakana: hàng T và N","kana":[{"script":"katakana","section":"basic","chars":["タ","チ","ツ","テ","ト","ナ","ニ","ヌ","ネ","ノ"]}],"grammar":[],"vocabLessons":[],"kanji":[],"prerequisites":["n5-k02"],"notes":[]},
+    {"id":"n5-k04","order":13,"topic":"Katakana: hàng H và M","kana":[{"script":"katakana","section":"basic","chars":["ハ","ヒ","フ","ヘ","ホ","マ","ミ","ム","メ","モ"]}],"grammar":[],"vocabLessons":[],"kanji":[],"prerequisites":["n5-k03"],"notes":[]},
+    {"id":"n5-k05","order":14,"topic":"Katakana: hàng Y, R, W và ン","kana":[{"script":"katakana","section":"basic","chars":["ヤ","ユ","ヨ","ラ","リ","ル","レ","ロ","ワ","ヲ","ン"]}],"grammar":[],"vocabLessons":[],"kanji":[],"prerequisites":["n5-k04"],"notes":[]},
+    {"id":"n5-k06","order":15,"topic":"Ôn Katakana cơ bản","reviewOf":["n5-k01","n5-k02","n5-k03","n5-k04","n5-k05"],"grammar":[],"vocabLessons":[],"kanji":[],"prerequisites":["n5-k05"],"notes":[]},
+    {"id":"n5-k07","order":16,"topic":"Katakana: âm đục và bán đục","kana":[{"script":"katakana","section":"dakuten","chars":["ガ","ギ","グ","ゲ","ゴ","ザ","ジ","ズ","ゼ","ゾ","ダ","ヂ","ヅ","デ","ド","バ","ビ","ブ","ベ","ボ"]},{"script":"katakana","section":"handakuten","chars":["パ","ピ","プ","ペ","ポ"]}],"grammar":[],"vocabLessons":[],"kanji":[],"prerequisites":["n5-k06"],"notes":[]},
+    {"id":"n5-k08","order":17,"topic":"Katakana: âm ghép","kana":[{"script":"katakana","section":"yoon","chars":["キャ","キュ","キョ","シャ","シュ","ショ","チャ","チュ","チョ","ニャ","ニュ","ニョ","ヒャ","ヒュ","ヒョ","ミャ","ミュ","ミョ","リャ","リュ","リョ","ギャ","ギュ","ギョ","ジャ","ジュ","ジョ","ビャ","ビュ","ビョ","ピャ","ピュ","ピョ"]}],"grammar":[],"vocabLessons":[],"kanji":[],"prerequisites":["n5-k07"],"notes":[]},
+    {"id":"n5-k09","order":18,"topic":"Kiểm tra tổng hợp Katakana","kind":"TEST","reviewOf":["n5-k01","n5-k02","n5-k03","n5-k04","n5-k05","n5-k07","n5-k08"],"grammar":[],"vocabLessons":[],"kanji":[],"prerequisites":["n5-k08"],"notes":[]},
+    {"id":"n5-m01","order":19,"topic":"Nhận diện ký tự Hiragana và Katakana","reviewOf":["n5-h01","n5-h02","n5-h03","n5-h04","n5-h05","n5-k01","n5-k02","n5-k03","n5-k04","n5-k05"],"grammar":[],"vocabLessons":[],"kanji":[],"prerequisites":["n5-k09"],"notes":[]},
+    {"id":"n5-m02","order":20,"topic":"Đọc từ viết bằng Hiragana","reviewOf":["n5-h01","n5-h02","n5-h03","n5-h04","n5-h05"],"grammar":[],"vocabLessons":[],"kanji":[],"prerequisites":["n5-m01"],"notes":[]},
+    {"id":"n5-m03","order":21,"topic":"Đọc từ viết bằng Katakana","reviewOf":["n5-k01","n5-k02","n5-k03","n5-k04","n5-k05"],"grammar":[],"vocabLessons":[],"kanji":[],"prerequisites":["n5-m02"],"notes":[]},
+    {"id":"n5-m04","order":22,"topic":"Phân biệt các ký tự dễ nhầm","reviewOf":["n5-h01","n5-h02","n5-h03","n5-h04","n5-h05","n5-k01","n5-k02","n5-k03","n5-k04","n5-k05"],"grammar":[],"vocabLessons":[],"kanji":[],"prerequisites":["n5-m03"],"notes":[]},
+    {"id":"n5-m05","order":23,"topic":"Kiểm tra tổng hợp Kana","kind":"TEST","reviewOf":["n5-h01","n5-h02","n5-h03","n5-h04","n5-h05","n5-h07","n5-h08","n5-k01","n5-k02","n5-k03","n5-k04","n5-k05","n5-k07","n5-k08"],"grammar":[],"vocabLessons":[],"kanji":[],"prerequisites":["n5-m04"],"notes":[]},
+    {"id":"n5-u01","order":24,"topic":"Giới thiệu bản thân","minnaLesson":1,"grammar":["wa","desu","de-wa-arimasen-ja-nai","ka-question","mo","no"],"vocabLessons":[1],"kanji":["人","日","本","学","生","先","大"],"prerequisites":["n5-m05"],"notes":["Mở sau khi đạt Kiểm tra tổng hợp Kana (n5-m05): từ vựng Minna viết bằng kana, nên kana phải chắc trước."]},
+    {"id":"n5-u02","order":25,"topic":"Đồ vật quanh ta","minnaLesson":2,"grammar":["kore-sore-are-dore","kono-sono-ano-dono","ka-or"],"vocabLessons":[2],"kanji":["新","聞","書","手"],"prerequisites":["n5-u01"],"notes":["ka-or: Minna bài 2 dạy câu hỏi lựa chọn「〜ですか、〜ですか」, còn OpenJLPT 'ka-or' là「N か N」nối danh từ. Gần nghĩa nhưng không trùng, cân nhắc dời sang sau.","手: lấy từ 手帳 (sổ tay) của bài 2; nếu thấy gượng thì dời sang n5-u16 (bộ phận cơ thể)."]},
+    {"id":"n5-u03","order":26,"topic":"Hỏi chỗ và mua sắm","minnaLesson":3,"grammar":["koko-soko-asoko-doko","o-kudasai"],"vocabLessons":[3],"kanji":["一","二","三","上","下","中","校","買"],"prerequisites":["n5-u02"],"notes":["o-kudasai: Minna bài 3 dùng「これをください」như một cụm cố định, trước khi bài 6 dạy trợ từ を. Giữ ở đây vì đúng tình huống mua sắm.","一 二 三 (giá tiền) và 上 下 中 (tầng, 地下) là lựa chọn theo ngữ cảnh. 校 (学校) không có trong từ vựng bài 3."]},
+    {"id":"n5-u04","order":27,"topic":"Giờ giấc và lịch sinh hoạt","minnaLesson":4,"grammar":["masu","masen","mashita","masen-deshita","ni-time","kara-from","made","to-and","ne"],"vocabLessons":[4],"kanji":["月","火","水","木","金","土","前","後","明"],"prerequisites":["n5-u03"],"notes":["Unit nặng nhất của phạm vi bài 1–5 (9 mẫu, 9 Kanji). Engine chia theo chỉ tiêu ngày nên không học hết trong một ngày, nhưng có thể muốn tách thành 2 unit.","ne: Minna giới thiệu〜ね khá sớm (bài 4–5); đặt ở đây là ước lượng."]},
+    {"id":"n5-u05","order":28,"topic":"Đi lại","minnaLesson":5,"grammar":["e","de-means","to-with","yo","nani-mo-nai-dare-mo-nai"],"vocabLessons":[5],"kanji":["行","来","年","友"],"prerequisites":["n5-u04"],"notes":["nani-mo-nai-dare-mo-nai: bài 5 chỉ có「どこ[へ]も行きません」; 何も/誰も xuất hiện ở bài 6 và 10. Có thể dời sang n5-u06."]},
+    {"id":"n5-u06","order":29,"topic":"Ăn uống và hoạt động hằng ngày","minnaLesson":6,"grammar":["o","de-place","masen-ka","mashou"],"vocabLessons":[],"kanji":["食","飲","見","読","話","朝","夜"],"prerequisites":["n5-u05"],"notes":["Chưa có từ vựng: seed Tango hiện chỉ có bài 1–5."]},
+    {"id":"n5-u07","order":30,"topic":"Cho và nhận","minnaLesson":7,"grammar":["ni-indirect-object","mou-ta"],"vocabLessons":[],"kanji":["父","母","子"],"prerequisites":["n5-u06"],"notes":[]},
+    {"id":"n5-u08","order":31,"topic":"Miêu tả người và đồ vật","minnaLesson":8,"grammar":["na-na-adjective","ga-but","amari-nai"],"vocabLessons":[],"kanji":["高","安","古","小","白","黒","赤","青"],"prerequisites":["n5-u07"],"notes":["Phủ định tính từ đuôi い (〜くない) Minna dạy ở bài 8, nhưng OpenJLPT gộp nó với thể quá khứ trong 'ku-nai-katta-ku-nakatta' nên mẫu đó được đặt ở n5-u12."]},
+    {"id":"n5-u09","order":32,"topic":"Sở thích và khả năng","minnaLesson":9,"grammar":["ga-suki-ga-kirai","ga-jouzu-ga-heta","kara-reason","zenzen-nai","ga-subject"],"vocabLessons":[],"kanji":[],"prerequisites":["n5-u08"],"notes":["ga-subject: が chỉ chủ ngữ được dùng rải rác từ bài 9 (好き/上手) và bài 10 (あります). Đặt ở đây là ước lượng."]},
+    {"id":"n5-u10","order":33,"topic":"Vị trí và sự tồn tại","minnaLesson":10,"grammar":["ga-aru-ga-iru","ni-location","ya"],"vocabLessons":[],"kanji":["左","右","東","西","南","北","男","女"],"prerequisites":["n5-u09"],"notes":[]},
+    {"id":"n5-u11","order":34,"topic":"Số lượng và tần suất","minnaLesson":11,"grammar":["ni-frequency","dake","kurai-gurai"],"vocabLessons":[],"kanji":[],"prerequisites":["n5-u10"],"notes":[]},
+    {"id":"n5-u12","order":35,"topic":"So sánh và kể chuyện đã qua","minnaLesson":12,"grammar":["deshita","ku-nai-katta-ku-nakatta","yori","no-hou-ga-yori","to-to-dochira-ga","no-naka-de-ga-ichiban"],"vocabLessons":[],"kanji":["長","多","少"],"prerequisites":["n5-u11"],"notes":["deshita: でした có thể đã cần từ bài 4 (きのうは休みでした). Nếu vậy thì chuyển lên n5-u04."]},
+    {"id":"n5-u13","order":36,"topic":"Mong muốn và đi chơi","minnaLesson":13,"grammar":["ga-hoshii","tai","ni-iku","ni-destination","nani-ka-dare-ka-doko-ka","goro"],"vocabLessons":[],"kanji":["山","川","田","夕"],"prerequisites":["n5-u12"],"notes":["ni-destination: に chỉ đích đến (〜に行きます) thường đi cùng へ ở bài 5. Đặt ở đây cùng〜に行く cho dễ phân biệt; có thể dời lên n5-u05.","goro: không chắc Minna dạy〜ごろ ở bài nào (khả năng bài 13). Cần bạn kiểm tra."]},
+    {"id":"n5-u14","order":37,"topic":"Nhờ vả và việc đang làm","minnaLesson":14,"grammar":["te-kudasai","te-iru","mashou-ka"],"vocabLessons":[],"kanji":[],"prerequisites":["n5-u13"],"notes":[]},
+    {"id":"n5-u15","order":38,"topic":"Xin phép và quy định","minnaLesson":15,"grammar":["te-mo-ii","te-wa-ikenai"],"vocabLessons":[],"kanji":[],"prerequisites":["n5-u14"],"notes":[]},
+    {"id":"n5-u16","order":39,"topic":"Kể trình tự trong ngày","minnaLesson":16,"grammar":["te","te-kara","kute-de"],"vocabLessons":[],"kanji":["目","耳","足","口","出","入"],"prerequisites":["n5-u15"],"notes":[]},
+    {"id":"n5-u17","order":40,"topic":"Việc phải làm và không cần làm","minnaLesson":17,"grammar":["nai","naide-kudasai","nakereba-naranai-nakute-wa-ikenai","nakute-mo-ii"],"vocabLessons":[],"kanji":[],"prerequisites":["n5-u16"],"notes":[]},
+    {"id":"n5-u18","order":41,"topic":"Trước khi làm gì đó","minnaLesson":18,"grammar":["mae-ni"],"vocabLessons":[],"kanji":[],"prerequisites":["n5-u17"],"notes":["Minna bài 18 còn có〜ことができます, nhưng OpenJLPT N5 không có mẫu này."]},
+    {"id":"n5-u19","order":42,"topic":"Kinh nghiệm và thay đổi","minnaLesson":19,"grammar":["ta","ta-koto-ga-aru","tari-tari-suru","ku-naru-ni-naru"],"vocabLessons":[],"kanji":[],"prerequisites":["n5-u18"],"notes":[]},
+    {"id":"n5-u20","order":43,"topic":"Nói chuyện thân mật","minnaLesson":20,"grammar":["da"],"vocabLessons":[],"kanji":[],"prerequisites":["n5-u19"],"notes":[]},
+    {"id":"n5-u21","order":44,"topic":"Phỏng đoán và gọi tên","minnaLesson":21,"grammar":["deshou","to-iu-named"],"vocabLessons":[],"kanji":[],"prerequisites":["n5-u20"],"notes":["to-iu-named:〜という không chắc thuộc bài 21. Cần bạn kiểm tra."]},
+    {"id":"n5-u22","order":45,"topic":"Bổ sung N5","minnaLesson":null,"grammar":["ato-de","nagara","mada-te-inai","ni-suru"],"vocabLessons":[],"kanji":[],"prerequisites":["n5-u21"],"notes":["OpenJLPT xếp 4 mẫu này vào N5, nhưng Minna dạy chúng sau bài 25 (thuộc N4). Gom lại ở cuối."]}
   ]
 }

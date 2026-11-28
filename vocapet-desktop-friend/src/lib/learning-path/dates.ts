@@ -29,3 +29,18 @@ export const weekdayVi = (iso: string) =>
     day: "numeric",
     month: "numeric",
   });
+
+/** "hôm nay", "ngày mai" or "T4, 27/11": a planned day said relative to the learner's today. */
+export function dayLabelVi(iso: string, todayIso: string) {
+  const diff = Math.round(
+    (new Date(`${iso}T00:00:00`).getTime() - new Date(`${todayIso}T00:00:00`).getTime()) /
+      86_400_000,
+  );
+  return diff === 0
+    ? "hôm nay"
+    : diff === 1
+      ? "ngày mai"
+      : diff === -1
+        ? "hôm qua"
+        : weekdayVi(iso);
+}

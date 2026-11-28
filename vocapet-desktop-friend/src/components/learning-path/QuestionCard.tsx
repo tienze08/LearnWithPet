@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Check, Flag, X } from "lucide-react";
+import { Check, Flag, Volume2, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +12,11 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { reportQuestion } from "@/api/learning-path.api";
+import { usePathStatusQuery } from "@/hooks/queries/learning-path.queries";
 import type { Question } from "@/lib/learning-path/questions";
+import { Companion } from "./studio";
+import { speakKana } from "@/lib/japanese/kana";
+import { JaText } from "./JaText";
 
 /**
  * One multiple-choice question. Calls onAnswer once when an option is chosen, then onNext on "Tiếp tục".
@@ -29,16 +33,18 @@ export function QuestionCard({
   onNext: () => void;
   nextLabel?: string;
 }) {
-  const [chosen, setChosen] = useState<string | null>(null);
-  const [reporting, setReporting] = useState(false);
-
-  // Reset only when the question itself changes: callers may rebuild an equal question object on every render.
+  // The pick belongs to one question: a new question starts unanswered in the same render (no reset effect to wait for,
+  // so a fast Enter can never skip it). Keyed by identity because callers may rebuild an equal question object.
   const qKey = `${q.itemType}:${q.itemId}:${q.kind}`;
-  useEffect(() => setChosen(null), [qKey]);
+  const [pick, setPick] = useState<{ key: string; option: string } | null>(null);
+  const chosen = pick?.key === qKey ? pick.option : null;
+  const [reporting, setReporting] = useState(false);
+  // Reports go to the Learning Path API, which answers 404 while the feature is off.
+  const canReport = usePathStatusQuery().data?.enabled === true;
 
   const choose = (o: string) => {
     if (chosen !== null) return;
-    setChosen(o);
+    setPick({ key: qKey, option: o });
     onAnswer(o === q.answer);
   };
 
@@ -55,23 +61,47 @@ export function QuestionCard({
   }, [q, chosen, reporting]);
 
   const right = chosen === q.answer;
+  const glyph = q.stemLang === "ja" && q.stem.length <= 2;
   return (
-    <div className="space-y-5">
-      <div className="space-y-3 rounded-3xl bg-card p-6 text-center shadow-sm">
-        <p className="text-sm font-semibold text-muted-foreground">{q.prompt}</p>
-        <p
-          lang={q.stemLang}
-          className={
-            q.stemLang === "ja"
-              ? q.stem.length <= 2
-                ? "jp-serif text-7xl font-bold"
-                : "text-2xl font-semibold leading-relaxed"
-              : "text-xl font-semibold"
-          }
-        >
-          {q.stem}
+    <div className="space-y-6">
+      <div className="grid justify-items-center gap-4 text-center">
+        <p className="text-sm leading-loose studio-muted">
+          <JaText text={q.prompt} ruby={q.ruby} />
         </p>
-        {q.hint && <p className="text-sm text-muted-foreground">{q.hint}</p>}
+        {glyph ? (
+          // Single kana/kanji: set in a genkō cell, like a practice sheet.
+          <div
+            className="studio-genko w-36 sm:w-44"
+            style={
+              { "--genko-cols": 1, fontSize: "clamp(4.5rem, 14vw, 6.5rem)" } as React.CSSProperties
+            }
+          >
+            <p lang="ja" className="!text-foreground">
+              {q.stem}
+            </p>
+          </div>
+        ) : (
+          <p
+            lang={q.stemLang}
+            className={`w-full rounded-lg border border-border bg-sheet px-6 py-8 ${
+              q.stemLang === "ja"
+                ? "text-2xl leading-loose sm:text-3xl sm:leading-loose"
+                : "studio-head text-2xl"
+            }`}
+          >
+            <JaText text={q.stem} ruby={q.ruby} />
+          </p>
+        )}
+        {q.speak && (
+          <Button type="button" variant="outline" onClick={() => speakKana(q.speak!)}>
+            <Volume2 aria-hidden className="mr-1.5 h-4 w-4" /> Nghe
+          </Button>
+        )}
+        {q.hint && (
+          <p className="text-sm leading-loose studio-muted">
+            <JaText text={q.hint} ruby={q.ruby} />
+          </p>
+        )}
       </div>
 
       <div className="grid gap-2 sm:grid-cols-2" role="group" aria-label="Các đáp án">
@@ -85,43 +115,68 @@ export function QuestionCard({
               disabled={chosen !== null}
               onClick={() => choose(o)}
               lang={q.optionsLang}
-              className={`flex min-h-14 items-center gap-3 rounded-2xl px-4 py-3 text-left text-base font-semibold transition-colors ${
+              className={`flex min-h-14 items-center gap-3 rounded-[var(--radius)] border px-4 py-3 text-left transition-colors ${q.optionsLang === "ja" ? "text-xl" : "text-base"} ${
                 isAnswer
-                  ? "bg-primary text-primary-foreground"
+                  ? "border-primary bg-primary-soft font-semibold"
                   : isWrongPick
-                    ? "bg-destructive/15 text-destructive"
-                    : "bg-surface-2 hover:bg-primary-soft disabled:hover:bg-surface-2"
+                    ? "studio-shake border-seal bg-sheet text-seal-ink"
+                    : "border-border bg-sheet hover:bg-primary-soft disabled:opacity-60 disabled:hover:bg-sheet"
               }`}
             >
-              <span className="text-xs opacity-60">{i + 1}</span>
-              <span className="flex-1">{o}</span>
-              {isAnswer && <Check aria-hidden className="h-5 w-5" />}
+              <kbd
+                aria-hidden
+                className="hidden min-w-6 rounded-[2px] border border-border px-1.5 text-center font-sans text-xs studio-muted sm:inline"
+              >
+                {i + 1}
+              </kbd>
+              <span className={`flex-1 ${q.ruby ? "leading-loose" : ""}`}>
+                <JaText text={o} ruby={q.ruby} />
+              </span>
+              {isAnswer && <Check aria-hidden className="h-5 w-5 text-primary" />}
               {isWrongPick && <X aria-hidden className="h-5 w-5" />}
             </button>
           );
         })}
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      {chosen !== null && (
+        <div
+          role="status"
+          className={`studio-rise sticky bottom-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border px-4 py-3 ${
+            right ? "border-primary bg-primary-soft" : "border-seal bg-sheet"
+          }`}
+        >
+          <div className="flex items-center gap-3 text-sm">
+            {/* The pet reacts: excited on a right answer, patiently waiting on a wrong one (never sad). */}
+            <Companion size={36} mood={right ? "excited" : "waiting"} />
+            <span>
+              {right ? (
+                <b>Đúng rồi.</b>
+              ) : (
+                <>
+                  <b className="text-seal-ink">Chưa đúng, thử nhớ lại nhé.</b> Đáp án:{" "}
+                  <b lang={q.optionsLang}>
+                    <JaText text={q.answer} ruby={q.ruby} />
+                  </b>
+                </>
+              )}
+            </span>
+          </div>
+          <Button onClick={onNext}>
+            {nextLabel} <span className="hidden text-xs opacity-70 sm:inline">Enter</span>
+          </Button>
+        </div>
+      )}
+
+      {canReport && (
         <button
           type="button"
           onClick={() => setReporting(true)}
-          className="inline-flex min-h-11 items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+          className="inline-flex min-h-11 items-center gap-1.5 text-sm studio-muted hover:text-foreground"
         >
           <Flag aria-hidden className="h-4 w-4" /> Báo câu hỏi sai
         </button>
-        {chosen !== null && (
-          <div className="flex items-center gap-3">
-            <p
-              role="status"
-              className={`text-sm font-bold ${right ? "text-primary" : "text-destructive"}`}
-            >
-              {right ? "Chính xác!" : `Đáp án đúng: ${q.answer}`}
-            </p>
-            <Button onClick={onNext}>{nextLabel}</Button>
-          </div>
-        )}
-      </div>
+      )}
 
       <ReportDialog q={q} open={reporting} onOpenChange={setReporting} />
     </div>

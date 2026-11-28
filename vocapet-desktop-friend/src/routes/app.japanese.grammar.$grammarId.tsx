@@ -26,5 +26,5 @@ function GrammarDetailPage() {
   const sameLevel = all.filter((x) => x.level === g.level);
   const at = sameLevel.findIndex((x) => x.id === g.id);
   const related = g.relatedGrammar.map((id) => all.find((x) => x.id === id)).filter((x): x is NonNullable<typeof x> => !!x);
-  return <GrammarDetail g={g} related={related} sameForm={sameForm(g, all).filter((o) => !g.relatedGrammar.includes(o.id))} sameTopic={sameTopic(g, all).filter((o) => !g.relatedGrammar.includes(o.id))} prev={sameLevel[at - 1] ?? null} next={sameLevel[at + 1] ?? null} />;
+  return <GrammarDetail g={g} all={all} related={related} sameForm={sameForm(g, all).filter((o) => !g.relatedGrammar.includes(o.id))} sameTopic={sameTopic(g, all).filter((o) => !g.relatedGrammar.includes(o.id))} prev={sameLevel[at - 1] ?? null} next={sameLevel[at + 1] ?? null} />;
 }
