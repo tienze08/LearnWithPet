@@ -33,7 +33,10 @@ export function useTangoLessonsQuery(level: JlptLevel) {
 }
 
 export function useTangoLessonQuery(lessonId: number) {
-  return useQuery({ queryKey: [TANGO, "lesson", lessonId], queryFn: () => getTangoLesson(lessonId) });
+  return useQuery({
+    queryKey: [TANGO, "lesson", lessonId],
+    queryFn: () => getTangoLesson(lessonId),
+  });
 }
 
 export function useTangoLessonVocabulariesQuery(lessonId: number, enabled = true) {
@@ -66,11 +69,17 @@ export function useTangoVocabularyQuery(vocabularyId: number) {
 }
 
 export function useTangoProgressQuery(level?: JlptLevel) {
-  return useQuery({ queryKey: [TANGO, "progress", level ?? "all"], queryFn: () => getTangoProgress(level) });
+  return useQuery({
+    queryKey: [TANGO, "progress", level ?? "all"],
+    queryFn: () => getTangoProgress(level),
+  });
 }
 
 export function useTangoWeakWordsQuery(level?: JlptLevel) {
-  return useQuery({ queryKey: [TANGO, "weak", level ?? "all"], queryFn: () => getTangoWeakWords(level) });
+  return useQuery({
+    queryKey: [TANGO, "weak", level ?? "all"],
+    queryFn: () => getTangoWeakWords(level),
+  });
 }
 
 export function useTangoFavoritesQuery() {
@@ -86,7 +95,12 @@ export function useTangoSearchQuery(q: string, level?: JlptLevel) {
 }
 
 /** Quiz questions are fetched per session: `nonce` is fixed for one session and changes on "Practice Again". */
-export function useTangoQuizQuery(lessonId: number, mode: TangoQuizMode, scope: TangoQuizScope, nonce: number) {
+export function useTangoQuizQuery(
+  lessonId: number,
+  mode: TangoQuizMode,
+  scope: TangoQuizScope,
+  nonce: number,
+) {
   return useQuery({
     queryKey: [TANGO, "quiz", lessonId, mode, scope, nonce],
     queryFn: () => getTangoQuiz(lessonId, mode, scope),
@@ -120,8 +134,13 @@ export function useAddLessonToDeckMutation() {
 export function useStudyProgressMutation(lessonId: number) {
   const invalidate = useInvalidateTango();
   return useMutation({
-    mutationFn: ({ vocabularyIds, lastPosition }: { vocabularyIds: number[]; lastPosition?: number }) =>
-      recordStudyProgress(lessonId, vocabularyIds, lastPosition),
+    mutationFn: ({
+      vocabularyIds,
+      lastPosition,
+    }: {
+      vocabularyIds: number[];
+      lastPosition?: number;
+    }) => recordStudyProgress(lessonId, vocabularyIds, lastPosition),
     onSuccess: invalidate,
   });
 }

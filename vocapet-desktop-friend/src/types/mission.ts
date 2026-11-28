@@ -1,8 +1,4 @@
-export type MissionType =
-  | "LEARN_WORDS"
-  | "FINISH_SESSION"
-  | "REVIEW_COUNT"
-  | "STUDY_TIME";
+export type MissionType = "LEARN_WORDS" | "FINISH_SESSION" | "REVIEW_COUNT" | "STUDY_TIME";
 
 export interface UserMissionResponse {
   id: number;

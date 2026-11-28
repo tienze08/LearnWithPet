@@ -69,7 +69,12 @@ export interface TangoVocabularyDetail {
   meanings: { meaning: string; isPrimary: boolean; note: string | null }[];
   examples: { japanese: string; reading: string | null; vietnamese: string }[];
   lessons: { lessonId: number; jlptLevel: JlptLevel; lessonNumber: number }[];
-  progress: { status: TangoWordStatus; viewed: boolean; answeredCount: number; accuracy: number | null } | null;
+  progress: {
+    status: TangoWordStatus;
+    viewed: boolean;
+    answeredCount: number;
+    accuracy: number | null;
+  } | null;
   favorite: boolean;
 }
 
@@ -146,8 +151,19 @@ export interface TangoProgressResponse {
   level: JlptLevel | null;
   words: { new: number; learning: number; mastered: number; needReview: number; total: number };
   lessons: { notStarted: number; inProgress: number; completed: number; total: number };
-  continueLearning: { lessonId: number; lessonNumber: number; title: string; lastPosition: number | null } | null;
-  recentAttempts: { attemptId: number; lessonId: number; scope: TangoQuizScope; accuracy: number; submittedAt: string }[];
+  continueLearning: {
+    lessonId: number;
+    lessonNumber: number;
+    title: string;
+    lastPosition: number | null;
+  } | null;
+  recentAttempts: {
+    attemptId: number;
+    lessonId: number;
+    scope: TangoQuizScope;
+    accuracy: number;
+    submittedAt: string;
+  }[];
 }
 
 export interface TangoWeakItem {
@@ -177,8 +193,7 @@ export interface TangoSearchResponse {
 
 const base = "/api/japanese/tango";
 
-export const getTangoLevels = () =>
-  apiFetch<{ levels: TangoLevelSummary[] }>(`${base}/levels`);
+export const getTangoLevels = () => apiFetch<{ levels: TangoLevelSummary[] }>(`${base}/levels`);
 
 export const getTangoLessons = (level: JlptLevel) =>
   apiFetch<{ level: JlptLevel; lessons: TangoLessonListItem[] }>(`${base}/lessons?level=${level}`);
@@ -187,7 +202,9 @@ export const getTangoLesson = (lessonId: number) =>
   apiFetch<TangoLessonDetail>(`${base}/lessons/${lessonId}`);
 
 export const getTangoLessonVocabularies = (lessonId: number) =>
-  apiFetch<{ lessonId: number; vocabularies: TangoLessonVocabulary[] }>(`${base}/lessons/${lessonId}/vocabularies`);
+  apiFetch<{ lessonId: number; vocabularies: TangoLessonVocabulary[] }>(
+    `${base}/lessons/${lessonId}/vocabularies`,
+  );
 
 export const getTangoVocabulary = (vocabularyId: number) =>
   apiFetch<TangoVocabularyDetail>(`${base}/vocabularies/${vocabularyId}`);
@@ -205,7 +222,11 @@ export interface TangoToDeckResponse {
 export const addTangoLessonToDeck = (lessonId: number) =>
   apiFetch<TangoToDeckResponse>(`${base}/lessons/${lessonId}/to-deck`, { method: "POST" });
 
-export const recordStudyProgress = (lessonId: number, vocabularyIds: number[], lastPosition?: number) =>
+export const recordStudyProgress = (
+  lessonId: number,
+  vocabularyIds: number[],
+  lastPosition?: number,
+) =>
   apiFetch<TangoStudyProgressResponse>(`${base}/lessons/${lessonId}/study-progress`, {
     method: "POST",
     body: JSON.stringify({ vocabularyIds, lastPosition }),
@@ -230,9 +251,12 @@ export const getTangoWeakWords = (level?: JlptLevel, limit = 50) => {
 };
 
 export const setTangoFavorite = (vocabularyId: number, favorite: boolean) =>
-  apiFetch<{ vocabularyId: number; favorite: boolean }>(`${base}/vocabularies/${vocabularyId}/favorite`, {
-    method: favorite ? "PUT" : "DELETE",
-  });
+  apiFetch<{ vocabularyId: number; favorite: boolean }>(
+    `${base}/vocabularies/${vocabularyId}/favorite`,
+    {
+      method: favorite ? "PUT" : "DELETE",
+    },
+  );
 
 export const getTangoFavorites = (page = 0, size = 50) =>
   apiFetch<{ items: TangoWordSummary[]; page: number; size: number; total: number }>(

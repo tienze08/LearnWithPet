@@ -25,7 +25,14 @@ export function buildSentences(grammar: GrammarPoint[]): Sentence[] {
         return;
       }
       const kanji = [...new Set(e.japanese.match(/\p{Script=Han}/gu) ?? [])];
-      byText.set(e.japanese, { ...e, id: `${g.id}:${i}`, level: g.level, grammarIds: [g.id], kanji, translation: g.translation });
+      byText.set(e.japanese, {
+        ...e,
+        id: `${g.id}:${i}`,
+        level: g.level,
+        grammarIds: [g.id],
+        kanji,
+        translation: g.translation,
+      });
     });
   }
   return [...byText.values()];
@@ -42,7 +49,10 @@ const KATAKANA = /[ァ-ヺー]/;
  * shortcut: no morphological analysis, so kana-only verbs and words next to unlisted kana are missed; add per-sentence
  * word links to the content if recall matters.
  */
-export function usesWord(s: Pick<Sentence, "japanese" | "furigana">, { expression, kana }: BankWord): boolean {
+export function usesWord(
+  s: Pick<Sentence, "japanese" | "furigana">,
+  { expression, kana }: BankWord,
+): boolean {
   const word = expression ?? kana;
   const verb = word.endsWith("ます");
   const stem = verb ? (word.match(/^.*\p{Script=Han}/u)?.[0] ?? null) : word;
@@ -67,8 +77,10 @@ export function usesWord(s: Pick<Sentence, "japanese" | "furigana">, { expressio
       }
       if (!cut && read === reading) return true;
     } else if (KATAKANA.test(stem[0])) {
-      if (!KATAKANA.test(s.japanese[at - 1] ?? "") && !KATAKANA.test(s.japanese[end] ?? "")) return true;
-    } else if (BEFORE.test(s.japanese.slice(0, at)) && AFTER.test(s.japanese.slice(end))) return true;
+      if (!KATAKANA.test(s.japanese[at - 1] ?? "") && !KATAKANA.test(s.japanese[end] ?? ""))
+        return true;
+    } else if (BEFORE.test(s.japanese.slice(0, at)) && AFTER.test(s.japanese.slice(end)))
+      return true;
   }
   return false;
 }

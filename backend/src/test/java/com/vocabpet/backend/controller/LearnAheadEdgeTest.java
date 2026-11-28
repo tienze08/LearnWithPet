@@ -8,7 +8,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -149,7 +148,7 @@ class LearnAheadEdgeTest {
 
     private void learnNextAhead() throws Exception {
         String n = nextUp();
-        assertThat((List<Object>) JsonPath.read(n, "$.lessons")).as(n).isNotEmpty();
+        assertThat(JsonPath.<List<Object>>read(n, "$.lessons")).as(n).isNotEmpty();
         answers(JsonPath.read(n, "$.lessons[0].items"), "LEARN", false);
     }
 
@@ -183,9 +182,9 @@ class LearnAheadEdgeTest {
         assertThat((Boolean) JsonPath.read(nextUp(), "$.lessons[0].inToday")).isTrue();
 
         String road = mockMvc.perform(get(BASE + "/roadmap")).andReturn().getResponse().getContentAsString();
-        assertThat((List<String>) JsonPath.read(road, "$.chapters[0].units[0:3].status")).containsExactly("DONE", "DONE", "ACTIVE");
-        assertThat((List<Boolean>) JsonPath.read(road, "$.chapters[0].units[0:3].ahead")).containsExactly(false, true, false);
-        assertThat((List<String>) JsonPath.read(road, "$.days[*].status")).startsWith("DONE", "TODAY");
+        assertThat(JsonPath.<List<String>>read(road, "$.chapters[0].units[0:3].status")).containsExactly("DONE", "DONE", "ACTIVE");
+        assertThat(JsonPath.<List<Boolean>>read(road, "$.chapters[0].units[0:3].ahead")).containsExactly(false, true, false);
+        assertThat(JsonPath.<List<String>>read(road, "$.days[*].status")).startsWith("DONE", "TODAY");
 
         finishToday();
         t = today();
@@ -204,23 +203,23 @@ class LearnAheadEdgeTest {
         // The second lesson keeps its original day (day 3), not "tomorrow" behind the first.
         assertThat((String) JsonPath.read(nextUp(), "$.lessons[0].scheduledFor")).isEqualTo(today.plusDays(2).toString());
         learnNextAhead();
-        assertThat((List<String>) JsonPath.read(today(), "$.learnedAhead[*].scheduledFor"))
+        assertThat(JsonPath.<List<String>>read(today(), "$.learnedAhead[*].scheduledFor"))
                 .containsExactly(today.plusDays(1).toString(), today.plusDays(2).toString());
 
         // Flexible's daily amount (2) is reached, but an open lesson is never locked by the pace.
         assertThat((Integer) JsonPath.read(nextUp(), "$.aheadUnitsToday")).isEqualTo(2);
-        assertThat((List<Object>) JsonPath.read(nextUp(), "$.lessons")).isNotEmpty();
+        assertThat(JsonPath.<List<Object>>read(nextUp(), "$.lessons")).isNotEmpty();
 
         int before = introduced();
         setPace("FAST_TRACK");
         String f = nextUp();
         assertThat((Integer) JsonPath.read(f, "$.aheadUnitsToday")).isEqualTo(2);
-        assertThat((List<Object>) JsonPath.read(f, "$.lessons")).isNotEmpty();
+        assertThat(JsonPath.<List<Object>>read(f, "$.lessons")).isNotEmpty();
         setPace("RELAXED");
-        assertThat((List<Object>) JsonPath.read(nextUp(), "$.lessons")).hasSize(1); // Relaxed suggests one, still offered
+        assertThat(JsonPath.<List<Object>>read(nextUp(), "$.lessons")).hasSize(1); // Relaxed suggests one, still offered
         assertThat(introduced()).isEqualTo(before); // switching pace never undoes progress
         setPace("FAST_TRACK");
-        assertThat((List<Object>) JsonPath.read(today(), "$.learnedAhead")).hasSize(2);
+        assertThat(JsonPath.<List<Object>>read(today(), "$.learnedAhead")).hasSize(2);
 
         // Next day: the plan continues after what was really learned; the cap starts over.
         shift(1);
@@ -247,7 +246,7 @@ class LearnAheadEdgeTest {
         assertThat(answerStatus("KANA", known, false, "PRACTICE")).isEqualTo(200); // practice
         String t = today();
         assertThat((Integer) JsonPath.read(t, "$.itemsIntroduced")).isEqualTo(before);
-        assertThat((List<Object>) JsonPath.read(t, "$.learnedAhead")).isEmpty();
+        assertThat(JsonPath.<List<Object>>read(t, "$.learnedAhead")).isEmpty();
         assertThat(answerStatus("GRAMMAR", "no-such-item", false, "LEARN")).isEqualTo(400);
         // Repeating an ahead lesson does not create a second record or change counts.
         List<Map<String, Object>> ahead = JsonPath.read(nextUp(), "$.lessons[0].items");
@@ -255,7 +254,7 @@ class LearnAheadEdgeTest {
         int afterAhead = introduced();
         answers(ahead, "LEARN", false);
         assertThat(introduced()).isEqualTo(afterAhead);
-        assertThat((List<Object>) JsonPath.read(today(), "$.learnedAhead")).hasSize(1);
+        assertThat(JsonPath.<List<Object>>read(today(), "$.learnedAhead")).hasSize(1);
         assertThat((Integer) JsonPath.read(today(), "$.daysCompleted")).isEqualTo(1);
     }
 
@@ -293,10 +292,10 @@ class LearnAheadEdgeTest {
         assertThat((Integer) JsonPath.read(t, "$.dayNumber")).isEqualTo(5);
         assertThat((Integer) JsonPath.read(t, "$.daysCompleted")).isEqualTo(1);
         assertThat(ids(items(t, "LEARN"))).isNotEmpty().doesNotContainAnyElementsOf(day1).doesNotContainAnyElementsOf(ids(ahead));
-        assertThat((List<Object>) JsonPath.read(t, "$.learnedAhead")).isEmpty(); // its planned day has passed
+        assertThat(JsonPath.<List<Object>>read(t, "$.learnedAhead")).isEmpty(); // its planned day has passed
         String road = mockMvc.perform(get(BASE + "/roadmap")).andReturn().getResponse().getContentAsString();
-        assertThat((List<String>) JsonPath.read(road, "$.days[*].status")).containsSequence("DONE", "MISSED", "MISSED", "MISSED", "TODAY");
-        assertThat((List<Boolean>) JsonPath.read(road, "$.chapters[0].units[?(@.ahead==true)].ahead")).isEmpty(); // the flag lives until the planned day
+        assertThat(JsonPath.<List<String>>read(road, "$.days[*].status")).containsSequence("DONE", "MISSED", "MISSED", "MISSED", "TODAY");
+        assertThat(JsonPath.<List<Boolean>>read(road, "$.chapters[0].units[?(@.ahead==true)].ahead")).isEmpty(); // the flag lives until the planned day
         finishToday();
 
         shift(30); // long absence: still one unit at a time, nothing repeated

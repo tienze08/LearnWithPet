@@ -25,7 +25,14 @@ const avatarMap = {
 const AVATARS = Object.keys(avatarMap) as Array<keyof typeof avatarMap>;
 
 /** The reference's six onboarding steps. Only the welcome step lives on this screen; level, goal and time are on /app/path/setup. */
-const STEPS = ["Chào mừng", "Trình độ", "Mục tiêu", "Thời gian học", "Cách học", "Hoàn tất"] as const;
+const STEPS = [
+  "Chào mừng",
+  "Trình độ",
+  "Mục tiêu",
+  "Thời gian học",
+  "Cách học",
+  "Hoàn tất",
+] as const;
 
 /**
  * Onboarding: the same two real steps as before (avatar, then pet species and name) behind a welcome step,
@@ -65,7 +72,10 @@ export function WelcomeFlow() {
         <aside className="hidden flex-col gap-16 border-r border-border/60 bg-[#f7f0e6]/70 px-6 pb-6 pt-16 md:flex">
           <Logo teal />
           <ol aria-label="Các bước" className="relative space-y-[1.4rem]">
-            <span aria-hidden className="absolute bottom-4 left-[1.45rem] top-4 w-px bg-[#d9d2c3]" />
+            <span
+              aria-hidden
+              className="absolute bottom-4 left-[1.45rem] top-4 w-px bg-[#d9d2c3]"
+            />
             {STEPS.map((label, i) => {
               const active = step === 0 && i === 0;
               const done = step > 0 && i === 0;
@@ -83,7 +93,11 @@ export function WelcomeFlow() {
                       active || done ? "bg-primary text-primary-foreground" : "bg-[#d8d3c8]"
                     }`}
                   >
-                    {done ? <Check className="h-3 w-3" /> : <span className="h-1.5 w-1.5 rounded-full bg-white/80" />}
+                    {done ? (
+                      <Check className="h-3 w-3" />
+                    ) : (
+                      <span className="h-1.5 w-1.5 rounded-full bg-white/80" />
+                    )}
                   </span>
                   {label}
                 </li>
@@ -93,10 +107,10 @@ export function WelcomeFlow() {
         </aside>
 
         <main className="relative min-w-0 bg-[linear-gradient(160deg,#fbf6ee,#f6ece0)] p-7 sm:p-10">
-          {step === 0 && (
-            <WelcomeScene />
-          )}
-          <div className={`relative z-10 flex h-full max-w-[32rem] flex-col ${step === 0 ? "justify-start pt-[25.5%]" : "justify-center"}`}>
+          {step === 0 && <WelcomeScene />}
+          <div
+            className={`relative z-10 flex h-full max-w-[32rem] flex-col ${step === 0 ? "justify-start pt-[25.5%]" : "justify-center"}`}
+          >
             <p className="mb-4 text-xs font-semibold studio-muted md:hidden">
               Bước {step + 1}/3 · {["Chào mừng", "Hồ sơ", "Bạn đồng hành"][step]}
             </p>
@@ -127,7 +141,10 @@ export function WelcomeFlow() {
                   </p>
                 </div>
                 <div>
-                  <label htmlFor="display-name" className="text-xs font-semibold uppercase tracking-wider studio-muted">
+                  <label
+                    htmlFor="display-name"
+                    className="text-xs font-semibold uppercase tracking-wider studio-muted"
+                  >
                     Tên hiển thị
                   </label>
                   <input
@@ -163,7 +180,11 @@ export function WelcomeFlow() {
                   </div>
                 </fieldset>
                 <div className="flex items-center justify-between pt-2">
-                  <button type="button" onClick={() => setStep(0)} className="ref-chip min-h-11 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setStep(0)}
+                    className="ref-chip min-h-11 gap-2"
+                  >
                     <ArrowLeft aria-hidden className="h-4 w-4" />
                     Quay lại
                   </button>
@@ -222,7 +243,10 @@ export function WelcomeFlow() {
                   })}
                 </div>
                 <div>
-                  <label htmlFor="pet-name" className="text-xs font-semibold uppercase tracking-wider studio-muted">
+                  <label
+                    htmlFor="pet-name"
+                    className="text-xs font-semibold uppercase tracking-wider studio-muted"
+                  >
                     Đặt tên cho bạn đồng hành
                   </label>
                   <input
@@ -239,7 +263,11 @@ export function WelcomeFlow() {
                   </p>
                 )}
                 <div className="flex items-center justify-between pt-2">
-                  <button type="button" onClick={() => setStep(1)} className="ref-chip min-h-11 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setStep(1)}
+                    className="ref-chip min-h-11 gap-2"
+                  >
                     <ArrowLeft aria-hidden className="h-4 w-4" />
                     Quay lại
                   </button>
@@ -259,15 +287,30 @@ export function WelcomeFlow() {
           {step === 0 && (
             <>
               <div className="pointer-events-none absolute bottom-[20.5%] right-[1.5%] z-10 w-[43%]">
-                <div aria-hidden className="absolute -bottom-[3%] left-[4%] h-[9%] w-[92%] rounded-[50%] bg-[radial-gradient(closest-side,rgba(232,196,170,.55),transparent)]" />
-                <img src={helloCat} alt="" aria-hidden draggable={false} className="relative h-auto w-full drop-shadow-[0_6px_10px_rgba(60,70,50,.12)]" />
+                <div
+                  aria-hidden
+                  className="absolute -bottom-[3%] left-[4%] h-[9%] w-[92%] rounded-[50%] bg-[radial-gradient(closest-side,rgba(232,196,170,.55),transparent)]"
+                />
+                <img
+                  src={helloCat}
+                  alt=""
+                  aria-hidden
+                  draggable={false}
+                  className="relative h-auto w-full drop-shadow-[0_6px_10px_rgba(60,70,50,.12)]"
+                />
               </div>
               <div className="absolute bottom-[9.5%] left-10 z-10 flex items-center gap-10">
                 <button
                   type="button"
                   onClick={() => setStep(1)}
                   className="studio-btn gap-3"
-                  style={{ minHeight: "4.25rem", padding: "0 3.25rem", borderRadius: 999, fontSize: "1.3rem", boxShadow: "0 8px 18px rgba(31,90,69,.25)" }}
+                  style={{
+                    minHeight: "4.25rem",
+                    padding: "0 3.25rem",
+                    borderRadius: 999,
+                    fontSize: "1.3rem",
+                    boxShadow: "0 8px 18px rgba(31,90,69,.25)",
+                  }}
                 >
                   Bắt đầu
                   <ArrowRight aria-hidden className="h-5 w-5" />

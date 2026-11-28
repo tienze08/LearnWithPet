@@ -155,11 +155,19 @@ function ReviewCenter() {
                 onClick={() => setFurigana((v) => !v)}
                 className="ref-chip min-h-12 gap-2 px-5"
               >
-                {furigana ? <EyeOff aria-hidden className="h-4 w-4" /> : <Eye aria-hidden className="h-4 w-4" />}
+                {furigana ? (
+                  <EyeOff aria-hidden className="h-4 w-4" />
+                ) : (
+                  <Eye aria-hidden className="h-4 w-4" />
+                )}
                 {furigana ? "Ẩn furigana" : "Hiện furigana"}
               </button>
               {!revealed && (
-                <button type="button" onClick={() => setRevealed(true)} className="studio-btn min-h-12 px-6">
+                <button
+                  type="button"
+                  onClick={() => setRevealed(true)}
+                  className="studio-btn min-h-12 px-6"
+                >
                   Lật thẻ
                   <ArrowRight aria-hidden className="h-4 w-4" />
                 </button>

@@ -91,10 +91,10 @@ class LearningPathFlowTest {
         String t = today();
         assertThat((String) JsonPath.read(t, "$.kind")).isEqualTo("LESSON");
         assertThat((String) JsonPath.read(t, "$.title")).startsWith("Ngày 1 – Hiragana: năm nguyên âm");
-        assertThat((List<String>) JsonPath.read(t, "$.phases[*].phase")).containsExactly("REVIEW", "LEARN", "PRACTICE", "TEST");
+        assertThat(JsonPath.<List<String>>read(t, "$.phases[*].phase")).containsExactly("REVIEW", "LEARN", "PRACTICE", "TEST");
         assertThat((String) JsonPath.read(t, "$.nextPhase")).isEqualTo("LEARN"); // nothing to review on day 1
-        assertThat((List<Object>) JsonPath.read(t, "$.week")).hasSize(7);
-        assertThat((List<String>) JsonPath.read(t, "$.skills[*].skill")).contains("HIRAGANA", "KATAKANA", "GRAMMAR");
+        assertThat(JsonPath.<List<Object>>read(t, "$.week")).hasSize(7);
+        assertThat(JsonPath.<List<String>>read(t, "$.skills[*].skill")).contains("HIRAGANA", "KATAKANA", "GRAMMAR");
 
         List<Map<String, Object>> learn = items(t, "LEARN");
         assertThat(learn).isNotEmpty().allMatch(i -> "KANA".equals(i.get("itemType")));
@@ -134,9 +134,9 @@ class LearningPathFlowTest {
         assertThat((Integer) JsonPath.read(t, "$.itemsIntroduced")).isEqualTo(learn.size());
 
         String road = mockMvc.perform(get(BASE + "/roadmap")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-        assertThat((List<String>) JsonPath.read(road, "$.days[*].status")).contains("TODAY", "UPCOMING");
-        assertThat((List<Integer>) JsonPath.read(road, "$.days[?(@.status=='TODAY')].newItems.KANA")).containsExactly(learn.size());
-        assertThat((List<String>) JsonPath.read(road, "$.days[*].kind")).contains("WEEKLY_TEST", "UNIT_REVIEW");
+        assertThat(JsonPath.<List<String>>read(road, "$.days[*].status")).contains("TODAY", "UPCOMING");
+        assertThat(JsonPath.<List<Integer>>read(road, "$.days[?(@.status=='TODAY')].newItems.KANA")).containsExactly(learn.size());
+        assertThat(JsonPath.<List<String>>read(road, "$.days[*].kind")).contains("WEEKLY_TEST", "UNIT_REVIEW");
 
         // Kana report: item_type is varchar now, so the new KANA value is stored.
         mockMvc.perform(post(BASE + "/reports").contentType(MediaType.APPLICATION_JSON)
@@ -150,11 +150,11 @@ class LearningPathFlowTest {
         assertThat((String) JsonPath.read(p, "$.days[0].title")).startsWith("Ngày 1 – Hiragana: năm nguyên âm");
         assertThat((String) JsonPath.read(p, "$.days[0].status")).isEqualTo("TODAY");
         assertThat((Integer) JsonPath.read(p, "$.days[0].newItems.KANA")).isPositive();
-        assertThat((List<String>) JsonPath.read(p, "$.prioritySkills[*].skill")).containsExactly("HIRAGANA", "KATAKANA");
+        assertThat(JsonPath.<List<String>>read(p, "$.prioritySkills[*].skill")).containsExactly("HIRAGANA", "KATAKANA");
         List<Map<String, Object>> stages = JsonPath.read(p, "$.stages");
         assertThat(stages.size()).isGreaterThan(1);
         assertThat(stages.get(0).get("testDate")).isNotNull(); // a cycle ends with its weekly test
-        assertThat((List<String>) stages.get(0).get("topics")).first().asString().startsWith("Hiragana");
+        assertThat((List<?>) stages.get(0).get("topics")).first().asString().startsWith("Hiragana");
         mockMvc.perform(get(BASE + "/status")).andExpect(jsonPath("$.onboarded").value(false));
         mockMvc.perform(get(BASE + "/today")).andExpect(status().isNotFound());
     }
@@ -170,7 +170,7 @@ class LearningPathFlowTest {
                 + ",{\"itemType\":\"KANA\",\"itemId\":\"" + katakana.get(0) + "\",\"correct\":false}";
         String result = send("/placement", "{\"answers\":[" + answers + "]}");
         assertThat((Integer) JsonPath.read(result, "$.kanaKnown")).isEqualTo(104); // every hiragana, no katakana
-        assertThat((List<String>) JsonPath.read(result, "$.sections[*].skill")).containsExactly("HIRAGANA", "KATAKANA", "GRAMMAR", "VOCAB", "KANJI");
+        assertThat(JsonPath.<List<String>>read(result, "$.sections[*].skill")).containsExactly("HIRAGANA", "KATAKANA", "GRAMMAR", "VOCAB", "KANJI");
         assertThat((Integer) JsonPath.read(result, "$.sections[0].known")).isEqualTo(104);
         assertThat((Integer) JsonPath.read(result, "$.sections[0].correct")).isEqualTo(10);
         assertThat((Integer) JsonPath.read(result, "$.sections[1].asked")).isEqualTo(1);
@@ -180,7 +180,7 @@ class LearningPathFlowTest {
         String preview = send("/preview", profileJson("STUDYING", 30));
         assertThat((String) JsonPath.read(preview, "$.days[0].title")).contains("Katakana");
         // Hiragana is all known, katakana is not: katakana (a prerequisite) leads the priorities.
-        assertThat((List<String>) JsonPath.read(preview, "$.prioritySkills[*].skill")).doesNotContain("HIRAGANA").first().isEqualTo("KATAKANA");
+        assertThat(JsonPath.<List<String>>read(preview, "$.prioritySkills[*].skill")).doesNotContain("HIRAGANA").first().isEqualTo("KATAKANA");
         assertThat((Boolean) JsonPath.read(mockMvc.perform(get(BASE + "/status")).andReturn().getResponse().getContentAsString(), "$.onboarded")).isFalse();
 
         mockMvc.perform(put(BASE + "/profile").contentType(MediaType.APPLICATION_JSON).content(profileJson("STUDYING", 30)))
@@ -218,7 +218,7 @@ class LearningPathFlowTest {
         String t = today();
         assertThat((String) JsonPath.read(t, "$.kind")).isEqualTo("WEEKLY_TEST");
         assertThat((String) JsonPath.read(t, "$.title")).endsWith("Kiểm tra tuần");
-        assertThat((List<String>) JsonPath.read(t, "$.phases[*].label")).containsExactly("Ôn tập", "Củng cố", "Luyện tập", "Kiểm tra tuần");
+        assertThat(JsonPath.<List<String>>read(t, "$.phases[*].label")).containsExactly("Ôn tập", "Củng cố", "Luyện tập", "Kiểm tra tuần");
         List<Map<String, Object>> test = items(t, "TEST");
         assertThat(test).hasSize(12).allMatch(i -> ((String) i.get("itemId")).startsWith("hiragana:")); // the cycle's 12 kana
 
@@ -246,18 +246,18 @@ class LearningPathFlowTest {
         assertThat((String) JsonPath.read(t, "$.focus.nextTitle")).startsWith("Ngày 2");
 
         String road = mockMvc.perform(get(BASE + "/roadmap")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-        assertThat((List<String>) JsonPath.read(road, "$.chapters[*].title")).containsExactly("Hiragana", "Katakana", "Kana Mastery", "Minna no Nihongo bài 1–5");
-        assertThat((List<String>) JsonPath.read(road, "$.chapters[*].status")).containsExactly("ACTIVE", "LOCKED", "LOCKED", "LOCKED");
+        assertThat(JsonPath.<List<String>>read(road, "$.chapters[*].title")).containsExactly("Hiragana", "Katakana", "Kana Mastery", "Minna no Nihongo bài 1–5");
+        assertThat(JsonPath.<List<String>>read(road, "$.chapters[*].status")).containsExactly("ACTIVE", "LOCKED", "LOCKED", "LOCKED");
         assertThat((String) JsonPath.read(road, "$.chapters[1].unlockRequires")).contains("Hiragana");
         assertThat((Integer) JsonPath.read(road, "$.chapters[1].unlockMissing")).isEqualTo(9);
         assertThat((String) JsonPath.read(road, "$.chapters[0].units[0].status")).isEqualTo("ACTIVE");
-        assertThat((List<String>) JsonPath.read(road, "$.days[*].checkpoint")).contains("DAILY", "WEEKLY", "CHAPTER");
+        assertThat(JsonPath.<List<String>>read(road, "$.days[*].checkpoint")).contains("DAILY", "WEEKLY", "CHAPTER");
         assertThat((String) JsonPath.read(road, "$.level")).isEqualTo("N5");
 
         // Nothing reviewed yet: no due items, no history, and no invented numbers.
         String ov = mockMvc.perform(get(BASE + "/review-overview")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         assertThat((Integer) JsonPath.read(ov, "$.due")).isZero();
-        assertThat((List<Object>) JsonPath.read(ov, "$.history")).isEmpty();
+        assertThat(JsonPath.<List<Object>>read(ov, "$.history")).isEmpty();
     }
 
     @Test

@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { ShadowingSessionRequest } from "@/api/shadowing.api";
-import { formatTime } from "@/components/audio/AudioPlayer";
+import { formatTime } from "@/lib/audio/engine";
 import { LineText } from "@/components/listening/ExerciseCards";
 import { Button } from "@/components/ui/button";
 import {

@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Mic } from "lucide-react";
-import { formatTime } from "@/components/audio/AudioPlayer";
+import { formatTime } from "@/lib/audio/engine";
 import { PRIVACY } from "@/components/shadowing/Panels";
 import { EmptyBlock, ErrorBlock, LoadingBlock } from "@/components/tango/shared";
 import { Button } from "@/components/ui/button";

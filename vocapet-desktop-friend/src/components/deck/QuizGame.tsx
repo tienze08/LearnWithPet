@@ -38,6 +38,8 @@ export default function QuizGame({ words, allWords, onAnswer }: QuizGameProps) {
       target,
       options,
     };
+    // `round` is not read: changing it draws a new question.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [round, words, allWords]);
 
   if (!question) {

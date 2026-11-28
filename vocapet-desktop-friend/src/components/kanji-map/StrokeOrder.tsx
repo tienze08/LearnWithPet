@@ -19,11 +19,19 @@ export function StrokeOrder({ paths, label }: { paths: string[]; label: string }
         strokeWidth={3.5}
       >
         <g stroke="var(--border)">
-          {paths.map((d, i) => <path key={i} d={d} />)}
+          {paths.map((d, i) => (
+            <path key={i} d={d} />
+          ))}
         </g>
         <g stroke="var(--foreground)">
           {paths.map((d, i) => (
-            <path key={i} d={d} pathLength={1} className="km-stroke" style={{ animationDelay: `${i * 0.55}s` }} />
+            <path
+              key={i}
+              d={d}
+              pathLength={1}
+              className="km-stroke"
+              style={{ animationDelay: `${i * 0.55}s` }}
+            />
           ))}
         </g>
       </svg>

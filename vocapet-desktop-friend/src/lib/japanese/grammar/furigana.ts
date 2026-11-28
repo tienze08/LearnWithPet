@@ -15,4 +15,7 @@ export function parseFurigana(markup: string): RubySegment[] {
 }
 
 /** The whole sentence in kana (reading where there is one, else the text itself). */
-export const readingOf = (markup: string) => parseFurigana(markup).map((s) => s.r ?? s.t).join("");
+export const readingOf = (markup: string) =>
+  parseFurigana(markup)
+    .map((s) => s.r ?? s.t)
+    .join("");

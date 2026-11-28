@@ -1,21 +1,9 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { SEED_DECKS, SEED_WORDS, type Deck, type Word } from "./vocab-seed";
+import { BASE_EXP, EXP_GROWTH, expForLevel } from "./pet/rules";
 
 export type PetMood = "happy" | "sad" | "sleepy" | "excited" | "waiting" | "crying";
 
-export function computePetMood(opts: {
-  reviewsToday: number;
-  dailyGoal: number;
-  streak: number;
-  studiedToday: boolean;
-}): PetMood {
-  const { reviewsToday, dailyGoal, streak, studiedToday } = opts;
-  const hour = new Date().getHours();
-  if (!studiedToday || reviewsToday === 0) return hour >= 23 || hour < 6 ? "sleepy" : "waiting";
-  if (reviewsToday >= dailyGoal && streak >= 7) return "excited";
-  if (reviewsToday >= dailyGoal) return "happy";
-  return "waiting";
-}
 export type PetVariant = "CAT" | "FOX" | "BUNNY" | "PANDA" | "DRAGON";
 export type PetStage = 1 | 2 | 3;
 
@@ -58,22 +46,8 @@ export type GameState = {
 };
 
 const STORAGE_KEY = "vocapet:v1";
-const BASE_EXP = 100;
-const EXP_GROWTH = 1.2;
 const EXP_PER_CORRECT = 25;
 const EXP_PER_WRONG = 5;
-
-export function stageForLevel(level: number): PetStage {
-  if (level >= 10) return 3;
-  if (level >= 5) return 2;
-  return 1;
-}
-
-export function expForLevel(level: number): number {
-  let v = BASE_EXP;
-  for (let i = 1; i < level; i++) v = Math.floor(v * EXP_GROWTH);
-  return v;
-}
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
@@ -214,11 +188,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
           }
 
           const newDailyProgress = s.dailyDate === t ? s.dailyProgress + 1 : 1;
-          const mood: PetMood = streakWasLost
-            ? "crying"
-            : correct
-              ? "happy"
-              : "waiting";
+          const mood: PetMood = streakWasLost ? "crying" : correct ? "happy" : "waiting";
 
           return {
             ...s,

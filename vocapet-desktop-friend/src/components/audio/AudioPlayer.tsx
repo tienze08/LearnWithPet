@@ -13,10 +13,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { RATES, type PlayerState, type PlaylistPlayer } from "@/lib/audio/engine";
-
-export const formatTime = (seconds: number) =>
-  `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
+import { formatTime, RATES, type PlayerState, type PlaylistPlayer } from "@/lib/audio/engine";
 
 const SLOW = 0.75;
 

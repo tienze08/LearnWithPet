@@ -1,5 +1,9 @@
 import { apiFetch } from "./client";
-import type { CompanionEventType, CompanionPreferences, CompanionStateResponse } from "@/types/companion";
+import type {
+  CompanionEventType,
+  CompanionPreferences,
+  CompanionStateResponse,
+} from "@/types/companion";
 
 export function getCompanionStateApi() {
   return apiFetch<CompanionStateResponse>("/api/companion/state", { method: "GET" });

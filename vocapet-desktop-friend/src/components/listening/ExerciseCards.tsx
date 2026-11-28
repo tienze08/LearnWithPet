@@ -31,22 +31,6 @@ export interface CardProps {
   onSubmit: (results: Submitted[]) => void;
 }
 
-export const TYPE_INFO: Record<SourceExercise["type"], { title: string; instruction: string }> = {
-  choose: { title: "Nghe và chọn", instruction: "Nghe câu, đọc câu hỏi rồi chọn một đáp án." },
-  fill: {
-    title: "Nghe và điền từ còn thiếu",
-    instruction: "Nghe câu rồi điền vào từng chỗ trống (gõ chữ Hán hoặc kana đều được).",
-  },
-  dictation: {
-    title: "Chép chính tả",
-    instruction: "Nghe và gõ lại cả câu bằng tiếng Nhật. Dấu câu không tính điểm.",
-  },
-  dialogue: {
-    title: "Nghe hội thoại",
-    instruction: "Nghe cả đoạn hội thoại rồi trả lời tất cả câu hỏi.",
-  },
-};
-
 /** Plays the exercise's audio; replaying is always allowed. */
 export function ListenButton({
   onClick,

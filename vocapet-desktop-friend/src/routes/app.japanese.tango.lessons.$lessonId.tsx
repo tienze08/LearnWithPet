@@ -145,7 +145,9 @@ function TangoLessonDetail() {
             </Button>
           )}
           <Button asChild variant="outline">
-            <Link to="/app/practice" search={{ mode: "vocab", lesson: data.id }}>Luyện tập từ vựng</Link>
+            <Link to="/app/practice" search={{ mode: "vocab", lesson: data.id }}>
+              Luyện tập từ vựng
+            </Link>
           </Button>
           <Button asChild variant="outline">
             <Link {...practicePath}>Làm bài kiểm tra</Link>

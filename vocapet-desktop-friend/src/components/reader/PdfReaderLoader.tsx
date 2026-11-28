@@ -1,5 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, FileText, Loader2, Maximize2, Minimize2, Minus, Plus } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  FileText,
+  Loader2,
+  Maximize2,
+  Minimize2,
+  Minus,
+  Plus,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type PdfDocument = { title: string; text: string; file: File; importedHighlights: string[] };
@@ -88,7 +97,9 @@ function isAnnotationTextItem(item: unknown): item is AnnotationTextItem {
   return typeof item === "object" && item !== null && "str" in item;
 }
 
-function extractAnnotationText(items: Array<unknown>, annotations: Array<any>) {
+type Annotation = { subtype?: string; contents?: unknown; quadPoints?: unknown };
+
+function extractAnnotationText(items: Array<unknown>, annotations: Annotation[]) {
   const terms: string[] = [];
   for (const annotation of annotations.filter((item) => item.subtype === "Highlight")) {
     const contents = typeof annotation.contents === "string" ? annotation.contents.trim() : "";
@@ -100,7 +111,12 @@ function extractAnnotationText(items: Array<unknown>, annotations: Array<any>) {
     if (!points?.length) continue;
     const boxes = Array.from({ length: Math.floor(points.length / 8) }, (_, index) => {
       const quad = points.slice(index * 8, index * 8 + 8);
-      return { left: Math.min(quad[0], quad[2], quad[4], quad[6]), right: Math.max(quad[0], quad[2], quad[4], quad[6]), bottom: Math.min(quad[1], quad[3], quad[5], quad[7]), top: Math.max(quad[1], quad[3], quad[5], quad[7]) };
+      return {
+        left: Math.min(quad[0], quad[2], quad[4], quad[6]),
+        right: Math.max(quad[0], quad[2], quad[4], quad[6]),
+        bottom: Math.min(quad[1], quad[3], quad[5], quad[7]),
+        top: Math.max(quad[1], quad[3], quad[5], quad[7]),
+      };
     });
     const text = items
       .filter(isAnnotationTextItem)
@@ -110,14 +126,22 @@ function extractAnnotationText(items: Array<unknown>, annotations: Array<any>) {
         const y = item.transform![5];
         const width = item.width ?? 0;
         const height = Math.max(item.height ?? 0, Math.abs(item.transform![3] ?? 0));
-        return boxes.some((box) => x <= box.right && x + width >= box.left && y + height >= box.bottom && y - height <= box.top);
+        return boxes.some(
+          (box) =>
+            x <= box.right &&
+            x + width >= box.left &&
+            y + height >= box.bottom &&
+            y - height <= box.top,
+        );
       })
       .map((item) => item.str)
       .join(" ")
       .trim();
     if (text) terms.push(text);
   }
-  return terms.flatMap((term) => term.match(/[\p{L}][\p{L}'-]*/gu) ?? []).map((term) => term.toLocaleLowerCase());
+  return terms
+    .flatMap((term) => term.match(/[\p{L}][\p{L}'-]*/gu) ?? [])
+    .map((term) => term.toLocaleLowerCase());
 }
 
 export function PdfDocumentViewer({
@@ -151,6 +175,10 @@ export function PdfDocumentViewer({
     .map((word) => word.toLocaleLowerCase())
     .sort()
     .join("|");
+
+  // The page render reads the newest words when it finishes, without re-rendering the page when they change.
+  const highlightRef = useRef({ basketWordsKey, learnedWordsKey });
+  highlightRef.current = { basketWordsKey, learnedWordsKey };
 
   useEffect(() => {
     const viewer = viewerRef.current;
@@ -223,7 +251,8 @@ export function PdfDocumentViewer({
           viewport,
         });
         await layer.render();
-        applyHighlights(textLayer, basketWordsKey, learnedWordsKey);
+        const latest = highlightRef.current;
+        applyHighlights(textLayer, latest.basketWordsKey, latest.learnedWordsKey);
       } catch {
         if (!cancelled) setError("This PDF could not be displayed. Please try another file.");
       } finally {
@@ -243,7 +272,10 @@ export function PdfDocumentViewer({
   }, [basketWordsKey, learnedWordsKey]);
 
   return (
-    <section ref={containerRef} className={`overflow-hidden border-2 border-border bg-muted/20 ${isFocusMode ? "h-screen rounded-none" : "rounded-2xl"}`}>
+    <section
+      ref={containerRef}
+      className={`overflow-hidden border-2 border-border bg-muted/20 ${isFocusMode ? "h-screen rounded-none" : "rounded-2xl"}`}
+    >
       <div className="flex items-center justify-between gap-3 border-b border-border bg-card px-3 py-2">
         <p className="truncate text-xs font-bold text-muted-foreground">{file.name}</p>
         <div className="flex shrink-0 items-center gap-2">
@@ -266,7 +298,12 @@ export function PdfDocumentViewer({
           >
             <Plus className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => isFocusMode ? void document.exitFullscreen() : void enterFocusMode()} aria-label={isFocusMode ? "Exit focus mode" : "Open focus mode"}>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => (isFocusMode ? void document.exitFullscreen() : void enterFocusMode())}
+            aria-label={isFocusMode ? "Exit focus mode" : "Open focus mode"}
+          >
             {isFocusMode ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
           </Button>
           <Button

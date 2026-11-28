@@ -33,15 +33,15 @@ type Mode = "chart" | "quiz" | "progress";
 const QUIZ_LENGTH = 10;
 
 const SECTION_LABELS: Record<KanaSection, string> = {
-  basic:       "Cơ bản",
-  dakuten:     "Dakuten (゛)",
-  handakuten:  "Handakuten (゜)",
-  yoon:        "Yōon (拗音)",
+  basic: "Cơ bản",
+  dakuten: "Dakuten (゛)",
+  handakuten: "Handakuten (゜)",
+  yoon: "Yōon (拗音)",
 };
 
 function KanaPage() {
-  const [script, setScript]   = useState<KanaScript>("hiragana");
-  const [mode, setMode]       = useState<Mode>("chart");
+  const [script, setScript] = useState<KanaScript>("hiragana");
+  const [mode, setMode] = useState<Mode>("chart");
   const [section, setSection] = useState<KanaSection>("basic");
 
   function switchScript(s: KanaScript) {
@@ -61,20 +61,40 @@ function KanaPage() {
 
       {/* Script + Mode tabs */}
       <div className="flex flex-wrap items-center gap-2">
-        <Button size="sm" variant={script === "hiragana" ? "default" : "outline"} onClick={() => switchScript("hiragana")}>
+        <Button
+          size="sm"
+          variant={script === "hiragana" ? "default" : "outline"}
+          onClick={() => switchScript("hiragana")}
+        >
           Hiragana
         </Button>
-        <Button size="sm" variant={script === "katakana" ? "default" : "outline"} onClick={() => switchScript("katakana")}>
+        <Button
+          size="sm"
+          variant={script === "katakana" ? "default" : "outline"}
+          onClick={() => switchScript("katakana")}
+        >
           Katakana
         </Button>
         <div className="mx-2 h-5 w-px bg-border" />
-        <Button size="sm" variant={mode === "chart" ? "default" : "outline"} onClick={() => setMode("chart")}>
+        <Button
+          size="sm"
+          variant={mode === "chart" ? "default" : "outline"}
+          onClick={() => setMode("chart")}
+        >
           Bảng
         </Button>
-        <Button size="sm" variant={mode === "quiz" ? "default" : "outline"} onClick={() => setMode("quiz")}>
+        <Button
+          size="sm"
+          variant={mode === "quiz" ? "default" : "outline"}
+          onClick={() => setMode("quiz")}
+        >
           Quiz
         </Button>
-        <Button size="sm" variant={mode === "progress" ? "default" : "outline"} onClick={() => setMode("progress")}>
+        <Button
+          size="sm"
+          variant={mode === "progress" ? "default" : "outline"}
+          onClick={() => setMode("progress")}
+        >
           Tiến độ
         </Button>
       </div>
@@ -100,7 +120,7 @@ function KanaPage() {
       )}
 
       {mode === "chart" && <KanaChart script={script} section={section} />}
-      {mode === "quiz"  && (
+      {mode === "quiz" && (
         <KanaQuiz key={`${script}-${section}`} script={script} section={section} />
       )}
       {mode === "progress" && <KanaProgressView script={script} />}
@@ -114,21 +134,25 @@ function KanaChart({ script, section }: { script: KanaScript; section: KanaSecti
   if (section === "basic") {
     return (
       <div className="grid grid-cols-5 gap-2">
-        {KANA_CHART[script].flat().map((cell, i) =>
-          cell ? (
-            <KanaCell key={`${cell.romaji}-${i}`} entry={cell} />
-          ) : (
-            <div key={`empty-${i}`} />
-          ),
-        )}
+        {KANA_CHART[script]
+          .flat()
+          .map((cell, i) =>
+            cell ? (
+              <KanaCell key={`${cell.romaji}-${i}`} entry={cell} />
+            ) : (
+              <div key={`empty-${i}`} />
+            ),
+          )}
       </div>
     );
   }
 
   const entries =
-    section === "dakuten"    ? DAKUTEN_CHART[script] :
-    section === "handakuten" ? HANDAKUTEN_CHART[script] :
-                               YOON_CHART[script];
+    section === "dakuten"
+      ? DAKUTEN_CHART[script]
+      : section === "handakuten"
+        ? HANDAKUTEN_CHART[script]
+        : YOON_CHART[script];
   const cols = section === "yoon" ? 3 : 5;
 
   return (
@@ -156,10 +180,13 @@ function KanaCell({ entry }: { entry: { kana: string; romaji: string } }) {
 // ── Quiz ────────────────────────────────────────────────────────────────────
 
 function KanaQuiz({ script, section }: { script: KanaScript; section: KanaSection }) {
-  const questions  = useMemo<KanaQuestion[]>(() => buildKanaQuiz(script, QUIZ_LENGTH, section), [script, section]);
-  const [index, setIndex]     = useState(0);
-  const [score, setScore]     = useState(0);
-  const [picked, setPicked]   = useState<string | null>(null);
+  const questions = useMemo<KanaQuestion[]>(
+    () => buildKanaQuiz(script, QUIZ_LENGTH, section),
+    [script, section],
+  );
+  const [index, setIndex] = useState(0);
+  const [score, setScore] = useState(0);
+  const [picked, setPicked] = useState<string | null>(null);
   const [results, setResults] = useState<KanaQuizResult[]>([]);
   const [response, setResponse] = useState<KanaAttemptResponse | null>(null);
 
@@ -168,14 +195,17 @@ function KanaQuiz({ script, section }: { script: KanaScript; section: KanaSectio
   if (questions.length === 0) return null;
 
   const finished = index >= questions.length;
-  const current  = questions[index];
+  const current = questions[index];
 
   function choose(option: string) {
     if (picked !== null) return;
     const isCorrect = option === current.target.romaji;
     if (isCorrect) setScore((s) => s + 1);
     setPicked(option);
-    setResults((r) => [...r, { kana: current.target.kana, romaji: current.target.romaji, isCorrect }]);
+    setResults((r) => [
+      ...r,
+      { kana: current.target.kana, romaji: current.target.romaji, isCorrect },
+    ]);
   }
 
   function next() {
@@ -216,9 +246,15 @@ function KanaQuiz({ script, section }: { script: KanaScript; section: KanaSectio
     return (
       <Card className="space-y-5 p-6">
         <div className="text-center">
-          <p className="text-2xl font-bold">{score}/{questions.length}</p>
+          <p className="text-2xl font-bold">
+            {score}/{questions.length}
+          </p>
           <p className="text-sm text-muted-foreground mt-1">
-            {score === questions.length ? "Hoàn hảo! 🎉" : score >= questions.length * 0.7 ? "Tốt lắm! 👍" : "Cần luyện thêm 💪"}
+            {score === questions.length
+              ? "Hoàn hảo! 🎉"
+              : score >= questions.length * 0.7
+                ? "Tốt lắm! 👍"
+                : "Cần luyện thêm 💪"}
           </p>
         </div>
 
@@ -227,16 +263,23 @@ function KanaQuiz({ script, section }: { script: KanaScript; section: KanaSectio
             <p className="text-sm font-medium text-muted-foreground">Chữ cần luyện thêm:</p>
             <div className="flex flex-wrap gap-2">
               {response.weakKana.map((w) => (
-                <div key={w.kana} className="flex flex-col items-center rounded-lg border border-red-200 bg-red-50 px-3 py-2">
+                <div
+                  key={w.kana}
+                  className="flex flex-col items-center rounded-lg border border-red-200 bg-red-50 px-3 py-2"
+                >
                   <span className="text-xl">{w.kana}</span>
-                  <span className="text-xs text-muted-foreground">{w.accuracy !== null ? `${Math.round(w.accuracy * 100)}%` : "0%"}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {w.accuracy !== null ? `${Math.round(w.accuracy * 100)}%` : "0%"}
+                  </span>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        <Button className="w-full" onClick={restart}>Làm lại</Button>
+        <Button className="w-full" onClick={restart}>
+          Làm lại
+        </Button>
       </Card>
     );
   }
@@ -244,7 +287,9 @@ function KanaQuiz({ script, section }: { script: KanaScript; section: KanaSectio
   return (
     <Card className="space-y-6 p-6">
       <div className="flex items-center justify-between text-sm text-muted-foreground">
-        <span>Câu {index + 1}/{questions.length}</span>
+        <span>
+          Câu {index + 1}/{questions.length}
+        </span>
         <span>Điểm: {score}</span>
       </div>
 
@@ -255,7 +300,7 @@ function KanaQuiz({ script, section }: { script: KanaScript; section: KanaSectio
       <div className="grid grid-cols-2 gap-3">
         {current.options.map((option) => {
           const isCorrect = option === current.target.romaji;
-          const isPicked  = option === picked;
+          const isPicked = option === picked;
           const tone =
             picked === null
               ? "hover:bg-accent"
@@ -281,11 +326,11 @@ function KanaQuiz({ script, section }: { script: KanaScript; section: KanaSectio
       {picked !== null && (
         <div className="flex items-center justify-between">
           <span className="text-sm">
-            {picked === current.target.romaji ? "✓ Chính xác!" : `✗ Đáp án: ${current.target.romaji}`}
+            {picked === current.target.romaji
+              ? "✓ Chính xác!"
+              : `✗ Đáp án: ${current.target.romaji}`}
           </span>
-          <Button onClick={next}>
-            {index + 1 === questions.length ? "Xem kết quả" : "Tiếp"}
-          </Button>
+          <Button onClick={next}>{index + 1 === questions.length ? "Xem kết quả" : "Tiếp"}</Button>
         </div>
       )}
     </Card>
@@ -295,7 +340,10 @@ function KanaQuiz({ script, section }: { script: KanaScript; section: KanaSectio
 // ── Progress ─────────────────────────────────────────────────────────────────
 
 const SECTION_TOTALS: Record<KanaSection, number> = {
-  basic: 46, dakuten: 20, handakuten: 5, yoon: 33,
+  basic: 46,
+  dakuten: 20,
+  handakuten: 5,
+  yoon: 33,
 };
 
 function KanaProgressView({ script }: { script: KanaScript }) {
@@ -311,16 +359,21 @@ function KanaProgressView({ script }: { script: KanaScript }) {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {(["basic", "dakuten", "handakuten", "yoon"] as KanaSection[]).map((sec) => {
           const data = sections.find((s) => s.section === sec);
-          const total    = SECTION_TOTALS[sec];
+          const total = SECTION_TOTALS[sec];
           const mastered = data?.mastered ?? 0;
-          const pct      = Math.round((mastered / total) * 100);
+          const pct = Math.round((mastered / total) * 100);
           return (
             <Card key={sec} className="space-y-2 p-4">
               <p className="text-xs font-medium text-muted-foreground">{SECTION_LABELS[sec]}</p>
-              <p className="text-2xl font-bold">{mastered}<span className="text-sm font-normal text-muted-foreground">/{total}</span></p>
+              <p className="text-2xl font-bold">
+                {mastered}
+                <span className="text-sm font-normal text-muted-foreground">/{total}</span>
+              </p>
               <Progress value={pct} className="h-1.5" />
               {data?.overallAccuracy != null && (
-                <p className="text-xs text-muted-foreground">{Math.round(data.overallAccuracy * 100)}% chính xác</p>
+                <p className="text-xs text-muted-foreground">
+                  {Math.round(data.overallAccuracy * 100)}% chính xác
+                </p>
               )}
             </Card>
           );
@@ -342,7 +395,9 @@ function KanaProgressView({ script }: { script: KanaScript }) {
                   {w.accuracy !== null ? `${Math.round(w.accuracy * 100)}%` : "Chưa học"}
                 </span>
                 {w.accuracy !== null && w.accuracy < 0.5 && (
-                  <Badge variant="destructive" className="mt-1 text-[10px] px-1 py-0">Yếu</Badge>
+                  <Badge variant="destructive" className="mt-1 text-[10px] px-1 py-0">
+                    Yếu
+                  </Badge>
                 )}
               </div>
             ))}
@@ -355,7 +410,9 @@ function KanaProgressView({ script }: { script: KanaScript }) {
       )}
 
       {sections.every((s) => s.seen === 0) && (
-        <p className="text-sm text-muted-foreground">Chưa có dữ liệu. Hãy làm quiz để xem tiến độ của bạn.</p>
+        <p className="text-sm text-muted-foreground">
+          Chưa có dữ liệu. Hãy làm quiz để xem tiến độ của bạn.
+        </p>
       )}
     </div>
   );

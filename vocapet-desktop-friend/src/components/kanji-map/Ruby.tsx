@@ -1,7 +1,13 @@
 import type { RubySegment } from "@/lib/japanese/kanji-map/types";
 
 /** Japanese text with furigana. Segments flagged `hl` are highlighted (target kanji / word). */
-export function Ruby({ segments, className = "" }: { segments: RubySegment[]; className?: string }) {
+export function Ruby({
+  segments,
+  className = "",
+}: {
+  segments: RubySegment[];
+  className?: string;
+}) {
   return (
     <span lang="ja" className={className}>
       {segments.map((s, i) => {

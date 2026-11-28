@@ -31,7 +31,11 @@ export type Sentence = {
 export type Enrichment = {
   radicalName?: string;
   radicalNote?: string;
-  mnemonic?: { origin: string | null; tip: string | null; related: { char: string; meaning: string }[] };
+  mnemonic?: {
+    origin: string | null;
+    tip: string | null;
+    related: { char: string; meaning: string }[];
+  };
   vocab?: KanjiVocab[];
   sentences?: Sentence[];
 };

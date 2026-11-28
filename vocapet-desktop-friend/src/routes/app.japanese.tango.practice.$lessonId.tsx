@@ -4,7 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft } from "lucide-react";
-import type { TangoAttemptAnswer, TangoAttemptResponse, TangoQuizMode, TangoQuizScope } from "@/api/tango.api";
+import type {
+  TangoAttemptAnswer,
+  TangoAttemptResponse,
+  TangoQuizMode,
+  TangoQuizScope,
+} from "@/api/tango.api";
 import { useSubmitTangoAttemptMutation, useTangoQuizQuery } from "@/hooks/queries/tango.queries";
 import { EmptyBlock, ErrorBlock, LoadingBlock, ProgressBar } from "@/components/tango/shared";
 
@@ -16,7 +21,9 @@ const SCOPES: TangoQuizScope[] = ["ALL", "MISTAKES"];
 export const Route = createFileRoute("/app/japanese/tango/practice/$lessonId")({
   validateSearch: (search: Record<string, unknown>): PracticeSearch => ({
     mode: MODES.includes(search.mode as TangoQuizMode) ? (search.mode as TangoQuizMode) : "MIXED",
-    scope: SCOPES.includes(search.scope as TangoQuizScope) ? (search.scope as TangoQuizScope) : "ALL",
+    scope: SCOPES.includes(search.scope as TangoQuizScope)
+      ? (search.scope as TangoQuizScope)
+      : "ALL",
     n: typeof search.n === "number" ? search.n : undefined,
   }),
   component: TangoPractice,
@@ -28,7 +35,16 @@ function TangoPractice() {
   const mode = search.mode ?? "MIXED";
   const scope = search.scope ?? "ALL";
   // A new nonce starts a fresh session (new questions, new clientAttemptId).
-  return <PracticeSession key={`${mode}-${scope}-${search.n ?? 0}`} lessonId={Number(lessonId)} lessonParam={lessonId} mode={mode} scope={scope} nonce={search.n ?? 0} />;
+  return (
+    <PracticeSession
+      key={`${mode}-${scope}-${search.n ?? 0}`}
+      lessonId={Number(lessonId)}
+      lessonParam={lessonId}
+      mode={mode}
+      scope={scope}
+      nonce={search.n ?? 0}
+    />
+  );
 }
 
 function PracticeSession({
@@ -71,8 +87,20 @@ function PracticeSession({
       <ResultView
         result={submit.data}
         lessonParam={lessonParam}
-        onPracticeMistakes={() => navigate({ to: "/app/japanese/tango/practice/$lessonId", params: { lessonId: lessonParam }, search: { mode: "MIXED", scope: "MISTAKES", n: Date.now() } })}
-        onPracticeAgain={() => navigate({ to: "/app/japanese/tango/practice/$lessonId", params: { lessonId: lessonParam }, search: { mode, scope, n: Date.now() } })}
+        onPracticeMistakes={() =>
+          navigate({
+            to: "/app/japanese/tango/practice/$lessonId",
+            params: { lessonId: lessonParam },
+            search: { mode: "MIXED", scope: "MISTAKES", n: Date.now() },
+          })
+        }
+        onPracticeAgain={() =>
+          navigate({
+            to: "/app/japanese/tango/practice/$lessonId",
+            params: { lessonId: lessonParam },
+            search: { mode, scope, n: Date.now() },
+          })
+        }
       />
     );
   }
@@ -81,10 +109,20 @@ function PracticeSession({
     return (
       <div className="space-y-4">
         <BackLink lessonParam={lessonParam} />
-        <EmptyBlock title={scope === "MISTAKES" ? "Bạn không có từ nào cần ôn trong bài này." : "Bài học này chưa đủ từ để kiểm tra."}>
+        <EmptyBlock
+          title={
+            scope === "MISTAKES"
+              ? "Bạn không có từ nào cần ôn trong bài này."
+              : "Bài học này chưa đủ từ để kiểm tra."
+          }
+        >
           {scope === "MISTAKES" && (
             <Button asChild className="mt-3" variant="outline">
-              <Link to="/app/japanese/tango/practice/$lessonId" params={{ lessonId: lessonParam }} search={{ mode: "MIXED", scope: "ALL" }}>
+              <Link
+                to="/app/japanese/tango/practice/$lessonId"
+                params={{ lessonId: lessonParam }}
+                search={{ mode: "MIXED", scope: "ALL" }}
+              >
                 Làm bài đầy đủ
               </Link>
             </Button>
@@ -115,7 +153,11 @@ function PracticeSession({
   const submitAll = () => {
     const payload: TangoAttemptAnswer[] = questions
       .filter((q) => answers[q.vocabularyId] !== undefined)
-      .map((q) => ({ vocabularyId: q.vocabularyId, mode: q.mode, answer: answers[q.vocabularyId] }));
+      .map((q) => ({
+        vocabularyId: q.vocabularyId,
+        mode: q.mode,
+        answer: answers[q.vocabularyId],
+      }));
     submit.mutate({
       clientAttemptId: clientAttemptId.current,
       mode,
@@ -156,7 +198,11 @@ function PracticeSession({
             aria-label="Đáp án"
             autoFocus
             value={draft}
-            placeholder={answers[question.vocabularyId] ? `Đã trả lời: ${answers[question.vocabularyId]}` : "Nhập đáp án"}
+            placeholder={
+              answers[question.vocabularyId]
+                ? `Đã trả lời: ${answers[question.vocabularyId]}`
+                : "Nhập đáp án"
+            }
             onChange={(e) => setDraft(e.target.value)}
           />
           <div className="flex flex-wrap justify-center gap-3">
@@ -182,7 +228,9 @@ function PracticeSession({
         <Button onClick={submitAll} disabled={!allAnswered || submit.isPending}>
           {submit.isPending ? "Đang nộp..." : "Nộp bài"}
         </Button>
-        {!allAnswered && <p className="text-xs text-muted-foreground">Trả lời hết câu hỏi để nộp bài.</p>}
+        {!allAnswered && (
+          <p className="text-xs text-muted-foreground">Trả lời hết câu hỏi để nộp bài.</p>
+        )}
         {submit.isError && (
           <p role="alert" className="text-center text-sm text-destructive">
             {submit.error.message} Bấm "Nộp bài" lại để gửi lại đúng bài này.
@@ -216,17 +264,25 @@ function ResultView({
           Đúng {result.correctCount} · Sai {result.incorrectCount} · Tổng {result.totalQuestions}
         </p>
         {result.scope === "ALL" ? (
-          <p className={`text-sm font-bold ${result.passed ? "text-success" : "text-muted-foreground"}`}>
+          <p
+            className={`text-sm font-bold ${result.passed ? "text-success" : "text-muted-foreground"}`}
+          >
             {result.passed ? "Đạt (từ 80% trở lên)" : "Chưa đạt, hãy ôn lại và thử lần nữa"}
           </p>
         ) : (
-          <p className="text-xs text-muted-foreground">Bài ôn từ sai không tính vào hoàn thành bài học.</p>
+          <p className="text-xs text-muted-foreground">
+            Bài ôn từ sai không tính vào hoàn thành bài học.
+          </p>
         )}
         {result.lessonStatus === "COMPLETED" && (
-          <p className="rounded-2xl bg-success/15 p-3 text-sm font-bold text-success">Hoàn thành bài học</p>
+          <p className="rounded-2xl bg-success/15 p-3 text-sm font-bold text-success">
+            Hoàn thành bài học
+          </p>
         )}
         {result.replayed && (
-          <p className="text-xs text-muted-foreground">Bài này đã được ghi nhận trước đó, đây là kết quả cũ.</p>
+          <p className="text-xs text-muted-foreground">
+            Bài này đã được ghi nhận trước đó, đây là kết quả cũ.
+          </p>
         )}
       </Card>
 

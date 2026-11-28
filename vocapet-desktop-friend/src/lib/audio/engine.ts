@@ -217,3 +217,6 @@ export class PlaylistPlayer {
     this.listeners.forEach((l) => l());
   }
 }
+
+export const formatTime = (seconds: number) =>
+  `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;

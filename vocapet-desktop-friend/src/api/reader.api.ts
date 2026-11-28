@@ -22,8 +22,8 @@ export function generateReaderFlashcardsApi(payload: {
 }
 
 export function suggestReaderVocabularyApi(payload: { context: string; sourceTitle: string }) {
-  return apiFetch<{ companionMessage: string; suggestions: Array<{ word: string; contextSentence: string; reason: string }> }>(
-    "/api/reader/suggest-vocabulary",
-    { method: "POST", body: JSON.stringify(payload) },
-  );
+  return apiFetch<{
+    companionMessage: string;
+    suggestions: Array<{ word: string; contextSentence: string; reason: string }>;
+  }>("/api/reader/suggest-vocabulary", { method: "POST", body: JSON.stringify(payload) });
 }

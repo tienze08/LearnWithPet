@@ -6,7 +6,7 @@ import type { ListeningAttemptRequest } from "@/api/listening.api";
 import type { GrammarPoint } from "@/data/japanese/grammar";
 import { questionId, summarize, type Recommendation } from "@/lib/listening/session";
 import type { Lesson } from "@/lib/listening/types";
-import { formatTime } from "@/components/audio/AudioPlayer";
+import { formatTime } from "@/lib/audio/engine";
 
 export interface WordLink {
   id: number;

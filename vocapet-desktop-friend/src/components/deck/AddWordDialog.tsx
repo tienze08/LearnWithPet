@@ -128,7 +128,7 @@ export default function AddWordDialog({ deckId, onAdd }: AddWordDialogProps) {
 
               <Input
                 value={partOfSpeech}
-                onChange={(e) => setPartOfSpeech(e.target.value as any)}
+                onChange={(e) => setPartOfSpeech(e.target.value as typeof partOfSpeech)}
               />
             </div>
           </div>

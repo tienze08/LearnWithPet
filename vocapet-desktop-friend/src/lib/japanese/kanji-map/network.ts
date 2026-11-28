@@ -57,9 +57,17 @@ export function buildNetwork(
       const y = childYs.length ? (childYs[0] + childYs[childYs.length - 1]) / 2 : row++ * ROW;
       ys.push(y);
       left.push({
-        id, char: p.c, role: "part", x: -depth * COL, y, size: 72,
-        navigable: !!graph.kanji[p.c], taught: taught(p.c), label: labelOf(p.c),
-        count: p.k.length, collapsed: isCollapsed,
+        id,
+        char: p.c,
+        role: "part",
+        x: -depth * COL,
+        y,
+        size: 72,
+        navigable: !!graph.kanji[p.c],
+        taught: taught(p.c),
+        label: labelOf(p.c),
+        count: p.k.length,
+        collapsed: isCollapsed,
       });
       edges.push({ id: `${id}->${parentId}`, source: id, target: parentId });
     });
@@ -71,8 +79,17 @@ export function buildNetwork(
 
   // ---- centre ----
   nodes.push({
-    id: centerId, char: center, role: "center", x: 0, y: 0, size: 96,
-    navigable: true, taught: taught(center), label: labelOf(center), count: 0, collapsed: false,
+    id: centerId,
+    char: center,
+    role: "center",
+    x: 0,
+    y: 0,
+    size: 96,
+    navigable: true,
+    taught: taught(center),
+    label: labelOf(center),
+    count: 0,
+    collapsed: false,
   });
   nodes.push(...left);
 
@@ -84,15 +101,33 @@ export function buildNetwork(
   shown.forEach((c, i) => {
     const id = `u:${c}`;
     nodes.push({
-      id, char: c, role: "usedIn", x: COL, y: (i - (total - 1) / 2) * ROW, size: 72,
-      navigable: !!graph.kanji[c], taught: taught(c), label: labelOf(c), count: 0, collapsed: false,
+      id,
+      char: c,
+      role: "usedIn",
+      x: COL,
+      y: (i - (total - 1) / 2) * ROW,
+      size: 72,
+      navigable: !!graph.kanji[c],
+      taught: taught(c),
+      label: labelOf(c),
+      count: 0,
+      collapsed: false,
     });
     edges.push({ id: `${centerId}->${id}`, source: centerId, target: id });
   });
   if (hidden > 0) {
     nodes.push({
-      id: "u:more", char: `+${hidden}`, role: "more", x: COL, y: (shown.length - (total - 1) / 2) * ROW, size: 72,
-      navigable: false, taught: false, label: "Xem thêm", count: hidden, collapsed: true,
+      id: "u:more",
+      char: `+${hidden}`,
+      role: "more",
+      x: COL,
+      y: (shown.length - (total - 1) / 2) * ROW,
+      size: 72,
+      navigable: false,
+      taught: false,
+      label: "Xem thêm",
+      count: hidden,
+      collapsed: true,
     });
   }
   return { nodes, edges };

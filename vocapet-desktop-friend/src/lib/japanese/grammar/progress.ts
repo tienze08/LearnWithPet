@@ -14,7 +14,8 @@ function readRaw(): Record<string, unknown> {
     return {};
   }
 }
-const ids = (v: unknown): string[] => (Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : []);
+const ids = (v: unknown): string[] =>
+  Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
 const read = (): Store => {
   const raw = readRaw();
   return { learned: ids(raw.learned), favorite: ids(raw.favorite) };
@@ -27,7 +28,12 @@ export function toggleMark(kind: GrammarMark, id: string): boolean {
   const raw = readRaw();
   const list = ids(raw[kind]);
   const on = !list.includes(id);
-  const next = { ...raw, learned: ids(raw.learned), favorite: ids(raw.favorite), [kind]: on ? [...list, id] : list.filter((x) => x !== id) };
+  const next = {
+    ...raw,
+    learned: ids(raw.learned),
+    favorite: ids(raw.favorite),
+    [kind]: on ? [...list, id] : list.filter((x) => x !== id),
+  };
   try {
     localStorage.setItem(KEY, JSON.stringify(next));
   } catch {

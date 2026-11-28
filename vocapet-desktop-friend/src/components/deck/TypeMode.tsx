@@ -24,6 +24,8 @@ export default function TypeGame({ words, onAnswer }: TypeGameProps) {
     if (!words.length) return null;
 
     return words[Math.floor(Math.random() * words.length)];
+    // `round` is not read: changing it draws a new word.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [round, words]);
 
   if (!currentWord) {

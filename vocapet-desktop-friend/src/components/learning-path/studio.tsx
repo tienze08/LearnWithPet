@@ -33,7 +33,11 @@ export function PetNote({
 export function Companion({ size = 40, mood = "happy" }: { size?: number; mood?: PetMood }) {
   const pose = mood === "sleepy" ? "sleep" : mood === "excited" ? "cheer" : "sit";
   return (
-    <span aria-hidden className="grid shrink-0 place-items-end" style={{ width: size, height: size }}>
+    <span
+      aria-hidden
+      className="grid shrink-0 place-items-end"
+      style={{ width: size, height: size }}
+    >
       <Cat pose={pose} className="max-h-full w-auto max-w-full object-contain" />
     </span>
   );
@@ -168,7 +172,3 @@ export function GenkoGrid({
     </ul>
   );
 }
-
-/** "Ngày 6 – Hiragana: hàng T" → "Hiragana: hàng T" (the number is shown on its own). */
-export const stripDayPrefix = (title: string | null | undefined) =>
-  (title ?? "").replace(/^Ngày \d+\s*–\s*/, "");

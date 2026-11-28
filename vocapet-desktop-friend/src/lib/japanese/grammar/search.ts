@@ -8,9 +8,19 @@ export type GroupFilter = "ALL" | GrammarGroupId;
 const JP = /[぀-ヿ一-鿿]/;
 const strip = (s: string) => s.replace(/[〜~（）()・\s]/g, "");
 /** Does a Latin/Vietnamese `token` start a word of `text` (both already folded)? Avoids "vi" matching the middle of a word. */
-const wordStart = (text: string, token: string) => new RegExp(`(^|[^a-z0-9])${token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`).test(text);
+const wordStart = (text: string, token: string) =>
+  new RegExp(`(^|[^a-z0-9])${token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`).test(text);
 
-type Index = { pattern: string; kana: string; romaji: string; vi: string; formation: string; keywords: string; examples: string; en: string };
+type Index = {
+  pattern: string;
+  kana: string;
+  romaji: string;
+  vi: string;
+  formation: string;
+  keywords: string;
+  examples: string;
+  en: string;
+};
 const cache = new WeakMap<GrammarPoint, Index>();
 
 function indexOf(g: GrammarPoint): Index {
@@ -23,7 +33,11 @@ function indexOf(g: GrammarPoint): Index {
       vi: fold([g.meaningVi, g.explanationVi].filter(Boolean).join(" ")),
       formation: fold(`${g.formationVi} ${g.formation}`),
       keywords: fold(g.tags.join(" ")),
-      examples: fold(g.examples.map((e) => (e.furigana ? readingOf(e.furigana) + e.japanese : e.japanese)).join(" ")),
+      examples: fold(
+        g.examples
+          .map((e) => (e.furigana ? readingOf(e.furigana) + e.japanese : e.japanese))
+          .join(" "),
+      ),
       en: g.meaningEn.toLowerCase(),
     };
     cache.set(g, i);
@@ -43,7 +57,8 @@ function scoreToken(i: Index, raw: string): number {
   }
   if (t.length < 2) return 0; // one Latin letter matches too much
   let best = 0;
-  if (i.romaji.split(/[^a-z]+/).some((w) => w.startsWith(t.replace(/\s/g, "")))) best = Math.max(best, 80);
+  if (i.romaji.split(/[^a-z]+/).some((w) => w.startsWith(t.replace(/\s/g, ""))))
+    best = Math.max(best, 80);
   if (wordStart(i.vi, t)) best = Math.max(best, 60);
   if (t.length >= 3 && wordStart(i.formation, t)) best = Math.max(best, 40);
   if (t.length >= 3 && wordStart(i.keywords, t)) best = Math.max(best, 30);
@@ -66,7 +81,12 @@ export function searchGrammar(items: GrammarPoint[], query: string): GrammarPoin
       }
       // A multi-word query that appears as a phrase (e.g. "ly do") ranks above scattered word matches.
       const phrase = fold(tokens.join(" "));
-      if (tokens.length > 1 && !JP.test(phrase) && (i.vi.includes(phrase) || i.formation.includes(phrase))) sum += 50;
+      if (
+        tokens.length > 1 &&
+        !JP.test(phrase) &&
+        (i.vi.includes(phrase) || i.formation.includes(phrase))
+      )
+        sum += 50;
       return { g, sum, n };
     })
     .filter((r): r is { g: GrammarPoint; sum: number; n: number } => r !== null)

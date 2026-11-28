@@ -39,7 +39,18 @@ export type GrammarExample = {
   meaningEn: string;
 };
 
-export type GrammarGroupId = "particle" | "verb" | "adjective" | "sentence" | "condition" | "time" | "reason" | "comparison" | "wish" | "rule" | "other";
+export type GrammarGroupId =
+  | "particle"
+  | "verb"
+  | "adjective"
+  | "sentence"
+  | "condition"
+  | "time"
+  | "reason"
+  | "comparison"
+  | "wish"
+  | "rule"
+  | "other";
 
 export type GrammarPoint = {
   id: string;

@@ -44,7 +44,12 @@ export default function Flashcards({ words, onAnswer }: FlashcardsProps) {
       </div>
 
       <div className="relative px-14">
-        <button type="button" aria-label="Thẻ trước" onClick={() => go(-1)} className={`${arrow} left-0`}>
+        <button
+          type="button"
+          aria-label="Thẻ trước"
+          onClick={() => go(-1)}
+          className={`${arrow} left-0`}
+        >
           <ChevronLeft aria-hidden className="h-5 w-5" />
         </button>
         <article className="ref-card grid min-h-[22rem] content-center justify-items-center gap-3 rounded-3xl p-8 text-center">
@@ -69,7 +74,12 @@ export default function Flashcards({ words, onAnswer }: FlashcardsProps) {
             </p>
           )}
         </article>
-        <button type="button" aria-label="Thẻ sau" onClick={() => go(1)} className={`${arrow} right-0`}>
+        <button
+          type="button"
+          aria-label="Thẻ sau"
+          onClick={() => go(1)}
+          className={`${arrow} right-0`}
+        >
           <ChevronRight aria-hidden className="h-5 w-5" />
         </button>
       </div>
@@ -80,7 +90,11 @@ export default function Flashcards({ words, onAnswer }: FlashcardsProps) {
           onClick={() => setHideReading((v) => !v)}
           className="ref-card inline-flex min-h-12 items-center gap-2 rounded-full px-6 text-sm font-semibold"
         >
-          {hideReading ? <Eye aria-hidden className="h-4 w-4" /> : <EyeOff aria-hidden className="h-4 w-4" />}
+          {hideReading ? (
+            <Eye aria-hidden className="h-4 w-4" />
+          ) : (
+            <EyeOff aria-hidden className="h-4 w-4" />
+          )}
           {hideReading ? "Hiện cách đọc" : "Ẩn cách đọc"}
         </button>
         <button

@@ -27,17 +27,26 @@ import {
   type Answer,
   type Submitted,
 } from "@/lib/listening/session";
-import type { Difficulty, Lesson } from "@/lib/listening/types";
-import {
-  ChooseCard,
-  DialogueCard,
-  DictationCard,
-  FillCard,
-  ListenButton,
-  TYPE_INFO,
-} from "./ExerciseCards";
+import type { Difficulty, Lesson, SourceExercise } from "@/lib/listening/types";
+import { ChooseCard, DialogueCard, DictationCard, FillCard, ListenButton } from "./ExerciseCards";
 import { Related, Results } from "./Results";
 import { Transcript } from "./Transcript";
+
+const TYPE_INFO: Record<SourceExercise["type"], { title: string; instruction: string }> = {
+  choose: { title: "Nghe và chọn", instruction: "Nghe câu, đọc câu hỏi rồi chọn một đáp án." },
+  fill: {
+    title: "Nghe và điền từ còn thiếu",
+    instruction: "Nghe câu rồi điền vào từng chỗ trống (gõ chữ Hán hoặc kana đều được).",
+  },
+  dictation: {
+    title: "Chép chính tả",
+    instruction: "Nghe và gõ lại cả câu bằng tiếng Nhật. Dấu câu không tính điểm.",
+  },
+  dialogue: {
+    title: "Nghe hội thoại",
+    instruction: "Nghe cả đoạn hội thoại rồi trả lời tất cả câu hỏi.",
+  },
+};
 
 const LEVELS: [Difficulty, string][] = [
   ["EASY", "Dễ"],

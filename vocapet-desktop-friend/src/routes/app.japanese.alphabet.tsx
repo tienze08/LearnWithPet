@@ -62,7 +62,9 @@ const SESSION_TTL = 2 * 60 * 60 * 1000;
 function saveSession(queue: QuizItem[], config: QuizConfig) {
   try {
     sessionStorage.setItem(SESSION_KEY, JSON.stringify({ queue, config, ts: Date.now() }));
-  } catch {}
+  } catch {
+    /* storage blocked: the quiz just is not restored */
+  }
 }
 
 function loadSession(): { queue: QuizItem[]; config: QuizConfig } | null {
@@ -70,13 +72,22 @@ function loadSession(): { queue: QuizItem[]; config: QuizConfig } | null {
     const raw = sessionStorage.getItem(SESSION_KEY);
     if (!raw) return null;
     const data = JSON.parse(raw);
-    if (Date.now() - data.ts > SESSION_TTL) { sessionStorage.removeItem(SESSION_KEY); return null; }
+    if (Date.now() - data.ts > SESSION_TTL) {
+      sessionStorage.removeItem(SESSION_KEY);
+      return null;
+    }
     return data;
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 
 function clearSession() {
-  try { sessionStorage.removeItem(SESSION_KEY); } catch {}
+  try {
+    sessionStorage.removeItem(SESSION_KEY);
+  } catch {
+    /* storage blocked: the quiz just is not restored */
+  }
 }
 
 // ── Build quiz queue ──────────────────────────────────────────────────────────
@@ -99,7 +110,10 @@ function buildQueue(config: QuizConfig, weakKanaSet?: Set<string>): QuizItem[] {
 
 type KanaStatus = "unseen" | "learning" | "mastered";
 
-function getStatus(kana: string, itemMap: Map<string, { mastered: boolean; wrongCount: number }>): KanaStatus {
+function getStatus(
+  kana: string,
+  itemMap: Map<string, { mastered: boolean; wrongCount: number }>,
+): KanaStatus {
   const item = itemMap.get(kana);
   if (!item) return "unseen";
   return item.mastered ? "mastered" : "learning";
@@ -111,7 +125,10 @@ function AlphabetPage() {
   const [view, setView] = useState<"chart" | "quiz">("chart");
   const [script, setScript] = useState<KanaScript>("hiragana");
   const [quizConfig, setQuizConfig] = useState<QuizConfig | null>(null);
-  const [restoredSession, setRestoredSession] = useState<{ queue: QuizItem[]; config: QuizConfig } | null>(null);
+  const [restoredSession, setRestoredSession] = useState<{
+    queue: QuizItem[];
+    config: QuizConfig;
+  } | null>(null);
 
   const { data: progressData } = useKanaProgressQuery();
   const { data: itemsData } = useKanaItemsQuery(script);
@@ -127,7 +144,8 @@ function AlphabetPage() {
   const overallAccuracy =
     totalSeen > 0
       ? Math.round(
-          sections.reduce((sum, s) => sum + (s.overallAccuracy ?? 0) * s.seen, 0) / totalSeen * 100,
+          (sections.reduce((sum, s) => sum + (s.overallAccuracy ?? 0) * s.seen, 0) / totalSeen) *
+            100,
         )
       : null;
 
@@ -144,7 +162,10 @@ function AlphabetPage() {
         config={quizConfig}
         initialQueue={restoredSession?.queue ?? null}
         script={script}
-        onBack={() => { clearSession(); setView("chart"); }}
+        onBack={() => {
+          clearSession();
+          setView("chart");
+        }}
       />
     );
   }
@@ -161,23 +182,38 @@ function AlphabetPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button size="sm" variant={script === "hiragana" ? "default" : "outline"} onClick={() => setScript("hiragana")}>
+          <Button
+            size="sm"
+            variant={script === "hiragana" ? "default" : "outline"}
+            onClick={() => setScript("hiragana")}
+          >
             Hiragana
           </Button>
-          <Button size="sm" variant={script === "katakana" ? "default" : "outline"} onClick={() => setScript("katakana")}>
+          <Button
+            size="sm"
+            variant={script === "katakana" ? "default" : "outline"}
+            onClick={() => setScript("katakana")}
+          >
             Katakana
           </Button>
-          <Button size="sm" onClick={() => startQuiz({ script, section: "all", count: 10, weakMode: false })}>
+          <Button
+            size="sm"
+            onClick={() => startQuiz({ script, section: "all", count: 10, weakMode: false })}
+          >
             Start Quiz ▶
           </Button>
         </div>
       </div>
 
       {/* Config panel */}
-      <QuizConfigPanel script={script} onStart={startQuiz} onCheckSession={() => {
-        const session = loadSession();
-        if (session) startQuiz(session.config, session.queue);
-      }} />
+      <QuizConfigPanel
+        script={script}
+        onStart={startQuiz}
+        onCheckSession={() => {
+          const session = loadSession();
+          if (session) startQuiz(session.config, session.queue);
+        }}
+      />
 
       {/* Chart sections */}
       <KanaSectionDisplay
@@ -258,8 +294,12 @@ function QuizConfigPanel({
         <p className="text-xs text-muted-foreground">Section</p>
         <div className="flex flex-wrap gap-1.5">
           {(["all", "basic", "dakuten", "handakuten", "yoon"] as QuizSectionOption[]).map((s) => (
-            <button key={s} type="button" onClick={() => setSection(s)}
-              className={`rounded-full px-3 py-1 text-xs capitalize transition ${section === s ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-accent"}`}>
+            <button
+              key={s}
+              type="button"
+              onClick={() => setSection(s)}
+              className={`rounded-full px-3 py-1 text-xs capitalize transition ${section === s ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-accent"}`}
+            >
               {s === "all" ? "All" : s === "yoon" ? "Yōon" : s.charAt(0).toUpperCase() + s.slice(1)}
             </button>
           ))}
@@ -270,8 +310,12 @@ function QuizConfigPanel({
         <p className="text-xs text-muted-foreground">Questions</p>
         <div className="flex gap-1.5">
           {([10, 20, "all"] as QuizCountOption[]).map((c) => (
-            <button key={String(c)} type="button" onClick={() => setCount(c)}
-              className={`rounded-full px-3 py-1 text-xs transition ${count === c ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-accent"}`}>
+            <button
+              key={String(c)}
+              type="button"
+              onClick={() => setCount(c)}
+              className={`rounded-full px-3 py-1 text-xs transition ${count === c ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-accent"}`}
+            >
               {c === "all" ? "All" : c}
             </button>
           ))}
@@ -279,14 +323,26 @@ function QuizConfigPanel({
       </div>
 
       <label className="flex items-center gap-2 cursor-pointer select-none">
-        <input type="checkbox" checked={weakMode} onChange={(e) => setWeakMode(e.target.checked)}
-          className="h-4 w-4 rounded border-input accent-primary" />
+        <input
+          type="checkbox"
+          checked={weakMode}
+          onChange={(e) => setWeakMode(e.target.checked)}
+          className="h-4 w-4 rounded border-input accent-primary"
+        />
         <span className="text-sm">Practice weak kana only</span>
       </label>
 
       <div className="flex gap-2">
-        <Button size="sm" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-        <Button size="sm" onClick={() => { setOpen(false); onStart({ script, section, count, weakMode }); }}>
+        <Button size="sm" variant="outline" onClick={() => setOpen(false)}>
+          Cancel
+        </Button>
+        <Button
+          size="sm"
+          onClick={() => {
+            setOpen(false);
+            onStart({ script, section, count, weakMode });
+          }}
+        >
           Start ▶
         </Button>
       </div>
@@ -296,10 +352,18 @@ function QuizConfigPanel({
 
 // ── Kana section display ──────────────────────────────────────────────────────
 
-type SectionProgress = { mastered: number; totalKana: number; overallAccuracy: number | null } | undefined;
+type SectionProgress =
+  | { mastered: number; totalKana: number; overallAccuracy: number | null }
+  | undefined;
 
 function KanaSectionDisplay({
-  label, kanaCount, entries, isGrid = false, cols = 5, itemMap, progress,
+  label,
+  kanaCount,
+  entries,
+  isGrid = false,
+  cols = 5,
+  itemMap,
+  progress,
 }: {
   label: string;
   kanaCount: number;
@@ -317,16 +381,23 @@ function KanaSectionDisplay({
     <section className="space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{label}</h2>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            {label}
+          </h2>
           <span className="text-xs text-muted-foreground">{kanaCount} characters</span>
           {mastered > 0 && (
-            <Badge variant="secondary" className="text-xs">{mastered}/{kanaCount}</Badge>
+            <Badge variant="secondary" className="text-xs">
+              {mastered}/{kanaCount}
+            </Badge>
           )}
         </div>
         {mastered > 0 && <Progress value={pct} className="h-1 w-20" />}
       </div>
 
-      <div className={`grid gap-1.5 sm:gap-2`} style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+      <div
+        className={`grid gap-1.5 sm:gap-2`}
+        style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
+      >
         {entries.map(({ entry, i }) =>
           entry ? (
             <KanaCard key={entry.kana} entry={entry} status={getStatus(entry.kana, itemMap)} />
@@ -359,7 +430,9 @@ function KanaCard({ entry, status }: { entry: KanaEntry; status: KanaStatus }) {
       <span className="text-2xl sm:text-3xl leading-none">{entry.kana}</span>
       <span className="mt-1 text-[10px] sm:text-xs text-muted-foreground">{entry.romaji}</span>
       {status !== "unseen" && (
-        <span className={`mt-1 h-1.5 w-1.5 rounded-full ${status === "mastered" ? "bg-green-500" : "bg-amber-400"}`} />
+        <span
+          className={`mt-1 h-1.5 w-1.5 rounded-full ${status === "mastered" ? "bg-green-500" : "bg-amber-400"}`}
+        />
       )}
     </button>
   );
@@ -368,7 +441,10 @@ function KanaCard({ entry, status }: { entry: KanaEntry; status: KanaStatus }) {
 // ── Quiz view (outer shell) ───────────────────────────────────────────────────
 
 function QuizView({
-  config, initialQueue, script, onBack,
+  config,
+  initialQueue,
+  script,
+  onBack,
 }: {
   config: QuizConfig;
   initialQueue: QuizItem[] | null;
@@ -407,7 +483,11 @@ function QuizView({
 // ── Stats bar ─────────────────────────────────────────────────────────────────
 
 function QuizStatsBar({
-  accuracy, remaining, incorrect, total, onBack,
+  accuracy,
+  remaining,
+  incorrect,
+  total,
+  onBack,
 }: {
   accuracy: number;
   remaining: number;
@@ -418,7 +498,11 @@ function QuizStatsBar({
   return (
     <div className="sticky top-[4.25rem] z-20 border-b border-border/70 bg-background/95 backdrop-blur">
       <div className="mx-auto flex max-w-4xl items-center gap-4 px-4 py-2 text-sm">
-        <button type="button" onClick={onBack} className="flex items-center gap-1 text-muted-foreground hover:text-foreground">
+        <button
+          type="button"
+          onClick={onBack}
+          className="flex items-center gap-1 text-muted-foreground hover:text-foreground"
+        >
           <ArrowLeft className="h-4 w-4" /> Back
         </button>
         <div className="ml-auto flex gap-6">
@@ -445,7 +529,11 @@ function Stat({ label, value }: { label: string; value: string }) {
 type FeedbackPhase = "idle" | "wrong" | "revealed";
 
 function FlashcardSession({
-  config, initialQueue, script, onComplete, onBack,
+  config,
+  initialQueue,
+  script,
+  onComplete,
+  onBack,
 }: {
   config: QuizConfig;
   initialQueue: QuizItem[] | null;
@@ -471,7 +559,7 @@ function FlashcardSession({
   // Persist session on queue changes
   useEffect(() => {
     if (queue.length > 0) saveSession(queue, config);
-  }, [queue]);
+  }, [queue, config]);
 
   // Auto-focus on mount and after each advance
   useEffect(() => {
@@ -522,9 +610,15 @@ function FlashcardSession({
     setFeedbackPhase("revealed");
   }
 
-  function handleGotIt() { advance(false); }
-  function handleNeedMore() { advance(true); }
-  function handleNext() { advance(true); } // after wrong
+  function handleGotIt() {
+    advance(false);
+  }
+  function handleNeedMore() {
+    advance(true);
+  }
+  function handleNext() {
+    advance(true);
+  } // after wrong
 
   async function advance(requeue: boolean) {
     const newQueue = requeue ? [...queue.slice(1), queue[0]] : queue.slice(1);
@@ -534,11 +628,13 @@ function FlashcardSession({
 
     if (newQueue.length === 0) {
       clearSession();
-      const results: KanaResult[] = Array.from(firstAttemptRef.current.entries()).map(([kana, isCorrect]) => ({
-        kana,
-        isCorrect,
-        section: getSectionForKana(config.script, kana) ?? "basic",
-      }));
+      const results: KanaResult[] = Array.from(firstAttemptRef.current.entries()).map(
+        ([kana, isCorrect]) => ({
+          kana,
+          isCorrect,
+          section: getSectionForKana(config.script, kana) ?? "basic",
+        }),
+      );
 
       // Submit to backend (grouped by section)
       await submitBySection(results, config.script);
@@ -551,7 +647,8 @@ function FlashcardSession({
     setQueue(newQueue);
   }
 
-  const accuracy = stats.totalSeen > 0 ? Math.round((stats.correctFirst / stats.totalSeen) * 100) : 0;
+  const accuracy =
+    stats.totalSeen > 0 ? Math.round((stats.correctFirst / stats.totalSeen) * 100) : 0;
 
   if (!current) return null;
 
@@ -569,8 +666,12 @@ function FlashcardSession({
         {/* Kana display */}
         <div className="flex items-center gap-3">
           <span className="text-8xl sm:text-9xl leading-none">{current.kana}</span>
-          <button type="button" onClick={() => speakKana(current.kana)} aria-label="Hear pronunciation"
-            className="rounded-full p-2 text-muted-foreground hover:bg-accent hover:text-foreground">
+          <button
+            type="button"
+            onClick={() => speakKana(current.kana)}
+            aria-label="Hear pronunciation"
+            className="rounded-full p-2 text-muted-foreground hover:bg-accent hover:text-foreground"
+          >
             <Volume2 className="h-5 w-5" />
           </button>
         </div>
@@ -582,7 +683,9 @@ function FlashcardSession({
               ref={inputRef}
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") handleSubmit(); }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSubmit();
+              }}
               placeholder="Type romaji..."
               className="text-center text-lg"
               autoCapitalize="none"
@@ -603,7 +706,9 @@ function FlashcardSession({
           <div className="w-full max-w-xs space-y-3 text-center">
             <p className="text-sm text-red-500">✗ Incorrect — correct answer:</p>
             <p className="text-3xl font-bold text-foreground">{current.romaji}</p>
-            <Button className="w-full" onClick={handleNext}>Next →</Button>
+            <Button className="w-full" onClick={handleNext}>
+              Next →
+            </Button>
           </div>
         )}
 
@@ -652,7 +757,11 @@ async function submitBySection(results: KanaResult[], script: KanaScript) {
 // ── Quiz result screen ────────────────────────────────────────────────────────
 
 function QuizResultScreen({
-  results, config, onBack, onPracticeMistakes, onPracticeAgain,
+  results,
+  config,
+  onBack,
+  onPracticeMistakes,
+  onPracticeAgain,
 }: {
   results: KanaResult[];
   config: QuizConfig;
@@ -660,10 +769,10 @@ function QuizResultScreen({
   onPracticeMistakes: () => void;
   onPracticeAgain: () => void;
 }) {
-  const correct   = results.filter((r) => r.isCorrect).length;
-  const total     = results.length;
+  const correct = results.filter((r) => r.isCorrect).length;
+  const total = results.length;
   const incorrect = total - correct;
-  const accuracy  = total > 0 ? Math.round((correct / total) * 100) : 0;
+  const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
   const wrongItems = results.filter((r) => !r.isCorrect);
 
   return (
@@ -695,8 +804,12 @@ function QuizResultScreen({
           <p className="text-sm font-medium">Needs practice ({wrongItems.length})</p>
           <div className="flex flex-wrap gap-2">
             {wrongItems.map((r) => (
-              <button key={r.kana} type="button" onClick={() => speakKana(r.kana)}
-                className="flex flex-col items-center rounded-lg border border-red-200 bg-red-50 px-3 py-2 hover:bg-red-100 dark:bg-red-950/30">
+              <button
+                key={r.kana}
+                type="button"
+                onClick={() => speakKana(r.kana)}
+                className="flex flex-col items-center rounded-lg border border-red-200 bg-red-50 px-3 py-2 hover:bg-red-100 dark:bg-red-950/30"
+              >
                 <span className="text-xl">{r.kana}</span>
               </button>
             ))}

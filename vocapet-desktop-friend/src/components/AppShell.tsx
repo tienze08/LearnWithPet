@@ -254,10 +254,22 @@ function DesktopSidebar() {
           label="Thư viện"
         />
         <div className="space-y-0.5" role="group" aria-label="Trong thư viện">
-          <SubLink to="/app/japanese/grammar" icon={<BookOpen className="h-4 w-4" />} label="Ngữ pháp" />
-          <SubLink to="/app/japanese/tango" icon={<Languages className="h-4 w-4" />} label="Từ vựng" />
+          <SubLink
+            to="/app/japanese/grammar"
+            icon={<BookOpen className="h-4 w-4" />}
+            label="Ngữ pháp"
+          />
+          <SubLink
+            to="/app/japanese/tango"
+            icon={<Languages className="h-4 w-4" />}
+            label="Từ vựng"
+          />
           <SubLink to="/app/japanese/kanji" icon={<Sparkles className="h-4 w-4" />} label="Kanji" />
-          <SubLink to="/app/japanese/alphabet" icon={<Type className="h-4 w-4" />} label="Bảng chữ cái" />
+          <SubLink
+            to="/app/japanese/alphabet"
+            icon={<Type className="h-4 w-4" />}
+            label="Bảng chữ cái"
+          />
         </div>
         <NavLink to="/app/listening" icon={<Headphones className="h-4 w-4" />} label="Luyện nghe" />
         <NavLink to="/app/shadowing" icon={<Mic className="h-4 w-4" />} label="Shadowing" />
@@ -328,8 +340,19 @@ function MobileNav() {
 
 function sceneryFor(path: string): LandscapeVariant {
   if (path.startsWith("/app/path")) return "plan";
-  if (path.startsWith("/app/library") || path.startsWith("/app/japanese") || path.startsWith("/app/decks")) return "library";
-  if (path.startsWith("/app/review") || path.startsWith("/app/practice") || path.startsWith("/app/listening") || path.startsWith("/app/shadowing")) return "flash";
+  if (
+    path.startsWith("/app/library") ||
+    path.startsWith("/app/japanese") ||
+    path.startsWith("/app/decks")
+  )
+    return "library";
+  if (
+    path.startsWith("/app/review") ||
+    path.startsWith("/app/practice") ||
+    path.startsWith("/app/listening") ||
+    path.startsWith("/app/shadowing")
+  )
+    return "flash";
   if (path.startsWith("/app/progress")) return "progress";
   return "today";
 }

@@ -125,18 +125,22 @@ export default class AnimationController {
   async load() {
     const source = VARIANT_ATLASES[this.variant];
     const atlas = this.removeGreenBackground(await PIXI.Assets.load(source), source);
-    (Object.entries(PET_ANIMATIONS) as [PetAction, AnimationConfig][]).forEach(([action, config]) => {
-      const variantConfig = { ...config, source };
-      this.configs.set(action, variantConfig);
-      this.animations.set(action, this.buildFrames(atlas, variantConfig));
-    });
+    (Object.entries(PET_ANIMATIONS) as [PetAction, AnimationConfig][]).forEach(
+      ([action, config]) => {
+        const variantConfig = { ...config, source };
+        this.configs.set(action, variantConfig);
+        this.animations.set(action, this.buildFrames(atlas, variantConfig));
+      },
+    );
 
     if (this.variant === "CAT") {
       const microAtlas = await PIXI.Assets.load(kittenMicroAtlas);
-      (Object.entries(CAT_MICRO_ANIMATIONS) as [MicroAction, AnimationConfig][]).forEach(([action, config]) => {
-        this.configs.set(action, config);
-        this.animations.set(action, this.buildFrames(microAtlas, config));
-      });
+      (Object.entries(CAT_MICRO_ANIMATIONS) as [MicroAction, AnimationConfig][]).forEach(
+        ([action, config]) => {
+          this.configs.set(action, config);
+          this.animations.set(action, this.buildFrames(microAtlas, config));
+        },
+      );
     }
 
     this.sprite = new PIXI.AnimatedSprite(this.animations.get("IDLE")!);
@@ -174,7 +178,6 @@ export default class AnimationController {
   }
 
   private setAnimation(action: AnimationKey, loop: boolean) {
-
     const frames = this.animations.get(action);
 
     if (!frames) return;
@@ -221,22 +224,17 @@ export default class AnimationController {
     const sourceWidth = texture.source.width;
     const sourceHeight = texture.source.height;
     const rows = config.rows ?? 1;
-    const top = Math.round((config.row ?? 0) * sourceHeight / rows);
-    const bottom = Math.round(((config.row ?? 0) + 1) * sourceHeight / rows);
+    const top = Math.round(((config.row ?? 0) * sourceHeight) / rows);
+    const bottom = Math.round((((config.row ?? 0) + 1) * sourceHeight) / rows);
     const frames: PIXI.Texture[] = [];
 
     for (let i = 0; i < config.columns; i++) {
-      const left = Math.round(i * sourceWidth / config.columns);
-      const right = Math.round((i + 1) * sourceWidth / config.columns);
+      const left = Math.round((i * sourceWidth) / config.columns);
+      const right = Math.round(((i + 1) * sourceWidth) / config.columns);
       frames.push(
         new PIXI.Texture({
           source: texture.source,
-          frame: new PIXI.Rectangle(
-            left,
-            top,
-            right - left,
-            bottom - top,
-          ),
+          frame: new PIXI.Rectangle(left, top, right - left, bottom - top),
         }),
       );
     }

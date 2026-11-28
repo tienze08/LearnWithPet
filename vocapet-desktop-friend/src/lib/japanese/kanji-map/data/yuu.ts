@@ -6,24 +6,61 @@ export const YUU_EXTRA: Enrichment = {
   radicalNote: "Chính chữ này là bộ thủ số 36 (Khang Hy).",
   vocab: [
     {
-      word: "夕方", reading: "ゆうがた", meaning: "Buổi chiều tối", source: "authored", composition: [],
+      word: "夕方",
+      reading: "ゆうがた",
+      meaning: "Buổi chiều tối",
+      source: "authored",
+      composition: [],
       example: {
-        ja: [{ t: "夕方", r: "ゆうがた", hl: true }, { t: "に" }, { t: "友達", r: "ともだち" }, { t: "と" }, { t: "会", r: "あ" }, { t: "います。" }],
+        ja: [
+          { t: "夕方", r: "ゆうがた", hl: true },
+          { t: "に" },
+          { t: "友達", r: "ともだち" },
+          { t: "と" },
+          { t: "会", r: "あ" },
+          { t: "います。" },
+        ],
         vi: "Tôi gặp bạn vào buổi chiều tối.",
       },
     },
     {
-      word: "夕日", reading: "ゆうひ", meaning: "Mặt trời chiều", source: "authored", composition: [],
-      example: { ja: [{ t: "夕日", r: "ゆうひ", hl: true }, { t: "がきれいです。" }], vi: "Mặt trời chiều thật đẹp." },
+      word: "夕日",
+      reading: "ゆうひ",
+      meaning: "Mặt trời chiều",
+      source: "authored",
+      composition: [],
+      example: {
+        ja: [{ t: "夕日", r: "ゆうひ", hl: true }, { t: "がきれいです。" }],
+        vi: "Mặt trời chiều thật đẹp.",
+      },
     },
     {
-      word: "夕食", reading: "ゆうしょく", meaning: "Bữa tối", source: "authored", composition: [],
-      example: { ja: [{ t: "夕食", r: "ゆうしょく", hl: true }, { t: "を" }, { t: "食", r: "た" }, { t: "べます。" }], vi: "Tôi ăn bữa tối." },
+      word: "夕食",
+      reading: "ゆうしょく",
+      meaning: "Bữa tối",
+      source: "authored",
+      composition: [],
+      example: {
+        ja: [
+          { t: "夕食", r: "ゆうしょく", hl: true },
+          { t: "を" },
+          { t: "食", r: "た" },
+          { t: "べます。" },
+        ],
+        vi: "Tôi ăn bữa tối.",
+      },
     },
   ],
   sentences: [
     {
-      ja: [{ t: "夕方", r: "ゆうがた", hl: true }, { t: "に" }, { t: "友達", r: "ともだち" }, { t: "と" }, { t: "会", r: "あ" }, { t: "います。" }],
+      ja: [
+        { t: "夕方", r: "ゆうがた", hl: true },
+        { t: "に" },
+        { t: "友達", r: "ともだち" },
+        { t: "と" },
+        { t: "会", r: "あ" },
+        { t: "います。" },
+      ],
       vi: "Tôi gặp bạn vào buổi chiều tối.",
       source: "authored",
     },

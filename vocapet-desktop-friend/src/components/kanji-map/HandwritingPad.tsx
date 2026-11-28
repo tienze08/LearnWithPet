@@ -3,7 +3,13 @@ import { Eraser, Undo2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { loadAllStrokes } from "@/data/kanji";
 import { labelOf } from "@/lib/japanese/kanji-map/detail";
-import { buildIndex, recognize, type KanjiIndex, type Match, type Pt } from "@/lib/japanese/kanji-map/recognize";
+import {
+  buildIndex,
+  recognize,
+  type KanjiIndex,
+  type Match,
+  type Pt,
+} from "@/lib/japanese/kanji-map/recognize";
 
 // The index is built once per page load, on first use. Everything runs in the browser; strokes never leave it.
 let indexPromise: Promise<KanjiIndex> | null = null;
@@ -141,7 +147,13 @@ export function HandwritingPad({ onSelect }: { onSelect: (char: string) => void 
           <Undo2 aria-hidden className="mr-1.5 h-4 w-4" />
           Hoàn tác
         </Button>
-        <Button type="button" variant="outline" size="sm" onClick={clear} disabled={!strokes.length}>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={clear}
+          disabled={!strokes.length}
+        >
           <Eraser aria-hidden className="mr-1.5 h-4 w-4" />
           Xóa
         </Button>
@@ -150,7 +162,8 @@ export function HandwritingPad({ onSelect }: { onSelect: (char: string) => void 
         </Button>
       </div>
       <p className="text-[11px] leading-snug text-muted-foreground">
-        {strokes.length} nét. Viết từng nét riêng, càng đúng thứ tự càng chính xác. Nét viết chỉ xử lý trên máy bạn.
+        {strokes.length} nét. Viết từng nét riêng, càng đúng thứ tự càng chính xác. Nét viết chỉ xử
+        lý trên máy bạn.
       </p>
 
       <div aria-live="polite">
@@ -182,7 +195,9 @@ export function HandwritingPad({ onSelect }: { onSelect: (char: string) => void 
                     <span className="mt-1 max-w-full truncate text-[11px] font-bold leading-none text-primary-ink">
                       {labelOf(m.char) ?? "—"}
                     </span>
-                    <span className="mt-0.5 text-[10px] leading-none text-muted-foreground">{m.confidence}%</span>
+                    <span className="mt-0.5 text-[10px] leading-none text-muted-foreground">
+                      {m.confidence}%
+                    </span>
                   </button>
                 </li>
               ))}

@@ -33,8 +33,14 @@ export function companionStorageKey(userId: number) {
 
 export function createCompanionMemory(userId: number, now = Date.now()): CompanionMemory {
   return {
-    personality: personalityFor(userId), energy: 82, lastSeenAt: now, lastStudyAt: null,
-    lastGreetingDate: null, lastIdleNudgeAt: null, lastAbsenceNudgeAt: null, lastBreakSuggestionAt: null,
+    personality: personalityFor(userId),
+    energy: 82,
+    lastSeenAt: now,
+    lastStudyAt: null,
+    lastGreetingDate: null,
+    lastIdleNudgeAt: null,
+    lastAbsenceNudgeAt: null,
+    lastBreakSuggestionAt: null,
   };
 }
 
@@ -42,14 +48,17 @@ export function loadCompanionMemory(userId: number, now = Date.now()): Companion
   if (typeof window === "undefined") return createCompanionMemory(userId, now);
   try {
     const raw = window.localStorage.getItem(companionStorageKey(userId));
-    return raw ? { ...createCompanionMemory(userId, now), ...JSON.parse(raw) } : createCompanionMemory(userId, now);
+    return raw
+      ? { ...createCompanionMemory(userId, now), ...JSON.parse(raw) }
+      : createCompanionMemory(userId, now);
   } catch {
     return createCompanionMemory(userId, now);
   }
 }
 
 export function saveCompanionMemory(userId: number, memory: CompanionMemory) {
-  if (typeof window !== "undefined") window.localStorage.setItem(companionStorageKey(userId), JSON.stringify(memory));
+  if (typeof window !== "undefined")
+    window.localStorage.setItem(companionStorageKey(userId), JSON.stringify(memory));
 }
 
 export function moodForCompanion(memory: CompanionMemory, now = Date.now()): CompanionMood {
@@ -64,32 +73,75 @@ export function refreshEnergy(memory: CompanionMemory, now = Date.now()): Compan
   const elapsedHours = Math.max(0, now - memory.lastSeenAt) / 3_600_000;
   const hour = new Date(now).getHours();
   const resting = hour >= 23 || hour < 6;
-  return { ...memory, energy: Math.round(Math.max(20, Math.min(100, memory.energy + (resting ? elapsedHours * 5 : -elapsedHours * 2)))), lastSeenAt: now };
+  return {
+    ...memory,
+    energy: Math.round(
+      Math.max(20, Math.min(100, memory.energy + (resting ? elapsedHours * 5 : -elapsedHours * 2))),
+    ),
+    lastSeenAt: now,
+  };
 }
 
 export function nextCompanionMoment(memory: CompanionMemory, name: string, now = Date.now()) {
   const next = refreshEnergy(memory, now);
   const inactiveFor = next.lastStudyAt ? now - next.lastStudyAt : 0;
-  if (next.lastStudyAt && inactiveFor >= THREE_DAYS && (!next.lastAbsenceNudgeAt || now - next.lastAbsenceNudgeAt >= THREE_DAYS)) {
-    return { memory: { ...next, lastAbsenceNudgeAt: now }, moment: { mood: "missing_you" as const, message: `I haven't seen you lately. Hope everything is okay, ${name}. We can start with just one word.` } };
+  if (
+    next.lastStudyAt &&
+    inactiveFor >= THREE_DAYS &&
+    (!next.lastAbsenceNudgeAt || now - next.lastAbsenceNudgeAt >= THREE_DAYS)
+  ) {
+    return {
+      memory: { ...next, lastAbsenceNudgeAt: now },
+      moment: {
+        mood: "missing_you" as const,
+        message: `I haven't seen you lately. Hope everything is okay, ${name}. We can start with just one word.`,
+      },
+    };
   }
   const hour = new Date(now).getHours();
   if (next.lastGreetingDate !== dayKey(now) && hour >= 5 && hour < 11) {
-    return { memory: { ...next, lastGreetingDate: dayKey(now) }, moment: { mood: "cheerful" as const, message: `Good morning, ${name}! Ready to learn today?` } };
+    return {
+      memory: { ...next, lastGreetingDate: dayKey(now) },
+      moment: {
+        mood: "cheerful" as const,
+        message: `Good morning, ${name}! Ready to learn today?`,
+      },
+    };
   }
-  if (next.lastStudyAt && inactiveFor >= THREE_HOURS && (!next.lastIdleNudgeAt || now - next.lastIdleNudgeAt >= THREE_HOURS)) {
-    const message = next.personality === "focused" ? "I've saved a few words for us to revisit when you're ready." : "I'm reading while waiting for you. Want to review a few words together?";
-    return { memory: { ...next, lastIdleNudgeAt: now }, moment: { mood: "curious" as const, message } };
+  if (
+    next.lastStudyAt &&
+    inactiveFor >= THREE_HOURS &&
+    (!next.lastIdleNudgeAt || now - next.lastIdleNudgeAt >= THREE_HOURS)
+  ) {
+    const message =
+      next.personality === "focused"
+        ? "I've saved a few words for us to revisit when you're ready."
+        : "I'm reading while waiting for you. Want to review a few words together?";
+    return {
+      memory: { ...next, lastIdleNudgeAt: now },
+      moment: { mood: "curious" as const, message },
+    };
   }
   return { memory: next, moment: null };
 }
 
 export function recordCompanionStudy(memory: CompanionMemory, now = Date.now()) {
-  return { ...refreshEnergy(memory, now), energy: Math.min(100, memory.energy + 8), lastStudyAt: now };
+  return {
+    ...refreshEnergy(memory, now),
+    energy: Math.min(100, memory.energy + 8),
+    lastStudyAt: now,
+  };
 }
 
 export function studyCompleteMoment(memory: CompanionMemory, name: string, now = Date.now()) {
-  if (memory.lastBreakSuggestionAt && now - memory.lastBreakSuggestionAt < BREAK_COOLDOWN) return null;
-  const message = memory.personality === "playful" ? `Great job, ${name}! Let's stretch our paws and take a short break.` : `Great job, ${name}! Let's take a short break.`;
-  return { memory: { ...memory, lastBreakSuggestionAt: now }, moment: { mood: "cheerful" as const, message } };
+  if (memory.lastBreakSuggestionAt && now - memory.lastBreakSuggestionAt < BREAK_COOLDOWN)
+    return null;
+  const message =
+    memory.personality === "playful"
+      ? `Great job, ${name}! Let's stretch our paws and take a short break.`
+      : `Great job, ${name}! Let's take a short break.`;
+  return {
+    memory: { ...memory, lastBreakSuggestionAt: now },
+    moment: { mood: "cheerful" as const, message },
+  };
 }

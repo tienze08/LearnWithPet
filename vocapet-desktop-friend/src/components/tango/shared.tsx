@@ -2,13 +2,7 @@ import type { ReactNode } from "react";
 import { AlertCircle, Check, Circle, CircleDot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { TangoLessonStatus, TangoWordStatus } from "@/api/tango.api";
-
-export const WORD_STATUS_LABEL: Record<TangoWordStatus, string> = {
-  NEW: "Mới",
-  LEARNING: "Đang học",
-  MASTERED: "Đã thuộc",
-  NEED_REVIEW: "Cần ôn",
-};
+import { WORD_STATUS_LABEL } from "@/lib/japanese/tango-labels";
 
 const WORD_STATUS_CLASS: Record<TangoWordStatus, string> = {
   NEW: "bg-muted text-muted-foreground",
@@ -115,11 +109,6 @@ export function ProgressBar({ value, label }: { value: number; label: string }) 
       <div className="h-full bg-primary transition-all duration-500" style={{ width: `${pct}%` }} />
     </div>
   );
-}
-
-export function formatDate(iso: string | null | undefined): string {
-  if (!iso) return "—";
-  return new Date(iso).toLocaleString("vi-VN", { dateStyle: "short", timeStyle: "short" });
 }
 
 /** Japanese text with correct `lang` and font role. */

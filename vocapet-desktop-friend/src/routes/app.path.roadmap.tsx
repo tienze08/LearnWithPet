@@ -9,7 +9,8 @@ import {
 } from "@/hooks/queries/learning-path.queries";
 import { dayLabelVi, formatViDate, weekdayVi } from "@/lib/learning-path/dates";
 import { UnlockBadge } from "@/components/learning-path/TodayView";
-import { Seal, stripDayPrefix } from "@/components/learning-path/studio";
+import { Seal } from "@/components/learning-path/studio";
+import { stripDayPrefix } from "@/lib/learning-path/dates";
 import { Cat } from "@/components/ref/Cat";
 import { ArrowLeft, ArrowRight, Check, Clock, Flag, GraduationCap, Lock, Play } from "lucide-react";
 

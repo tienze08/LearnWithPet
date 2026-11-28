@@ -4,7 +4,6 @@ import com.vocabpet.backend.dto.TangoRe.TangoResponses.*;
 import com.vocabpet.backend.entity.*;
 import com.vocabpet.backend.entity.enums.JlptLevel;
 import com.vocabpet.backend.entity.enums.TangoLessonStatus;
-import com.vocabpet.backend.entity.enums.TangoVocabularyStatus;
 import com.vocabpet.backend.exception.TangoBadRequestException;
 import com.vocabpet.backend.exception.TangoNotFoundException;
 import com.vocabpet.backend.repository.*;
@@ -17,7 +16,10 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/** Progress overview, weak words, favorites and search. Reads only, plus favorite toggles. */
+/**
+ * Progress overview, weak words, favorites and search. Reads only, plus
+ * favorite toggles.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -45,12 +47,14 @@ public class TangoProgressService {
         int learning = 0, mastered = 0, needReview = 0;
         for (Long id : scope.vocabularyIds()) {
             UserTangoVocabularyProgress p = vocabProgress.get(id);
-            if (p == null) continue;
+            if (p == null)
+                continue;
             switch (p.getStatus()) {
                 case LEARNING -> learning++;
                 case MASTERED -> mastered++;
                 case NEED_REVIEW -> needReview++;
-                default -> { }
+                default -> {
+                }
             }
         }
         int total = scope.vocabularyIds().size();
@@ -60,9 +64,12 @@ public class TangoProgressService {
         int inProgress = 0, completed = 0;
         for (Long id : scope.lessonIds()) {
             UserTangoLessonProgress lp = lessonProgress.get(id);
-            if (lp == null) continue;
-            if (lp.getStatus() == TangoLessonStatus.COMPLETED) completed++;
-            else inProgress++;
+            if (lp == null)
+                continue;
+            if (lp.getStatus() == TangoLessonStatus.COMPLETED)
+                completed++;
+            else
+                inProgress++;
         }
         int lessonTotal = scope.lessonIds().size();
         LessonCounts lessons = new LessonCounts(lessonTotal - inProgress - completed, inProgress, completed,
@@ -71,7 +78,8 @@ public class TangoProgressService {
         ContinueLearning continueLearning = lessonProgress.values().stream()
                 .filter(lp -> lp.getStatus() == TangoLessonStatus.IN_PROGRESS)
                 .max(Comparator.comparing(lp -> lp.getLastStudiedAt() == null
-                        ? LocalDateTime.MIN : lp.getLastStudiedAt()))
+                        ? LocalDateTime.MIN
+                        : lp.getLastStudiedAt()))
                 .map(lp -> new ContinueLearning(lp.getLesson().getId(), lp.getLesson().getLessonNumber(),
                         lp.getLesson().getTitle(), lp.getLastPosition()))
                 .orElse(null);
@@ -97,7 +105,8 @@ public class TangoProgressService {
                 .filter(p -> p.getAnsweredCount() > 0)
                 .sorted(Comparator
                         .comparingDouble((UserTangoVocabularyProgress p) -> accuracy(p))
-                        .thenComparing(Comparator.comparingInt(UserTangoVocabularyProgress::getIncorrectCount).reversed())
+                        .thenComparing(
+                                Comparator.comparingInt(UserTangoVocabularyProgress::getIncorrectCount).reversed())
                         .thenComparing(p -> p.getLastAnsweredAt() == null ? LocalDateTime.MIN : p.getLastAnsweredAt()))
                 .limit(max)
                 .map(p -> {
@@ -115,7 +124,8 @@ public class TangoProgressService {
         User user = currentUserService.getCurrentUser();
         TangoVocabulary v = vocabularyRepository.findById(vocabularyId)
                 .orElseThrow(() -> new TangoNotFoundException("Vocabulary not found"));
-        Optional<UserTangoFavorite> existing = favoriteRepository.findByUserIdAndVocabularyId(user.getId(), vocabularyId);
+        Optional<UserTangoFavorite> existing = favoriteRepository.findByUserIdAndVocabularyId(user.getId(),
+                vocabularyId);
         if (favorite && existing.isEmpty()) {
             favoriteRepository.save(UserTangoFavorite.builder()
                     .user(user).vocabulary(v).createdAt(LocalDateTime.now()).build());
@@ -153,31 +163,37 @@ public class TangoProgressService {
 
         List<SearchLesson> lessons = wantLessons
                 ? scope.lessons().stream()
-                .filter(l -> normalizeForSearch(l.getTitle()).contains(needle))
-                .limit(SEARCH_LIMIT)
-                .map(l -> new SearchLesson(l.getId(), l.getJlptLevel().name(), l.getLessonNumber(), l.getTitle()))
-                .toList()
+                        .filter(l -> normalizeForSearch(l.getTitle()).contains(needle))
+                        .limit(SEARCH_LIMIT)
+                        .map(l -> new SearchLesson(l.getId(), l.getJlptLevel().name(), l.getLessonNumber(),
+                                l.getTitle()))
+                        .toList()
                 : List.of();
 
         List<WordSummary> vocabularies = wantVocabularies
                 ? scope.vocabularies().stream()
-                .filter(v -> matchesWord(v, needle))
-                .limit(SEARCH_LIMIT)
-                .map(TangoProgressService::summary)
-                .toList()
+                        .filter(v -> matchesWord(v, needle))
+                        .limit(SEARCH_LIMIT)
+                        .map(TangoProgressService::summary)
+                        .toList()
                 : List.of();
 
         return new SearchResponse(lessons, vocabularies);
     }
 
     private boolean matchesWord(TangoVocabulary v, String needle) {
-        if (normalizeForSearch(nullToEmpty(v.getExpression())).contains(needle)) return true;
-        if (normalizeForSearch(v.getKana()).contains(needle)) return true;
-        if (normalizeForSearch(v.getRomaji()).contains(needle)) return true;
+        if (normalizeForSearch(nullToEmpty(v.getExpression())).contains(needle))
+            return true;
+        if (normalizeForSearch(v.getKana()).contains(needle))
+            return true;
+        if (normalizeForSearch(v.getRomaji()).contains(needle))
+            return true;
         return v.getMeanings().stream().anyMatch(m -> normalizeForSearch(m.getMeaning()).contains(needle));
     }
 
-    /** Searchable form: NFKC, katakana to hiragana, lowercase. Kanji are kept as-is. */
+    /**
+     * Searchable form: NFKC, katakana to hiragana, lowercase. Kanji are kept as-is.
+     */
     private static String normalizeForSearch(String raw) {
         String s = Normalizer.normalize(nullToEmpty(raw), Normalizer.Form.NFKC).trim().toLowerCase(Locale.ROOT);
         StringBuilder out = new StringBuilder(s.length());
@@ -187,27 +203,31 @@ public class TangoProgressService {
         return out.toString();
     }
 
-    /** The catalog slice a query covers: all published content, or one JLPT level. */
+    /**
+     * The catalog slice a query covers: all published content, or one JLPT level.
+     */
     private Scope scopeOf(JlptLevel level) {
         List<JlptLevel> levels = level == null ? List.of(JlptLevel.values()) : List.of(level);
         List<TangoLesson> lessons = new ArrayList<>();
         Map<Long, TangoVocabulary> vocabularies = new LinkedHashMap<>();
         for (JlptLevel l : levels) {
             lessons.addAll(lessonRepository.findByJlptLevelAndPublishedTrueOrderBySortOrderAsc(l));
-            lessonVocabularyRepository.findPublishedByLevel(l).forEach(lv ->
-                    vocabularies.putIfAbsent(lv.getVocabulary().getId(), lv.getVocabulary()));
+            lessonVocabularyRepository.findPublishedByLevel(l)
+                    .forEach(lv -> vocabularies.putIfAbsent(lv.getVocabulary().getId(), lv.getVocabulary()));
         }
         return new Scope(levels, lessons, List.copyOf(vocabularies.values()));
     }
 
     private Map<Long, UserTangoVocabularyProgress> vocabProgressFor(Long userId, Collection<Long> ids) {
-        if (ids.isEmpty()) return Map.of();
+        if (ids.isEmpty())
+            return Map.of();
         return vocabularyProgressRepository.findByUserIdAndVocabularyIdIn(userId, ids).stream()
                 .collect(Collectors.toMap(p -> p.getVocabulary().getId(), p -> p, (a, b) -> a));
     }
 
     private Map<Long, UserTangoLessonProgress> lessonProgressFor(Long userId, Collection<Long> ids) {
-        if (ids.isEmpty()) return Map.of();
+        if (ids.isEmpty())
+            return Map.of();
         return lessonProgressRepository.findByUserIdAndLessonIdIn(userId, ids).stream()
                 .collect(Collectors.toMap(p -> p.getLesson().getId(), p -> p, (a, b) -> a));
     }

@@ -16,13 +16,18 @@ function TangoMistakes() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <Link to="/app/japanese/tango" className="inline-flex items-center gap-1 text-sm font-bold text-muted-foreground hover:text-foreground">
+      <Link
+        to="/app/japanese/tango"
+        className="inline-flex items-center gap-1 text-sm font-bold text-muted-foreground hover:text-foreground"
+      >
         <ArrowLeft className="h-4 w-4" /> Tango
       </Link>
       <div>
         <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">Ôn tập</p>
         <h1 className="mt-1 text-3xl font-extrabold tracking-tight">Từ cần ôn</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Sắp xếp từ yếu nhất lên đầu. Vào bài học để làm bài ôn từ sai.</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Sắp xếp từ yếu nhất lên đầu. Vào bài học để làm bài ôn từ sai.
+        </p>
       </div>
 
       <div role="tablist" aria-label="Lọc theo cấp độ" className="flex flex-wrap gap-2">
@@ -33,7 +38,9 @@ function TangoMistakes() {
             aria-selected={level === item}
             onClick={() => setLevel(item)}
             className={`rounded-full border px-3 py-1 text-sm font-bold ${
-              level === item ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card"
+              level === item
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-border bg-card"
             }`}
           >
             {item ?? "Tất cả"}

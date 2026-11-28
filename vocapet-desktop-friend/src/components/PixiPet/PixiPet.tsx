@@ -121,6 +121,8 @@ const PetCanvas = forwardRef<PetCanvasHandle, Props>(({ variant, stage, size, mo
 
       appRef.current = null;
     };
+    // `mood` only sets the first pose; the next effect follows its changes without rebuilding the canvas.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [size, variant]);
 
   useEffect(() => {

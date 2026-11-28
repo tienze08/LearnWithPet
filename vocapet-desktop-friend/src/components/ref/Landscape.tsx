@@ -86,7 +86,16 @@ function Pagoda({ x, y, s = 1 }: { x: number; y: number; s?: number }) {
           <rect x={-t.w / 2 + 10} y={t.y + 2} width={t.w - 20} height={t.h} fill={C.wall} />
           <rect x={-t.w / 2 + 10} y={t.y + t.h - 2} width={t.w - 20} height="4" fill={C.wallDark} />
           {[-1, 0, 1].map((k) => (
-            <rect key={k} x={k * 16 - 4} y={t.y + 8} width="8" height={t.h - 12} rx="1" fill={C.wallDark} opacity=".8" />
+            <rect
+              key={k}
+              x={k * 16 - 4}
+              y={t.y + 8}
+              width="8"
+              height={t.h - 12}
+              rx="1"
+              fill={C.wallDark}
+              opacity=".8"
+            />
           ))}
           <Roof cx={0} y={t.y} w={t.w} />
         </g>
@@ -103,8 +112,20 @@ function Pagoda({ x, y, s = 1 }: { x: number; y: number; s?: number }) {
 function Pine({ x, y, s = 1, o = 1 }: { x: number; y: number; s?: number; o?: number }) {
   return (
     <g transform={`translate(${x} ${y}) scale(${s})`} opacity={o}>
-      <path d="M0 0 Q-6 -34 8 -62 Q16 -80 6 -96" stroke={C.trunk} strokeWidth="6" fill="none" strokeLinecap="round" />
-      <path d="M8 -50 Q34 -56 46 -72" stroke={C.trunk} strokeWidth="4" fill="none" strokeLinecap="round" />
+      <path
+        d="M0 0 Q-6 -34 8 -62 Q16 -80 6 -96"
+        stroke={C.trunk}
+        strokeWidth="6"
+        fill="none"
+        strokeLinecap="round"
+      />
+      <path
+        d="M8 -50 Q34 -56 46 -72"
+        stroke={C.trunk}
+        strokeWidth="4"
+        fill="none"
+        strokeLinecap="round"
+      />
       <ellipse cx="2" cy="-104" rx="38" ry="13" fill={C.forest} />
       <ellipse cx="48" cy="-78" rx="26" ry="9" fill={C.forest} opacity=".9" />
       <ellipse cx="-18" cy="-74" rx="22" ry="8" fill={C.forest} opacity=".85" />
@@ -112,7 +133,21 @@ function Pine({ x, y, s = 1, o = 1 }: { x: number; y: number; s?: number; o?: nu
   );
 }
 
-function Branch({ x, y, s = 1, flip = false, seed = 1, o = 1 }: { x: number; y: number; s?: number; flip?: boolean; seed?: number; o?: number }) {
+function Branch({
+  x,
+  y,
+  s = 1,
+  flip = false,
+  seed = 1,
+  o = 1,
+}: {
+  x: number;
+  y: number;
+  s?: number;
+  flip?: boolean;
+  seed?: number;
+  o?: number;
+}) {
   const r = rng(seed);
   const stems = [
     "M0 0 Q120 40 210 20 T400 70",
@@ -121,7 +156,14 @@ function Branch({ x, y, s = 1, flip = false, seed = 1, o = 1 }: { x: number; y: 
     "M300 50 Q340 100 330 160",
   ];
   const dots: ReactNode[] = [];
-  const spots: Array<[number, number, number]> = [[190, 18, 50], [300, 54, 58], [130, 120, 40], [340, -20, 40], [330, 140, 44], [60, 24, 36]];
+  const spots: Array<[number, number, number]> = [
+    [190, 18, 50],
+    [300, 54, 58],
+    [130, 120, 40],
+    [340, -20, 40],
+    [330, 140, 44],
+    [60, 24, 36],
+  ];
   spots.forEach(([cx, cy, spread], k) => {
     for (let i = 0; i < 34; i++) {
       const a = r() * Math.PI * 2;
@@ -141,7 +183,14 @@ function Branch({ x, y, s = 1, flip = false, seed = 1, o = 1 }: { x: number; y: 
   return (
     <g transform={`translate(${x} ${y}) scale(${flip ? -s : s} ${s})`} opacity={o}>
       {stems.map((d, i) => (
-        <path key={i} d={d} stroke={C.trunk} strokeWidth={i === 0 ? 6 : 3} fill="none" strokeLinecap="round" />
+        <path
+          key={i}
+          d={d}
+          stroke={C.trunk}
+          strokeWidth={i === 0 ? 6 : 3}
+          fill="none"
+          strokeLinecap="round"
+        />
       ))}
       {dots}
     </g>
@@ -154,14 +203,34 @@ function Flower({ x, y, s = 1 }: { x: number; y: number; s?: number }) {
       <path d="M0 0 Q-4 30 2 60" stroke="#7f9a72" strokeWidth="3" fill="none" />
       <path d="M2 44 Q-18 34 -22 46 Q-6 52 2 44Z" fill="#9db58d" />
       {[0, 72, 144, 216, 288].map((a) => (
-        <ellipse key={a} cx="0" cy="-10" rx="7" ry="11" fill="#fbeceb" stroke="#f1c2c0" strokeWidth="1" transform={`rotate(${a})`} />
+        <ellipse
+          key={a}
+          cx="0"
+          cy="-10"
+          rx="7"
+          ry="11"
+          fill="#fbeceb"
+          stroke="#f1c2c0"
+          strokeWidth="1"
+          transform={`rotate(${a})`}
+        />
       ))}
       <circle r="4" fill="#f0c36a" />
     </g>
   );
 }
 
-function Petals({ seed = 7, n = 14, w = 1000, h = 420 }: { seed?: number; n?: number; w?: number; h?: number }) {
+function Petals({
+  seed = 7,
+  n = 14,
+  w = 1000,
+  h = 420,
+}: {
+  seed?: number;
+  n?: number;
+  w?: number;
+  h?: number;
+}) {
   const r = rng(seed);
   return (
     <g fill={C.petal}>

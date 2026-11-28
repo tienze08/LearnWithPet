@@ -13,7 +13,8 @@ import {
 import { KANA_CHART, type KanaScript } from "@/lib/japanese/kana";
 import { weekdayVi } from "@/lib/learning-path/dates";
 import { ErrorBlock } from "@/components/tango/shared";
-import { GenkoGrid, Seal, stripDayPrefix, type GenkoCell } from "@/components/learning-path/studio";
+import { GenkoGrid, Seal, type GenkoCell } from "@/components/learning-path/studio";
+import { stripDayPrefix } from "@/lib/learning-path/dates";
 import { AchievementsSection } from "@/components/progress/AchievementsSection";
 import { Cat } from "@/components/ref/Cat";
 import { Award, ChevronDown, Flame, Star } from "lucide-react";
@@ -43,7 +44,9 @@ function ProgressPage() {
       <header className="relative min-h-[17rem] space-y-6 sm:pr-[min(34%,20rem)]">
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-2">
-            <h1 className="studio-head text-4xl leading-tight sm:text-[2.75rem]">Hành trình của bạn</h1>
+            <h1 className="studio-head text-4xl leading-tight sm:text-[2.75rem]">
+              Hành trình của bạn
+            </h1>
             <p className="max-w-[48ch] text-base studio-muted">
               {!t
                 ? "Cùng nhìn lại những thành quả đã đạt được nhé!"
@@ -70,14 +73,20 @@ function ProgressPage() {
         </div>
         <div className="flex flex-wrap gap-4">
           <div className="ref-card grid w-40 justify-items-center gap-2 bg-peach/60 px-4 py-5 text-center">
-            <span aria-hidden className="grid h-12 w-12 place-items-center rounded-full bg-sheet/80">
+            <span
+              aria-hidden
+              className="grid h-12 w-12 place-items-center rounded-full bg-sheet/80"
+            >
               <Flame className="h-6 w-6 text-streak" />
             </span>
             <p className="studio-head text-2xl leading-none tabular-nums">{streak} ngày</p>
             <p className="text-xs studio-muted">Chuỗi học tập</p>
           </div>
           <div className="ref-card grid w-40 justify-items-center gap-2 bg-butter/30 px-4 py-5 text-center">
-            <span aria-hidden className="grid h-12 w-12 place-items-center rounded-full bg-sheet/80">
+            <span
+              aria-hidden
+              className="grid h-12 w-12 place-items-center rounded-full bg-sheet/80"
+            >
               <Star className="h-6 w-6 text-[var(--p-peach-ink)]" />
             </span>
             <p className="studio-head text-2xl leading-none tabular-nums">
@@ -98,12 +107,17 @@ function ProgressPage() {
         </div>
         <div className="ref-card flex flex-col items-center gap-2 p-6 text-center">
           <h2 className="studio-head w-full text-left text-lg">Cột mốc</h2>
-          <span aria-hidden className="mt-2 grid h-16 w-16 place-items-center rounded-full bg-butter/40 text-[var(--p-peach-ink)]">
+          <span
+            aria-hidden
+            className="mt-2 grid h-16 w-16 place-items-center rounded-full bg-butter/40 text-[var(--p-peach-ink)]"
+          >
             <Award className="h-8 w-8" />
           </span>
           <p className="studio-head text-2xl">{t?.profile.targetLevel ?? "N5"}</p>
           <p className="text-sm studio-muted">
-            {t ? `Đạt được ${t.itemsUnderstood}/${t.itemsTotal} nội dung` : "Thiết lập lộ trình để theo dõi"}
+            {t
+              ? `Đạt được ${t.itemsUnderstood}/${t.itemsTotal} nội dung`
+              : "Thiết lập lộ trình để theo dõi"}
           </p>
           {t && (
             <div
@@ -467,9 +481,7 @@ function Accuracy({ enabled, range }: { enabled: boolean; range: number }) {
         </p>
       </div>
       {!enabled ? (
-        <p className="text-sm studio-muted">
-          Thiết lập lộ trình để theo dõi kết quả học mỗi ngày.
-        </p>
+        <p className="text-sm studio-muted">Thiết lập lộ trình để theo dõi kết quả học mỗi ngày.</p>
       ) : ov.isPending ? (
         <div className="h-24 animate-pulse rounded-[2px] bg-surface-2" aria-busy="true" />
       ) : days.length === 0 ? (
@@ -493,7 +505,10 @@ function Accuracy({ enabled, range }: { enabled: boolean; range: number }) {
                   />
                   <span
                     className="block w-full bg-primary"
-                    style={{ height: `${(d.correct / max) * 100}%`, borderRadius: d.answered === d.correct ? "9999px 9999px 0 0" : 0 }}
+                    style={{
+                      height: `${(d.correct / max) * 100}%`,
+                      borderRadius: d.answered === d.correct ? "9999px 9999px 0 0" : 0,
+                    }}
                   />
                 </li>
               ))}
@@ -513,7 +528,8 @@ function Accuracy({ enabled, range }: { enabled: boolean; range: number }) {
               .join("; ")}
           </p>
           <p className="text-sm studio-muted">
-            {total} câu trong {days.length} ngày · đúng {Math.round((right / Math.max(1, total)) * 100)}%
+            {total} câu trong {days.length} ngày · đúng{" "}
+            {Math.round((right / Math.max(1, total)) * 100)}%
           </p>
         </>
       )}

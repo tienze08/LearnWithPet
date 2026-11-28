@@ -5,7 +5,15 @@ import { LevelStamp } from "@/components/tango/shared";
 import { PatternTitle } from "./PatternTitle";
 
 /** One grammar point in the list: pattern, Vietnamese meaning, basic formation, level, link to the detail page. */
-export function GrammarCard({ g, learned, favorite }: { g: GrammarPoint; learned: boolean; favorite: boolean }) {
+export function GrammarCard({
+  g,
+  learned,
+  favorite,
+}: {
+  g: GrammarPoint;
+  learned: boolean;
+  favorite: boolean;
+}) {
   return (
     <li>
       <Link
@@ -19,7 +27,9 @@ export function GrammarCard({ g, learned, favorite }: { g: GrammarPoint; learned
           <LevelStamp level={g.level} />
         </div>
         <p className="text-sm font-semibold">
-          {g.meaningVi ?? <span className="font-normal text-muted-foreground">Chưa có bản dịch tiếng Việt</span>}
+          {g.meaningVi ?? (
+            <span className="font-normal text-muted-foreground">Chưa có bản dịch tiếng Việt</span>
+          )}
         </p>
         <p className="text-xs text-muted-foreground">Cấu trúc: {g.formationVi}</p>
         <div className="mt-auto flex items-center gap-2 pt-1 text-xs">
@@ -30,7 +40,12 @@ export function GrammarCard({ g, learned, favorite }: { g: GrammarPoint; learned
               Đã học
             </span>
           )}
-          {favorite && <Star aria-label="Yêu thích" className={`h-3.5 w-3.5 fill-current text-warning-ink ${learned ? "" : "ml-auto"}`} />}
+          {favorite && (
+            <Star
+              aria-label="Yêu thích"
+              className={`h-3.5 w-3.5 fill-current text-warning-ink ${learned ? "" : "ml-auto"}`}
+            />
+          )}
         </div>
       </Link>
     </li>

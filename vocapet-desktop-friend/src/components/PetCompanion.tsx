@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { useGame, stageForLevel, computePetMood, type PetMood } from "@/lib/store";
+import { useGame, type PetMood } from "@/lib/store";
+import { computePetMood } from "@/lib/pet/rules";
+import { stageForLevel } from "@/lib/pet/rules";
 import { Button } from "@/components/ui/button";
 import { BookOpen, PencilLine, Sparkles, Target, X } from "lucide-react";
 import { useAnswerQuizMutation, useRandomQuizMutation } from "@/hooks/queries/quiz.queries";
@@ -16,7 +18,11 @@ import { reactionFor } from "@/lib/pet/behavior";
 import { petEvents } from "@/lib/pet/events";
 import type { UserResponse } from "@/types/user";
 import { useMeQuery } from "@/hooks/queries/user.queries";
-import { useCompanionEventMutation, useCompanionPreferencesMutation, useCompanionStateQuery } from "@/hooks/queries/companion.queries";
+import {
+  useCompanionEventMutation,
+  useCompanionPreferencesMutation,
+  useCompanionStateQuery,
+} from "@/hooks/queries/companion.queries";
 import type { PetBehaviorResponse as ServerPetBehaviorResponse } from "@/types/pet";
 
 function todayISO() {
@@ -63,7 +69,9 @@ export function PetCompanion() {
   const queryClient = useQueryClient();
   const { state, setPetInterval, recordAnswer } = useGame();
   const { data: me } = useMeQuery();
-  const { data: companionState, refetch: refreshCompanionState } = useCompanionStateQuery(Boolean(me?.pet));
+  const { data: companionState, refetch: refreshCompanionState } = useCompanionStateQuery(
+    Boolean(me?.pet),
+  );
   const [reminder, setReminder] = useState(false);
   const [open, setOpen] = useState(false);
   const [timeLeft, setTimeLeft] = useState(15);
@@ -95,7 +103,11 @@ export function PetCompanion() {
 
   useEffect(() => {
     if (!me?.id || !me.pet) return;
-    recordCompanionEvent("APP_OPENED", { onSuccess: (snapshot) => applyServerReaction(snapshot.reaction) });
+    recordCompanionEvent("APP_OPENED", {
+      onSuccess: (snapshot) => applyServerReaction(snapshot.reaction),
+    });
+    // Greets once per signed-in user, not on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [me?.id]);
 
   useEffect(() => {
@@ -103,11 +115,7 @@ export function PetCompanion() {
       const reaction = reactionFor(event);
       setEventMood(reaction.emotion);
       triggerPetAnimation(reaction.action);
-      if (
-        reaction.message &&
-        event.type !== "ANSWER_CORRECT" &&
-        event.type !== "ANSWER_WRONG"
-      ) {
+      if (reaction.message && event.type !== "ANSWER_CORRECT" && event.type !== "ANSWER_WRONG") {
         speakPet(`${state.petName}: ${reaction.message}`, reaction.priority, 3);
       }
       window.setTimeout(() => setEventMood(null), 1800);
@@ -207,6 +215,8 @@ export function PetCompanion() {
       if (approachTimer) window.clearTimeout(approachTimer);
       if (invitationTimer) window.clearTimeout(invitationTimer);
     };
+    // The reminder timer must not restart when the quiz mutation's identity changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, reminder, state.popupIntervalMin, companionState?.remindersEnabled, state.petName]);
 
   const [quiz, setQuiz] = useState<QuizQuestionResponse | null>(null);
@@ -243,6 +253,8 @@ export function PetCompanion() {
     }, 90_000);
     void notes;
     return () => window.clearInterval(id);
+    // The poll must not restart on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, reminder, refreshCompanionState]);
 
   // auto-open quiz a few seconds after reminder appears
@@ -266,6 +278,8 @@ export function PetCompanion() {
       });
     }, 1000);
     return () => clearInterval(id);
+    // The countdown restarts only for a new question.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, quiz?.vocabularyId]);
 
   const { mutateAsync: answerQuiz } = useAnswerQuizMutation();
@@ -293,22 +307,22 @@ export function PetCompanion() {
 
     if (!result) return;
 
-      setAnswerResult(result);
-      recordAnswer(String(quiz.vocabularyId), result.correct, { xp: result.xp, coin: result.coin });
-      queryClient.setQueryData<UserResponse>(["me"], (currentUser) =>
-        currentUser
-          ? {
-              ...currentUser,
-              xp: currentUser.xp + result.xp,
-              totalXp: currentUser.totalXp + result.xp,
-              coin: currentUser.coin + result.coin,
-            }
-          : currentUser,
-      );
-      void Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["achievements", "me"] }),
-        queryClient.invalidateQueries({ queryKey: ["me"] }),
-      ]);
+    setAnswerResult(result);
+    recordAnswer(String(quiz.vocabularyId), result.correct, { xp: result.xp, coin: result.coin });
+    queryClient.setQueryData<UserResponse>(["me"], (currentUser) =>
+      currentUser
+        ? {
+            ...currentUser,
+            xp: currentUser.xp + result.xp,
+            totalXp: currentUser.totalXp + result.xp,
+            coin: currentUser.coin + result.coin,
+          }
+        : currentUser,
+    );
+    void Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["achievements", "me"] }),
+      queryClient.invalidateQueries({ queryKey: ["me"] }),
+    ]);
 
     applyServerReaction(result.petBehavior);
     recordCompanionEvent(result.correct ? "ANSWER_CORRECT" : "ANSWER_WRONG", {
@@ -442,7 +456,9 @@ export function PetCompanion() {
                 {answerResult === null ? (
                   <span className="text-muted-foreground">Checking your answer…</span>
                 ) : answerResult.correct ? (
-                  <span className="text-success">✨ Amazing! +{answerResult.xp} XP · +{answerResult.coin} 🪙</span>
+                  <span className="text-success">
+                    ✨ Amazing! +{answerResult.xp} XP · +{answerResult.coin} 🪙
+                  </span>
                 ) : (
                   <span className="text-destructive">😅 Don't worry — we'll learn together.</span>
                 )}
@@ -475,11 +491,13 @@ export function PetCompanion() {
           {companionState && (
             <div className="mb-3 rounded-xl border border-border bg-muted/40 p-2">
               <p className="text-xs font-semibold capitalize">
-                Companion · {companionState.personality.toLowerCase()} · Energy {companionState.energy}%
+                Companion · {companionState.personality.toLowerCase()} · Energy{" "}
+                {companionState.energy}%
               </p>
               {companionState.daysTogether > 0 && (
                 <p className="mt-1 text-[11px] text-muted-foreground">
-                  Together {companionState.daysTogether} days · {companionState.totalSessionsTogether} study moments
+                  Together {companionState.daysTogether} days ·{" "}
+                  {companionState.totalSessionsTogether} study moments
                 </p>
               )}
               {companionState.frequentlyWrongWord && (
@@ -507,7 +525,11 @@ export function PetCompanion() {
                           triggerPetAnimation("THINK");
                         } catch (error) {
                           console.error("Weak-topic quiz failed", error);
-                          speakPet(`${state.petName}: I couldn't prepare that practice set yet.`, 1, 4);
+                          speakPet(
+                            `${state.petName}: I couldn't prepare that practice set yet.`,
+                            1,
+                            4,
+                          );
                         }
                       }}
                     >
@@ -518,14 +540,19 @@ export function PetCompanion() {
               )}
               {companionState.learningProfile?.totalStudyMinutes > 0 && (
                 <p className="mt-1 text-[11px] text-muted-foreground">
-                  We have studied {companionState.learningProfile.totalStudyMinutes} minutes together.
+                  We have studied {companionState.learningProfile.totalStudyMinutes} minutes
+                  together.
                 </p>
               )}
               <button
                 className="mt-1 text-xs font-medium text-primary hover:underline"
-                onClick={() => updateCompanionPreferences({ remindersEnabled: !companionState.remindersEnabled })}
+                onClick={() =>
+                  updateCompanionPreferences({ remindersEnabled: !companionState.remindersEnabled })
+                }
               >
-                {companionState.remindersEnabled ? "Pause companion reminders" : "Turn on companion reminders"}
+                {companionState.remindersEnabled
+                  ? "Pause companion reminders"
+                  : "Turn on companion reminders"}
               </button>
             </div>
           )}
@@ -555,7 +582,11 @@ export function PetCompanion() {
                   triggerPetAnimation("STUDY");
                 } catch (e) {
                   console.error(e);
-                  speakPet(`${state.petName}: Add a word to one of your decks, then we can practise together.`, 1, 5);
+                  speakPet(
+                    `${state.petName}: Add a word to one of your decks, then we can practise together.`,
+                    1,
+                    5,
+                  );
                 }
               }}
             >

@@ -45,7 +45,9 @@ function LibraryPage() {
   const q = useSettled(query.trim());
   const [showFilters, setShowFilters] = useState(true);
   const shows = (g: Group) =>
-    filter === "all" || filter === g || (g === "kana" && (filter === "hiragana" || filter === "katakana"));
+    filter === "all" ||
+    filter === g ||
+    (g === "kana" && (filter === "hiragana" || filter === "katakana"));
 
   return (
     <div className="mx-auto max-w-[1040px] space-y-8">
@@ -83,14 +85,24 @@ function LibraryPage() {
             className="ref-card inline-flex min-h-12 items-center gap-2 rounded-full px-5 text-sm font-semibold"
           >
             Bộ lọc
-            <ChevronDown aria-hidden className={`h-4 w-4 transition-transform ${showFilters ? "rotate-180" : ""}`} />
+            <ChevronDown
+              aria-hidden
+              className={`h-4 w-4 transition-transform ${showFilters ? "rotate-180" : ""}`}
+            />
           </button>
         </div>
         <div className="space-y-2">
-          <h1 className="studio-head text-4xl leading-tight sm:text-[2.75rem]">Thư viện kiến thức</h1>
+          <h1 className="studio-head text-4xl leading-tight sm:text-[2.75rem]">
+            Thư viện kiến thức
+          </h1>
           <p className="text-base studio-muted">Khám phá và học bất cứ điều gì bạn muốn!</p>
         </div>
-        <div role="group" aria-label="Lọc theo nhóm" hidden={!showFilters} className="flex flex-wrap gap-2">
+        <div
+          role="group"
+          aria-label="Lọc theo nhóm"
+          hidden={!showFilters}
+          className="flex flex-wrap gap-2"
+        >
           {FILTERS.map((f) => (
             <button
               key={f.id}
@@ -122,12 +134,60 @@ function Contents({ shows }: { shows: (g: Group) => boolean }) {
     tone: string;
     circle: string;
   }[] = [
-    { group: "hiragana", to: "/app/japanese/alphabet", jp: "あ", label: "Hiragana", cta: "Bắt đầu từ cơ bản", tone: "bg-[var(--p-rose)]", circle: "bg-[#f7c9cc] text-[#d9505f]" },
-    { group: "katakana", to: "/app/japanese/alphabet", jp: "ア", label: "Katakana", cta: "Học ngay", tone: "bg-[var(--p-sky)]", circle: "bg-[#cfe0f7] text-[#3b7bd4]" },
-    { group: "kanji", to: "/app/japanese/kanji", jp: "漢", label: "Kanji", cta: "Khám phá", tone: "bg-[var(--p-mint)]", circle: "bg-[#d3e4cc] text-primary" },
-    { group: "grammar", to: "/app/japanese/grammar", icon: <BookOpen className="h-7 w-7" />, label: "Ngữ pháp", cta: "Tìm hiểu", tone: "bg-[var(--p-peach)]", circle: "bg-[#f8dfae] text-[#c8872a]" },
-    { group: "vocab", to: "/app/japanese/tango", icon: <ListChecks className="h-7 w-7" />, label: "Từ vựng", cta: "Học ngay", tone: "bg-[var(--p-lilac)]", circle: "bg-[#d9d2f2] text-[#6a5bb5]" },
-    { group: "deck", to: "/app/decks", icon: <Layers className="h-7 w-7" />, label: "Flashcards", cta: "Luyện tập", tone: "bg-[var(--p-forest-soft)]", circle: "bg-[#c7dfc4] text-primary" },
+    {
+      group: "hiragana",
+      to: "/app/japanese/alphabet",
+      jp: "あ",
+      label: "Hiragana",
+      cta: "Bắt đầu từ cơ bản",
+      tone: "bg-[var(--p-rose)]",
+      circle: "bg-[#f7c9cc] text-[#d9505f]",
+    },
+    {
+      group: "katakana",
+      to: "/app/japanese/alphabet",
+      jp: "ア",
+      label: "Katakana",
+      cta: "Học ngay",
+      tone: "bg-[var(--p-sky)]",
+      circle: "bg-[#cfe0f7] text-[#3b7bd4]",
+    },
+    {
+      group: "kanji",
+      to: "/app/japanese/kanji",
+      jp: "漢",
+      label: "Kanji",
+      cta: "Khám phá",
+      tone: "bg-[var(--p-mint)]",
+      circle: "bg-[#d3e4cc] text-primary",
+    },
+    {
+      group: "grammar",
+      to: "/app/japanese/grammar",
+      icon: <BookOpen className="h-7 w-7" />,
+      label: "Ngữ pháp",
+      cta: "Tìm hiểu",
+      tone: "bg-[var(--p-peach)]",
+      circle: "bg-[#f8dfae] text-[#c8872a]",
+    },
+    {
+      group: "vocab",
+      to: "/app/japanese/tango",
+      icon: <ListChecks className="h-7 w-7" />,
+      label: "Từ vựng",
+      cta: "Học ngay",
+      tone: "bg-[var(--p-lilac)]",
+      circle: "bg-[#d9d2f2] text-[#6a5bb5]",
+    },
+    {
+      group: "deck",
+      to: "/app/decks",
+      icon: <Layers className="h-7 w-7" />,
+      label: "Flashcards",
+      cta: "Luyện tập",
+      tone: "bg-[var(--p-forest-soft)]",
+      circle: "bg-[#c7dfc4] text-primary",
+    },
   ];
 
   return (
@@ -151,7 +211,10 @@ function Contents({ shows }: { shows: (g: Group) => boolean }) {
                 <span className="mt-2 block text-lg font-semibold text-foreground">{e.label}</span>
                 <span className="flex items-center gap-1 text-sm font-medium text-primary">
                   {e.cta}
-                  <ArrowRight aria-hidden className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                  <ArrowRight
+                    aria-hidden
+                    className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5"
+                  />
                 </span>
               </Link>
             </li>

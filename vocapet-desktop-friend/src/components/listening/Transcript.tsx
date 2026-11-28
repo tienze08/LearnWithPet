@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ChevronDown, Languages, List, MessageCircle, Play, Type } from "lucide-react";
-import { formatTime } from "@/components/audio/AudioPlayer";
+import { formatTime } from "@/lib/audio/engine";
 import { Button } from "@/components/ui/button";
 import type { PlayerState, PlaylistPlayer, Segment } from "@/lib/audio/engine";
 import type { Lesson } from "@/lib/listening/types";

@@ -20,7 +20,8 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: TITLE },
       {
         property: "og:description",
-        content: "Học tiếng Nhật thật vui: lộ trình theo trình độ, ôn tập đúng lúc, và một người bạn nhỏ luôn bên bạn.",
+        content:
+          "Học tiếng Nhật thật vui: lộ trình theo trình độ, ôn tập đúng lúc, và một người bạn nhỏ luôn bên bạn.",
       },
     ],
   }),
@@ -28,10 +29,30 @@ export const Route = createFileRoute("/")({
 });
 
 const FEATURES = [
-  { icon: RouteIcon, title: "Lộ trình riêng", desc: "Chọn trình độ, mục tiêu và thời gian học; VocaPet xếp lịch từng ngày cho bạn.", tone: "bg-peach" },
-  { icon: BookOpen, title: "Từ vựng, kanji, ngữ pháp", desc: "Học theo giáo trình Minna no Nihongo, kèm bảng Hiragana và Katakana.", tone: "bg-mint" },
-  { icon: Layers, title: "Flashcards ôn lặp lại", desc: "Thẻ quay lại đúng lúc sắp quên, có furigana bật tắt khi cần.", tone: "bg-sky" },
-  { icon: TrendingUp, title: "Tiến độ & chuỗi ngày", desc: "Xem chuỗi học, điểm XP và cột mốc JLPT để giữ nhịp mỗi ngày.", tone: "bg-lilac" },
+  {
+    icon: RouteIcon,
+    title: "Lộ trình riêng",
+    desc: "Chọn trình độ, mục tiêu và thời gian học; VocaPet xếp lịch từng ngày cho bạn.",
+    tone: "bg-peach",
+  },
+  {
+    icon: BookOpen,
+    title: "Từ vựng, kanji, ngữ pháp",
+    desc: "Học theo giáo trình Minna no Nihongo, kèm bảng Hiragana và Katakana.",
+    tone: "bg-mint",
+  },
+  {
+    icon: Layers,
+    title: "Flashcards ôn lặp lại",
+    desc: "Thẻ quay lại đúng lúc sắp quên, có furigana bật tắt khi cần.",
+    tone: "bg-sky",
+  },
+  {
+    icon: TrendingUp,
+    title: "Tiến độ & chuỗi ngày",
+    desc: "Xem chuỗi học, điểm XP và cột mốc JLPT để giữ nhịp mỗi ngày.",
+    tone: "bg-lilac",
+  },
 ];
 
 const STEPS = [
@@ -52,7 +73,10 @@ function Landing() {
       <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5">
         <Logo />
         <div className="flex items-center gap-2">
-          <Link to="/login" className="flex min-h-11 items-center rounded-full px-4 text-sm font-medium hover:bg-primary-soft">
+          <Link
+            to="/login"
+            className="flex min-h-11 items-center rounded-full px-4 text-sm font-medium hover:bg-primary-soft"
+          >
             Đăng nhập
           </Link>
           <Link to="/register" className="studio-btn min-h-11 rounded-full px-5">
@@ -70,8 +94,8 @@ function Landing() {
             với <span className="text-primary">người bạn nhỏ</span> bên cạnh.
           </h1>
           <p className="mt-6 max-w-[34rem] text-lg leading-relaxed text-foreground/75">
-            Một lộ trình dành riêng cho bạn: học chữ, từ vựng và ngữ pháp mỗi ngày, ôn lại đúng lúc, và có
-            một chú mèo đồng hành để giữ chuỗi học của bạn.
+            Một lộ trình dành riêng cho bạn: học chữ, từ vựng và ngữ pháp mỗi ngày, ôn lại đúng lúc,
+            và có một chú mèo đồng hành để giữ chuỗi học của bạn.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link to="/register" className="studio-btn min-h-12 gap-2 rounded-full px-7 text-base">
@@ -85,7 +109,10 @@ function Landing() {
 
         <div className="ref-card relative aspect-[5/4] overflow-hidden">
           <Landscape variant="welcome" />
-          <Cat pose="read" className="absolute bottom-[6%] left-1/2 w-[46%] -translate-x-1/2 drop-shadow-[0_10px_14px_rgba(52,66,48,0.18)]" />
+          <Cat
+            pose="read"
+            className="absolute bottom-[6%] left-1/2 w-[46%] -translate-x-1/2 drop-shadow-[0_10px_14px_rgba(52,66,48,0.18)]"
+          />
         </div>
       </section>
 
@@ -118,9 +145,16 @@ function Landing() {
         <div className="relative overflow-hidden rounded-3xl bg-primary-soft px-6 py-14 text-center">
           <Landscape variant="plan" />
           <div className="relative">
-            <h2 className="studio-head text-3xl sm:text-4xl">Cùng bắt đầu chuỗi học đầu tiên nhé!</h2>
-            <p className="mt-3 text-foreground/70">Mỗi ngày một chút, chú mèo sẽ luôn ở đây cùng bạn.</p>
-            <Link to="/register" className="studio-btn mt-7 min-h-12 gap-2 rounded-full px-8 text-base">
+            <h2 className="studio-head text-3xl sm:text-4xl">
+              Cùng bắt đầu chuỗi học đầu tiên nhé!
+            </h2>
+            <p className="mt-3 text-foreground/70">
+              Mỗi ngày một chút, chú mèo sẽ luôn ở đây cùng bạn.
+            </p>
+            <Link
+              to="/register"
+              className="studio-btn mt-7 min-h-12 gap-2 rounded-full px-8 text-base"
+            >
               Bắt đầu miễn phí <ArrowRight aria-hidden className="h-4 w-4" />
             </Link>
           </div>

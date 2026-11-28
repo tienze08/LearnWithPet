@@ -1,8 +1,4 @@
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
   createVocabularyApi,
@@ -15,28 +11,20 @@ import {
 
 import type { VocabularyResponse } from "@/api/vocabulary.api";
 
-
-export function useVocabulariesQuery(deckId:number){
-
- return useQuery<VocabularyResponse[]>({
-    queryKey:["vocabularies",deckId],
-    queryFn:()=>getVocabulariesApi(deckId),
-    enabled:!!deckId
- });
-
+export function useVocabulariesQuery(deckId: number) {
+  return useQuery<VocabularyResponse[]>({
+    queryKey: ["vocabularies", deckId],
+    queryFn: () => getVocabulariesApi(deckId),
+    enabled: !!deckId,
+  });
 }
 
 export function useCreateVocabularyMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      deckId,
-      payload,
-    }: {
-      deckId: number;
-      payload: VocabularyRequest;
-    }) => createVocabularyApi(deckId, payload),
+    mutationFn: ({ deckId, payload }: { deckId: number; payload: VocabularyRequest }) =>
+      createVocabularyApi(deckId, payload),
 
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
@@ -63,12 +51,7 @@ export function useUpdateVocabularyMutation() {
       deckId: number;
       vocabularyId: number;
       payload: VocabularyRequest;
-    }) =>
-      updateVocabularyApi(
-        deckId,
-        vocabularyId,
-        payload,
-      ),
+    }) => updateVocabularyApi(deckId, vocabularyId, payload),
 
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
@@ -82,17 +65,8 @@ export function useDeleteVocabularyMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      deckId,
-      vocabularyId,
-    }: {
-      deckId: number;
-      vocabularyId: number;
-    }) =>
-      deleteVocabularyApi(
-        deckId,
-        vocabularyId,
-      ),
+    mutationFn: ({ deckId, vocabularyId }: { deckId: number; vocabularyId: number }) =>
+      deleteVocabularyApi(deckId, vocabularyId),
 
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({

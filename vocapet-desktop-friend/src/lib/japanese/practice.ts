@@ -35,7 +35,7 @@ export function translateItems(sentences: Sentence[], directions: Direction[]): 
   );
 }
 
-export const normalizeJa =(text: string) =>
+export const normalizeJa = (text: string) =>
   text.normalize("NFKC").replace(/[\s。、，．！？!?「」『』・,.]/g, "");
 
 /**

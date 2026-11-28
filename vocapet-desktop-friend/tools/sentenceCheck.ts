@@ -18,7 +18,10 @@ assert.equal(twice.length, grammar[0].examples.length);
 assert.deepEqual(twice[0].grammarIds, [grammar[0].id, "other"]);
 
 const uses = (furigana: string, expression: string | null, kana: string) =>
-  usesWord({ furigana, japanese: furigana.replace(/\{([^|}]+)\|[^}]+\}/g, "$1") }, { expression, kana });
+  usesWord(
+    { furigana, japanese: furigana.replace(/\{([^|}]+)\|[^}]+\}/g, "$1") },
+    { expression, kana },
+  );
 const cases: [boolean, string, string | null, string][] = [
   [true, "この{本|ほん}です。", "本", "ほん"],
   [false, "{日本|にほん}です。", "本", "ほん"],
@@ -36,11 +39,26 @@ const cases: [boolean, string, string | null, string][] = [
   [true, "これは{私|わたし}のかさです。", null, "これ"],
   [false, "スーパーマーケットです。", null, "スーパー"],
 ];
-for (const [expected, furigana, expression, kana] of cases) assert.equal(uses(furigana, expression, kana), expected, `${expression ?? kana} in ${furigana}`);
+for (const [expected, furigana, expression, kana] of cases)
+  assert.equal(uses(furigana, expression, kana), expected, `${expression ?? kana} in ${furigana}`);
 
 type Seed = { lessons: { words: (Partial<BankWord> & { kana: string })[] }[] };
-const words = read<Seed>("../../backend/src/main/resources/tango/minna-n5-bai-1-5.json").lessons.flatMap((l) => l.words);
-const linked = words.filter((w) => bank.some((s) => usesWord(s, { expression: w.expression ?? null, kana: w.kana })));
-console.log(`sentences ${bank.length}, linked to a Tango word ${bank.filter((s) => words.some((w) => usesWord(s, { expression: w.expression ?? null, kana: w.kana }))).length}, Tango words with a sentence ${linked.length}/${words.length}`);
+const words = read<Seed>(
+  "../../backend/src/main/resources/tango/minna-n5-bai-1-5.json",
+).lessons.flatMap((l) => l.words);
+const linked = words.filter((w) =>
+  bank.some((s) => usesWord(s, { expression: w.expression ?? null, kana: w.kana })),
+);
+console.log(
+  `sentences ${bank.length}, linked to a Tango word ${bank.filter((s) => words.some((w) => usesWord(s, { expression: w.expression ?? null, kana: w.kana }))).length}, Tango words with a sentence ${linked.length}/${words.length}`,
+);
 if (process.argv.includes("--list"))
-  for (const w of linked) console.log(w.expression ?? w.kana, "=>", bank.filter((s) => usesWord(s, { expression: w.expression ?? null, kana: w.kana })).map((s) => s.japanese).join(" / "));
+  for (const w of linked)
+    console.log(
+      w.expression ?? w.kana,
+      "=>",
+      bank
+        .filter((s) => usesWord(s, { expression: w.expression ?? null, kana: w.kana }))
+        .map((s) => s.japanese)
+        .join(" / "),
+    );

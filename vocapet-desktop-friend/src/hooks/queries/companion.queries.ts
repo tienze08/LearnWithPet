@@ -1,5 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getCompanionStateApi, recordCompanionEventApi, updateCompanionPreferencesApi } from "@/api/companion.api";
+import {
+  getCompanionStateApi,
+  recordCompanionEventApi,
+  updateCompanionPreferencesApi,
+} from "@/api/companion.api";
 
 export function useCompanionStateQuery(enabled = true) {
   return useQuery({ queryKey: ["companion", "state"], queryFn: getCompanionStateApi, enabled });

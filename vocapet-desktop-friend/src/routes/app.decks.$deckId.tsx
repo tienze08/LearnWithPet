@@ -237,7 +237,7 @@ export default function DeckDetail() {
 
               vocabularyId: id,
 
-              payload: patch as any,
+              payload: patch as Parameters<typeof updateVocabulary.mutate>[0]["payload"],
             });
           }}
           deleteWord={(id) => {

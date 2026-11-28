@@ -1,7 +1,7 @@
 // Right column: stepper, recording, comparison and self-assessment.
 import { useEffect, useMemo } from "react";
 import { AlertTriangle, Check, Loader2, Mic, Pause, Play, Square, Trash2 } from "lucide-react";
-import { formatTime } from "@/components/audio/AudioPlayer";
+import { formatTime } from "@/lib/audio/engine";
 import { LineText } from "@/components/listening/ExerciseCards";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";

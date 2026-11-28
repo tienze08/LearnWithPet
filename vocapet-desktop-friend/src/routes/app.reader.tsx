@@ -37,11 +37,14 @@ import {
 import type { GeneratedCard } from "@/lib/reader-ai.functions";
 import { generateReaderFlashcardsApi, suggestReaderVocabularyApi } from "@/api/reader.api";
 import { Pet } from "@/components/PixiPet/Pet";
-import { stageForLevel } from "@/lib/store";
+import { stageForLevel } from "@/lib/pet/rules";
 import { speakPet } from "@/hooks/stores/petSpeech";
 import { petEvents } from "@/lib/pet/events";
 import { useDecksQuery } from "@/hooks/queries/deck.queries";
-import { useCreateVocabularyMutation, useMyVocabulariesQuery } from "@/hooks/queries/vocabulary.queries";
+import {
+  useCreateVocabularyMutation,
+  useMyVocabulariesQuery,
+} from "@/hooks/queries/vocabulary.queries";
 import type { BasketItem, VocabularySuggestion } from "@/components/reader/types";
 import { sentenceAround, speakWord } from "@/components/reader/utils/text";
 import { PdfDocumentViewer, PdfReaderLoader } from "@/components/reader/PdfReaderLoader";
@@ -257,7 +260,10 @@ export function ReaderPage() {
     () => new Set(basket.map((item) => item.word.toLowerCase())),
     [basket],
   );
-  const pdfWordFrequencies = useMemo(() => sourceId === "pdf" ? scanDocumentWords(doc.text) : new Map<string, number>(), [sourceId, doc.text]);
+  const pdfWordFrequencies = useMemo(
+    () => (sourceId === "pdf" ? scanDocumentWords(doc.text) : new Map<string, number>()),
+    [sourceId, doc.text],
+  );
   const learnedPdfWords = useMemo(() => {
     const userWords = new Set(myVocabularies.map((word) => word.word.toLocaleLowerCase()));
     return [...pdfWordFrequencies.keys()].filter((word) => userWords.has(word));
@@ -284,10 +290,22 @@ export function ReaderPage() {
       setPdfStorageReady(true);
     });
 
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [me?.id]);
 
-  async function handlePdfLoaded({ title, text, file, importedHighlights = [] }: { title: string; text: string; file: File; importedHighlights?: string[] }) {
+  async function handlePdfLoaded({
+    title,
+    text,
+    file,
+    importedHighlights = [],
+  }: {
+    title: string;
+    text: string;
+    file: File;
+    importedHighlights?: string[];
+  }) {
     setCustomTitle(title);
     setCustomText(text);
     setPdfFile(file);
@@ -298,13 +316,23 @@ export function ReaderPage() {
     setAiStatus("Your PDF is open. I can analyse its text while you read the original pages.");
     if (importedHighlights.length) {
       setImportedHighlightTerms(importedHighlights);
-      setAiStatus(`I found ${importedHighlights.length} highlights you made earlier. Review them before adding to your basket.`);
+      setAiStatus(
+        `I found ${importedHighlights.length} highlights you made earlier. Review them before adding to your basket.`,
+      );
     }
     speakPet("Your PDF is ready. Let’s find useful words together!", 1, 5);
 
     if (me?.id) {
       try {
-        await saveLatestPdf({ userId: me.id, title, text, file, savedAt: Date.now(), basket: [], highlights: {} });
+        await saveLatestPdf({
+          userId: me.id,
+          title,
+          text,
+          file,
+          savedAt: Date.now(),
+          basket: [],
+          highlights: {},
+        });
       } catch {
         toast.error("Your PDF could not be saved locally. Check browser storage permissions.");
       }
@@ -353,7 +381,12 @@ export function ReaderPage() {
   function handleSelection(event?: { clientX?: number; clientY?: number; fromPdf?: boolean }) {
     const sel = typeof window !== "undefined" ? window.getSelection() : null;
     let text = sel?.toString().trim().replace(/\s+/g, " ") ?? "";
-    if (event?.fromPdf && event.clientX !== undefined && event.clientY !== undefined && /\s/.test(text)) {
+    if (
+      event?.fromPdf &&
+      event.clientX !== undefined &&
+      event.clientY !== undefined &&
+      /\s/.test(text)
+    ) {
       text = wordAtPointer(event.clientX, event.clientY) ?? text;
     }
     if (!text || text.length > 60) return;
@@ -598,7 +631,9 @@ export function ReaderPage() {
             <SelectValue placeholder="Choose a text" />
           </SelectTrigger>
           <SelectContent>
-            {pdfFile && <SelectItem value="pdf">Uploaded PDF: {customTitle || "Untitled"}</SelectItem>}
+            {pdfFile && (
+              <SelectItem value="pdf">Uploaded PDF: {customTitle || "Untitled"}</SelectItem>
+            )}
             {LIBRARY.map((l) => (
               <SelectItem key={l.id} value={l.id}>
                 {l.emoji} {l.title}
@@ -629,19 +664,28 @@ export function ReaderPage() {
           Ask Pip for suggestions
         </Button>
         <input ref={fileRef} type="file" accept=".txt,.md,text/plain" hidden onChange={onFile} />
-        <PdfReaderLoader onLoaded={({ title, text, file, importedHighlights }) => {
-          void handlePdfLoaded({ title, text, file, importedHighlights });
-          setCustomTitle(title);
-          setCustomText(text);
-          setPdfFile(file);
-          setSourceId("pdf");
-          setAiStatus("Your PDF is open. I can analyse its text while you read the original pages.");
-          speakPet("Your PDF is ready. Let’s find useful words together!", 1, 5);
-        }} />
+        <PdfReaderLoader
+          onLoaded={({ title, text, file, importedHighlights }) => {
+            void handlePdfLoaded({ title, text, file, importedHighlights });
+            setCustomTitle(title);
+            setCustomText(text);
+            setPdfFile(file);
+            setSourceId("pdf");
+            setAiStatus(
+              "Your PDF is open. I can analyse its text while you read the original pages.",
+            );
+            speakPet("Your PDF is ready. Let’s find useful words together!", 1, 5);
+          }}
+        />
 
         {sourceId === "pdf" && (
           <label className="flex items-center gap-2 rounded-xl border-2 border-border bg-card px-3 py-2 text-xs font-bold">
-            <input type="checkbox" checked={showLearnedWords} onChange={(event) => setShowLearnedWords(event.target.checked)} className="accent-primary" />
+            <input
+              type="checkbox"
+              checked={showLearnedWords}
+              onChange={(event) => setShowLearnedWords(event.target.checked)}
+              className="accent-primary"
+            />
             Show learned words ({learnedPdfWords.length})
           </label>
         )}
@@ -682,9 +726,18 @@ export function ReaderPage() {
 
           {sourceId === "pdf" && (
             <div className="mb-4 grid grid-cols-3 gap-2 rounded-2xl border border-primary/20 bg-primary/5 p-3 text-center text-xs">
-              <div><p className="text-lg font-extrabold">{pdfWordFrequencies.size}</p><p className="text-muted-foreground">unique words</p></div>
-              <div><p className="text-lg font-extrabold text-primary">{learnedPdfWords.length}</p><p className="text-muted-foreground">already learned</p></div>
-              <div><p className="text-lg font-extrabold text-amber-600">{basketWords.size}</p><p className="text-muted-foreground">in basket</p></div>
+              <div>
+                <p className="text-lg font-extrabold">{pdfWordFrequencies.size}</p>
+                <p className="text-muted-foreground">unique words</p>
+              </div>
+              <div>
+                <p className="text-lg font-extrabold text-primary">{learnedPdfWords.length}</p>
+                <p className="text-muted-foreground">already learned</p>
+              </div>
+              <div>
+                <p className="text-lg font-extrabold text-amber-600">{basketWords.size}</p>
+                <p className="text-muted-foreground">in basket</p>
+              </div>
             </div>
           )}
 
@@ -948,25 +1001,45 @@ export function ReaderPage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={!!importedHighlightTerms} onOpenChange={(open) => !open && setImportedHighlightTerms(null)}>
+      <Dialog
+        open={!!importedHighlightTerms}
+        onOpenChange={(open) => !open && setImportedHighlightTerms(null)}
+      >
         <DialogContent className="max-w-lg rounded-3xl border-2">
           <DialogHeader>
             <DialogTitle className="font-extrabold">Import previous highlights</DialogTitle>
             <DialogDescription>
-              Pip found {importedHighlightTerms?.length ?? 0} highlights embedded in this PDF. Remove anything you do not want, then add the rest to your basket.
+              Pip found {importedHighlightTerms?.length ?? 0} highlights embedded in this PDF.
+              Remove anything you do not want, then add the rest to your basket.
             </DialogDescription>
           </DialogHeader>
           <div className="max-h-72 space-y-2 overflow-auto pr-1">
             {importedHighlightTerms?.map((word) => (
-              <div key={word} className="flex items-center justify-between rounded-xl border border-border bg-muted/30 px-3 py-2">
+              <div
+                key={word}
+                className="flex items-center justify-between rounded-xl border border-border bg-muted/30 px-3 py-2"
+              >
                 <span className="font-bold">{word}</span>
-                <button type="button" onClick={() => setImportedHighlightTerms((terms) => terms?.filter((term) => term !== word) ?? null)} className="text-muted-foreground hover:text-destructive" aria-label={`Remove ${word}`}>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setImportedHighlightTerms(
+                      (terms) => terms?.filter((term) => term !== word) ?? null,
+                    )
+                  }
+                  className="text-muted-foreground hover:text-destructive"
+                  aria-label={`Remove ${word}`}
+                >
                   <X className="h-4 w-4" />
                 </button>
               </div>
             ))}
           </div>
-          <Button onClick={importExistingHighlights} disabled={!importedHighlightTerms?.length} className="rounded-xl font-extrabold">
+          <Button
+            onClick={importExistingHighlights}
+            disabled={!importedHighlightTerms?.length}
+            className="rounded-xl font-extrabold"
+          >
             <ShoppingBasket className="mr-2 h-4 w-4" /> Add to basket
           </Button>
         </DialogContent>

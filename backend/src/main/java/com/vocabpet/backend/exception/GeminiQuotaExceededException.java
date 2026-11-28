@@ -1,6 +1,8 @@
 package com.vocabpet.backend.exception;
 
 public class GeminiQuotaExceededException extends RuntimeException {
+
+    private static final long serialVersionUID = 1L;
     private final int retryAfterSeconds;
 
     public GeminiQuotaExceededException(int retryAfterSeconds) {

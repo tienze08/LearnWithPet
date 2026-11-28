@@ -29,8 +29,12 @@ export type KanjiGraphData = {
   usedIn: Record<string, string[]>;
 };
 
-export const loadKanjiGraph = () => import("./graph.json").then((m) => m.default as unknown as KanjiGraphData);
-const buckets = import.meta.glob("./strokes/*.json", { import: "default" }) as Record<string, () => Promise<Record<string, string[]>>>;
+export const loadKanjiGraph = () =>
+  import("./graph.json").then((m) => m.default as unknown as KanjiGraphData);
+const buckets = import.meta.glob("./strokes/*.json", { import: "default" }) as Record<
+  string,
+  () => Promise<Record<string, string[]>>
+>;
 
 /** SVG path `d` strings in drawing order (KanjiVG, 109x109 viewBox), or null when there is none. One small file per code-point bucket. */
 export async function loadStrokes(char: string): Promise<string[] | null> {

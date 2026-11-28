@@ -146,8 +146,9 @@ export function Practice({
   // Recordings are discarded when the learner leaves.
   useEffect(() => {
     const made = urls.current;
+    const sequence = flow;
     return () => {
-      flow.current++;
+      sequence.current++;
       recognition.current?.abort();
       made.forEach((u) => URL.revokeObjectURL(u));
     };

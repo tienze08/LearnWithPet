@@ -1,8 +1,5 @@
 export function speak(text: string) {
-  if (
-    typeof window === "undefined" ||
-    !("speechSynthesis" in window)
-  ) {
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) {
     return;
   }
 

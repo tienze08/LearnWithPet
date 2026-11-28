@@ -19,7 +19,7 @@ export type PetSpeciesUnlock = {
   isUnlocked: (s: GameState) => boolean;
 };
 
-export const PET_UNLOCKS: PetSpeciesUnlock[] = [
+const PET_UNLOCKS: PetSpeciesUnlock[] = [
   { id: "CAT", requirement: "Bạn đồng hành đầu tiên", isUnlocked: () => true },
   { id: "FOX", requirement: "Đạt cấp 3", isUnlocked: (s) => s.level >= 3 },
   { id: "BUNNY", requirement: "Học 5 ngày liên tiếp", isUnlocked: (s) => s.streak >= 5 },

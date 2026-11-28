@@ -1,8 +1,4 @@
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
   getDecksApi,
@@ -36,13 +32,8 @@ export function useUpdateDeckMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      id,
-      payload,
-    }: {
-      id: number;
-      payload: DeckRequest;
-    }) => updateDeckApi(id, payload),
+    mutationFn: ({ id, payload }: { id: number; payload: DeckRequest }) =>
+      updateDeckApi(id, payload),
 
     onSuccess: () => {
       queryClient.invalidateQueries({

@@ -38,12 +38,14 @@ export const DATA_SOURCES: DataSource[] = [
   {
     id: "unihan",
     name: "Unicode Unihan (kVietnamese)",
-    provides: "Âm Hán Việt của các kanji ngoài 71 chữ VocaPet tự biên soạn; một số chữ tra qua dạng biến thể (phồn thể, giản thể).",
+    provides:
+      "Âm Hán Việt của các kanji ngoài 71 chữ VocaPet tự biên soạn; một số chữ tra qua dạng biến thể (phồn thể, giản thể).",
     holder: "Unicode, Inc.",
     licence: "Unicode License v3",
     licenceUrl: "https://www.unicode.org/license.txt",
     homepage: "https://www.unicode.org/charts/unihan.html",
-    changes: "Chỉ trích trường kVietnamese và các biến thể giữ nguyên cách đọc, chuyển thành JSON (tools/importHanViet.py). Âm viết tay của VocaPet luôn được ưu tiên.",
+    changes:
+      "Chỉ trích trường kVietnamese và các biến thể giữ nguyên cách đọc, chuyển thành JSON (tools/importHanViet.py). Âm viết tay của VocaPet luôn được ưu tiên.",
     inUse: true,
   },
   {
@@ -54,7 +56,8 @@ export const DATA_SOURCES: DataSource[] = [
     licence: "CC BY-SA 4.0 (EDRDG General Dictionary Licence)",
     licenceUrl: "https://www.edrdg.org/edrdg/licence.html",
     homepage: "https://www.edrdg.org/wiki/index.php/KANJIDIC_Project",
-    changes: "Trích một phần các trường dữ liệu cho các kanji trong VocaPet và chuyển sang JSON (bản 2026-321).",
+    changes:
+      "Trích một phần các trường dữ liệu cho các kanji trong VocaPet và chuyển sang JSON (bản 2026-321).",
     inUse: true,
   },
   {
@@ -76,7 +79,8 @@ export const DATA_SOURCES: DataSource[] = [
     licence: "CC BY-SA 3.0",
     licenceUrl: "https://creativecommons.org/licenses/by-sa/3.0/",
     homepage: "http://kanjivg.tagaini.net",
-    changes: "Đường nét SVG giữ nguyên, được trích riêng cho các kanji trong VocaPet và đóng gói thành JSON (bản r20260714). Bộ thủ lấy từ thuộc tính của KanjiVG.",
+    changes:
+      "Đường nét SVG giữ nguyên, được trích riêng cho các kanji trong VocaPet và đóng gói thành JSON (bản r20260714). Bộ thủ lấy từ thuộc tính của KanjiVG.",
     inUse: true,
   },
 ];

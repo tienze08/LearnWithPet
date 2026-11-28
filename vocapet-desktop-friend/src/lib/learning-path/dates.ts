@@ -44,3 +44,7 @@ export function dayLabelVi(iso: string, todayIso: string) {
         ? "hôm qua"
         : weekdayVi(iso);
 }
+
+/** "Ngày 6 – Hiragana: hàng T" → "Hiragana: hàng T" (the number is shown on its own). */
+export const stripDayPrefix = (title: string | null | undefined) =>
+  (title ?? "").replace(/^Ngày \d+\s*–\s*/, "");

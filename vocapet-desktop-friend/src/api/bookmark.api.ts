@@ -1,65 +1,37 @@
 import { apiFetch } from "./client";
 
-
 export interface BookmarkResponse {
+  id: number;
 
-  id:number;
+  vocabularyId: number;
 
-  vocabularyId:number;
+  word: string;
 
-  word:string;
+  meaning: string;
 
-  meaning:string;
+  example: string;
 
-  example:string;
+  difficulty: string;
 
-  difficulty:string;
+  partOfSpeech: string;
 
-  partOfSpeech:string;
-
-  deckId:number;
-
+  deckId: number;
 }
 
-
-
-export function addBookmarkApi(
-  vocabularyId:number
-){
-
-  return apiFetch<BookmarkResponse>(
-    `/api/bookmarks/${vocabularyId}`,
-    {
-      method:"POST",
-    }
-  );
-
+export function addBookmarkApi(vocabularyId: number) {
+  return apiFetch<BookmarkResponse>(`/api/bookmarks/${vocabularyId}`, {
+    method: "POST",
+  });
 }
 
-
-
-export function removeBookmarkApi(
-  vocabularyId:number
-){
-
-  return apiFetch<void>(
-    `/api/bookmarks/${vocabularyId}`,
-    {
-      method:"DELETE",
-    }
-  );
-
+export function removeBookmarkApi(vocabularyId: number) {
+  return apiFetch<void>(`/api/bookmarks/${vocabularyId}`, {
+    method: "DELETE",
+  });
 }
 
-
-
-export function getBookmarksApi(){
-
-  return apiFetch<BookmarkResponse[]>(
-    "/api/bookmarks",
-    {
-      method:"GET",
-    }
-  );
-
+export function getBookmarksApi() {
+  return apiFetch<BookmarkResponse[]>("/api/bookmarks", {
+    method: "GET",
+  });
 }

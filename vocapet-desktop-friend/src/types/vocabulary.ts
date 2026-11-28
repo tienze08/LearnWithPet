@@ -1,14 +1,6 @@
-export type Difficulty =
-  | "EASY"
-  | "MEDIUM"
-  | "HARD";
+export type Difficulty = "EASY" | "MEDIUM" | "HARD";
 
-export type PartOfSpeech =
-  | "NOUN"
-  | "VERB"
-  | "ADJECTIVE"
-  | "ADVERB";
-
+export type PartOfSpeech = "NOUN" | "VERB" | "ADJECTIVE" | "ADVERB";
 
 export interface Vocabulary {
   id: number;

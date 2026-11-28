@@ -4,9 +4,21 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, ChevronLeft, ChevronRight, Volume2 } from "lucide-react";
 import { speakKana } from "@/lib/japanese/kana";
-import { useTangoLessonQuery, useTangoLessonVocabulariesQuery, useTangoVocabularyQuery, useStudyProgressMutation } from "@/hooks/queries/tango.queries";
+import {
+  useTangoLessonQuery,
+  useTangoLessonVocabulariesQuery,
+  useTangoVocabularyQuery,
+  useStudyProgressMutation,
+} from "@/hooks/queries/tango.queries";
 import { useLearningAttemptMutation } from "@/hooks/queries/learning.queries";
-import { Enso, ErrorBlock, JpText, LoadingBlock, ProgressBar, WordStatusBadge } from "@/components/tango/shared";
+import {
+  Enso,
+  ErrorBlock,
+  JpText,
+  LoadingBlock,
+  ProgressBar,
+  WordStatusBadge,
+} from "@/components/tango/shared";
 
 export const Route = createFileRoute("/app/japanese/tango/learn/$lessonId")({
   component: TangoLearningMode,
@@ -70,7 +82,15 @@ function TangoLearningMode() {
 
   if (lesson.isPending || words.isPending) return <LoadingBlock rows={2} />;
   if (lesson.isError || words.isError) {
-    return <ErrorBlock error={lesson.error ?? words.error} onRetry={() => { lesson.refetch(); words.refetch(); }} />;
+    return (
+      <ErrorBlock
+        error={lesson.error ?? words.error}
+        onRetry={() => {
+          lesson.refetch();
+          words.refetch();
+        }}
+      />
+    );
   }
   if (list.length === 0) {
     return (
@@ -105,7 +125,9 @@ function TangoLearningMode() {
             aria-pressed={mode === m}
             onClick={() => setMode(m)}
             className={`rounded-full border px-4 py-1.5 text-sm font-bold transition-colors ${
-              mode === m ? "border-transparent bg-primary-soft text-primary-ink" : "border-transparent bg-surface-2 hover:bg-primary-soft"
+              mode === m
+                ? "border-transparent bg-primary-soft text-primary-ink"
+                : "border-transparent bg-surface-2 hover:bg-primary-soft"
             }`}
           >
             {m === "guided" ? "Học có hướng dẫn" : "Flashcard"}
@@ -127,11 +149,22 @@ function TangoLearningMode() {
             )}
           </div>
           <div className="relative">
-            <JpText serif as="p" className="text-5xl sm:text-7xl">{current.expression ?? current.kana}</JpText>
-            {current.expression && <JpText as="p" className="mt-2 text-xl text-muted-foreground">{current.kana}</JpText>}
+            <JpText serif as="p" className="text-5xl sm:text-7xl">
+              {current.expression ?? current.kana}
+            </JpText>
+            {current.expression && (
+              <JpText as="p" className="mt-2 text-xl text-muted-foreground">
+                {current.kana}
+              </JpText>
+            )}
             {showMeaning && <p className="mt-1 text-sm text-muted-foreground">{current.romaji}</p>}
           </div>
-          <Button variant="outline" size="sm" onClick={() => speakKana(current.kana)} aria-label="Phát âm">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => speakKana(current.kana)}
+            aria-label="Phát âm"
+          >
             <Volume2 className="mr-2 h-4 w-4" /> Nghe
           </Button>
 
@@ -156,7 +189,11 @@ function TangoLearningMode() {
                 </p>
               ) : null}
               <div className="flex gap-3">
-                <Button variant="outline" disabled={attempt.isPending} onClick={() => record(false)}>
+                <Button
+                  variant="outline"
+                  disabled={attempt.isPending}
+                  onClick={() => record(false)}
+                >
                   Chưa biết (1)
                 </Button>
                 <Button disabled={attempt.isPending} onClick={() => record(true)}>
@@ -174,7 +211,11 @@ function TangoLearningMode() {
         </Button>
         {index === list.length - 1 && allViewed ? (
           <Button asChild>
-            <Link to="/app/japanese/tango/practice/$lessonId" params={{ lessonId }} search={{ mode: "MIXED", scope: "ALL" }}>
+            <Link
+              to="/app/japanese/tango/practice/$lessonId"
+              params={{ lessonId }}
+              search={{ mode: "MIXED", scope: "ALL" }}
+            >
               Làm bài kiểm tra
             </Link>
           </Button>
@@ -185,7 +226,9 @@ function TangoLearningMode() {
         )}
       </div>
       {attempt.isError && (
-        <p role="alert" className="text-center text-sm text-destructive">Chưa ghi nhận được. Thử lại.</p>
+        <p role="alert" className="text-center text-sm text-destructive">
+          Chưa ghi nhận được. Thử lại.
+        </p>
       )}
       {study.isError && (
         <p role="alert" className="text-center text-sm text-destructive">
@@ -205,10 +248,14 @@ function WordExamples({ vocabularyId }: { vocabularyId: number }) {
   if (examples.length === 0) return null;
   return (
     <div className="space-y-2 rounded-2xl bg-surface-2 p-4 text-left">
-      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">Ví dụ</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+        Ví dụ
+      </p>
       {examples.map((e, i) => (
         <div key={i}>
-          <JpText as="p" className="text-lg font-medium">{e.japanese}</JpText>
+          <JpText as="p" className="text-lg font-medium">
+            {e.japanese}
+          </JpText>
           {e.reading && <p className="text-sm text-muted-foreground">{e.reading}</p>}
           <p className="text-sm">{e.vietnamese}</p>
         </div>

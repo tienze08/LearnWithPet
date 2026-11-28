@@ -22,7 +22,8 @@ export function AddToDeckButton({
       onSuccess: (r) => {
         const openDeck = {
           label: "Mở deck",
-          onClick: () => navigate({ to: "/app/decks/$deckId", params: { deckId: String(r.deckId) } }),
+          onClick: () =>
+            navigate({ to: "/app/decks/$deckId", params: { deckId: String(r.deckId) } }),
         };
         if (r.added === 0) toast("Bài này đã có trong flashcard", { action: openDeck });
         else toast.success(`Đã thêm ${r.added} từ vào deck ${r.deckName}`, { action: openDeck });

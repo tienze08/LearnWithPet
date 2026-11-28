@@ -29,7 +29,8 @@ const BY_TAG: Partial<Record<GrammarGroupId, string[]>> = {
 /** Groups of one point: by tag, plus verb/adjective from the formation tokens. "other" when none applies. */
 export function groupsOf(g: Pick<SourceGrammar, "tags" | "formation">): GrammarGroupId[] {
   const out = new Set<GrammarGroupId>();
-  for (const [group, tags] of Object.entries(BY_TAG)) if (tags!.some((t) => g.tags.includes(t))) out.add(group as GrammarGroupId);
+  for (const [group, tags] of Object.entries(BY_TAG))
+    if (tags!.some((t) => g.tags.includes(t))) out.add(group as GrammarGroupId);
   if (/Verb/.test(g.formation)) out.add("verb");
   if (/Adj/.test(g.formation)) out.add("adjective");
   return out.size ? [...out] : ["other"];

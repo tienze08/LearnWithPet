@@ -75,7 +75,7 @@ class AdaptiveScheduleTest {
         for (int guard = 0; guard < 20; guard++) {
             String l = getJson("/units/" + unit);
             if (!"LEARN".equals(JsonPath.read(l, "$.mode"))) return;
-            for (Map<String, Object> i : (List<Map<String, Object>>) JsonPath.read(l, "$.items"))
+            for (Map<String, Object> i : JsonPath.<List<Map<String, Object>>>read(l, "$.items"))
                 answer(i.get("itemType"), i.get("itemId"), true, false, "LEARN");
         }
     }
@@ -128,7 +128,7 @@ class AdaptiveScheduleTest {
         String t = getJson("/today");
         assertThat((String) JsonPath.read(t, "$.advice.kind")).isEqualTo("REVIEW_BACKLOG");
         assertThat((Integer) JsonPath.read(t, "$.advice.dueReviews")).isEqualTo(25);
-        assertThat((List<Object>) JsonPath.read(getJson("/next-up"), "$.lessons")).isNotEmpty(); // advice, not a lock
+        assertThat(JsonPath.<List<Object>>read(getJson("/next-up"), "$.lessons")).isNotEmpty(); // advice, not a lock
         assertThat((String) JsonPath.read(getJson("/units"), "$.nextUnitId")).isEqualTo("n5-h04");
     }
 

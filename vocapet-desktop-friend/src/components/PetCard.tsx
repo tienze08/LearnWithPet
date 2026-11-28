@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Pet } from "./PixiPet/Pet";
-import { useGame, stageForLevel, type PetVariant } from "@/lib/store";
+import { useGame, type PetVariant } from "@/lib/store";
+import { stageForLevel } from "@/lib/pet/rules";
 import { Sparkles, Star, Zap } from "lucide-react";
 import PetCanvas from "./PixiPet/PixiPet";
 

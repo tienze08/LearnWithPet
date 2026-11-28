@@ -18,7 +18,11 @@ export function Logo({ className = "", teal = false }: { className?: string; tea
           <Cat pose="face" className="w-8" />
         </span>
       )}
-      <span className={`studio-head tracking-tight ${teal ? "text-[1.35rem] font-medium" : "text-xl"}`}>VocaPet</span>
+      <span
+        className={`studio-head tracking-tight ${teal ? "text-[1.35rem] font-medium" : "text-xl"}`}
+      >
+        VocaPet
+      </span>
     </span>
   );
 }

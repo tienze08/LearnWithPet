@@ -28,7 +28,6 @@ import com.vocabpet.backend.entity.User;
 import com.vocabpet.backend.entity.enums.PathPlanStatus;
 import com.vocabpet.backend.entity.enums.Role;
 import com.vocabpet.backend.repository.DailyPlanRepository;
-import com.vocabpet.backend.repository.ItemProgressRepository;
 import com.vocabpet.backend.repository.KanaItemProgressRepository;
 import com.vocabpet.backend.repository.LearningPlanRepository;
 import com.vocabpet.backend.repository.UserRepository;
@@ -53,7 +52,6 @@ class UnlockFlowTest {
     @Autowired private LearningPlanRepository planRepository;
     @Autowired private DailyPlanRepository dailyPlanRepository;
     @Autowired private KanaItemProgressRepository kanaRepository;
-    @Autowired private ItemProgressRepository itemProgressRepository;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -131,15 +129,15 @@ class UnlockFlowTest {
         String u = getJson("/units");
         assertThat((String) JsonPath.read(u, "$.nextUnitId")).isEqualTo("n5-h01");
         assertThat(state("n5-h01")).isEqualTo("AVAILABLE");
-        assertThat((List<Boolean>) JsonPath.read(u, "$.units[?(@.id=='n5-h01')].inToday")).containsExactly(true);
+        assertThat(JsonPath.<List<Boolean>>read(u, "$.units[?(@.id=='n5-h01')].inToday")).containsExactly(true);
         assertThat(state("n5-h02")).isEqualTo("LOCKED");
-        assertThat((List<String>) JsonPath.read(u, "$.units[?(@.id=='n5-h02')].missing[0].id")).containsExactly("n5-h01");
-        assertThat(((List<String>) JsonPath.read(u, "$.units[?(@.id=='n5-h02')].lockedReason")).get(0)).contains("Hiragana: năm nguyên âm");
+        assertThat(JsonPath.<List<String>>read(u, "$.units[?(@.id=='n5-h02')].missing[0].id")).containsExactly("n5-h01");
+        assertThat((JsonPath.<List<String>>read(u, "$.units[?(@.id=='n5-h02')].lockedReason")).get(0)).contains("Hiragana: năm nguyên âm");
         // Suggested days are information: every unit of the path has one, the locked ones included.
-        assertThat((List<Object>) JsonPath.read(u, "$.units[?(@.id=='n5-h03')].scheduledFor")).doesNotContainNull();
+        assertThat(JsonPath.<List<Object>>read(u, "$.units[?(@.id=='n5-h03')].scheduledFor")).doesNotContainNull();
         // The next lesson is offered even though today's plan is not done.
         String n = getJson("/next-up");
-        assertThat((List<Object>) JsonPath.read(n, "$.lessons")).isNotEmpty();
+        assertThat(JsonPath.<List<Object>>read(n, "$.lessons")).isNotEmpty();
         assertThat((Boolean) JsonPath.read(n, "$.lessons[0].inToday")).isTrue();
     }
 
@@ -156,12 +154,12 @@ class UnlockFlowTest {
             assertThat(state(id)).isEqualTo("COMPLETED");
         }
         String u = getJson("/units");
-        assertThat((List<Boolean>) JsonPath.read(u, "$.units[?(@.id=='n5-h03')].learnedAhead")).containsExactly(true);
+        assertThat(JsonPath.<List<Boolean>>read(u, "$.units[?(@.id=='n5-h03')].learnedAhead")).containsExactly(true);
         // The original planned day is kept for statistics, the learning day is recorded separately.
         LocalDate today = LocalDate.parse(JsonPath.read(getJson("/today"), "$.date"));
-        LocalDate planned = LocalDate.parse((String) ((List<?>) JsonPath.read(u, "$.units[?(@.id=='n5-h03')].scheduledFor")).get(0));
+        LocalDate planned = LocalDate.parse((String) (JsonPath.<List<?>>read(u, "$.units[?(@.id=='n5-h03')].scheduledFor")).get(0));
         assertThat(planned).isAfter(today);
-        assertThat((List<String>) JsonPath.read(u, "$.units[?(@.id=='n5-h03')].learnedOn")).containsExactly(today.toString());
+        assertThat(JsonPath.<List<String>>read(u, "$.units[?(@.id=='n5-h03')].learnedOn")).containsExactly(today.toString());
         // The next open lesson is the review lesson; it is offered now instead of "tomorrow".
         assertThat((String) JsonPath.read(u, "$.nextUnitId")).isEqualTo("n5-h06");
         assertThat((String) JsonPath.read(getJson("/next-up"), "$.lessons[0].kind")).isEqualTo("REVIEW");
@@ -171,7 +169,7 @@ class UnlockFlowTest {
     void lockedLessonsCannotBeStartedInAnyWay() throws Exception {
         String l = getJson("/units/n5-h07");
         assertThat((String) JsonPath.read(l, "$.mode")).isEqualTo("LOCKED");
-        assertThat((List<Object>) JsonPath.read(l, "$.items")).isEmpty();
+        assertThat(JsonPath.<List<Object>>read(l, "$.items")).isEmpty();
         assertThat((String) JsonPath.read(l, "$.unit.lockedReason")).contains("Ôn Hiragana cơ bản");
         assertThat(answer("KANA", "hiragana:が", true, "LEARN")).isEqualTo(400);
         assertThat(answer("KANA", "hiragana:が", true, "PRACTICE")).isEqualTo(400); // the phase cannot bypass the lock
@@ -192,9 +190,9 @@ class UnlockFlowTest {
 
         String revisit = getJson("/units/n5-h01");
         assertThat((String) JsonPath.read(revisit, "$.mode")).isEqualTo("REVISIT");
-        assertThat((List<Object>) JsonPath.read(revisit, "$.items")).hasSize(5);
+        assertThat(JsonPath.<List<Object>>read(revisit, "$.items")).hasSize(5);
         int introduced = JsonPath.read(getJson("/today"), "$.itemsIntroduced");
-        for (Map<String, Object> i : (List<Map<String, Object>>) JsonPath.read(revisit, "$.items"))
+        for (Map<String, Object> i : JsonPath.<List<Map<String, Object>>>read(revisit, "$.items"))
             assertThat(answer(i.get("itemType"), i.get("itemId"), true, "PRACTICE")).isEqualTo(200);
         assertThat((Integer) JsonPath.read(getJson("/today"), "$.itemsIntroduced")).isEqualTo(introduced);
         assertThat(state("n5-h01")).isEqualTo("COMPLETED");
@@ -207,7 +205,7 @@ class UnlockFlowTest {
         learn("n5-h01", false); // every answer wrong
         assertThat(state("n5-h01")).isEqualTo("COMPLETED");
         assertThat(state("n5-h02")).isEqualTo("AVAILABLE");
-        assertThat((List<Integer>) JsonPath.read(getJson("/units"), "$.units[?(@.id=='n5-h01')].masteryPercent")).containsExactly(0);
+        assertThat(JsonPath.<List<Integer>>read(getJson("/units"), "$.units[?(@.id=='n5-h01')].masteryPercent")).containsExactly(0);
     }
 
     @Test
@@ -216,7 +214,7 @@ class UnlockFlowTest {
         String path = "$.units[?(@.id in ['n5-h06','n5-h07','n5-h08'])].scheduledFor";
         List<String> before = JsonPath.read(getJson("/units"), path);
         check("n5-h06", 0);
-        assertThat((List<String>) JsonPath.read(getJson("/units"), path)).isEqualTo(before);
+        assertThat(JsonPath.<List<String>>read(getJson("/units"), path)).isEqualTo(before);
     }
 
     @Test
@@ -232,7 +230,7 @@ class UnlockFlowTest {
         // A failed chapter test keeps the next chapter locked and shows the test as in progress.
         String failed = check("n5-h09", 10);
         assertThat((Boolean) JsonPath.read(failed, "$.passed")).isFalse();
-        assertThat((List<Object>) JsonPath.read(failed, "$.wrongItems")).hasSize(10);
+        assertThat(JsonPath.<List<Object>>read(failed, "$.wrongItems")).hasSize(10);
         assertThat(state("n5-h09")).isEqualTo("IN_PROGRESS");
         assertThat(state("n5-k01")).isEqualTo("LOCKED");
         String passed = check("n5-h09", 0);

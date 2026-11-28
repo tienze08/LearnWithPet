@@ -4,12 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -114,7 +112,7 @@ class LearnAheadFlowTest {
         finishToday();
 
         String n = nextUp();
-        assertThat((List<Object>) JsonPath.read(n, "$.lessons")).hasSize(1); // Flexible suggests one
+        assertThat(JsonPath.<List<Object>>read(n, "$.lessons")).hasSize(1); // Flexible suggests one
         List<String> ids = JsonPath.read(n, "$.lessons[0].items[*].itemId");
         assertThat(ids).isNotEmpty().doesNotContainAnyElementsOf(todays);
         assertThat((String) JsonPath.read(n, "$.lessons[0].scheduledFor")).isNotNull();
@@ -137,12 +135,12 @@ class LearnAheadFlowTest {
         assertThat((Boolean) JsonPath.read(t, "$.completed")).isTrue(); // today's plan is untouched
         assertThat((Integer) JsonPath.read(t, "$.itemsIntroduced")).isEqualTo(introducedBefore + ahead.size());
         assertThat((Integer) JsonPath.read(t, "$.daysCompleted")).isEqualTo(1); // no completed day appeared
-        assertThat((List<Object>) JsonPath.read(t, "$.learnedAhead")).hasSize(1);
+        assertThat(JsonPath.<List<Object>>read(t, "$.learnedAhead")).hasSize(1);
         assertThat((String) JsonPath.read(t, "$.learnedAhead[0].scheduledFor")).isEqualTo(scheduled);
 
         // The unit shows as learned ahead on the roadmap, and the next suggestion is a different lesson.
         String road = mockMvc.perform(get(BASE + "/roadmap")).andReturn().getResponse().getContentAsString();
-        assertThat((List<Object>) JsonPath.read(road, "$.chapters[*].units[?(@.ahead==true)]")).hasSize(1);
+        assertThat(JsonPath.<List<Object>>read(road, "$.chapters[*].units[?(@.ahead==true)]")).hasSize(1);
         String n2 = nextUp();
         assertThat((String) JsonPath.read(n2, "$.lessons[0].title")).isNotEqualTo(title);
 
@@ -159,21 +157,21 @@ class LearnAheadFlowTest {
         mockMvc.perform(post(BASE + "/answers").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"itemType\":\"KANA\",\"itemId\":\"katakana:ア\",\"correct\":true,\"review\":false,\"questionKind\":\"t\",\"phase\":\"LEARN\"}"))
                 .andExpect(status().isBadRequest());
-        assertThat((List<Object>) JsonPath.read(today(), "$.learnedAhead")).isEmpty();
+        assertThat(JsonPath.<List<Object>>read(today(), "$.learnedAhead")).isEmpty();
     }
 
     @Test
     void paceDecidesHowMuchIsOfferedButNeverLocksAnOpenLesson() throws Exception {
         setUp("FAST_TRACK");
         finishToday();
-        assertThat((List<Object>) JsonPath.read(nextUp(), "$.lessons")).hasSize(3); // Fast Track suggests three
+        assertThat(JsonPath.<List<Object>>read(nextUp(), "$.lessons")).hasSize(3); // Fast Track suggests three
         mockMvc.perform(put(BASE + "/pace").contentType(MediaType.APPLICATION_JSON).content("{\"pace\":\"RELAXED\"}")).andExpect(status().isOk());
         String n = nextUp();
         assertThat((Integer) JsonPath.read(n, "$.aheadCap")).isEqualTo(1);
         answerAll(JsonPath.read(n, "$.lessons[0].items"), "LEARN", true);
         String after = nextUp(); // the pace's daily amount is a suggestion: open lessons stay available
         assertThat((Integer) JsonPath.read(after, "$.aheadUnitsToday")).isEqualTo(1);
-        assertThat((List<Object>) JsonPath.read(after, "$.lessons")).hasSize(1);
+        assertThat(JsonPath.<List<Object>>read(after, "$.lessons")).hasSize(1);
     }
 
     @Test
@@ -182,6 +180,6 @@ class LearnAheadFlowTest {
         finishToday();
         List<Map<String, Object>> known = items(today(), "LEARN");
         answerAll(known.subList(0, 1), "LEARN", true);
-        assertThat((List<Object>) JsonPath.read(today(), "$.learnedAhead")).isEmpty();
+        assertThat(JsonPath.<List<Object>>read(today(), "$.learnedAhead")).isEmpty();
     }
 }
