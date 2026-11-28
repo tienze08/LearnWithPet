@@ -18,10 +18,10 @@ export interface PetHandle {
 }
 
 export const PET_VARIANTS = [
-  { id: "CAT", name: "Cat", desc: "A cheerful study buddy" },
-  { id: "FOX", name: "Fox", desc: "A clever study buddy" },
-  { id: "BUNNY", name: "Bunny", desc: "A calm little helper" },
-  { id: "PANDA", name: "Panda", desc: "A focused study pal" },
+  { id: "CAT", name: "Burumaru", desc: "A gentle study companion" },
+  { id: "FOX", name: "Ghost", desc: "A tiny retro study companion" },
+  { id: "BUNNY", name: "Kabi", desc: "A relaxed study companion" },
+  { id: "PANDA", name: "Blau", desc: "A focused football study pal" },
   { id: "DRAGON", name: "Dragon", desc: "A legendary study pal" },
 ] as const;
 

@@ -10,6 +10,7 @@ import { speakKana } from "@/lib/japanese/kana";
 
 import {
   useFinishStudySessionMutation,
+  useActiveStudySessionQuery,
   useNextStudyCardQuery,
   useReviewStudyCardMutation,
   useStartStudySessionMutation,
@@ -67,6 +68,14 @@ export default function StudySessionFlashcards({ deckId }: Props) {
   const [streak, setStreak] = useState(0);
   const [scheduleNotice, setScheduleNotice] = useState<string | null>(null);
   const [reviewed, setReviewed] = useState(0);
+  const [startedAt, setStartedAt] = useState<number | null>(null);
+  const [correct, setCorrect] = useState(0);
+  const [earnedXp, setEarnedXp] = useState(0);
+  const [againWords, setAgainWords] = useState<string[]>([]);
+  const { data: activeSession } = useActiveStudySessionQuery();
+  const recoveryRequested =
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("recovery") === "1";
 
   const startMutation = useStartStudySessionMutation();
   const finishMutation = useFinishStudySessionMutation();
@@ -107,16 +116,47 @@ export default function StudySessionFlashcards({ deckId }: Props) {
   }, [started, finished, data, flipped, reviewMutation.isPending]);
 
   async function startSession() {
-    const session = await startMutation.mutateAsync({ deckId });
+    const session = await startMutation.mutateAsync({
+      deckId,
+      reviewLimit: recoveryRequested ? 10 : undefined,
+    });
     setSessionId(session.sessionId);
+    setStartedAt(Date.now());
+    setReviewed(0);
+    setCorrect(0);
+    setEarnedXp(0);
+    setAgainWords([]);
     setStarted(true);
     petEvents.emit({ type: "SESSION_STARTED" });
   }
+
+  function resumeSession() {
+    if (!activeSession || activeSession.deckId !== deckId) return;
+    setSessionId(activeSession.sessionId);
+    setStartedAt(new Date(activeSession.startedAt).getTime());
+    setReviewed(activeSession.reviewed);
+    setCorrect(activeSession.correct);
+    setStarted(true);
+    petEvents.emit({ type: "SESSION_STARTED" });
+  }
+
+  // Coming from "recovery" on the plan page: continue the waiting session.
+  useEffect(() => {
+    if (!recoveryRequested || started || !activeSession || activeSession.deckId !== deckId) return;
+    resumeSession();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recoveryRequested, started, activeSession, deckId]);
 
   async function review(rating: Rating) {
     if (!data) return;
     const result = await reviewMutation.mutateAsync({ vocabularyId: data.vocabularyId, rating });
     setReviewed((n) => n + 1);
+    setEarnedXp((xp) => xp + result.xp);
+    if (rating === "AGAIN") {
+      setAgainWords((words) => (words.includes(data.word) ? words : [...words, data.word]));
+    } else {
+      setCorrect((n) => n + 1);
+    }
     setScheduleNotice(scheduleMessage(rating, result.nextReviewTime));
     if (result.streakUpdated) {
       setStreak(result.currentStreak);
@@ -138,6 +178,18 @@ export default function StudySessionFlashcards({ deckId }: Props) {
         <p className="max-w-md text-sm studio-muted">
           Mỗi lần một thẻ. Lật thẻ, rồi cho biết bạn nhớ đến đâu để lịch ôn tự điều chỉnh.
         </p>
+        {recoveryRequested && <p className="text-sm">Phiên ngắn để ôn lại: tối đa 10 lượt.</p>}
+        {activeSession?.deckId === deckId && (
+          <div className="grid justify-items-center gap-2">
+            <p className="text-sm">
+              Bạn còn một phiên đang dở: đã ôn {activeSession.reviewed} lượt
+              {activeSession.currentWord ? `, thẻ tiếp theo: ${activeSession.currentWord}` : ""}.
+            </p>
+            <Button variant="outline" onClick={resumeSession}>
+              Học tiếp phiên đang dở
+            </Button>
+          </div>
+        )}
         <Button size="lg" onClick={startSession} disabled={startMutation.isPending}>
           {startMutation.isPending ? "Đang bắt đầu…" : "Bắt đầu ôn"}
         </Button>
@@ -164,6 +216,29 @@ export default function StudySessionFlashcards({ deckId }: Props) {
               ? "Giỏi lắm! Mình sẽ nhắc lại đúng lúc bạn sắp quên."
               : "Bộ này chưa có thẻ cần ôn. Quay lại sau nhé."}
           </PetNote>
+          {reviewed > 0 && (
+            <>
+              <dl className="grid grid-cols-2 gap-6 sm:grid-cols-4">
+                {[
+                  ["Độ chính xác", `${Math.round((correct / reviewed) * 100)}%`],
+                  ["XP nhận được", `+${earnedXp}`],
+                  [
+                    "Thời gian",
+                    `${Math.max(1, Math.round((Date.now() - (startedAt ?? Date.now())) / 60000))} phút`,
+                  ],
+                  ["Chuỗi ngày", streak || "✓"],
+                ].map(([label, value]) => (
+                  <div key={label} className="flex flex-col-reverse">
+                    <dt className="text-xs studio-muted">{label}</dt>
+                    <dd className="studio-head text-2xl">{value}</dd>
+                  </div>
+                ))}
+              </dl>
+              {againWords.length > 0 && (
+                <p className="text-sm studio-muted">Sẽ gặp lại sớm: {againWords.join(", ")}</p>
+              )}
+            </>
+          )}
         </section>
       </>
     );

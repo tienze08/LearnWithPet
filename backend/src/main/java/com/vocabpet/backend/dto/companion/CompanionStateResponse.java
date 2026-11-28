@@ -25,6 +25,9 @@ public class CompanionStateResponse {
     private long daysTogether;
     private long totalSessionsTogether;
     private int usualStudyHour;
+    private long yesterdayWords;
+    private boolean closeToUsualStudyTime;
+    private String relationshipMilestone;
     private LearningProfileResponse learningProfile;
     private String frequentlyWrongWord;
     private PetIntent intent;

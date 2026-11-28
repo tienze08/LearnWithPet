@@ -38,7 +38,7 @@ public class PetBehaviorEngineImpl
             case CORRECT_ANSWER:
                 return PetBehaviorResponse.builder()
                         .mood(PetMood.HAPPY)
-                        .action(PetAction.HAPPY)
+                        .action(PetAction.CELEBRATE)
                         .priority(100)
                         .duration(3)
                         .build();

@@ -19,6 +19,12 @@ public class DeckResponse {
 
     private int wordCount;
 
+    /** Words that have entered this user's shared FSRS schedule at least once. */
+    private long studiedCount;
+
+    /** Words that have reached the FSRS mastered state. */
+    private long masteredCount;
+
     private String emoji;
 
     private String color;

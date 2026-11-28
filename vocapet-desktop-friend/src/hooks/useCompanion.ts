@@ -35,7 +35,7 @@ export function useCompanion(
         personality: memory.personality,
         mood: moment?.mood ?? moodForCompanion(memory),
       });
-      if (moment) speakPet(`Pip: ${moment.message}`, 1, 6);
+      if (moment) speakPet(`Burumaru: ${moment.message}`, 1, 6);
     };
     memoryRef.current = loadCompanionMemory(userId);
     reviewCountRef.current = reviewCount;
@@ -56,7 +56,7 @@ export function useCompanion(
     const completed = studyCompleteMoment(memory, name, now);
     if (completed) {
       memory = completed.memory;
-      speakPet(`Pip: ${completed.moment.message}`, 2, 5);
+      speakPet(`Burumaru: ${completed.moment.message}`, 2, 5);
     }
     memoryRef.current = memory;
     reviewCountRef.current = reviewCount;

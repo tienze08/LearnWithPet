@@ -54,6 +54,9 @@ public class UserService {
                                 .coin(user.getCoin())
                                 .streak(user.getStreak())
                                 .onboarded(user.getOnboarded())
+                                .dailyGoal(user.getDailyGoal())
+                                .studyLevel(user.getStudyLevel())
+                                .studyGoal(user.getStudyGoal())
                                 .pet(petResponse)
                                 .build();
         }
@@ -70,6 +73,14 @@ public class UserService {
                 }
 
                 user.setAvatar(AvatarType.valueOf(request.getAvatarType().toUpperCase()));
+                if (request.getDisplayName() != null && !request.getDisplayName().isBlank()) {
+                        user.setName(request.getDisplayName().trim());
+                }
+                if (request.getDailyGoal() != null) {
+                        user.setDailyGoal(Math.max(5, Math.min(50, request.getDailyGoal())));
+                }
+                user.setStudyLevel(request.getStudyLevel());
+                user.setStudyGoal(request.getStudyGoal());
                 user.setOnboarded(true);
 
                 if (request.getPetSpecies() != PetSpecies.CAT) {

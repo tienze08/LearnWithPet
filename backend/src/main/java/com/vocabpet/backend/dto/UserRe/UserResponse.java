@@ -29,6 +29,10 @@ public class UserResponse {
 
     private Boolean onboarded;
 
+    private int dailyGoal;
+    private String studyLevel;
+    private String studyGoal;
+
     private PetResponse pet;
 
 }

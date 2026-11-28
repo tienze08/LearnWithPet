@@ -19,6 +19,10 @@ public class ReviewResponse {
 
     private int longestStreak;
 
+    private int xp;
+
+    private int coin;
+
     private PetBehaviorResponse companionReaction;
 
 }

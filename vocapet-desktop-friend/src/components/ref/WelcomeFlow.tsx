@@ -45,12 +45,28 @@ export function WelcomeFlow() {
   const [name, setName] = useState("");
   const [avatar, setAvatar] = useState<keyof typeof avatarMap>("FOX");
   const [variant, setVariant] = useState<PetVariant>("CAT");
-  const [petName, setPetName] = useState("Pip");
+  const [petName, setPetName] = useState("Burumaru");
+  const [dailyGoal, setDailyGoal] = useState(10);
+  const [studyLevel, setStudyLevel] = useState("INTERMEDIATE");
+  const [studyGoal, setStudyGoal] = useState("GENERAL");
   const onboarding = useOnboardingMutation();
 
   async function finish() {
     try {
-      await onboarding.mutateAsync({ avatarType: avatar, petName, petSpecies: variant });
+      await onboarding.mutateAsync({
+        avatarType: avatar,
+        petName,
+        petSpecies: variant,
+        displayName: name.trim(),
+        dailyGoal,
+        studyLevel,
+        studyGoal,
+      });
+      // PetCompanion greets the new learner with this once.
+      sessionStorage.setItem(
+        "vocapet_onboarding_greeting",
+        `${petName}: Chào mừng bạn! Mình đã đặt mục tiêu ${dailyGoal} từ mỗi ngày.`,
+      );
       nav({ to: "/app" });
     } catch {
       // the error block below reads onboarding.isError
@@ -256,6 +272,57 @@ export function WelcomeFlow() {
                     placeholder="Ví dụ: Mochi"
                     className={`${field} sm:max-w-xs`}
                   />
+                </div>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  {(
+                    [
+                      [
+                        "Từ mỗi ngày",
+                        String(dailyGoal),
+                        (v: string) => setDailyGoal(Number(v)),
+                        [
+                          ["5", "5 từ"],
+                          ["10", "10 từ"],
+                          ["20", "20 từ"],
+                        ],
+                      ],
+                      [
+                        "Trình độ",
+                        studyLevel,
+                        setStudyLevel,
+                        [
+                          ["BEGINNER", "Mới bắt đầu"],
+                          ["INTERMEDIATE", "Trung cấp"],
+                          ["ADVANCED", "Nâng cao"],
+                        ],
+                      ],
+                      [
+                        "Mục tiêu",
+                        studyGoal,
+                        setStudyGoal,
+                        [
+                          ["GENERAL", "Học chung"],
+                          ["IELTS", "IELTS"],
+                          ["TOEIC", "TOEIC"],
+                        ],
+                      ],
+                    ] as const
+                  ).map(([label, value, set, options]) => (
+                    <label key={label} className="text-xs font-semibold studio-muted">
+                      {label}
+                      <select
+                        value={value}
+                        onChange={(e) => set(e.target.value)}
+                        className="mt-1 min-h-11 w-full rounded-xl border border-input bg-sheet px-3 text-sm text-foreground"
+                      >
+                        {options.map(([id, text]) => (
+                          <option key={id} value={id}>
+                            {text}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  ))}
                 </div>
                 {onboarding.isError && (
                   <p role="alert" className="text-sm text-destructive">

@@ -121,7 +121,9 @@ function DecksPage() {
                     </span>
                     <span className="text-right">
                       <span className="studio-head block text-2xl tabular-nums">{words}</span>
-                      <span className="block text-xs studio-muted">từ</span>
+                      <span className="block text-xs studio-muted">
+                        từ{d.studiedCount ? ` · đã ôn ${d.studiedCount}` : ""}
+                      </span>
                     </span>
                     <ArrowRight
                       aria-hidden

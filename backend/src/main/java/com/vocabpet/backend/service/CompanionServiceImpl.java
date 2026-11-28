@@ -9,6 +9,7 @@ import com.vocabpet.backend.entity.CompanionMemory;
 import com.vocabpet.backend.entity.CompanionProfile;
 import com.vocabpet.backend.entity.CompanionWordMemory;
 import com.vocabpet.backend.entity.Pet;
+import com.vocabpet.backend.entity.StudySession;
 import com.vocabpet.backend.entity.User;
 import com.vocabpet.backend.entity.Vocabulary;
 import com.vocabpet.backend.entity.enums.CompanionEventType;
@@ -35,8 +36,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class CompanionServiceImpl implements CompanionService {
-    private static final int DAILY_GOAL = 10;
-
     private final CurrentUserService currentUserService;
     private final PetRepository petRepository;
     private final CompanionProfileRepository profileRepository;
@@ -102,30 +101,44 @@ public class CompanionServiceImpl implements CompanionService {
         LocalDateTime start = LocalDate.now().atStartOfDay();
         long reviewsToday = studyReviewRepository.countByUserIdAndReviewedAtBetween(user.getId(), start,
                 start.plusDays(1));
+        LocalDateTime yesterdayStart = start.minusDays(1);
+        long yesterdayWords = studyReviewRepository.countDistinctVocabularyByUserIdAndReviewedAtBetween(
+                user.getId(), yesterdayStart, start);
         long dueReviews = progressRepository.countDueCards(user.getId(), now);
+        long daysTogether = memory.getFirstStudyDate() == null ? 0
+                : ChronoUnit.DAYS.between(memory.getFirstStudyDate(), LocalDate.now()) + 1;
         return CompanionStateResponse.builder()
                 .petName(pet.getName()).species(pet.getSpecies()).petLevel(pet.getLevel())
                 .personality(profile.getPersonality()).energy(memory.getEnergy())
                 .remindersEnabled(profile.isRemindersEnabled())
                 .quietHoursStart(profile.getQuietHoursStart()).quietHoursEnd(profile.getQuietHoursEnd())
-                .streak(user.getStreak()).reviewsToday(reviewsToday).dueReviews(dueReviews).dailyGoal(DAILY_GOAL)
-                .daysTogether(memory.getFirstStudyDate() == null ? 0
-                        : ChronoUnit.DAYS.between(memory.getFirstStudyDate(), LocalDate.now()) + 1)
+                .streak(user.getStreak()).reviewsToday(reviewsToday).dueReviews(dueReviews).dailyGoal(user.getDailyGoal())
+                .daysTogether(daysTogether)
                 .totalSessionsTogether(memory.getTotalSessionsTogether())
                 .usualStudyHour(memory.getUsualStudyHour())
+                .yesterdayWords(yesterdayWords)
+                .closeToUsualStudyTime(memory.getUsualStudyHour() >= 0
+                        && Math.abs(now.getHour() - memory.getUsualStudyHour()) <= 1)
+                .relationshipMilestone(relationshipMilestone(daysTogether))
                 .learningProfile(learningProfile)
                 .frequentlyWrongWord(mostDifficultWord(profile))
                 .intent(intent)
                 .reaction(reaction).build();
     }
 
+    private String relationshipMilestone(long daysTogether) {
+        if (daysTogether == 7) return "7 days together";
+        if (daysTogether > 0 && daysTogether % 30 == 0) return daysTogether + " days together";
+        return null;
+    }
+
     private Pet requiredPet(User user) {
         return petRepository.findByUserId(user.getId()).orElseGet(() -> {
             // A companion should never make a learning action fail. Users who
-            // have not chosen a species yet receive the default Pip cat.
+            // have not chosen a species yet receive the default Burumaru cat.
             Pet pet = Pet.builder()
                     .user(user)
-                    .name("Pip")
+                    .name("Burumaru")
                     .species(PetSpecies.CAT)
                     .mood(PetMood.HAPPY)
                     .level(1)
@@ -185,13 +198,14 @@ public class CompanionServiceImpl implements CompanionService {
         }
         wordMemoryRepository.save(wordMemory);
 
+        // A review is a learning event, but it is not automatically a full
+        // study session. Session relationship memory is updated only when the
+        // user explicitly completes a start/end session.
         if (memory.getFirstStudyDate() == null)
             memory.setFirstStudyDate(now.toLocalDate());
         if (memory.getLastStudyAt() == null || !memory.getLastStudyAt().toLocalDate().equals(now.toLocalDate()))
             memory.setStudyDays(memory.getStudyDays() + 1);
         memory.setLastStudyAt(now);
-        memory.setTotalSessionsTogether(memory.getTotalSessionsTogether() + 1);
-        memory.setUsualStudyHour(rollingHour(memory.getUsualStudyHour(), memory.getTotalSessionsTogether(), now.getHour()));
         memoryRepository.save(memory);
 
         if (!correct) {
@@ -210,6 +224,25 @@ public class CompanionServiceImpl implements CompanionService {
     @Transactional
     public PetBehaviorResponse recordReviewOutcome(User user, Vocabulary vocabulary, boolean correct) {
         return recordQuizOutcome(user, vocabulary, correct);
+    }
+
+    @Override
+    @Transactional
+    public void recordSessionCompleted(User user, StudySession session) {
+        LocalDateTime finishedAt = session.getFinishedAt() == null ? LocalDateTime.now() : session.getFinishedAt();
+        Pet pet = requiredPet(user);
+        CompanionMemory memory = memoryFor(profileFor(pet, user), finishedAt);
+        long completedSessions = memory.getTotalSessionsTogether() + 1;
+        int durationMinutes = (int) Math.max(0, session.getDurationSeconds() / 60);
+
+        memory.setTotalSessionsTogether(completedSessions);
+        memory.setUsualStudyHour(rollingHour(memory.getUsualStudyHour(), completedSessions,
+                session.getStartedAt() == null ? finishedAt.getHour() : session.getStartedAt().getHour()));
+        memory.setAverageSessionMinutes((int) Math.round(
+                ((memory.getAverageSessionMinutes() * (completedSessions - 1)) + durationMinutes)
+                        / (double) completedSessions));
+        memory.setLastStudyAt(finishedAt);
+        memoryRepository.save(memory);
     }
 
     private int rollingHour(int previousHour, long totalSessions, int currentHour) {
@@ -325,7 +358,7 @@ public class CompanionServiceImpl implements CompanionService {
                         line(profile.getPersonality(), "Great job! Let's take a short break."), 2, 6);
             }
             case ANSWER_CORRECT ->
-                reaction(PetMood.HAPPY, PetAction.HAPPY, line(profile.getPersonality(), "You got it!"), 2, 3);
+                reaction(PetMood.HAPPY, PetAction.CELEBRATE, line(profile.getPersonality(), "You got it!"), 2, 3);
             case ANSWER_WRONG -> reaction(PetMood.SAD, PetAction.SAD,
                     line(profile.getPersonality(), "No worries. We'll learn this one together."), 1, 4);
             case DAILY_GOAL_COMPLETED -> reaction(PetMood.HAPPY, PetAction.CELEBRATE,

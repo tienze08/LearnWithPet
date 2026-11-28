@@ -13,7 +13,9 @@ export async function apiFetch<T>(endpoint: string, options?: RequestInit): Prom
     fetch(`${API_URL}${endpoint}`, {
       ...options,
       headers: {
-        "Content-Type": "application/json",
+        ...(typeof FormData !== "undefined" && options?.body instanceof FormData
+          ? {}
+          : { "Content-Type": "application/json" }),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...options?.headers,
       },
@@ -48,11 +50,25 @@ export async function apiFetch<T>(endpoint: string, options?: RequestInit): Prom
   }
 
   const text = await response.text();
-  const data = text ? JSON.parse(text) : null;
+  let data: { message?: string } | null = null;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    data = { message: text };
+  }
 
   if (!response.ok) {
     throw new Error(data?.message || `HTTP ${response.status} - Unknown error`);
   }
 
   return data as T;
+}
+
+export async function apiFetchBlob(endpoint: string): Promise<Blob> {
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    headers: { Authorization: `Bearer ${localStorage.getItem("vocapet_token") ?? ""}` },
+  });
+  if (response.status === 401) clearExpiredSession();
+  if (!response.ok) throw new Error(`HTTP ${response.status} - Could not load PDF`);
+  return response.blob();
 }

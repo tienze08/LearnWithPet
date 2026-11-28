@@ -1,6 +1,7 @@
 package com.vocabpet.backend.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -11,6 +12,8 @@ public interface StudySessionRepository
         extends JpaRepository<StudySession, Long> {
 
     List<StudySession> findByUserId(Long userId);
+
+    Optional<StudySession> findFirstByUserIdAndFinishedAtIsNullOrderByLastActiveAtDesc(Long userId);
 
     @Query(value = """
             SELECT HOUR(started_at)

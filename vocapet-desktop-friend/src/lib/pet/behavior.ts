@@ -18,9 +18,9 @@ const reactions: Record<PetEvent["type"], PetReaction> = {
   },
   SESSION_FINISHED: { action: "HAPPY", emotion: "happy", message: "Nice work today!", priority: 2 },
   QUIZ_STARTED: {
-    action: "THINK",
+    action: "STUDY",
     emotion: "waiting",
-    message: "I'm thinking with you.",
+    message: "I'm reviewing this with you.",
     priority: 1,
   },
   QUIZ_COMPLETED: { action: "IDLE", emotion: "waiting", priority: 0 },

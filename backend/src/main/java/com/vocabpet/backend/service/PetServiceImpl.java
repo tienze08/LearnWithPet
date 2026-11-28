@@ -107,7 +107,7 @@ public class PetServiceImpl implements PetService {
                 }
 
                 Pet pet = petRepository.findByUserId(user.getId()).orElseGet(() -> Pet.builder()
-                                .user(user).name("Pip")
+                                .user(user).name("Burumaru")
                                 .mood(com.vocabpet.backend.entity.enums.PetMood.HAPPY)
                                 .level(1).xp(0).build());
                 pet.setSpecies(species);

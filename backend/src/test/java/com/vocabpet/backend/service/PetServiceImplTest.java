@@ -51,6 +51,7 @@ class PetServiceImplTest {
 
         when(currentUserService.getCurrentUser()).thenReturn(user);
         when(petUnlockRepository.existsByUserAndSpecies(user, PetSpecies.FOX)).thenReturn(false);
+        when(vocabularyProgressRepository.countByUserIdAndRepetitionsGreaterThanEqual(1L, 4)).thenReturn(0L);
 
         PetResponse response = petService.unlockPet(PetSpecies.FOX);
 

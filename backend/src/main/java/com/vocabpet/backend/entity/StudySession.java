@@ -33,11 +33,20 @@ public class StudySession {
 
     private LocalDateTime finishedAt;
 
+    /** Last meaningful activity, used to offer an unfinished session for resume. */
+    private LocalDateTime lastActiveAt;
+
+    /** The card being shown when the learner last left the session. */
+    private Long currentVocabularyId;
+
     @Builder.Default
     private Integer totalReviews = 0;
 
     @Builder.Default
     private Integer uniqueCards = 0;
+
+    /** Optional cap for a short, focused recovery session. */
+    private Integer reviewLimit;
 
     @OneToMany(mappedBy = "session", cascade = CascadeType.ALL)
     @Builder.Default

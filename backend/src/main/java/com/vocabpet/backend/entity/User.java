@@ -54,6 +54,13 @@ public class User {
     @Builder.Default
     private int streak = 0;
 
+    @Builder.Default
+    private int dailyGoal = 10;
+
+    private String studyLevel;
+
+    private String studyGoal;
+
     /**
      * Ngày học gần nhất
      */

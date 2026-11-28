@@ -44,6 +44,10 @@ const PetCanvas = forwardRef<PetCanvasHandle, Props>(({ variant, stage, size, mo
       controllerRef.current?.play(action);
     },
     setFacing(direction) {
+      controllerRef.current?.setFacing(direction);
+      // All installed Petdex sheets have authored left/right rows. Mirroring
+      // them would make the character walk backwards.
+      if (["CAT", "FOX", "BUNNY", "PANDA", "DRAGON"].includes(variant)) return;
       const sprite = spriteRef.current;
       if (!sprite) return;
       sprite.scale.x = Math.abs(sprite.scale.x) * (direction === "right" ? 1 : -1);

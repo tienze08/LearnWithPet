@@ -22,6 +22,10 @@ export interface DeckResponse {
   color: string;
 
   wordCount: number;
+
+  studiedCount: number;
+
+  masteredCount: number;
 }
 
 export function getDecksApi() {

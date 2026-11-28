@@ -1,5 +1,7 @@
 export type StartStudySessionRequest = {
   deckId: number;
+  /** Optional cap used by the five-minute recovery flow. */
+  reviewLimit?: number;
 };
 
 export type StartStudySessionResponse = {

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
@@ -10,7 +10,6 @@ import { BookOpen, PencilLine, Sparkles, Target, X } from "lucide-react";
 import { useAnswerQuizMutation, useRandomQuizMutation } from "@/hooks/queries/quiz.queries";
 import { QuizAnswerResponse, QuizQuestionResponse } from "@/types/quiz";
 import Pet, { PetHandle } from "./PixiPet/Pet";
-import { useRef } from "react";
 import { PetAction } from "./PixiPet/AnimationController";
 import { PetSpeechBubble } from "./PetSpeech";
 import { speakPet } from "@/hooks/stores/petSpeech";
@@ -23,7 +22,10 @@ import {
   useCompanionPreferencesMutation,
   useCompanionStateQuery,
 } from "@/hooks/queries/companion.queries";
+import { useActiveStudySessionQuery } from "@/hooks/queries/study-session.queries";
 import type { PetBehaviorResponse as ServerPetBehaviorResponse } from "@/types/pet";
+
+type QuizAnimationPhase = "none" | "approaching" | "question" | "result";
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
@@ -66,12 +68,14 @@ function serverAction(action: ServerPetBehaviorResponse["action"]): PetAction {
 
 export function PetCompanion() {
   const petRef = useRef<PetHandle>(null);
+  const quizPhaseRef = useRef<QuizAnimationPhase>("none");
   const queryClient = useQueryClient();
   const { state, setPetInterval, recordAnswer } = useGame();
   const { data: me } = useMeQuery();
   const { data: companionState, refetch: refreshCompanionState } = useCompanionStateQuery(
     Boolean(me?.pet),
   );
+  const { data: activeStudySession } = useActiveStudySessionQuery();
   const [reminder, setReminder] = useState(false);
   const [open, setOpen] = useState(false);
   const [timeLeft, setTimeLeft] = useState(15);
@@ -79,22 +83,103 @@ export function PetCompanion() {
   const [showSettings, setShowSettings] = useState(false);
   const [eventMood, setEventMood] = useState<PetMood | null>(null);
   const [interrupting, setInterrupting] = useState(false);
+  const [isApproachingQuiz, setIsApproachingQuiz] = useState(false);
+  const [petX, setPetX] = useState(24);
+  const [viewportWidth, setViewportWidth] = useState(0);
+  const [walkCycle, setWalkCycle] = useState(0);
   const lastActivityAt = useRef(Date.now());
   const interruptionInProgress = useRef(false);
+  const quizArrivalInProgress = useRef(false);
+  const walkInProgress = useRef(false);
+  const petXRef = useRef(petX);
+  const facingRef = useRef<"left" | "right">("left");
 
   const { mutateAsync: getQuiz } = useRandomQuizMutation();
   const { mutate: recordCompanionEvent } = useCompanionEventMutation();
   const { mutate: updateCompanionPreferences } = useCompanionPreferencesMutation();
 
+  const setQuizAnimationPhase = (phase: QuizAnimationPhase) => {
+    quizPhaseRef.current = phase;
+  };
+
   const triggerPetAnimation = (action: PetAction = "STUDY") => {
+    // Ambient events (polling, speech, reminder timers) must never replace the
+    // authored animation that is currently explaining a quiz interaction.
+    const phase = quizPhaseRef.current;
+    if (phase === "approaching" && action !== "WALK" && action !== "THINK") return;
+    if (phase === "question" && action !== "STUDY") return;
+    if (phase === "result" && action !== "CELEBRATE" && action !== "SAD") return;
     window.requestAnimationFrame(() => {
       petRef.current?.play(action);
     });
   };
 
-  const applyServerReaction = (reaction: ServerPetBehaviorResponse) => {
+  const maxPetX = () => Math.max(24, window.innerWidth - 132);
+
+  const movePetTo = (nextX: number, facing?: "left" | "right") => {
+    const clampedX = Math.min(maxPetX(), Math.max(24, nextX));
+    petXRef.current = clampedX;
+    setPetX(clampedX);
+    if (facing) {
+      facingRef.current = facing;
+      petRef.current?.setFacing(facing);
+    }
+  };
+
+  /**
+   * A quiz is initiated by the companion, rather than appearing as a sudden
+   * system popup. The pet reaches the right edge first; the card then opens
+   * above and to the left of it, fully inside the viewport.
+   */
+  const showQuizAtRight = (nextQuiz: QuizQuestionResponse) => {
+    if (quizArrivalInProgress.current) return;
+
+    quizArrivalInProgress.current = true;
+    setQuizAnimationPhase("approaching");
+    setReminder(false);
+    setIsApproachingQuiz(true);
+    movePetTo(maxPetX(), "right");
+    triggerPetAnimation("WALK");
+
+    window.setTimeout(() => {
+      setQuiz(nextQuiz);
+      setPicked(null);
+      setAnswerResult(null);
+      setOpen(true);
+      setIsApproachingQuiz(false);
+      quizArrivalInProgress.current = false;
+      setQuizAnimationPhase("question");
+      triggerPetAnimation("STUDY");
+    }, 850);
+  };
+
+  const openPetQuiz = async () => {
+    if (activeStudySession || open || reminder || interrupting || quizArrivalInProgress.current)
+      return;
+    try {
+      const nextQuiz = await getQuiz(undefined);
+      showQuizAtRight(nextQuiz);
+    } catch (error) {
+      console.error("Pet click quiz failed", error);
+      speakPet(
+        `${state.petName}: Add a word to one of your decks, then we can practise together.`,
+        1,
+        4,
+      );
+    }
+  };
+
+  const openCompanionOverview = () => {
+    // A click is a gentle way to check in with the companion. Starting a quiz
+    // remains an explicit choice from the overview (or a scheduled reminder).
+    if (open || isApproachingQuiz) return;
+    setReminder(false);
+    setShowSettings((visible) => !visible);
+  };
+
+  const applyServerReaction = (reaction: ServerPetBehaviorResponse, animate = true) => {
     setEventMood(serverMood[reaction.mood]);
-    triggerPetAnimation(serverAction(reaction.action));
+    if (animate) triggerPetAnimation(serverAction(reaction.action));
     if (reaction.message) {
       speakPet(`${state.petName}: ${reaction.message}`, reaction.priority, reaction.duration);
     }
@@ -109,6 +194,14 @@ export function PetCompanion() {
     // Greets once per signed-in user, not on every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [me?.id]);
+
+  useEffect(() => {
+    const greeting = sessionStorage.getItem("vocapet_onboarding_greeting");
+    if (!greeting) return;
+    sessionStorage.removeItem("vocapet_onboarding_greeting");
+    triggerPetAnimation("STUDY");
+    speakPet(greeting, 3, 8);
+  }, []);
 
   useEffect(() => {
     const unsubscribe = petEvents.subscribe((event) => {
@@ -126,6 +219,72 @@ export function PetCompanion() {
   }, [state.petName]);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    // Start at the lower-right, then wander only while the companion is free.
+    setViewportWidth(window.innerWidth);
+    movePetTo(window.innerWidth - 132, "left");
+    const keepOnScreen = () => {
+      setViewportWidth(window.innerWidth);
+      movePetTo(petXRef.current);
+    };
+    window.addEventListener("resize", keepOnScreen);
+    return () => window.removeEventListener("resize", keepOnScreen);
+    // movePetTo only writes refs and state; re-running would restart the walk.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (
+      activeStudySession ||
+      open ||
+      reminder ||
+      showSettings ||
+      interrupting ||
+      typeof window === "undefined"
+    )
+      return;
+
+    let finishWalkTimer: number | undefined;
+    // After reaching an edge, only pause long enough for the turn to read.
+    // walkCycle schedules the opposite trip instead of leaving the pet idle.
+    const walkTimer = window.setTimeout(
+      () => {
+        if (walkInProgress.current) return;
+
+        walkInProgress.current = true;
+        // Determine the direction from the actual current position. This is
+        // more reliable than a stale direction flag after a quiz interrupts a
+        // route: an edge arrival always turns around for the next trip.
+        const atRightEdge = petXRef.current >= maxPetX() - 2;
+        const nextX = atRightEdge ? 24 : maxPetX();
+        const direction = atRightEdge ? "left" : "right";
+        movePetTo(nextX, direction);
+        triggerPetAnimation("WALK");
+
+        finishWalkTimer = window.setTimeout(() => {
+          triggerPetAnimation("IDLE");
+          const nextDirection = direction === "right" ? "left" : "right";
+          facingRef.current = nextDirection;
+          // Store the turned direction immediately so the next authored walk
+          // row is the opposite row, never a backwards slide.
+          petRef.current?.setFacing(nextDirection);
+          walkInProgress.current = false;
+          setWalkCycle((cycle) => cycle + 1);
+        }, 6200);
+      },
+      walkCycle === 0 ? 6000 : 700,
+    );
+
+    return () => {
+      window.clearTimeout(walkTimer);
+      if (finishWalkTimer) window.clearTimeout(finishWalkTimer);
+      walkInProgress.current = false;
+    };
+    // movePetTo only writes refs and state; re-running would restart the walk.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeStudySession, open, reminder, showSettings, interrupting, walkCycle]);
+
+  useEffect(() => {
     const markActivity = () => {
       lastActivityAt.current = Date.now();
     };
@@ -135,7 +294,10 @@ export function PetCompanion() {
   }, []);
 
   useEffect(() => {
-    if (reminder || open || typeof window === "undefined") return;
+    // A focused FSRS session takes priority over ambient companion quizzes.
+    // Pip stays in the authored STUDY state and only returns to reminders
+    // after the session is finished or paused.
+    if (activeStudySession || reminder || open || typeof window === "undefined") return;
 
     let approachTimer: number | undefined;
     let invitationTimer: number | undefined;
@@ -162,12 +324,7 @@ export function PetCompanion() {
         invitationTimer = window.setTimeout(async () => {
           try {
             const nextQuiz = await getQuiz(undefined);
-            setQuiz(nextQuiz);
-            setPicked(null);
-            setAnswerResult(null);
-            setReminder(false);
-            setOpen(true);
-            triggerPetAnimation("STUDY");
+            showQuizAtRight(nextQuiz);
           } catch (error) {
             console.error("Pet reminder quiz failed", error);
             speakPet(`${state.petName}: Let's review a word when you're ready.`, 1, 4);
@@ -217,7 +374,14 @@ export function PetCompanion() {
     };
     // The reminder timer must not restart when the quiz mutation's identity changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, reminder, state.popupIntervalMin, companionState?.remindersEnabled, state.petName]);
+  }, [
+    activeStudySession,
+    open,
+    reminder,
+    state.popupIntervalMin,
+    companionState?.remindersEnabled,
+    state.petName,
+  ]);
 
   const [quiz, setQuiz] = useState<QuizQuestionResponse | null>(null);
   const studiedToday = state.lastStudyDate === todayISO();
@@ -230,10 +394,16 @@ export function PetCompanion() {
   const moodMeta = MOOD_META[state.petMood] ?? MOOD_META.waiting;
 
   useEffect(() => {
+    if (activeStudySession) {
+      setReminder(false);
+      setInterrupting(false);
+      triggerPetAnimation("STUDY");
+      return;
+    }
     if (!open && !reminder && !showSettings && !interrupting) {
       triggerPetAnimation("IDLE");
     }
-  }, [open, reminder, showSettings, interrupting]);
+  }, [activeStudySession, open, reminder, showSettings, interrupting]);
 
   useEffect(() => {
     const notes = [
@@ -247,7 +417,9 @@ export function PetCompanion() {
     const id = window.setInterval(() => {
       if (!open && !reminder) {
         void refreshCompanionState().then(({ data }) => {
-          if (data?.reaction.message) applyServerReaction(data.reaction);
+          // A periodic memory check may add a thought, but it must not replace
+          // the current idle/walk loop with an unrelated animation.
+          if (data?.reaction.message) applyServerReaction(data.reaction, false);
         });
       }
     }, 90_000);
@@ -298,9 +470,11 @@ export function PetCompanion() {
       console.error("Quiz answer failed", error);
       speakPet(`${state.petName}: I couldn't check that answer. Please try again.`, 2, 4);
       window.setTimeout(() => {
+        setQuizAnimationPhase("none");
         setOpen(false);
         setPicked(null);
         setAnswerResult(null);
+        triggerPetAnimation("IDLE");
       }, 1400);
       return null;
     });
@@ -324,9 +498,17 @@ export function PetCompanion() {
       queryClient.invalidateQueries({ queryKey: ["me"] }),
     ]);
 
+    // Show the result immediately. Server-side companion memory may return a
+    // message afterwards, but it must not make a correct answer look like an
+    // idle/wave action instead of the authored jump.
+    setQuizAnimationPhase("result");
     applyServerReaction(result.petBehavior);
+    triggerPetAnimation(result.correct ? "CELEBRATE" : "SAD");
     recordCompanionEvent(result.correct ? "ANSWER_CORRECT" : "ANSWER_WRONG", {
-      onSuccess: (snapshot) => applyServerReaction(snapshot.reaction),
+      onSuccess: (snapshot) => {
+        applyServerReaction(snapshot.reaction);
+        triggerPetAnimation(result.correct ? "CELEBRATE" : "SAD");
+      },
       onError: () => {
         // The companion event is optional: quiz feedback must not be blocked by it.
       },
@@ -334,9 +516,11 @@ export function PetCompanion() {
 
     // Đợi người dùng xem kết quả
     setTimeout(() => {
+      setQuizAnimationPhase("none");
       setOpen(false);
       setPicked(null);
       setAnswerResult(null);
+      triggerPetAnimation("IDLE");
 
       speakPet(
         result.petBehavior.message,
@@ -349,9 +533,21 @@ export function PetCompanion() {
   const reactionMood: PetMood =
     picked === null ? "waiting" : answerResult?.correct ? "happy" : "waiting";
   const visibleMood = eventMood ?? (open ? reactionMood : state.petMood);
+  // The quiz is 320px wide. Keep the entire companion group inside the
+  // viewport when it opens instead of letting a right-edge pet clip the card.
+  const overlayX = open || reminder || showSettings ? Math.max(16, viewportWidth - 344) : petX;
+  const isOverlayOpen = open || reminder || showSettings;
 
   return (
-    <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-2 pointer-events-none">
+    <motion.div
+      className="fixed bottom-6 left-0 z-40 flex flex-col items-end gap-2 pointer-events-none"
+      animate={{ x: overlayX }}
+      transition={{
+        type: "tween",
+        ease: "easeInOut",
+        duration: isApproachingQuiz ? 0.8 : isOverlayOpen ? 0.25 : 6,
+      }}
+    >
       {/* Reminder speech bubble */}
       <AnimatePresence>
         {reminder && !open && (
@@ -376,10 +572,12 @@ export function PetCompanion() {
                 size="sm"
                 className="btn-pop h-7 text-xs"
                 onClick={async () => {
-                  const quiz = await getQuiz(undefined);
-                  setQuiz(quiz);
-                  setOpen(true);
-                  triggerPetAnimation("STUDY");
+                  try {
+                    const quiz = await getQuiz(undefined);
+                    showQuizAtRight(quiz);
+                  } catch (error) {
+                    console.error("Reminder quiz failed", error);
+                  }
                 }}
               >
                 <Sparkles className="w-3 h-3 mr-1" /> Quiz me
@@ -406,8 +604,10 @@ export function PetCompanion() {
           >
             <button
               onClick={() => {
+                setQuizAnimationPhase("none");
                 setOpen(false);
                 setPicked(null);
+                triggerPetAnimation("IDLE");
               }}
               className="absolute top-2 right-2 text-muted-foreground hover:text-foreground"
               aria-label="Close"
@@ -416,7 +616,6 @@ export function PetCompanion() {
             </button>
             <div className="relative flex items-center gap-2 mb-2">
               <Pet
-                ref={petRef}
                 variant={state.petVariant}
                 stage={stageForLevel(state.petLevel)}
                 size={64}
@@ -519,10 +718,8 @@ export function PetCompanion() {
                       onClick={async () => {
                         try {
                           const quiz = await getQuiz(companionState.learningProfile.weakestDeckId!);
-                          setQuiz(quiz);
                           setShowSettings(false);
-                          setOpen(true);
-                          triggerPetAnimation("THINK");
+                          showQuizAtRight(quiz);
                         } catch (error) {
                           console.error("Weak-topic quiz failed", error);
                           speakPet(
@@ -577,9 +774,7 @@ export function PetCompanion() {
 
                 try {
                   const quiz = await getQuiz(undefined);
-                  setQuiz(quiz);
-                  setOpen(true);
-                  triggerPetAnimation("STUDY");
+                  showQuizAtRight(quiz);
                 } catch (e) {
                   console.error(e);
                   speakPet(
@@ -630,10 +825,18 @@ export function PetCompanion() {
       >
         <PetSpeechBubble />
 
-        <button
-          onClick={() => setShowSettings((v) => !v)}
-          aria-label="Open pet"
-          className="p-0 transition-transform hover:scale-[1.03]"
+        <div
+          role="button"
+          tabIndex={0}
+          aria-label="Open companion overview"
+          onClick={openCompanionOverview}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              openCompanionOverview();
+            }
+          }}
+          className="select-none cursor-pointer p-0 transition-transform hover:scale-[1.03]"
         >
           <div className="flex h-24 w-24 items-center justify-center">
             <Pet
@@ -644,8 +847,8 @@ export function PetCompanion() {
               mood={visibleMood}
             />
           </div>
-        </button>
+        </div>
       </motion.div>
-    </div>
+    </motion.div>
   );
 }

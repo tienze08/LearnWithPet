@@ -4,6 +4,9 @@ import {
   finishStudySessionApi,
   getRecentReviewsApi,
   getStudyDashboardStatsApi,
+  getActiveStudySessionApi,
+  getStudyAnalyticsApi,
+  getTodayStudyPlanApi,
   getNextStudyCardApi,
   reviewStudyCardApi,
   startStudySessionApi,
@@ -12,8 +15,10 @@ import {
 import { StartStudySessionRequest } from "@/types/study-session";
 
 export function useStartStudySessionMutation() {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload: StartStudySessionRequest) => startStudySessionApi(payload),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["study-session", "active"] }),
   });
 }
 
@@ -38,13 +43,21 @@ export function useReviewStudyCardMutation(sessionId: number) {
       queryClient.invalidateQueries({ queryKey: ["me"] });
       queryClient.invalidateQueries({ queryKey: ["study-reviews", "recent"] });
       queryClient.invalidateQueries({ queryKey: ["study-dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["study-plan", "today"] });
+      queryClient.invalidateQueries({ queryKey: ["study-session", "active"] });
     },
   });
 }
 
 export function useFinishStudySessionMutation() {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (sessionId: number) => finishStudySessionApi(sessionId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["study-plan", "today"] });
+      queryClient.invalidateQueries({ queryKey: ["companion", "state"] });
+      queryClient.invalidateQueries({ queryKey: ["study-session", "active"] });
+    },
   });
 }
 
@@ -59,5 +72,26 @@ export function useStudyDashboardStatsQuery() {
   return useQuery({
     queryKey: ["study-dashboard"],
     queryFn: getStudyDashboardStatsApi,
+  });
+}
+
+export function useTodayStudyPlanQuery() {
+  return useQuery({
+    queryKey: ["study-plan", "today"],
+    queryFn: getTodayStudyPlanApi,
+  });
+}
+
+export function useActiveStudySessionQuery() {
+  return useQuery({
+    queryKey: ["study-session", "active"],
+    queryFn: getActiveStudySessionApi,
+  });
+}
+
+export function useStudyAnalyticsQuery(days = 7) {
+  return useQuery({
+    queryKey: ["study-analytics", days],
+    queryFn: () => getStudyAnalyticsApi(days),
   });
 }

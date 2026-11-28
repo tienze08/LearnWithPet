@@ -21,4 +21,8 @@ export interface OnboardingPayload {
   avatarType: string;
   petName: string;
   petSpecies: string;
+  displayName: string;
+  dailyGoal: number;
+  studyLevel: string;
+  studyGoal: string;
 }

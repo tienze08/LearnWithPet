@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import com.vocabpet.backend.entity.UserVocabularyProgress;
 import com.vocabpet.backend.entity.Vocabulary;
+import com.vocabpet.backend.entity.enums.Status;
 
 public interface UserVocabularyProgressRepository
                 extends JpaRepository<UserVocabularyProgress, Long> {
@@ -84,6 +85,16 @@ public interface UserVocabularyProgressRepository
         long countDueCards(Long userId, LocalDateTime now);
 
         @Query("""
+                        SELECT p
+                        FROM UserVocabularyProgress p
+                        WHERE p.user.id = :userId
+                        AND p.vocabulary.deck.user.id = :userId
+                        AND p.nextReviewTime > :now
+                        ORDER BY p.nextReviewTime ASC
+                        """)
+        List<UserVocabularyProgress> findUpcomingCards(Long userId, LocalDateTime now);
+
+        @Query("""
                         SELECT COUNT(p)
                         FROM UserVocabularyProgress p
                         WHERE p.user.id = :userId
@@ -124,4 +135,8 @@ public interface UserVocabularyProgressRepository
         long countByUserIdAndRepetitionsGreaterThanEqual(Long userId, int repetitions);
 
         long countByUserIdAndRepetitionsBetween(Long userId, int minimumRepetitions, int maximumRepetitions);
+
+        long countByUserIdAndVocabularyDeckId(Long userId, Long deckId);
+
+        long countByUserIdAndVocabularyDeckIdAndStatus(Long userId, Long deckId, Status status);
 }

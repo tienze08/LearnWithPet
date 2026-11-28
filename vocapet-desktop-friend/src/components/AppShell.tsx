@@ -20,6 +20,8 @@ import {
   Dumbbell,
   Headphones,
   CalendarCheck,
+  CalendarClock,
+  BarChart3,
   Languages,
   Layers,
   Library,
@@ -200,6 +202,18 @@ function AccountMenu({ withName, extra }: { withName?: boolean; extra?: boolean 
           </DropdownMenuItem>
         )}
         {extra && (
+          <>
+            <DropdownMenuItem onSelect={() => navigate({ to: "/app/plan" })}>
+              <CalendarClock className="mr-2 h-4 w-4" />
+              Kế hoạch FSRS
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => navigate({ to: "/app/analytics" })}>
+              <BarChart3 className="mr-2 h-4 w-4" />
+              Phân tích
+            </DropdownMenuItem>
+          </>
+        )}
+        {extra && (
           <DropdownMenuItem onSelect={() => navigate({ to: "/app/decks" })}>
             <Layers className="mr-2 h-4 w-4" />
             Flashcards
@@ -246,6 +260,11 @@ function DesktopSidebar() {
             label="Hôm nay"
           />
         )}
+        <NavLink
+          to="/app/plan"
+          icon={<CalendarClock className="h-4 w-4" />}
+          label="Kế hoạch FSRS"
+        />
         <NavLink to="/app/review" icon={<Repeat className="h-4 w-4" />} label="Ôn tập" />
         <NavLink
           to="/app/library"
@@ -276,6 +295,7 @@ function DesktopSidebar() {
         <NavLink to="/app/practice" icon={<Dumbbell className="h-4 w-4" />} label="Luyện tập" />
         <NavLink to="/app/decks" icon={<Layers className="h-4 w-4" />} label="Flashcards" />
         <NavLink to="/app/progress" icon={<TrendingUp className="h-4 w-4" />} label="Tiến độ" />
+        <NavLink to="/app/analytics" icon={<BarChart3 className="h-4 w-4" />} label="Phân tích" />
         <NavLink to="/app/profile" icon={<Settings className="h-4 w-4" />} label="Cài đặt" />
       </nav>
       <div className="space-y-3 border-t border-border px-2 pt-4">
